@@ -14,6 +14,14 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
-	<ItemGroup>
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\EV3Model\EV3Model.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="YamlDotNet" />
+        <PackageReference Include="OutputColorizer" />
+        <PackageReference Include="SharpZipLib" />
+    </ItemGroup>
 </Project>

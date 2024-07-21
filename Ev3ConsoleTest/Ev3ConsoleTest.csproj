@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\EV3Decompiler\EV3Decompiler.csproj" />
+        <ProjectReference Include="..\EV3Model\EV3Model.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="TestPrograms\Program.rbf" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="TestPrograms\Program.rbf">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+</Project>
