@@ -1,6 +1,7 @@
 ﻿namespace Ev3EmulatorCore.Lms.Cui
 {
 	// this is a pseudo UI file
+	// control files like /dev/tty0
 	public class UiFileHandler
 	{
 		public const int BUTTON_FILE_HANDLER = 1;
@@ -17,6 +18,17 @@
 		{
 			// TODO
 			return 0;
+		}
+
+		public bool IsButtonPressed(int button)
+		{
+			// TODO
+			return false;
+		}
+
+		public void OnExit()
+		{
+			// do something
 		}
 	}
 }

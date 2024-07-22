@@ -206,6 +206,8 @@
 		public const int BUTTONS = 6;
 		public const int LEDS = 4;
 
+		public const byte BUTTONTYPES = 6;
+
 		public const int LCD_WIDTH = 178;
 		public const int LCD_HEIGHT = 128;
 		public const int TOPLINE_HEIGHT = 10;
@@ -260,7 +262,7 @@
 		public const byte OSVERS_SIZE = 17;
 		public const byte OSBUILD_SIZE = 11;
 		public const byte IPADDR_SIZE = 16;
-
+		
 
 		public const byte BUTTON_ACTIVE = 0x01;
 		public const byte BUTTON_PRESSED = 0x02;  //!< button is pressed at the moment
@@ -277,6 +279,9 @@
 		public const byte BUTTON_BUFPRINT = 0x04;
 
 		public const byte BUTTON_SET = (BUTTON_ALIVE | BUTTON_CLICK);
+
+		public const byte REAL_ANY_BUTTON = 6;
+		public const byte REAL_NO_BUTTON = 7;
 
 		// Used when no battery is present
 		public const byte DEFAULT_BATTERY_VOLTAGE = 9;

@@ -1371,7 +1371,7 @@
             CURRENT_SLOT = -1,
         }
 
-        internal enum ButtonType
+        public enum ButtonType
         {
             NO_BUTTON = 0,
             UP_BUTTON = 1,

@@ -7,7 +7,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 	// the file is https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.h
 	public partial class CuiClass
 	{
-		public struct GRAPH
+		public class GRAPH
 		{
 			IntPtr pMin; // float
 			IntPtr pMax; // float
@@ -31,7 +31,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 		}
 
-		public struct NOTIFY
+		public class NOTIFY
 		{
 		    Int16 ScreenStartX;
 			Int16 ScreenStartY;
@@ -64,7 +64,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 		}
 
-		public struct IQUESTION
+		public class IQUESTION
 		{
 			Int16 ScreenStartX;
 			Int16 ScreenStartY;
@@ -87,7 +87,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			byte NeedUpdate;
 		}
 
-		public struct TQUESTION
+		public class TQUESTION
 		{
 			Int16 ScreenStartX;
 			Int16 ScreenStartY;
@@ -109,7 +109,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			byte NeedUpdate;
 		}
 
-		public struct KEYB
+		public class KEYB
 		{
 			Int16 ScreenStartX;
 			Int16 ScreenStartY;
@@ -134,7 +134,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			byte NeedUpdate;
 		}
 
-		public struct BROWSER
+		public class BROWSER
 		{
 			public Int16 ScreenStartX;
 			public Int16 ScreenStartY;
@@ -191,7 +191,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 		}
 
-		public struct TXTBOX
+		public class TXTBOX
 		{
 			Int16 ScreenStartX;
 			Int16 ScreenStartY;
@@ -230,17 +230,17 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 		}
 
-		public struct UI_GLOBALS
+		public class UI_GLOBALS
 		{
 			//*****************************************************************************
 			// Ui Global variables
 			//*****************************************************************************
 
-			public ClcdClass.LCD LcdSafe;
-			public ClcdClass.LCD LcdSave;
-			public ClcdClass.LCD[] LcdPool = new ClcdClass.LCD[lms2012.LCD_STORE_LEVELS];
-			public ClcdClass.LCD LcdBuffer;
-			public ClcdClass.LCD Lcd; // ClcdClass.LCD
+			public DlcdClass.LCD LcdSafe;
+			public DlcdClass.LCD LcdSave;
+			public DlcdClass.LCD[] LcdPool = new DlcdClass.LCD[lms2012.LCD_STORE_LEVELS];
+			public DlcdClass.LCD LcdBuffer;
+			public DlcdClass.LCD Lcd; // ClcdClass.LCD
 
 			//UI UiSafe;
 			//UI* pUi;
@@ -299,9 +299,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 			public byte LedState;
 
 			public byte[] ButtonState = new byte[lms2012.BUTTONS];
-			public Int16[] ButtonTimer = new Int16[lms2012.BUTTONS];
-			public Int16[] ButtonDebounceTimer = new Int16[lms2012.BUTTONS];
-			public Int16[] ButtonRepeatTimer = new Int16[lms2012.BUTTONS];
+			public UInt16[] ButtonTimer = new UInt16[lms2012.BUTTONS];
+			public UInt16[] ButtonDebounceTimer = new UInt16[lms2012.BUTTONS];
+			public UInt16[] ButtonRepeatTimer = new UInt16[lms2012.BUTTONS];
 			public byte Activated;
 
 			public byte ScreenBusy;
