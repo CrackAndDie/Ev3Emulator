@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EV3DecompilerLib.Decompile
+﻿namespace EV3DecompilerLib.Decompile
 {
     /// <summary>
     /// LMS objects class to describe hirarchy
     /// </summary>
-    public class lms2012
+    public partial class lms2012
     {
         public struct ObjectHeader
         {
@@ -1228,7 +1222,7 @@ namespace EV3DecompilerLib.Decompile
             [ArraySubcode.GET_FOLDERNAME] = new[] { Param.PAR8, Param.PAR8 },
         };
 
-        internal enum InfoSubcode
+        public enum InfoSubcode : int
         {
             SET_ERROR = 1,
             GET_ERROR = 2,
@@ -1281,8 +1275,8 @@ namespace EV3DecompilerLib.Decompile
             [InfoSubcode.TST_RAM_CHECK] = new[] { Param.PAR8, },
         };
 
-        internal enum SoundSubcode
-        {
+        public enum SoundSubcode : int
+		{
             BREAK = 0,
             TONE = 1,
             PLAY = 2,
@@ -1439,10 +1433,26 @@ namespace EV3DecompilerLib.Decompile
             [MathSubcode.TRUNC] = new[] { Param.PARF, Param.PAR8, Param.PARF },
         };
 
-        #endregion SUBCODES
-        // ----------------------------------------
+		#endregion SUBCODES
+		// ----------------------------------------
 
-        //---
+		//---
+
+		/*! \enum DSPSTAT
+ *
+ *        Dispatch status values
+ */
+		public enum DSPSTAT
+		{
+			NOBREAK = 0x0100,               //!< Dispatcher running (looping)
+			STOPBREAK = 0x0200,               //!< Break because of program stop
+			SLEEPBREAK = 0x0400,               //!< Break because of sleeping
+			INSTRBREAK = 0x0800,               //!< Break because of opcode break
+			BUSYBREAK = 0x1000,               //!< Break because of waiting for completion
+			PRGBREAK = 0x2000,               //!< Break because of program break
+			USERBREAK = 0x4000,               //!< Break because of user decision
+			FAILBREAK = 0x8000                //!< Break because of fail
+		}
 
         internal enum BrowserType
         {
@@ -1590,7 +1600,7 @@ namespace EV3DecompilerLib.Decompile
             BTTYPE_UNKNOWN = 6
         }
 
-        internal enum LedPattern
+        internal enum LedPattern : byte
         {
             LED_BLACK = 0,
             LED_GREEN = 1,
@@ -1604,8 +1614,8 @@ namespace EV3DecompilerLib.Decompile
             LED_ORANGE_PULSE = 9
         }
 
-        internal enum LedType
-        {
+        internal enum LedType : byte
+		{
             LED_ALL = 0,
             LED_RR = 1,
             LED_RG = 2,
@@ -1630,7 +1640,7 @@ namespace EV3DecompilerLib.Decompile
             TYPE_REFRESH_BROWSER = -2
         }
 
-        internal enum Result
+        public enum Result
         {
             OK = 0,
             BUSY = 1,
@@ -1782,60 +1792,5 @@ namespace EV3DecompilerLib.Decompile
         {
             return (DataFormat)((int)cp & 0x3F);
         }
-
-        internal const int LC0_MIN = -31;
-        internal const int LC0_MAX = 31;
-        internal const sbyte DATA8_MIN = -127;
-        internal const sbyte DATA8_MAX = 127;
-        internal const Int16 DATA16_MIN = -32767;
-        internal const Int16 DATA16_MAX = 32767;
-        internal const Int32 DATA32_MIN = -2147483647;
-        internal const Int32 DATA32_MAX = 2147483647;
-        internal const float DATAF_MIN = -2147483647;
-        internal const float DATAF_MAX = 2147483647;
-        internal const byte DATA8_NAN = 0x80; //!!
-        internal const UInt16 DATA16_NAN = 0x8000; //!!
-        internal const UInt32 DATA32_NAN = 0x80000000; //!!
-        internal const float DATAF_NAN = 0x7FC00000;
-
-        //class Data8(LittleEndianStructure):
-        //    _fields_ = [("value", c_int8)]
-
-        //        class Data16(LittleEndianStructure):
-        //    _fields_ = [("value", c_int16)]
-
-        //        class Data32(LittleEndianStructure):
-        //    _fields_ = [("value", c_int32)]
-
-        //        class DataFloat(LittleEndianStructure):
-        //    _fields_ = [("value", c_float)]
-
-        internal const byte PRIMPAR_SHORT = 0x00;
-        internal const byte PRIMPAR_LONG = 0x80;
-        internal const byte PRIMPAR_CONST = 0x00;
-        internal const byte PRIMPAR_VARIABLE = 0x40;
-        internal const byte PRIMPAR_LOCAL = 0x00;
-        internal const byte PRIMPAR_GLOBAL = 0x20;
-        internal const byte PRIMPAR_HANDLE = 0x10;
-        internal const byte PRIMPAR_ADDR = 0x08;
-        internal const byte PRIMPAR_INDEX = 0x1F;
-        internal const byte PRIMPAR_CONST_SIGN = 0x20;
-        internal const byte PRIMPAR_VALUE = 0x3F;
-        internal const byte PRIMPAR_BYTES = 0x07;
-        internal const byte PRIMPAR_STRING_OLD = 0;
-        internal const byte PRIMPAR_1_BYTE = 1;
-        internal const byte PRIMPAR_2_BYTES = 2;
-        internal const byte PRIMPAR_4_BYTES = 3;
-        internal const byte PRIMPAR_STRING = 4;
-        internal const byte PRIMPAR_LABEL = 0x20;
-
-        internal const byte DIRECT_COMMAND_REPLY = 0x00;
-        internal const byte DIRECT_COMMAND_NO_REPLY = 0x80;
-        internal const byte DIRECT_REPLY = 0x02;
-        internal const byte DIRECT_REPLY_ERROR = 0x04;
-        internal const byte SYSTEM_COMMAND_REPLY = 0x01;
-        internal const byte SYSTEM_COMMAND_NO_REPLY = 0x81;
-        internal const byte SYSTEM_REPLY = 0x03;
-        internal const byte SYSTEM_REPLY_ERROR = 0x05;
     }
 }
