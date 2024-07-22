@@ -7,7 +7,46 @@ namespace Ev3EmulatorCore.Lms.Cui
 	// the file is https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.h
 	public partial class CuiClass
 	{
-		public class GRAPH
+        public static KeyValuePair<lms2012.ButtonType, byte>[] MappedToReal =
+        {
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.UP_BUTTON, 0),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.ENTER_BUTTON, 1),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.DOWN_BUTTON, 2),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.RIGHT_BUTTON, 3),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.LEFT_BUTTON, 4),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.BACK_BUTTON, 5),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.ANY_BUTTON, lms2012.REAL_ANY_BUTTON),
+            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.NO_BUTTON, lms2012.REAL_NO_BUTTON),
+        };
+
+        byte[] DownloadSuccesSound = { (byte)lms2012.Op.INFO, (byte)lms2012.LC0((int)lms2012.InfoSubcode.GET_VOLUME), (byte)lms2012.LV0(0), (byte)lms2012.Op.SOUND, (byte)lms2012.LC0((int)lms2012.SoundSubcode.PLAY), (byte)lms2012.LV0(0), (byte)lms2012.LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, (byte)lms2012.Op.SOUND_READY, (byte)lms2012.Op.OBJECT_END };
+		
+		public static byte[] TopLineBattIconMap =
+		{
+            (byte)lms2012.StatusIcon.SICON_BATT_0,           //  0
+            (byte)lms2012.StatusIcon.SICON_BATT_1,           //  1
+            (byte)lms2012.StatusIcon.SICON_BATT_2,           //  2
+            (byte)lms2012.StatusIcon.SICON_BATT_3,           //  3
+            (byte)lms2012.StatusIcon.SICON_BATT_4            //  4
+        };
+
+		public static byte[] TopLineBtIconMap =
+		{
+            (byte)lms2012.StatusIcon.SICON_BT_ON,            //  001
+            (byte)lms2012.StatusIcon.SICON_BT_VISIBLE,       //  011
+            (byte)lms2012.StatusIcon.SICON_BT_CONNECTED,     //  101
+            (byte)lms2012.StatusIcon.SICON_BT_CONNVISIB,     //  111
+        };
+
+		public static byte[] TopLineWifiIconMap =
+		{
+            (byte)lms2012.StatusIcon.SICON_WIFI_3,            //  001
+            (byte)lms2012.StatusIcon.SICON_WIFI_3,       //  011
+            (byte)lms2012.StatusIcon.SICON_BT_CONNECTED,     //  101
+            (byte)lms2012.StatusIcon.SICON_BT_CONNVISIB,     //  111
+        };
+
+        public class GRAPH
 		{
 			IntPtr pMin; // float
 			IntPtr pMax; // float
@@ -236,11 +275,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 			// Ui Global variables
 			//*****************************************************************************
 
-			public DlcdClass.LCD LcdSafe;
-			public DlcdClass.LCD LcdSave;
-			public DlcdClass.LCD[] LcdPool = new DlcdClass.LCD[lms2012.LCD_STORE_LEVELS];
-			public DlcdClass.LCD LcdBuffer;
-			public DlcdClass.LCD Lcd; // ClcdClass.LCD
+			public DlcdClass.LCD LcdSafe = new DlcdClass.LCD();
+			public DlcdClass.LCD LcdSave = new DlcdClass.LCD();
+			public DlcdClass.LCD[] LcdPool = new DlcdClass.LCD[lms2012.LCD_STORE_LEVELS] 
+			{
+                new DlcdClass.LCD(),
+                new DlcdClass.LCD(),
+				new DlcdClass.LCD()
+            };
+			public DlcdClass.LCD LcdBuffer = new DlcdClass.LCD();
+			public DlcdClass.LCD Lcd = new DlcdClass.LCD(); // ClcdClass.LCD
 
 			//UI UiSafe;
 			//UI* pUi;
@@ -334,7 +378,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			public byte Click;
 
-			public byte Font;
+			public lms2012.FontType Font;
 
 			public byte[] ImageBuffer = new byte[lms2012.IMAGEBUFFER_SIZE];
 

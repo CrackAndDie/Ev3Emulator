@@ -1,4 +1,5 @@
-﻿using Ev3EmulatorCore.Lms.Cui;
+﻿using Ev3EmulatorCore.Lms.Ccom;
+using Ev3EmulatorCore.Lms.Cui;
 
 namespace Ev3EmulatorCore.Lms.Lms2012
 {
@@ -19,8 +20,11 @@ namespace Ev3EmulatorCore.Lms.Lms2012
 
 		public UiFileHandler UiFileHandler = new UiFileHandler();
 		public CuiClass.UI_GLOBALS UiInstance = new CuiClass.UI_GLOBALS();
+
 		public CuiClass CuiClass = new CuiClass();
 		public DlcdClass DlcdClass = new DlcdClass();
 		public DterminalClass DterminalClass = new DterminalClass();
-	}
+
+        public CcomClass CcomClass = new CcomClass();
+    }
 }

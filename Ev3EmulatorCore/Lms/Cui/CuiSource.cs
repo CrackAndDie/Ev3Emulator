@@ -6,20 +6,6 @@ namespace Ev3EmulatorCore.Lms.Cui
 {
 	public partial class CuiClass
 	{
-		public static KeyValuePair<lms2012.ButtonType, byte>[] MappedToReal =
-		{
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.UP_BUTTON, 0),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.ENTER_BUTTON, 1),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.DOWN_BUTTON, 2),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.RIGHT_BUTTON, 3),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.LEFT_BUTTON, 4),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.BACK_BUTTON, 5),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.ANY_BUTTON, lms2012.REAL_ANY_BUTTON),
-			new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.NO_BUTTON, lms2012.REAL_NO_BUTTON),
-		};
-
-		byte[] DownloadSuccesSound = { (byte)lms2012.Op.INFO, (byte)lms2012.LC0((int)lms2012.InfoSubcode.GET_VOLUME), (byte)lms2012.LV0(0), (byte)lms2012.Op.SOUND, (byte)lms2012.LC0((int)lms2012.SoundSubcode.PLAY), (byte)lms2012.LV0(0), (byte)lms2012.LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, (byte)lms2012.Op.SOUND_READY, (byte)lms2012.Op.OBJECT_END };
-
 		public void cUiDownloadSuccessSound()
 		{
 			byte[] locals = new byte[1];
@@ -714,7 +700,100 @@ namespace Ev3EmulatorCore.Lms.Cui
 			byte tmpStatus;
 			byte[] name = new byte[lms2012.NAME_LENGTH + 1];
 
+			if (LmsInstance.Inst.UiInstance.TopLineEnabled != 0)
+			{
+				LmsInstance.Inst.DlcdClass.LcdClearTopline(LmsInstance.Inst.UiInstance.Lcd);
 
+				// show bt status
+				tmpStatus = 0;
+				btStatus = LmsInstance.Inst.CcomClass.cComGetBtStatus();
+				if (btStatus > 0) 
+				{
+					tmpStatus = 1;
+					btStatus >>= 1;
+					if (btStatus >= 0 && btStatus < lms2012.TOP_BT_ICONS)
+					{
+                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 0, 1, lms2012.IconType.SMALL_ICON, TopLineWifiIconMap[btStatus]);
+                    }
+                }
+				if (LmsInstance.Inst.UiInstance.BtOn != tmpStatus)
+				{
+					LmsInstance.Inst.UiInstance.BtOn = tmpStatus;
+					LmsInstance.Inst.UiInstance.UiUpdate = 1;
+                }
+
+                // show wifi status
+                tmpStatus = 0;
+				wifiStatus = LmsInstance.Inst.CcomClass.cComGetWifiStatus();
+                if (wifiStatus > 0)
+                {
+                    tmpStatus = 1;
+                    wifiStatus >>= 1;
+                    if (wifiStatus >= 0 && wifiStatus < lms2012.TOP_WIFI_ICONS)
+                    {
+                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 16, 1, lms2012.IconType.SMALL_ICON, TopLineWifiIconMap[wifiStatus]);
+                    }
+                }
+                if (LmsInstance.Inst.UiInstance.WiFiOn != tmpStatus)
+                {
+                    LmsInstance.Inst.UiInstance.WiFiOn = tmpStatus;
+                    LmsInstance.Inst.UiInstance.UiUpdate = 1;
+                }
+
+				// TODO: battery shite was here
+
+				LmsInstance.Inst.CcomClass.cComGetBrickName(lms2012.NAME_LENGTH + 1, name);
+
+				x1 = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(lms2012.FontType.SMALL_FONT);
+				x2 = (short)(lms2012.LCD_WIDTH / x1);
+				x2 -= (short)name.Length;
+				x2 /= 2;
+				x2 *= x1;
+				LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, x2, 1, lms2012.FontType.SMALL_FONT, name);
+
+				x1 = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.SMALL_ICON);
+				x2 = (short)((lms2012.LCD_WIDTH - x1) / x1);
+
+				// TODO: show usb status here
+
+				// TODO: show battery was here
+
+				LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 0, lms2012.TOPLINE_HEIGHT, lms2012.LCD_WIDTH, lms2012.TOPLINE_HEIGHT);
+            }
+		}
+
+		public void cUiUpdateLcd()
+		{
+			LmsInstance.Inst.UiInstance.Font = lms2012.FontType.NORMAL_FONT;
+			cUiUpdateTopline();
+			LmsInstance.Inst.DlcdClass.dLcdUpdate(LmsInstance.Inst.UiInstance.Lcd);
+        }
+
+		public void cUiRunScreen()
+		{
+			if (LmsInstance.Inst.UiInstance.ScreenBlocked == 0)
+			{
+				switch (LmsInstance.Inst.UiInstance.RunScreenEnabled)
+				{
+					case 0:
+						break;
+					case 1:
+						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
+                        break;
+                    case 2:
+                        LmsInstance.Inst.UiInstance.RunScreenEnabled++;
+                        break;
+                    case 3:
+                        LmsInstance.Inst.UiInstance.RunScreenNumber = 1;
+
+						//clear
+						LmsInstance.Inst.DlcdClass.LcdClear(LmsInstance.Inst.UiInstance.Lcd);
+						cUiUpdateLcd();
+
+						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 39, );
+                        break;
+                }
+			}
 		}
 	}
 }

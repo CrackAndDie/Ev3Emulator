@@ -285,10 +285,17 @@
 
 		// Used when no battery is present
 		public const byte DEFAULT_BATTERY_VOLTAGE = 9;
-		#endregion
 
-		#region cLcd defines
-		public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
+		public const byte BG_COLOR = 0;
+		public const byte FG_COLOR = 1;
+
+		public const byte TOP_BATT_ICONS = 5;
+		public const byte TOP_BT_ICONS = 4;
+		public const byte TOP_WIFI_ICONS = 4;
+        #endregion
+
+        #region cLcd defines
+        public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
 		public const int LCD_TOPLINE_SIZE = (((LCD_WIDTH + 7) / 8) * (TOPLINE_HEIGHT + 1));
 		#endregion
 	}

@@ -1454,7 +1454,7 @@
 			FAILBREAK = 0x8000                //!< Break because of fail
 		}
 
-        internal enum BrowserType
+        public enum BrowserType : byte
         {
             BROWSE_FOLDERS = 0,
             BROWSE_FOLDS_FILES = 1,
@@ -1462,7 +1462,7 @@
             BROWSE_FILES = 3
         }
 
-        internal enum FontType
+        public enum FontType : byte
         {
             NORMAL_FONT = 0,
             SMALL_FONT = 1,
@@ -1470,7 +1470,7 @@
             TINY_FONT = 3
         }
 
-        internal enum IconType
+        public enum IconType : byte
         {
             NORMAL_ICON = 0,
             SMALL_ICON = 1,
@@ -1479,7 +1479,7 @@
             ARROW_ICON = 4
         }
 
-        internal enum StatusIcon
+        public enum StatusIcon : byte
         {
             SICON_CHARGING = 0,
             SICON_BATT_4 = 1,
@@ -1501,7 +1501,7 @@
             SICON_USB = 21
         }
 
-        internal enum NIcon
+        public enum NIcon : sbyte
         {
             ICON_NONE = -1,
             ICON_RUN = 0,
@@ -1540,7 +1540,7 @@
             ICON_BRICK1 = 34
         }
 
-        internal enum LIcon
+        public enum LIcon : byte
         {
             YES_NOTSEL = 0,
             YES_SEL = 1,
@@ -1571,7 +1571,7 @@
             WARN_MEMORY = 27
         }
 
-        internal enum MIcon
+        public enum MIcon : byte
         {
             ICON_STAR = 0,
             ICON_LOCKSTAR = 1,
@@ -1586,13 +1586,13 @@
             ICON_XED = 10
         }
 
-        internal enum AIcon
+        public enum AIcon : byte 
         {
             ICON_LEFT = 1,
             ICON_RIGHT = 2
         }
 
-        internal enum BluetoothType
+        public enum BluetoothType : byte
         {
             BTTYPE_PC = 3,
             BTTYPE_PHONE = 4,
