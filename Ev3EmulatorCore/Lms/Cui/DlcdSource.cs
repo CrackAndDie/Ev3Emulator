@@ -59,7 +59,22 @@ namespace Ev3EmulatorCore.Lms.Cui
 			// TODO
 		}
 
-		public void dLcdDrawPicture(LCD lcd, byte color, short x0, short y0, short iconWidth, short iconHeight, byte[] data)
+        public void dLcdRect(LCD lcd, byte color, short x0, short y0, short x1, short y1)
+        {
+            // TODO
+        }
+
+        public void dLcdFillRect(LCD lcd, byte color, short x0, short y0, short x1, short y1)
+        {
+            // TODO
+        }
+
+        public void dLcdDrawPixel(LCD lcd, byte color, short x0, short y0)
+        {
+            // TODO
+        }
+
+        public void dLcdDrawPicture(LCD lcd, byte color, short x0, short y0, short iconWidth, short iconHeight, byte[] data)
 		{
 			// TODO
 		}

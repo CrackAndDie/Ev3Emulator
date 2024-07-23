@@ -216,8 +216,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 			public Int16 Chars;
 			public Int16 Lines;
 
-			public Int16 hFolders;
-			public Int16 hFiles;
+			public Int16 hFolders = 0;
+			public Int16 hFiles = 0;
 			public UInt16 PrgId;
 			public UInt16 ObjId;
 

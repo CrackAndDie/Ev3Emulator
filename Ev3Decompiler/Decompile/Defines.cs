@@ -307,5 +307,13 @@
 		public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
 		public const int LCD_TOPLINE_SIZE = (((LCD_WIDTH + 7) / 8) * (TOPLINE_HEIGHT + 1));
 		#endregion
-	}
+
+		#region cMemory defines
+		public const string MEMORY_FOLDER = "/mnt/ramdisk";
+		public const string PROGRAM_FOLDER = "../prjs/BrkProg_SAVE";
+		public const string DATALOG_FOLDER = "../prjs/BrkDL_SAVE";
+		public const string SDCARD_FOLDER = "../prjs/SD_Card";
+		public const string USBSTICK_FOLDER = "../prjs/USB_Stick";
+        #endregion
+    }
 }

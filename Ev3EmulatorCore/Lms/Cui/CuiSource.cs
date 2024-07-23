@@ -1,9 +1,7 @@
 ﻿using EV3DecompilerLib.Decompile;
 using Ev3EmulatorCore.Extensions;
+using Ev3EmulatorCore.Helpers;
 using Ev3EmulatorCore.Lms.Lms2012;
-using System.Runtime.InteropServices;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ev3EmulatorCore.Lms.Cui
 {
@@ -1596,7 +1594,6 @@ namespace Ev3EmulatorCore.Lms.Cui
 				pK.PointerY = Height;
 			}
 
-
 			TmpChar = KeyboardLayout[pK.Layout][pK.PointerY][pK.PointerX];
 
 			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
@@ -1607,7 +1604,6 @@ namespace Ev3EmulatorCore.Lms.Cui
 			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
 			{
 				SelectedChar = TmpChar;
-
 				switch (SelectedChar)
 				{
 					case 0x01:
@@ -1615,25 +1611,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 							pK.Layout = 2;
 						}
 						break;
-
 					case 0x02:
 						{
 							pK.Layout = 0;
 						}
 						break;
-
 					case 0x03:
 						{
 							pK.Layout = 1;
 						}
 						break;
-
 					case 0x04:
 						{
 							pK.Layout = 0;
 						}
 						break;
-
 					case 0x08:
 						{
 							Tmp = (short)pAnswer.Length;
@@ -1644,12 +1636,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 						}
 						break;
-
 					case (byte)'\r':
 						{
 						}
 						break;
-
 					default:
 						{
 							var tmpArr = new byte[] { SelectedChar };
@@ -1665,12 +1655,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 						}
 						break;
-
-
 				}
 
 				TmpChar = KeyboardLayout[pK.Layout][pK.PointerY][pK.PointerX];
-
 				pK.NeedUpdate = 1;
 			}
 
@@ -1693,19 +1680,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 							LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pK.ScreenStartX, pK.ScreenStartY, kbc.Width, kbc.Height, kbc.Data);
 						}
 						break;
-
 					case 1:
 						{
 							LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pK.ScreenStartX, pK.ScreenStartY, kbs.Width, kbs.Height, kbs.Data);
 						}
 						break;
-
 					case 2:
 						{
 							LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pK.ScreenStartX, pK.ScreenStartY, kbn.Width, kbn.Height, kbn.Data);
 						}
 						break;
-
 				}
 				if ((Icon >= 0) && (Icon < lms2012.NIcon.ICON_BRICK1))
 				{
@@ -1716,7 +1700,6 @@ namespace Ev3EmulatorCore.Lms.Cui
 					LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pK.TextStartX, pK.TextStartY, lms2012.FontType.SMALL_FONT, pText);
 				}
 
-
 				X4 = 0;
 				X3 = (short)pAnswer.Length;
 				if (X3 > 15)
@@ -1726,8 +1709,6 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pK.StringStartX, pK.StringStartY, lms2012.FontType.NORMAL_FONT, pAnswer.Skip(X4).ToArray());
 				LmsInstance.Inst.DlcdClass.dLcdDrawChar(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pK.StringStartX + (X3 - X4) * 8), pK.StringStartY, lms2012.FontType.NORMAL_FONT, (byte)'_');
-
-
 
 				SX = (short)(pK.KeybStartX + pK.PointerX * pK.KeybSpaceX);
 				SY = (short)(pK.KeybStartY + pK.PointerY * pK.KeybSpaceY);
@@ -1741,19 +1722,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX - 8), SY, (short)(pK.KeybWidth + 8), pK.KeybHeight);
 						}
 						break;
-
 					case 0x04:
 						{
 							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX - 8), (short)(pK.KeybStartY + 1 * pK.KeybSpaceY), (short)(pK.KeybWidth + 8), (short)(pK.KeybHeight * 2 + 1));
 						}
 						break;
-
 					case 0x08:
 						{
 							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX + 2), SY, (short)(pK.KeybWidth + 5), pK.KeybHeight);
 						}
 						break;
-
 					case 0x0D:
 						{
 							SX = (short)(pK.KeybStartX + 112);
@@ -1764,19 +1742,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, SX, SY, (short)(pK.KeybWidth + 14), (short)(pK.KeybSpaceY * 2 - 4));
 						}
 						break;
-
 					case 0x20:
 						{
 							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(pK.KeybStartX + 11), (short)(SY + 1), (short)(pK.KeybWidth + 68), (short)(pK.KeybHeight - 3));
 						}
 						break;
-
 					default:
 						{
 							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX + 1), SY, pK.KeybWidth, pK.KeybHeight);
 						}
 						break;
-
 				}
 				cUiUpdateLcd();
 				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
@@ -1784,5 +1759,980 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			return (SelectedChar);
 		}
-	}
+
+        void cUiDrawBar(byte Color, short X, short Y, short X1, short Y1, short Min, short Max, short Act)
+        {
+            short Tmp;
+            short Items;
+            short KnobHeight = 7;
+
+            Items = (short)(Max - Min);
+
+            switch (X1)
+            {
+                case 5:
+                    {
+                        KnobHeight = 7;
+                    }
+                    break;
+                case 6:
+                    {
+                        KnobHeight = 9;
+                    }
+                    break;
+                default:
+                    {
+                        if (Items > 0)
+                        {
+                            KnobHeight = (short)(Y1 / Items);
+                        }
+                    }
+                    break;
+            }
+
+            if (Act < Min)
+            {
+                Act = Min;
+            }
+            if (Act > Max)
+            {
+                Act = Max;
+            }
+
+            // Draw scroll bar
+            LmsInstance.Inst.DlcdClass.dLcdRect(LmsInstance.Inst.UiInstance.Lcd, Color, X, Y, X1, Y1);
+
+            // Draw nob
+            Tmp = Y;
+            if ((Items > 1) && (Act > 0))
+            {
+                Tmp += (short)(((Y1 - KnobHeight) * (Act - 1)) / (Items - 1));
+            }
+
+            switch (X1)
+            {
+                case 5:
+                    {
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                    }
+                    break;
+                case 6:
+                    {
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 4), Tmp);
+                        Tmp++;
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                        Tmp++;
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 4), Tmp);
+                        Tmp++;
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
+                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
+                    }
+                    break;
+                default:
+                    {
+                        LmsInstance.Inst.DlcdClass.dLcdFillRect(LmsInstance.Inst.UiInstance.Lcd, Color, X, Tmp, X1, KnobHeight);
+                    }
+                    break;
+            }
+        }
+
+        lms2012.Result cUiBrowser(byte Type, short X, short Y, short X1, short Y1, byte Lng, ref sbyte pType, byte[] pAnswer)
+        {
+            lms2012.Result Result = lms2012.Result.BUSY;
+            int Image;
+            BROWSER pB;
+            ushort PrgId;
+            ushort ObjId;
+            short Tmp;
+            short Indent;
+            short Item;
+            short TotalItems;
+            sbyte TmpType = 0;
+            byte Folder;
+            byte OldPriority;
+            byte Priority = 0;
+            byte Color;
+            short Ignore;
+            byte Data8 = 0;
+            int Total = 0;
+            int Free = 0;
+            lms2012.Result TmpResult;
+            short TmpHandle;
+
+            PrgId = LmsInstance.Inst.CurrentProgramId();
+            ObjId = LmsInstance.Inst.CallingObjectId();
+            pB = LmsInstance.Inst.UiInstance.Browser;
+
+            Color = lms2012.FG_COLOR;
+
+            // Test ignore horizontal update
+            if (((byte)Type & 0x20) != 0)
+            {
+                Ignore = -1;
+            }
+            else
+            {
+                if (((byte)Type & 0x10) != 0)
+                {
+                    Ignore = 1;
+                }
+                else
+                {
+                    Ignore = 0;
+                }
+            }
+
+            // Isolate browser type
+            Type &= 0x0F;
+
+            LmsInstance.Inst.CheckUsbstick(ref Data8, ref Total, ref Free, 0);
+            if (Data8 != 0)
+            {
+                LmsInstance.Inst.UiInstance.UiUpdate = 1;
+            }
+            LmsInstance.Inst.CheckSdcard(ref Data8, ref Total, ref Free, 0);
+            if (Data8 != 0)
+            {
+                LmsInstance.Inst.UiInstance.UiUpdate = 1;
+            }
+
+            if (LmsInstance.Inst.ProgramStatusChange((ushort)lms2012.Slot.USER_SLOT) == lms2012.ObjectStatus.STOPPED)
+            {
+                if (Type != (byte)lms2012.BrowserType.BROWSE_FILES)
+                {
+                    Result = lms2012.Result.OK;
+					pType = 0;
+                }
+            }
+
+            if ((pType == (short)lms2012.FileType.TYPE_REFRESH_BROWSER))
+            {
+                LmsInstance.Inst.UiInstance.UiUpdate = 1;
+            }
+
+            if ((pType == (short)lms2012.FileType.TYPE_RESTART_BROWSER))
+            {
+                if (pB.hFiles != 0)
+                {
+                    LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
+                }
+                if (pB.hFolders != 0)
+                {
+                    LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFolders);
+                }
+				pB.PrgId = 0;
+                pB.ObjId = 0;
+				//    pAnswer[0]          =  0;
+				pType = 0;
+            }
+
+            if ((pB.PrgId == 0) && (pB.ObjId == 0))
+            {
+                //* INIT *****************************************************************************************************
+
+                // Define screen
+                pB.ScreenStartX = X;
+                pB.ScreenStartY = Y;
+                pB.ScreenWidth = X1;
+                pB.ScreenHeight = Y1;
+
+                // calculate lines on screen
+                pB.LineSpace = 5;
+                pB.IconHeight = LmsInstance.Inst.DlcdClass.dLcdGetIconHeight(lms2012.IconType.NORMAL_ICON);
+                pB.LineHeight = (short)(pB.IconHeight + pB.LineSpace);
+                pB.Lines = (short)(pB.ScreenHeight / pB.LineHeight);
+
+                // calculate chars and lines on screen
+                pB.CharWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(lms2012.FontType.NORMAL_FONT);
+                pB.CharHeight = LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(lms2012.FontType.NORMAL_FONT);
+                pB.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.NORMAL_ICON);
+                pB.Chars = (short)((pB.ScreenWidth - pB.IconWidth) / pB.CharWidth);
+
+                // calculate start of icon
+                pB.IconStartX = cUiAlignX(pB.ScreenStartX);
+                pB.IconStartY = (short)(pB.ScreenStartY + pB.LineSpace / 2);
+
+                // calculate start of text
+                pB.TextStartX = cUiAlignX((short)(pB.ScreenStartX + pB.IconWidth));
+                pB.TextStartY = (short)(pB.ScreenStartY + (pB.LineHeight - pB.CharHeight) / 2);
+
+                // Calculate selection barBrowser
+                pB.SelectStartX = (short)(pB.ScreenStartX + 1);
+                pB.SelectWidth = (short)(pB.ScreenWidth - (pB.CharWidth + 5));
+                pB.SelectStartY = (short)(pB.IconStartY - 1);
+                pB.SelectHeight = (short)(pB.IconHeight + 2);
+
+                // Calculate scroll bar
+                pB.ScrollWidth = 6;
+                pB.NobHeight = 9;
+                pB.ScrollStartX = (short)(pB.ScreenStartX + pB.ScreenWidth - pB.ScrollWidth);
+                pB.ScrollStartY = (short)(pB.ScreenStartY + 1);
+                pB.ScrollHeight = (short)(pB.ScreenHeight - 2);
+                pB.ScrollSpan = (short)(pB.ScrollHeight - pB.NobHeight);
+
+				pB.TopFolder.WriteBytes(pAnswer);
+
+                pB.PrgId = PrgId;
+                pB.ObjId = ObjId;
+
+                pB.OldFiles = 0;
+                pB.Folders = 0;
+                pB.OpenFolder = 0;
+                pB.Files = 0;
+                pB.ItemStart = 1;
+                pB.ItemPointer = 1;
+                pB.NeedUpdate = 1;
+                LmsInstance.Inst.UiInstance.UiUpdate = 1;
+            }
+
+            if ((pB.PrgId == PrgId) && (pB.ObjId == ObjId))
+            {
+                //* CTRL *****************************************************************************************************
+                if (LmsInstance.Inst.UiInstance.UiUpdate != 0)
+                {
+                    LmsInstance.Inst.UiInstance.UiUpdate = 0;
+                    if (pB.hFiles != 0)
+                    {
+                        LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
+                    }
+                    if (pB.hFolders != 0)
+                    {
+                        LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFolders);
+                    }
+
+					pB.OpenFolder = 0;
+                    pB.Files = 0;
+					pType = 0;
+
+                    switch (Type)
+                    {
+                        case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
+                        case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
+                            {
+                                if (LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.TYPE_FOLDER, pB.TopFolder, ref pB.hFolders) == lms2012.Result.OK)
+                                {
+                                    //******************************************************************************************************
+                                    if (pB.OpenFolder != 0)
+                                    {
+                                        LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.SubFolder, ref TmpType);
+                                        if (CommonHelper.Strcmp(pB.SubFolder, lms2012.SDCARD_FOLDER) == 0)
+                                        {
+                                            Item = pB.ItemPointer;
+                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+                                            Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
+											pType = (sbyte)lms2012.FileType.TYPE_SDCARD;
+
+											pAnswer.WriteBytes(pB.FullPath);
+                                        }
+                                        else
+                                        {
+                                            if (CommonHelper.Strcmp(pB.SubFolder, lms2012.USBSTICK_FOLDER) == 0)
+                                            {
+                                                Item = pB.ItemPointer;
+                                                LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+                                                Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
+                                                pType = (sbyte)lms2012.FileType.TYPE_USBSTICK;
+
+                                                pAnswer.WriteBytes(pB.FullPath);
+                                            }
+                                            else
+                                            {
+                                                Result = LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.FILETYPE_UNKNOWN, pB.SubFolder, ref pB.hFiles);
+                                                Result = lms2012.Result.BUSY;
+                                            }
+                                        }
+                                    }
+                                    //******************************************************************************************************
+                                }
+                                else
+                                {
+                                    pB.PrgId = 0;
+                                    pB.ObjId = 0;
+                                }
+                            }
+                            break;
+                        case (byte)lms2012.BrowserType.BROWSE_CACHE:
+                            {
+                            }
+                            break;
+                        case (byte)lms2012.BrowserType.BROWSE_FILES:
+                            {
+                                if (LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.FILETYPE_UNKNOWN, pB.TopFolder, ref pB.hFiles) == lms2012.Result.OK)
+                                {
+                                }
+                                else
+                                {
+                                    pB.PrgId = 0;
+                                    pB.ObjId = 0;
+                                }
+                            }
+                            break;
+
+                    }
+                }
+
+				// TODO: probably uncomment
+				
+                //if (CommonHelper.Strstr((char*)pB.SubFolder, SDCARD_FOLDER))
+                //{
+                //    pB.Sdcard = 1;
+                //}
+                //else
+                //{
+                //    pB.Sdcard = 0;
+                //}
+
+                //if (strstr((char*)pB.SubFolder, USBSTICK_FOLDER))
+                //{
+                //    pB.Usbstick = 1;
+                //}
+                //else
+                //{
+                //    pB.Usbstick = 0;
+                //}
+
+                TmpResult = lms2012.Result.OK;
+                switch (Type)
+                {
+                    case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
+                    case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
+                        {
+                            // Collect folders in directory
+                            TmpResult = LmsInstance.Inst.CmemoryClass.cMemoryGetFolderItems(pB.PrgId, pB.hFolders, ref pB.Folders);
+
+                            // Collect files in folder
+                            if ((pB.OpenFolder != 0) && (TmpResult == lms2012.Result.OK))
+                            {
+                                TmpResult = LmsInstance.Inst.CmemoryClass.cMemoryGetFolderItems(pB.PrgId, pB.hFiles, ref pB.Files);
+                            }
+                        }
+                        break;
+                    case (byte)lms2012.BrowserType.BROWSE_CACHE:
+                        {
+                            pB.Folders = (short)LmsInstance.Inst.CmemoryClass.cMemoryGetCacheFiles();
+                        }
+                        break;
+                    case (byte)lms2012.BrowserType.BROWSE_FILES:
+                        {
+                            TmpResult = LmsInstance.Inst.CmemoryClass.cMemoryGetFolderItems(pB.PrgId, pB.hFiles, ref pB.Files);
+                        }
+                        break;
+
+                }
+
+                if ((pB.OpenFolder != 0) && (pB.OpenFolder == pB.ItemPointer))
+                {
+                    if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
+                    {
+                        // Close folder
+                        LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
+                        if (pB.ItemPointer > pB.OpenFolder)
+                        {
+                            pB.ItemPointer -= pB.Files;
+                        }
+						pB.OpenFolder = 0;
+                        pB.Files = 0;
+                    }
+                }
+
+                // TODO: probably uncomment
+
+                //if (pB.Sdcard == 1)
+                //{
+                //    if (pB.OpenFolder == 0)
+                //    {
+                //        if (cUiGetShortPress(BACK_BUTTON))
+                //        {
+                //            // Collapse sdcard
+                //            if (pB.hFiles)
+                //            {
+                //                cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+                //            }
+                //            if (pB.hFolders)
+                //            {
+                //                cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+                //            }
+                //          pB.PrgId = 0;
+                //            pB.ObjId = 0;
+                //            strcpy((char*)pAnswer, vmPRJS_DIR);
+                //            *pType = 0;
+                //            pB.SubFolder[0] = 0;
+                //        }
+                //    }
+                //}
+                //if (pB.Usbstick == 1)
+                //{
+                //    if (pB.OpenFolder == 0)
+                //    {
+                //        if (cUiGetShortPress(BACK_BUTTON))
+                //        {
+                //            // Collapse usbstick
+                //            if (pB.hFiles)
+                //            {
+                //                cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+                //            }
+                //            if (pB.hFolders)
+                //            {
+                //                cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+                //            }
+                //          pB.PrgId = 0;
+                //            pB.ObjId = 0;
+                //            strcpy((char*)pAnswer, vmPRJS_DIR);
+                //            *pType = 0;
+                //            pB.SubFolder[0] = 0;
+                //        }
+                //    }
+                //}
+
+
+                if (pB.OldFiles != (pB.Files + pB.Folders))
+                {
+                    pB.OldFiles = (short)(pB.Files + pB.Folders);
+                    pB.NeedUpdate = 1;
+                }
+
+                if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
+                {
+                    pB.OldFiles = 0;
+                    if (pB.OpenFolder != 0)
+                    {
+                        if ((pB.ItemPointer > pB.OpenFolder) && (pB.ItemPointer <= (pB.OpenFolder + pB.Files)))
+                        { // File selected
+
+                            Item = (short)(pB.ItemPointer - pB.OpenFolder);
+                            Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, ref pType);
+
+                            pAnswer.WriteBytes(pB.FullPath);
+                        }
+                        else
+                        { // Folder selected
+                            if (pB.OpenFolder == pB.ItemPointer)
+                            { // Enter on open folder
+
+                                Item = pB.OpenFolder;
+                                Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, Lng, pAnswer, ref pType);
+                            }
+                            else
+                            {
+                                // Close folder
+                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
+                                if (pB.ItemPointer > pB.OpenFolder)
+                                {
+                                    pB.ItemPointer -= pB.Files;
+                                }
+								pB.OpenFolder = 0;
+                                pB.Files = 0;
+                            }
+                        }
+                    }
+                    if (pB.OpenFolder == 0)
+                    { // Open folder
+                        switch (Type)
+                        {
+                            case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
+                                { // Folder
+
+                                    Item = pB.ItemPointer;
+                                    LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+                                    Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
+
+                                    pAnswer.WriteBytes(pB.FullPath.ConcatArrays(new byte[] { (byte)'/' }).ConcatArrays(pB.Filename));
+                                    pType = (sbyte)lms2012.FileType.TYPE_BYTECODE;
+                                }
+                                break;
+                            case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
+                                { // Folder & File
+
+                                    pB.OpenFolder = pB.ItemPointer;
+                                    LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.SubFolder, ref TmpType);
+                                    if (CommonHelper.Strcmp(pB.SubFolder, lms2012.SDCARD_FOLDER) == 0)
+                                    {
+                                        Item = pB.ItemPointer;
+                                        LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+                                        Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
+                                        pType = (sbyte)lms2012.FileType.TYPE_SDCARD;
+
+                                        pAnswer.WriteBytes(pB.FullPath);
+                                    }
+                                    else
+                                    {
+                                        if (CommonHelper.Strcmp(pB.SubFolder, lms2012.USBSTICK_FOLDER) == 0)
+                                        {
+                                            Item = pB.ItemPointer;
+                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+                                            Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
+                                            pType = (sbyte)lms2012.FileType.TYPE_USBSTICK;
+
+                                            pAnswer.WriteBytes(pB.FullPath);
+                                        }
+                                        else
+                                        {
+                                            pB.ItemStart = pB.ItemPointer;
+                                            Result = LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.FILETYPE_UNKNOWN, pB.SubFolder, ref pB.hFiles);
+
+                                            Result = lms2012.Result.BUSY;
+                                        }
+                                    }
+                                }
+                                break;
+                            case (byte)lms2012.BrowserType.BROWSE_CACHE:
+                                { // Cache
+                                    Item = pB.ItemPointer;
+
+                                    pType = LmsInstance.Inst.CmemoryClass.cMemoryGetCacheName((byte)Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, pB.Filename);
+                                    pAnswer.WriteBytes(pB.FullPath);
+                                    Result = lms2012.Result.OK;
+                                }
+                                break;
+                            case (byte)lms2012.BrowserType.BROWSE_FILES:
+                                { // File
+                                    if ((pB.ItemPointer > pB.OpenFolder) && (pB.ItemPointer <= (pB.OpenFolder + pB.Files)))
+                                    { // File selected
+                                        Item = (short)(pB.ItemPointer - pB.OpenFolder);
+
+                                        Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, ref pType);
+
+                                        pAnswer.WriteBytes(pB.FullPath);
+                                        Result = lms2012.Result.OK;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+					pB.NeedUpdate = 1;
+                }
+
+                TotalItems = (short)(pB.Folders + pB.Files);
+                if (TmpResult == lms2012.Result.OK)
+                {
+                    if (TotalItems != 0)
+                    {
+                        if (pB.ItemPointer > TotalItems)
+                        {
+                            pB.ItemPointer = TotalItems;
+                            pB.NeedUpdate = 1;
+                        }
+                        if (pB.ItemStart > pB.ItemPointer)
+                        {
+                            pB.ItemStart = pB.ItemPointer;
+                            pB.NeedUpdate = 1;
+                        }
+                    }
+                    else
+                    {
+                        pB.ItemStart = 1;
+                        pB.ItemPointer = 1;
+                    }
+                }
+
+                Tmp = cUiGetVert();
+                if (Tmp != 0)
+                { // up/down arrow pressed
+
+                    pB.NeedUpdate = 1;
+
+                    // Calculate item pointer
+                    pB.ItemPointer += Tmp;
+                    if (pB.ItemPointer < 1)
+                    {
+                        pB.ItemPointer = 1;
+                        pB.NeedUpdate = 0;
+                    }
+                    if (pB.ItemPointer > TotalItems)
+                    {
+                        pB.ItemPointer = TotalItems;
+                        pB.NeedUpdate = 0;
+                    }
+                }
+
+                // Calculate item start
+                if (pB.ItemPointer < pB.ItemStart)
+                {
+                    if (pB.ItemPointer > 0)
+                    {
+                        pB.ItemStart = pB.ItemPointer;
+                    }
+                }
+                if (pB.ItemPointer >= (pB.ItemStart + pB.Lines))
+                {
+                    pB.ItemStart = (short)(pB.ItemPointer - pB.Lines);
+                    pB.ItemStart++;
+                }
+
+                if (pB.NeedUpdate != 0)
+                {
+                    //* UPDATE ***************************************************************************************************
+                    pB.NeedUpdate = 0;
+
+                    //# ifdef DEBUG
+                    //# ifndef DISABLE_SDCARD_SUPPORT
+                    //                    if (pB.Sdcard)
+                    //                    {
+                    //                        printf("SDCARD\r\n");
+                    //                    }
+                    //#endif
+                    //# ifndef DISABLE_USBSTICK_SUPPORT
+                    //                    if (pB.Usbstick)
+                    //                    {
+                    //                        printf("USBSTICK\r\n");
+                    //                    }
+                    //#endif
+                    //                    printf("Folders = %3d, OpenFolder = %3d, Files = %3d, ItemStart = %3d, ItemPointer = %3d, TotalItems = %3d\r\n\n", pB.Folders, pB.OpenFolder, pB.Files, pB.ItemStart, pB.ItemPointer, TotalItems);
+                    //#endif
+
+                    // clear screen
+                    LmsInstance.Inst.DlcdClass.dLcdFillRect(LmsInstance.Inst.UiInstance.Lcd, lms2012.BG_COLOR, pB.ScreenStartX, pB.ScreenStartY, pB.ScreenWidth, pB.ScreenHeight);
+
+                    OldPriority = 0;
+                    for (Tmp = 0; Tmp < pB.Lines; Tmp++)
+                    {
+                        Item = (short)(Tmp + pB.ItemStart);
+                        Folder = 1;
+                        Priority = OldPriority;
+
+                        if (Item <= TotalItems)
+                        {
+                            if (pB.OpenFolder != 0)
+                            {
+                                if ((Item > pB.OpenFolder) && (Item <= (pB.OpenFolder + pB.Files)))
+                                {
+                                    Item -= pB.OpenFolder;
+                                    Folder = 0;
+                                }
+                                else
+                                {
+                                    if (Item > pB.OpenFolder)
+                                    {
+                                        Item -= pB.Files;
+                                    }
+                                }
+                            }
+
+                            //*** Graphics ***********************************************************************************************
+
+                            if (Folder != 0)
+                            { // Show folder
+
+                                switch (Type)
+                                {
+                                    case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
+                                        {
+                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
+                                            if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemIcon(pB.PrgId, pB.hFolders, Item, ref TmpHandle, &Image) == lms2012.Result.OK)
+                                            {
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawBitmap(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, pB.IconStartY + (Tmp * pB.LineHeight), (IP)Image);
+                                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFile(pB.PrgId, TmpHandle);
+                                            }
+                                            else
+                                            {
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, pB.IconStartY + (Tmp * pB.LineHeight), PCApp_width, PCApp_height, (UBYTE*)PCApp_bits);
+                                            }
+
+											pB.Text[0] = 0;
+                                            if (CommonHelper.Strcmp(pB.Filename, "Bluetooth") == 0)
+                                            {
+                                                if (LmsInstance.Inst.UiInstance.BtOn != 0)
+                                                {
+                                                    pB.Text[0] = (byte)'+';
+                                                }
+                                                else
+                                                {
+                                                    pB.Text[0] = (byte)'-';
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (CommonHelper.Strcmp(pB.Filename, "WiFi") == 0)
+                                                {
+                                                    if (LmsInstance.Inst.UiInstance.WiFiOn != 0)
+                                                    {
+                                                        pB.Text[0] = (byte)'+';
+                                                    }
+                                                    else
+                                                    {
+                                                        pB.Text[0] = (byte)'-';
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemText(pB.PrgId, pB.hFolders, Item, pB.Chars, pB.Text) != lms2012.Result.OK)
+                                                    {
+                                                        pB.Text[0] = 0;
+                                                    }
+                                                }
+                                            }
+                                            switch (pB.Text[0])
+                                            {
+                                                case 0:
+                                                    {
+                                                    }
+                                                    break;
+
+                                                case (byte)'+':
+                                                    {
+                                                        Indent = (short)((pB.Chars - 1) * pB.CharWidth - LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.MENU_ICON));
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + Indent), (short)((pB.TextStartY - 2) + (Tmp * pB.LineHeight)), lms2012.IconType.MENU_ICON, (int)lms2012.MIcon.ICON_CHECKED);
+                                                    }
+                                                    break;
+
+                                                case (byte)'-':
+                                                    {
+                                                        Indent = (short)((pB.Chars - 1) * pB.CharWidth - LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.MENU_ICON));
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + Indent), (short)((pB.TextStartY - 2) + (Tmp * pB.LineHeight)), lms2012.IconType.MENU_ICON, (int)lms2012.MIcon.ICON_CHECKBOX);
+                                                    }
+                                                    break;
+
+                                                default:
+                                                    {
+                                                        Indent = (short)((pB.Chars - 1) - (pB.Text.Length * pB.CharWidth));
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + Indent), (short)(pB.TextStartY + (Tmp * pB.LineHeight)), lms2012.FontType.NORMAL_FONT, pB.Text);
+                                                    }
+                                                    break;
+
+                                            }
+
+                                        }
+                                        break;
+
+                                    case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
+                                        {
+                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
+                                            LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
+
+                                            if ((Priority == 1) || (Priority == 2))
+                                            {
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_FOLDER2);
+                                            }
+                                            else
+                                            {
+                                                if (Priority == 3)
+                                                {
+                                                    LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_SD);
+                                                }
+                                                else
+                                                {
+                                                    if (Priority == 4)
+                                                    {
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_USB);
+                                                    }
+                                                    else
+                                                    {
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
+                                                    }
+                                                }
+                                            }
+                                            if (Priority != OldPriority)
+                                            {
+                                                if ((Priority == 1) || (Priority >= 3))
+                                                {
+                                                    if (Tmp != 0)
+                                                    {
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        break;
+
+                                    case (byte)lms2012.BrowserType.BROWSE_CACHE:
+                                        {
+                                            TmpType = LmsInstance.Inst.CmemoryClass.cMemoryGetCacheName((byte)Item, (byte)pB.Chars, pB.FullPath, pB.Filename);
+                                            LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
+                                        }
+                                        break;
+
+                                    case (byte)lms2012.BrowserType.BROWSE_FILES:
+                                        {
+                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
+                                            LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
+                                        }
+                                        break;
+
+                                }
+                                // Draw folder name
+                                LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pB.TextStartX, (short)(pB.TextStartY + (Tmp * pB.LineHeight)), lms2012.FontType.NORMAL_FONT, pB.Filename);
+
+                                // Draw open folder
+                                if (Item == pB.OpenFolder)
+                                {
+                                    LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, 144, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_OPENFOLDER);
+                                }
+
+                                // Draw selection
+                                if (pB.ItemPointer == (Tmp + pB.ItemStart))
+                                {
+                                    LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.SelectWidth + 1), pB.SelectHeight);
+                                }
+
+                                // Draw end line
+                                switch (Type)
+                                {
+                                    case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
+                                    case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
+                                    case (byte)lms2012.BrowserType.BROWSE_FILES:
+                                        {
+                                            if (((Tmp + pB.ItemStart) == TotalItems) && (Tmp < (pB.Lines - 1)))
+                                            {
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                            }
+                                        }
+                                        break;
+
+                                    case (byte)lms2012.BrowserType.BROWSE_CACHE:
+                                        {
+                                            if (((Tmp + pB.ItemStart) == 1) && (Tmp < (pB.Lines - 1)))
+                                            {
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                            }
+                                            if (((Tmp + pB.ItemStart) == TotalItems) && (Tmp < (pB.Lines - 1)))
+                                            {
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                            }
+                                        }
+                                        break;
+
+                                }
+                            }
+                            else
+                            { // Show file
+
+                                // Get file name and type
+                                LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, (byte)(pB.Chars - 1), pB.Filename, ref TmpType, ref Priority);
+
+                                // show File icons
+                                LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth), (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
+
+                                // Draw file name
+                                LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + pB.CharWidth), (short)(pB.TextStartY + (Tmp * pB.LineHeight)), lms2012.FontType.NORMAL_FONT, pB.Filename);
+
+                                // Draw folder line
+                                if ((Tmp == (pB.Lines - 1)) || (Item == pB.Files))
+                                {
+                                    LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.SelectHeight - 1));
+                                }
+                                else
+                                {
+                                    LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 1));
+                                }
+
+                                // Draw selection
+                                if (pB.ItemPointer == (Tmp + pB.ItemStart))
+                                {
+                                    LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(pB.SelectStartX + pB.CharWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.SelectWidth + 1 - pB.CharWidth), pB.SelectHeight);
+                                }
+                            }
+
+                            //************************************************************************************************************
+                        }
+
+                        OldPriority = Priority;
+                    }
+
+                    cUiDrawBar(1, pB.ScrollStartX, pB.ScrollStartY, pB.ScrollWidth, pB.ScrollHeight, 0, TotalItems, pB.ItemPointer);
+
+                    // Update
+                    cUiUpdateLcd();
+                    LmsInstance.Inst.UiInstance.ScreenBusy = 0;
+                }
+
+                if (Result != lms2012.Result.OK)
+                {
+                    Tmp = cUiTestHorz();
+                    if (Ignore == Tmp)
+                    {
+                        Tmp = cUiGetHorz();
+                        Tmp = 0;
+                    }
+
+                    if ((Tmp != 0) || (cUiTestShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0) || (cUiTestLongPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0))
+                    {
+                        if (Type != (byte)lms2012.BrowserType.BROWSE_CACHE)
+                        {
+                            if (pB.OpenFolder != 0)
+                            {
+                                if (pB.hFiles != 0)
+                                {
+                                    LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
+                                }
+                            }
+                            if (pB.hFolders != 0)
+                            {
+                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFolders);
+                            }
+                        }
+                      pB.PrgId = 0;
+                        pB.ObjId = 0;
+                        pB.SubFolder[0] = 0;
+                        pAnswer[0] = 0;
+                        pType = 0;
+                        Result = lms2012.Result.OK;
+                    }
+                }
+                else
+                {
+                    pB.NeedUpdate = 1;
+                }
+            }
+            else
+            {
+                pAnswer[0] = 0;
+                pType = (sbyte)lms2012.FileType.TYPE_RESTART_BROWSER;
+                Result = lms2012.Result.FAIL;
+            }
+
+            if (pType > 0)
+            {
+//# ifndef DISABLE_SDCARD_SUPPORT
+//                if (pB.Sdcard)
+//                {
+//                    *pType |= TYPE_SDCARD;
+//                }
+//#endif
+//# ifndef DISABLE_USBSTICK_SUPPORT
+//                if (pB.Usbstick)
+//                {
+//                    *pType |= TYPE_USBSTICK;
+//                }
+//#endif
+            }
+
+            if (Result != lms2012.Result.BUSY)
+            {
+                //* EXIT *****************************************************************************************************
+            }
+
+            return (Result);
+        }
+    }
 }

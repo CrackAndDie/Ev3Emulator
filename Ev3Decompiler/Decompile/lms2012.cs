@@ -1623,7 +1623,7 @@
             LED_LG = 4
         }
 
-        public enum FileType
+        public enum FileType : short
         {
             FILETYPE_UNKNOWN = 0x00,
             TYPE_FOLDER = 0x01,

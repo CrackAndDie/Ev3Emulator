@@ -25,5 +25,13 @@
 				buff[i] = (byte)value[i];
 			}
 		}
+
+		public static T[] ConcatArrays<T>(this T[] a1, T[] a2)
+		{
+            var z = new T[a1.Length + a2.Length];
+            a1.CopyTo(z, 0);
+            a2.CopyTo(z, a1.Length);
+			return z;
+        }
 	}
 }
