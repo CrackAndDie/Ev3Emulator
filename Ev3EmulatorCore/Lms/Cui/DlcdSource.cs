@@ -15,12 +15,18 @@ namespace Ev3EmulatorCore.Lms.Cui
 			return 0;
 		}
 
-		public void dLcdDrawIcon(LCD lcd, byte color, short x0, short y0, lms2012.IconType tp, byte no) 
+		public void dLcdDrawIcon(LCD lcd, byte color, short x0, short y0, lms2012.IconType tp, int no) 
 		{
 			// TODO
 		}
 
 		public short dLcdGetIconWidth(lms2012.IconType icon)
+		{
+			// TODO
+			return 0;
+		}
+
+		public short dLcdGetIconHeight(lms2012.IconType icon)
 		{
 			// TODO
 			return 0;
@@ -32,7 +38,18 @@ namespace Ev3EmulatorCore.Lms.Cui
 			return 0;
 		}
 
+		public short dLcdGetFontHeight(lms2012.FontType font)
+		{
+			// TODO
+			return 0;
+		}
+
 		public void dLcdDrawText(LCD lcd, byte color, short x0, short y0, lms2012.FontType font, byte[] text)
+		{
+			// TODO
+		}
+
+		public void dLcdDrawChar(LCD lcd, byte color, short x0, short y0, lms2012.FontType font, byte data)
 		{
 			// TODO
 		}
@@ -43,6 +60,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 		}
 
 		public void dLcdDrawPicture(LCD lcd, byte color, short x0, short y0, short iconWidth, short iconHeight, byte[] data)
+		{
+			// TODO
+		}
+
+		public void dLcdInverseRect(LCD lcd, short x0, short y0, short x1, short y1)
 		{
 			// TODO
 		}

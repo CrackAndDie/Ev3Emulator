@@ -18,5 +18,11 @@
         {
             // TODO
         }
+
+        public byte cComGetEvent()
+        {
+            // TODO
+            return 1;
+        }
     }
 }

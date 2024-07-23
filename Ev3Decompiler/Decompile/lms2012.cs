@@ -1360,7 +1360,7 @@
             TYPE_NONE = 126,
             TYPE_ERROR = 127,
         }
-        internal enum Slot
+        public enum Slot : int
         {
             GUI_SLOT = 0,
             USER_SLOT = 1,
@@ -1623,7 +1623,7 @@
             LED_LG = 4
         }
 
-        internal enum FileType
+        public enum FileType
         {
             FILETYPE_UNKNOWN = 0x00,
             TYPE_FOLDER = 0x01,
@@ -1692,7 +1692,7 @@
             WHITECOLOR = 6
         }
 
-        internal enum Warning
+        public enum Warning : byte
         {
             WARNING_TEMP = 0x01,
             WARNING_CURRENT = 0x02,
@@ -1706,7 +1706,7 @@
             WARNINGS = 0x3F
         }
 
-        internal enum ObjectStatus
+		public enum ObjectStatus
         {
             RUNNING = 0x0010,
             WAITING = 0x0020,
@@ -1714,7 +1714,7 @@
             HALTED = 0x0080
         }
 
-        internal enum DeviceCommand
+		public enum DeviceCommand
         {
             DEVCMD_RESET = 0x11,
             DEVCMD_FIRE = 0x11,
@@ -1770,6 +1770,40 @@
             OUT = 0x40
         }
 
+		public enum Error
+        {
+			TOO_MANY_ERRORS_TO_BUFFER,
+			TYPEDATA_TABLE_FULL,
+			TYPEDATA_FILE_NOT_FOUND,
+			ANALOG_DEVICE_FILE_NOT_FOUND,
+			ANALOG_SHARED_MEMORY,
+			UART_DEVICE_FILE_NOT_FOUND,
+			UART_SHARED_MEMORY,
+			IIC_DEVICE_FILE_NOT_FOUND,
+			IIC_SHARED_MEMORY,
+			DISPLAY_SHARED_MEMORY,
+			OUTPUT_SHARED_MEMORY,
+			COM_COULD_NOT_OPEN_FILE,
+			COM_NAME_TOO_SHORT,
+			COM_NAME_TOO_LONG,
+			COM_INTERNAL,
+			VM_INTERNAL,
+			VM_PROGRAM_VALIDATION,
+			VM_PROGRAM_NOT_STARTED,
+			VM_PROGRAM_FAIL_BREAK,
+			VM_PROGRAM_INSTRUCTION_BREAK,
+			VM_PROGRAM_NOT_FOUND,
+			FILE_OPEN_ERROR,
+			FILE_READ_ERROR,
+			FILE_WRITE_ERROR,
+			FILE_CLOSE_ERROR,
+			FILE_GET_HANDLE_ERROR,
+			FILE_NAME_ERROR,
+			USB_SHARED_MEMORY,
+			OUT_OF_MEMORY,
+			ERRORS
+		}
+
         public enum Callparam
         {
             IN_8 = DataDirection.IN | DataFormat.DATA8,
@@ -1792,5 +1826,137 @@
         {
             return (DataFormat)((int)cp & 0x3F);
         }
-    }
+
+		public static byte[] ValidChars =
+        {
+          0x00,   // 0x00      NUL
+          0x00,   // 0x01      SOH
+          0x00,   // 0x02      STX
+          0x00,   // 0x03      ETX
+          0x00,   // 0x04      EOT
+          0x00,   // 0x05      ENQ
+          0x00,   // 0x06      ACK
+          0x00,   // 0x07      BEL
+          0x00,   // 0x08      BS
+          0x00,   // 0x09      TAB
+          0x00,   // 0x0A      LF
+          0x00,   // 0x0B      VT
+          0x00,   // 0x0C      FF
+          0x00,   // 0x0D      CR
+          0x00,   // 0x0E      SO
+          0x00,   // 0x0F      SI
+          0x00,   // 0x10      DLE
+          0x00,   // 0x11      DC1
+          0x00,   // 0x12      DC2
+          0x00,   // 0x13      DC3
+          0x00,   // 0x14      DC4
+          0x00,   // 0x15      NAK
+          0x00,   // 0x16      SYN
+          0x00,   // 0x17      ETB
+          0x00,   // 0x18      CAN
+          0x00,   // 0x19      EM
+          0x00,   // 0x1A      SUB
+          0x00,   // 0x1B      ESC
+          0x00,   // 0x1C      FS
+          0x00,   // 0x1D      GS
+          0x00,   // 0x1E      RS
+          0x00,   // 0x1F      US
+          0x12,   // 0x20      (space)
+          0x00,   // 0x21      !
+          0x00,   // 0x22      "
+          0x00,   // 0x23      #
+          0x00,   // 0x24      $
+          0x00,   // 0x25      %
+          0x00,   // 0x26      &
+          0x00,   // 0x27      '
+          0x00,   // 0x28      (
+          0x00,   // 0x29      )
+          0x00,   // 0x2A      *
+          0x00,   // 0x2B      +
+          0x00,   // 0x2C      ,
+          0x03,   // 0x2D      -
+          0x02,   // 0x2E      .
+          0x02,   // 0x2F      /
+          0x1F,   // 0x30      0
+          0x1F,   // 0x31      1
+          0x1F,   // 0x32      2
+          0x1F,   // 0x33      3
+          0x1F,   // 0x34      4
+          0x1F,   // 0x35      5
+          0x1F,   // 0x36      6
+          0x1F,   // 0x37      7
+          0x1F,   // 0x38      8
+          0x1F,   // 0x39      9
+          0x00,   // 0x3A      :
+          0x00,   // 0x3B      ;
+          0x00,   // 0x3C      <
+          0x00,   // 0x3D      =
+          0x00,   // 0x3E      >
+          0x00,   // 0x3F      ?
+          0x00,   // 0x40      @
+          0x1F,   // 0x41      A
+          0x1F,   // 0x42      B
+          0x1F,   // 0x43      C
+          0x1F,   // 0x44      D
+          0x1F,   // 0x45      E
+          0x1F,   // 0x46      F
+          0x1F,   // 0x47      G
+          0x1F,   // 0x48      H
+          0x1F,   // 0x49      I
+          0x1F,   // 0x4A      J
+          0x1F,   // 0x4B      K
+          0x1F,   // 0x4C      L
+          0x1F,   // 0x4D      M
+          0x1F,   // 0x4E      N
+          0x1F,   // 0x4F      O
+          0x1F,   // 0x50      P
+          0x1F,   // 0x51      Q
+          0x1F,   // 0x52      R
+          0x1F,   // 0x53      S
+          0x1F,   // 0x54      T
+          0x1F,   // 0x55      U
+          0x1F,   // 0x56      V
+          0x1F,   // 0x57      W
+          0x1F,   // 0x58      X
+          0x1F,   // 0x59      Y
+          0x1F,   // 0x5A      Z
+          0x00,   // 0x5B      [
+          0x00,   // 0x5C      '\'
+          0x00,   // 0x5D      ]
+          0x00,   // 0x5E      ^
+          0x1F,   // 0x5F      _
+          0x00,   // 0x60      `
+          0x1F,   // 0x61      a
+          0x1F,   // 0x62      b
+          0x1F,   // 0x63      c
+          0x1F,   // 0x64      d
+          0x1F,   // 0x65      e
+          0x1F,   // 0x66      f
+          0x1F,   // 0x67      g
+          0x1F,   // 0x68      h
+          0x1F,   // 0x69      i
+          0x1F,   // 0x6A      j
+          0x1F,   // 0x6B      k
+          0x1F,   // 0x6C      l
+          0x1F,   // 0x6D      m
+          0x1F,   // 0x6E      n
+          0x1F,   // 0x6F      o
+          0x1F,   // 0x70      p
+          0x1F,   // 0x71      q
+          0x1F,   // 0x72      r
+          0x1F,   // 0x73      s
+          0x1F,   // 0x74      t
+          0x1F,   // 0x75      u
+          0x1F,   // 0x76      v
+          0x1F,   // 0x77      w
+          0x1F,   // 0x78      x
+          0x1F,   // 0x79      y
+          0x1F,   // 0x7A      z
+          0x00,   // 0x7B      {
+          0x00,   // 0x7C      |
+          0x00,   // 0x7D      }
+          0x02,   // 0x7E      ~
+          0x00    // 0x7F      
+        };
+	}
 }

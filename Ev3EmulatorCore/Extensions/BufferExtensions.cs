@@ -17,5 +17,13 @@
 				buff[i] = (byte)value[i];
 			}
 		}
+
+		public static void WriteBytes(this byte[] buff, byte[] value)
+		{
+			for (int i = 0; i < Math.Min(buff.Length, value.Length); ++i)
+			{
+				buff[i] = (byte)value[i];
+			}
+		}
 	}
 }

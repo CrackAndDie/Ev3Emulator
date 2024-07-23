@@ -27,6 +27,7 @@
 		internal const int INSTALLED_MEMORY = 6000;            //!< Flash allocated to hold user programs/data
 		internal const int LOW_MEMORY = 500;               //!< Low memory warning [KB]
 
+		internal const int PRINTBUFFERSIZE = 160;
 		internal const int LOGBUFFER_SIZE = 1000;               //!< Min log buffer size
 		internal const int DEVICE_LOGBUF_SIZE = 300;               //!< Device log buffer size (black layer buffer)
 		internal const int MIN_LIVE_UPDATE_TIME = 10;               //!< [mS] Min sample time when live update
@@ -97,6 +98,10 @@
 
 
 		internal const int DIR_DEEPT = 127;    //!< Max directory items allocated
+
+		internal const int FILENAME_SIZE = 52;                    //!< User filename size without extension including zero
+		internal const int FOLDERNAME_SIZE = 10;            //!< Folder name size relative to "lms2012" folder including zero
+		internal const int SUBFOLDERNAME_SIZE = FILENAME_SIZE;    //!< Sub folder name size without "/" including zero
 
 		/*! \endverbatim
  *
@@ -292,10 +297,14 @@
 		public const byte TOP_BATT_ICONS = 5;
 		public const byte TOP_BT_ICONS = 4;
 		public const byte TOP_WIFI_ICONS = 4;
-        #endregion
 
-        #region cLcd defines
-        public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
+		public const byte MAX_KEYB_DEEPT = 3;
+		public const byte MAX_KEYB_WIDTH = 12;
+		public const byte MAX_KEYB_HEIGHT = 4;
+		#endregion
+
+		#region cLcd defines
+		public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
 		public const int LCD_TOPLINE_SIZE = (((LCD_WIDTH + 7) / 8) * (TOPLINE_HEIGHT + 1));
 		#endregion
 	}

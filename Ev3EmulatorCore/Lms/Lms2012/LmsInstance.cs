@@ -18,6 +18,9 @@ namespace Ev3EmulatorCore.Lms.Lms2012
 			private set { _instance = value; }
 		}
 
+		public GLOBALS VmInstance = new GLOBALS();
+
+		public UiBmpHandler UiBmpHandler = new UiBmpHandler();
 		public UiFileHandler UiFileHandler = new UiFileHandler();
 		public CuiClass.UI_GLOBALS UiInstance = new CuiClass.UI_GLOBALS();
 

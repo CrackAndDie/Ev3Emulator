@@ -17,6 +17,8 @@
     <PackageVersion Include="YamlDotNet" Version="8.0.0" />
     <PackageVersion Include="OutputColorizer" Version="1.1.0" />
     <PackageVersion Include="SharpZipLib" Version="1.3.3" />
+    <PackageVersion Include="BmpSharp" Version="0.2.0" />
+    <PackageVersion Include="SkiaSharp" Version="2.88.8" />
 
     <PackageVersion Include="NetSparkleUpdater.SparkleUpdater" Version="3.0.0-preview20240120001" />
     <PackageVersion Include="NetSparkleUpdater.UI.Avalonia" Version="3.0.0-preview20240219001" />

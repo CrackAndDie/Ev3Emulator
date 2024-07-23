@@ -1,4 +1,5 @@
 ﻿using EV3DecompilerLib.Decompile;
+using Ev3EmulatorCore.Helpers;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Ev3EmulatorCore.Lms.Cui
@@ -19,7 +20,19 @@ namespace Ev3EmulatorCore.Lms.Cui
             new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.NO_BUTTON, lms2012.REAL_NO_BUTTON),
         };
 
-        byte[] DownloadSuccesSound = { (byte)lms2012.Op.INFO, (byte)lms2012.LC0((int)lms2012.InfoSubcode.GET_VOLUME), (byte)lms2012.LV0(0), (byte)lms2012.Op.SOUND, (byte)lms2012.LC0((int)lms2012.SoundSubcode.PLAY), (byte)lms2012.LV0(0), (byte)lms2012.LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, (byte)lms2012.Op.SOUND_READY, (byte)lms2012.Op.OBJECT_END };
+		public static KeyValuePair<lms2012.FileType, lms2012.NIcon>[] FiletypeToNormalIcon =
+	    {
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.FILETYPE_UNKNOWN, lms2012.NIcon.ICON_FOLDER),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_FOLDER, lms2012.NIcon.ICON_FOLDER),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_SOUND, lms2012.NIcon.ICON_SOUND),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_BYTECODE, lms2012.NIcon.ICON_RUN),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_GRAPHICS, lms2012.NIcon.ICON_IMAGE),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_DATALOG, lms2012.NIcon.ICON_OBD),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_PROGRAM, lms2012.NIcon.ICON_OBP),
+			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_TEXT, lms2012.NIcon.ICON_TEXT),
+		};
+
+		byte[] DownloadSuccesSound = { (byte)lms2012.Op.INFO, (byte)lms2012.LC0((int)lms2012.InfoSubcode.GET_VOLUME), (byte)lms2012.LV0(0), (byte)lms2012.Op.SOUND, (byte)lms2012.LC0((int)lms2012.SoundSubcode.PLAY), (byte)lms2012.LV0(0), (byte)lms2012.LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, (byte)lms2012.Op.SOUND_READY, (byte)lms2012.Op.OBJECT_END };
 		
 		public static byte[] TopLineBattIconMap =
 		{
@@ -53,7 +66,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			IntPtr pVal; // float
 			IntPtr pOffset; // int 16
 			IntPtr pSpan; // int 16
-			float[,] Buffer = new float[lms2012.GRAPH_BUFFERS, lms2012.GRAPH_BUFFER_SIZE];
+			float[][] Buffer = CommonHelper.GenerateTwoDimArray<float>(lms2012.GRAPH_BUFFERS, lms2012.GRAPH_BUFFER_SIZE);
 			Int16 Pointer;
 			Int16 GraphStartX;
 			Int16 GraphSizeX;
@@ -72,31 +85,31 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 		public class NOTIFY
 		{
-		    Int16 ScreenStartX;
-			Int16 ScreenStartY;
-			Int16 ScreenWidth;
-			Int16 ScreenHeight;
-			Int16 NoOfIcons;
-			Int16 NoOfChars;
-			Int16 FontWidth;
-			Int16 TextStartX;
-			Int16 TextStartY;
-			Int16 TextSpaceY;
-			Int16 TextChars;
-			Int16 TextLines;
-			byte[,] TextLine = new byte[lms2012.MAX_NOTIFY_LINES, lms2012.MAX_NOTIFY_LINE_CHARS];
-		    Int16 IconWidth;
-			Int16 IconHeight;
-			Int16 IconStartX;
-			Int16 IconStartY;
-			Int16 IconSpaceX;
-			Int16 LineStartX;
-			Int16 LineStartY;
-			Int16 LineEndX;
-			Int16 YesNoStartX;
-			Int16 YesNoStartY;
-			byte Font;
-			byte NeedUpdate;
+		    public Int16 ScreenStartX;
+			public Int16 ScreenStartY;
+			public Int16 ScreenWidth;
+			public Int16 ScreenHeight;
+			public Int16 NoOfIcons;
+			public Int16 NoOfChars;
+			public Int16 FontWidth;
+			public Int16 TextStartX;
+			public Int16 TextStartY;
+			public Int16 TextSpaceY;
+			public Int16 TextChars;
+			public Int16 TextLines;
+			public byte[][] TextLine = CommonHelper.GenerateTwoDimArray<byte>(lms2012.MAX_NOTIFY_LINES, lms2012.MAX_NOTIFY_LINE_CHARS);
+			public Int16 IconWidth;
+			public Int16 IconHeight;
+			public Int16 IconStartX;
+			public Int16 IconStartY;
+			public Int16 IconSpaceX;
+			public Int16 LineStartX;
+			public Int16 LineStartY;
+			public Int16 LineEndX;
+			public Int16 YesNoStartX;
+			public Int16 YesNoStartY;
+			public lms2012.FontType Font;
+			public byte NeedUpdate;
 
 			public NOTIFY()
 			{
@@ -105,72 +118,72 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 		public class IQUESTION
 		{
-			Int16 ScreenStartX;
-			Int16 ScreenStartY;
-			Int16 ScreenWidth;
-			Int16 ScreenHeight;
-			Int16 Frame;
-			Int32 Icons;
-			Int16 NoOfIcons;
-			Int16 IconWidth;
-			Int16 IconHeight;
-			Int16 IconStartX;
-			Int16 IconStartY;
-			Int16 IconSpaceX;
-			Int16 PointerX;
-			Int16 SelectStartX;
-			Int16 SelectStartY;
-			Int16 SelectWidth;
-			Int16 SelectHeight;
-			Int16 SelectSpaceX;
-			byte NeedUpdate;
+			public Int16 ScreenStartX;
+			public Int16 ScreenStartY;
+			public Int16 ScreenWidth;
+			public Int16 ScreenHeight;
+			public Int16 Frame;
+			public Int32 Icons;
+			public Int16 NoOfIcons;
+			public Int16 IconWidth;
+			public Int16 IconHeight;
+			public Int16 IconStartX;
+			public Int16 IconStartY;
+			public Int16 IconSpaceX;
+			public Int16 PointerX;
+			public Int16 SelectStartX;
+			public Int16 SelectStartY;
+			public Int16 SelectWidth;
+			public Int16 SelectHeight;
+			public Int16 SelectSpaceX;
+			public byte NeedUpdate;
 		}
 
 		public class TQUESTION
 		{
-			Int16 ScreenStartX;
-			Int16 ScreenStartY;
-			Int16 ScreenWidth;
-			Int16 ScreenHeight;
-			Int16 NoOfIcons;
-			Int16 IconWidth;
-			Int16 IconHeight;
-			Int16 IconStartX;
-			Int16 IconStartY;
-			Int16 IconSpaceX;
-			Int16 LineStartX;
-			Int16 LineStartY;
-			Int16 LineEndX;
-			Int16 YesNoStartX;
-			Int16 YesNoStartY;
-			Int16 YesNoSpaceX;
-			byte Default;
-			byte NeedUpdate;
+			public Int16 ScreenStartX;
+			public Int16 ScreenStartY;
+			public Int16 ScreenWidth;
+			public Int16 ScreenHeight;
+			public Int16 NoOfIcons;
+			public Int16 IconWidth;
+			public Int16 IconHeight;
+			public Int16 IconStartX;
+			public Int16 IconStartY;
+			public Int16 IconSpaceX;
+			public Int16 LineStartX;
+			public Int16 LineStartY;
+			public Int16 LineEndX;
+			public Int16 YesNoStartX;
+			public Int16 YesNoStartY;
+			public Int16 YesNoSpaceX;
+			public byte Default;
+			public byte NeedUpdate;
 		}
 
 		public class KEYB
 		{
-			Int16 ScreenStartX;
-			Int16 ScreenStartY;
-			Int16 IconStartX;
-			Int16 IconStartY;
-			Int16 TextStartX;
-			Int16 TextStartY;
-			Int16 StringStartX;
-			Int16 StringStartY;
-			Int16 KeybStartX;
-			Int16 KeybStartY;
-			Int16 KeybSpaceX;
-			Int16 KeybSpaceY;
-			Int16 KeybWidth;
-			Int16 KeybHeight;
-			Int16 PointerX;
-			Int16 PointerY;
-			Int16 OldX;
-			Int16 OldY;
-			byte Layout;
-			byte CharSet;
-			byte NeedUpdate;
+			public Int16 ScreenStartX;
+			public Int16 ScreenStartY;
+			public Int16 IconStartX;
+			public Int16 IconStartY;
+			public Int16 TextStartX;
+			public Int16 TextStartY;
+			public Int16 StringStartX;
+			public Int16 StringStartY;
+			public Int16 KeybStartX;
+			public Int16 KeybStartY;
+			public Int16 KeybSpaceX;
+			public Int16 KeybSpaceY;
+			public Int16 KeybWidth;
+			public Int16 KeybHeight;
+			public Int16 PointerX;
+			public Int16 PointerY;
+			public Int16 OldX;
+			public Int16 OldY;
+			public byte Layout;
+			public byte CharSet;
+			public byte NeedUpdate;
 		}
 
 		public class BROWSER
@@ -292,13 +305,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 			//ANALOG Analog;
 			//ANALOG* pAnalog;
 
-			public NOTIFY Notify;
-			public TQUESTION Question;
-			public IQUESTION IconQuestion;
-			public BROWSER Browser;
-			public KEYB Keyboard;
-			public GRAPH Graph;
-			public TXTBOX Txtbox;
+			public NOTIFY Notify = new NOTIFY();
+			public TQUESTION Question = new TQUESTION();
+			public IQUESTION IconQuestion = new IQUESTION();
+			public BROWSER Browser = new BROWSER();
+			public KEYB Keyboard = new KEYB();
+			public GRAPH Graph = new GRAPH();
+			public TXTBOX Txtbox = new TXTBOX();
 
 			public int PowerFile;
 			public int UiFile;
