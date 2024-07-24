@@ -1,0 +1,13 @@
+# This file is part of the lms2012-compat package
+
+[Unit]
+Description=lms2012-compat USB HID
+# This is the alias created by the lms2012-compat-usb-hid-gadget udev rule.
+BindsTo=sys-subsystem-udc-devices-%i.device
+Conflicts=ev3-usb@%i.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/share/lms2012-compat/scripts/usb-hid-gadget.sh start %i
+ExecStop=/usr/share/lms2012-compat/scripts/usb-hid-gadget.sh stop %i
