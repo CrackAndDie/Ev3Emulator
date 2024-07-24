@@ -1642,7 +1642,7 @@
             TYPE_REFRESH_BROWSER = -2
         }
 
-        public enum Result
+        public enum Result : sbyte
         {
             OK = 0,
             BUSY = 1,

@@ -2,6 +2,7 @@
 using Ev3EmulatorCore.Lms.Lms2012;
 using static EV3DecompilerLib.Decompile.lms2012;
 using static Ev3EmulatorCore.Lms.Lms2012.LmsInstance;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ev3EmulatorCore.Lms.Cui
 {
@@ -50,25 +51,25 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				if (Inst.UiInstance.Warnlight != 0)
 				{
-					if ((State == LED_GREEN_FLASH) || (State == LED_RED_FLASH) || (State == LED_ORANGE_FLASH))
+					if ((State == (sbyte)LedPattern.LED_GREEN_FLASH) || (State == (sbyte)LedPattern.LED_RED_FLASH) || (State == (sbyte)LedPattern.LED_ORANGE_FLASH))
 					{
-						Buffer[0] = LED_ORANGE_FLASH + '0';
+						Buffer[0] = (sbyte)LedPattern.LED_ORANGE_FLASH + '0';
 					}
 					else
 					{
-						if ((State == LED_GREEN_PULSE) || (State == LED_RED_PULSE) || (State == LED_ORANGE_PULSE))
+						if ((State == (sbyte)LedPattern.LED_GREEN_PULSE) || (State == (sbyte)LedPattern.LED_RED_PULSE) || (State == (sbyte)LedPattern.LED_ORANGE_PULSE))
 						{
-							Buffer[0] = LED_ORANGE_PULSE + '0';
+							Buffer[0] = (sbyte)LedPattern.LED_ORANGE_PULSE + '0';
 						}
 						else
 						{
-							Buffer[0] = LED_ORANGE + '0';
+							Buffer[0] = (sbyte)LedPattern.LED_ORANGE + '0';
 						}
 					}
 				}
 				else
 				{
-					Buffer[0] = Inst.UiInstance.LedState + '0';
+					Buffer[0] = (sbyte)(Inst.UiInstance.LedState + '0');
 				}
 				Buffer[1] = 0;
 				write(Inst.UiInstance.UiFile, Buffer, 2);
@@ -82,15 +83,15 @@ namespace Ev3EmulatorCore.Lms.Cui
 		}
 
 
-		RESULT cUiInit()
+		Result cUiInit()
 		{
-			RESULT Result = OK;
+			Result Result = Result.OK;
 			UI* pUiTmp;
 			ANALOG* pAdcTmp;
 			UBYTE Tmp;
 			DATAF Hw;
-			DATA8 Buffer[32];
-			DATA8 OsBuf[2000];
+			DATA8[] Buffer = new DATA8[32];
+			DATA8[] OsBuf = new DATA8[2000];
 			int Lng;
 			int Start;
 			int Sid;
@@ -110,8 +111,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			Inst.UiInstance.ScreenBusy = 0;
 			Inst.UiInstance.ScreenBlocked = 0;
-			Inst.UiInstance.ScreenPrgId = -1;
-			Inst.UiInstance.ScreenObjId = -1;
+			Inst.UiInstance.ScreenPrgId = ushort.MaxValue;
+			Inst.UiInstance.ScreenObjId = ushort.MaxValue;
 
 			Inst.UiInstance.PowerInitialized = 0;
 			Inst.UiInstance.ShutDown = 0;
@@ -125,22 +126,24 @@ namespace Ev3EmulatorCore.Lms.Cui
 			Inst.UiInstance.WarningConfirmed = 0;
 			Inst.UiInstance.VoltageState = 0;
 
-			Inst.UiInstance.pLcd = &Inst.UiInstance.LcdSafe;
-			Inst.UiInstance.pUi = &Inst.UiInstance.UiSafe;
-			Inst.UiInstance.pAnalog = &Inst.UiInstance.Analog;
+			fixed (LCD* pLcdSafe = &Inst.UiInstance.LcdSafe)
+            Inst.UiInstance.pLcd = pLcdSafe;
+            fixed (UI* pUiSafe = &Inst.UiInstance.UiSafe)
+            Inst.UiInstance.pUi = pUiSafe;
+            fixed (UI* pUiSafe = &Inst.UiInstance.UiSafe)
+            Inst.UiInstance.pAnalog = &Inst.UiInstance.Analog;
 
 			Inst.UiInstance.Browser.PrgId = 0;
 			Inst.UiInstance.Browser.ObjId = 0;
 
-			Inst.UiInstance.Tbatt = 0.0;
-			Inst.UiInstance.Vbatt = 9.0;
-			Inst.UiInstance.Ibatt = 0.0;
-			Inst.UiInstance.Imotor = 0.0;
-			Inst.UiInstance.Iintegrated = 0.0;
-# ifdef Linux_X86
-			Inst.UiInstance.Ibatt = 0.1;
-			Inst.UiInstance.Imotor = 0.0;
-#endif
+			Inst.UiInstance.Tbatt = 0.0f;
+			Inst.UiInstance.Vbatt = 9.0f;
+			Inst.UiInstance.Ibatt = 0.0f;
+			Inst.UiInstance.Imotor = 0.0f;
+			Inst.UiInstance.Iintegrated = 0.0f;
+
+			Inst.UiInstance.Ibatt = 0.1f;
+			Inst.UiInstance.Imotor = 0.0f;
 
 			Result = dTerminalInit();
 
@@ -155,12 +158,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				pUiTmp = (UI*)mmap(0, sizeof(UI), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, Inst.UiInstance.UiFile, 0);
 
-				if (pUiTmp == MAP_FAILED)
+				if (pUiTmp == MAP_Result.FAILED)
 				{
-# ifndef Linux_X86
 					LogErrorNumber(UI_SHARED_MEMORY);
-					Result = FAIL;
-#endif
+					Result = Result.Result.FAIL;
 				}
 				else
 				{
@@ -172,12 +173,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 			else
 			{
-# ifndef Linux_X86
 				LogErrorNumber(UI_DEVICE_FILE_NOT_FOUND);
-				Result = FAIL;
-#else
-				snprintf(Inst.UiInstance.HwVers, HWVERS_SIZE, "X86");
-#endif
+				Result = Result.Result.FAIL;
 			}
 			Hw *= (DATAF)10;
 			Inst.UiInstance.Hw = (DATA8)Hw;
@@ -186,12 +183,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, Inst.UiInstance.AdcFile, 0);
 
-				if (pAdcTmp == MAP_FAILED)
+				if (pAdcTmp == MAP_Result.FAILED)
 				{
-# ifndef Linux_X86
 					LogErrorNumber(ANALOG_SHARED_MEMORY);
-					Result = FAIL;
-#endif
+					Result = Result.FAIL;
 				}
 				else
 				{
@@ -200,10 +195,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 			else
 			{
-# ifndef Linux_X86
 				LogErrorNumber(ANALOG_DEVICE_FILE_NOT_FOUND);
-				Result = FAIL;
-#endif
+				Result = Result.FAIL;
 			}
 
 			if (SPECIALVERS < '0')
@@ -250,7 +243,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					}
 					Start++;
 				}
-				if (Tmp)
+				if (Tmp != 0)
 				{
 					strftime((char*)Inst.UiInstance.OsBuild, OSBUILD_SIZE, "%y%m%d%H%M", &tm);
 				}
@@ -292,60 +285,52 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 			}
 
-# ifdef DEBUG_VIRTUAL_BATT_TEMP
-			cUiInitTemp();
-#endif
-
 			return (Result);
 		}
 
 
-		RESULT cUiOpen()
+		Result cUiOpen()
 		{
-			RESULT Result = FAIL;
+			Result Result = Result.FAIL;
 
 			// Save screen before run
 			LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdPool[0], sizeof(LCD));
 
 			cUiButtonClr();
-			cUiSetLed(LED_GREEN_PULSE);
+			cUiSetLed((sbyte)LedPattern.LED_GREEN_PULSE);
 			Inst.UiInstance.RunScreenEnabled = 3;
 			Inst.UiInstance.RunLedEnabled = 1;
 			Inst.UiInstance.TopLineEnabled = 0;
 
-			Result = OK;
+			Result = Result.OK;
 
 			return (Result);
 		}
 
 
-		RESULT cUiClose()
+		Result cUiClose()
 		{
-			RESULT Result = FAIL;
+			Result Result = Result.FAIL;
 
-			Inst.UiInstance.Warning &= ~WARNING_BUSY;
+			Inst.UiInstance.Warning &= (sbyte)~Warning.WARNING_BUSY;
 			Inst.UiInstance.RunLedEnabled = 0;
 			Inst.UiInstance.RunScreenEnabled = 0;
 			Inst.UiInstance.TopLineEnabled = 1;
 			Inst.UiInstance.BackButtonBlocked = 0;
 			Inst.UiInstance.Browser.NeedUpdate = 1;
-			cUiSetLed(LED_GREEN);
+			cUiSetLed((sbyte)LedPattern.LED_GREEN);
 
 			cUiButtonClr();
 
-			Result = OK;
+			Result = Result.OK;
 
 			return (Result);
 		}
 
 
-		RESULT cUiExit()
+		Result cUiExit()
 		{
-			RESULT Result = FAIL;
-
-# ifdef DEBUG_VIRTUAL_BATT_TEMP
-			cUiExitTemp();
-#endif
+			Result Result = Result.FAIL;
 
 			Result = dTerminalExit();
 
@@ -366,7 +351,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				close(Inst.UiInstance.PowerFile);
 			}
 
-			Result = OK;
+			Result = Result.OK;
 
 			return (Result);
 		}
@@ -387,7 +372,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					if (Inst.UiInstance.ButtonDebounceTimer[Button] == 0)
 					{ // Button activated
 
-						Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
+						Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_ACTIVE;
 					}
 
 					Inst.UiInstance.ButtonDebounceTimer[Button] = BUTTON_DEBOUNCE_TIME;
@@ -416,9 +401,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 					if ((Inst.UiInstance.ButtonState[Button] & BUTTON_PRESSED) == 0)
 					{ // Button activated
 
-						Inst.UiInstance.Activated = BUTTON_SET;
-						Inst.UiInstance.ButtonState[Button] |= BUTTON_PRESSED;
-						Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVATED;
+						Inst.UiInstance.Activated = (sbyte)BUTTON_SET;
+						Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_PRESSED;
+						Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_ACTIVATED;
 						Inst.UiInstance.ButtonTimer[Button] = 0;
 						Inst.UiInstance.ButtonRepeatTimer[Button] = BUTTON_START_REPEAT_TIME;
 					}
@@ -434,8 +419,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 						if ((Button != 1) && (Button != 5))
 						{ // No repeat on ENTER and BACK
 
-							Inst.UiInstance.Activated |= BUTTON_SET;
-							Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVATED;
+							Inst.UiInstance.Activated |= (sbyte)BUTTON_SET;
+							Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_ACTIVATED;
 							Inst.UiInstance.ButtonRepeatTimer[Button] = BUTTON_REPEAT_TIME;
 						}
 					}
@@ -449,16 +434,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONG_LATCH) == 0)
 						{ // Only once
 
-							Inst.UiInstance.ButtonState[Button] |= BUTTON_LONG_LATCH;
-
-# ifdef BUFPRINTSIZE
-							if (Button == 2)
-							{
-								Inst.UiInstance.Activated |= BUTTON_BUFPRINT;
-							}
-#endif
+							Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_LONG_LATCH;
 						}
-						Inst.UiInstance.ButtonState[Button] |= BUTTON_LONGPRESS;
+						Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_LONGPRESS;
 					}
 
 				}
@@ -469,38 +447,38 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						Inst.UiInstance.ButtonState[Button] &= ~BUTTON_PRESSED;
 						Inst.UiInstance.ButtonState[Button] &= ~BUTTON_LONG_LATCH;
-						Inst.UiInstance.ButtonState[Button] |= BUTTON_BUMBED;
+						Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_BUMBED;
 					}
 				}
 			}
 		}
 
-		RESULT cUiUpdateInput()
+		Result cUiUpdateInput()
 		{
 			UBYTE Key;
 
 			if (GetTerminalEnable() != 0)
 			{
-				if (dTerminalRead(&Key) == OK)
+				if (dTerminalRead(&Key) == Result.OK)
 				{
 					switch (Key)
 					{
-						case ' ':
+						case (byte)' ':
 							{
-								Inst.UiInstance.Escape = Key;
+								Inst.UiInstance.Escape = (sbyte)Key;
 							}
 							break;
 
-						case '<':
+						case (byte)'<':
 							{
-								Inst.UiInstance.Escape = Key;
+								Inst.UiInstance.Escape = (sbyte)Key;
 							}
 							break;
 
-						case '\r':
-						case '\n':
+						case (byte)'\r':
+						case (byte)'\n':
 							{
-								if (Inst.UiInstance.KeyBufIn)
+								if (Inst.UiInstance.KeyBufIn != 0)
 								{
 									Inst.UiInstance.Keys = Inst.UiInstance.KeyBufIn;
 									Inst.UiInstance.KeyBufIn = 0;
@@ -510,7 +488,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						default:
 							{
-								Inst.UiInstance.KeyBuffer[Inst.UiInstance.KeyBufIn] = Key;
+								Inst.UiInstance.KeyBuffer[Inst.UiInstance.KeyBufIn] = (sbyte)Key;
 								if (++Inst.UiInstance.KeyBufIn >= KEYBUF_SIZE)
 								{
 									Inst.UiInstance.KeyBufIn--;
@@ -524,7 +502,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 			dLcdRead();
 
-			return (OK);
+			return (Result.OK);
 		}
 
 		DATA8 cUiEscape()
@@ -623,7 +601,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				if (Press != 0)
 				{
-					Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
+					Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_ACTIVE;
 				}
 				else
 				{
@@ -638,7 +616,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					{
 						for (Button = 0; Button < BUTTONS; Button++)
 						{
-							Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
+							Inst.UiInstance.ButtonState[Button] |= (sbyte)BUTTON_ACTIVE;
 						}
 					}
 					else
@@ -930,11 +908,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 		{
 			DATA16 Result = 0;
 
-			if (cUiTestShortPress(LEFT_BUTTON) != 0)
+			if (cUiTestShortPress((sbyte)ButtonType.LEFT_BUTTON) != 0)
 			{
 				Result = -1;
 			}
-			if (cUiTestShortPress(RIGHT_BUTTON) != 0)
+			if (cUiTestShortPress((sbyte)ButtonType.RIGHT_BUTTON) != 0)
 			{
 				Result = 1;
 			}
@@ -947,11 +925,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 		{
 			DATA16 Result = 0;
 
-			if (cUiGetShortPress(LEFT_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.LEFT_BUTTON) != 0)
 			{
 				Result = -1;
 			}
-			if (cUiGetShortPress(RIGHT_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.RIGHT_BUTTON) != 0)
 			{
 				Result = 1;
 			}
@@ -964,11 +942,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 		{
 			DATA16 Result = 0;
 
-			if (cUiGetShortPress(UP_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.UP_BUTTON) != 0)
 			{
 				Result = -1;
 			}
-			if (cUiGetShortPress(DOWN_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.DOWN_BUTTON) != 0)
 			{
 				Result = 1;
 			}
@@ -981,7 +959,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 		{
 			DATA8 Result = 0;
 
-			Result = cUiTestShortPress(ANY_BUTTON);
+			Result = cUiTestShortPress((sbyte)ButtonType.ANY_BUTTON);
 
 			return (Result);
 		}
@@ -1047,10 +1025,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 		{
 			DATA16 X1, X2;
 			DATA16 V;
-			DATA8 BtStatus;
-			DATA8 WifiStatus;
+            DATA8 BtStatus;
+            DATA8 WifiStatus;
 			DATA8 TmpStatus;
-			DATA8 Name[NAME_LENGTH + 1];
+			DATA8[] Name = new DATA8[NAME_LENGTH + 1];
 
 			DATA32 Total;
 			DATA32 Free;
@@ -1069,7 +1047,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					BtStatus >>= 1;
 					if ((BtStatus >= 0) && (BtStatus < TOP_BT_ICONS))
 					{
-						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 0, 1, SMALL_ICON, TopLineBtIconMap[BtStatus]);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 0, 1, IconType.SMALL_ICON, TopLineBtIconMap[BtStatus]);
 					}
 				}
 				if (Inst.UiInstance.BtOn != TmpStatus)
@@ -1087,7 +1065,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					WifiStatus >>= 1;
 					if ((WifiStatus >= 0) && (WifiStatus < TOP_WIFI_ICONS))
 					{
-						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 16, 1, SMALL_ICON, TopLineWifiIconMap[WifiStatus]);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 16, 1, IconType.SMALL_ICON, TopLineWifiIconMap[WifiStatus]);
 					}
 				}
 				if (Inst.UiInstance.WiFiOn != TmpStatus)
@@ -1100,26 +1078,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 				cComGetBrickName(NAME_LENGTH + 1, Name);
 
 				X1 = dLcdGetFontWidth(SMALL_FONT);
-				X2 = LCD_WIDTH / X1;
+				X2 = (short)(LCD_WIDTH / X1);
 				X2 -= strlen((char*)Name);
 				X2 /= 2;
 				X2 *= X1;
-				dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X2, 1, SMALL_FONT, Name);
+				dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X2, 1, FontType.SMALL_FONT, Name);
 
 				// Calculate number of icons
 				X1 = dLcdGetIconWidth(SMALL_ICON);
-				X2 = (LCD_WIDTH - X1) / X1;
+				X2 = (short)((LCD_WIDTH - X1) / X1);
 
 				// Show USB status
 				if (cComGetUsbStatus() != 0)
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, (X2 - 1) * X1, 1, SMALL_ICON, SICON_USB);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, (X2 - 1) * X1, 1, IconType.SMALL_ICON, SICON_USB);
 				}
 
 				// Show battery
 				V = (DATA16)(Inst.UiInstance.Vbatt * 1000.0);
 				V -= Inst.UiInstance.BattIndicatorLow;
-				V = (V * (TOP_BATT_ICONS - 1)) / (Inst.UiInstance.BattIndicatorHigh - Inst.UiInstance.BattIndicatorLow);
+				V = (short)((V * (TOP_BATT_ICONS - 1)) / (Inst.UiInstance.BattIndicatorHigh - Inst.UiInstance.BattIndicatorLow));
 				if (V > (TOP_BATT_ICONS - 1))
 				{
 					V = (TOP_BATT_ICONS - 1);
@@ -1128,7 +1106,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				{
 					V = 0;
 				}
-				dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X2 * X1, 1, SMALL_ICON, TopLineBattIconMap[V]);
+				dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X2 * X1, 1, IconType.SMALL_ICON, TopLineBattIconMap[V]);
 
 				// Show bottom line
 				dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 0, TOPLINE_HEIGHT, LCD_WIDTH, TOPLINE_HEIGHT);
@@ -1138,7 +1116,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 		void cUiUpdateLcd()
 		{
-			Inst.UiInstance.Font = NORMAL_FONT;
+			Inst.UiInstance.Font = (sbyte)FontType.NORMAL_FONT;
 			cUiUpdateTopline();
 			dLcdUpdate(Inst.UiInstance.pLcd);
 		}
@@ -1183,7 +1161,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 							cUiUpdateLcd();
 
 							// Draw user program name
-							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 79, 1, (DATA8*)VMInstance.Program[USER_SLOT].Name);
+							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 79, 1, (DATA8*)VMInstance.Program[Slot.USER_SLOT].Name);
 							cUiUpdateLcd();
 
 							Inst.UiInstance.RunScreenTimer = 0;
@@ -1193,7 +1171,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 							if (Inst.UiInstance.RunLedEnabled != 0)
 							{
-								cUiSetLed(LED_GREEN_PULSE);
+								cUiSetLed((sbyte)LedPattern.LED_GREEN_PULSE);
 							}
 
 							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani1x_width, Ani1x_height, (UBYTE*)Ani1x_bits);
@@ -1284,26 +1262,29 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			if (Inst.UiInstance.Vbatt >= Inst.UiInstance.BattWarningHigh)
 			{
-				Inst.UiInstance.Warning &= ~WARNING_BATTLOW;
+				unchecked { Inst.UiInstance.Warning &= (sbyte)~Warning.WARNING_BATTLOW; }
 			}
 
 			if (Inst.UiInstance.Vbatt <= Inst.UiInstance.BattWarningLow)
 			{
-				Inst.UiInstance.Warning |= WARNING_BATTLOW;
+				Inst.UiInstance.Warning |= (sbyte)Warning.WARNING_BATTLOW;
 			}
 
 			if (Inst.UiInstance.Vbatt >= Inst.UiInstance.BattShutdownHigh)
 			{ // Good
 
-				Inst.UiInstance.Warning &= ~WARNING_VOLTAGE;
+				unchecked
+				{
+					Inst.UiInstance.Warning &= (sbyte)~Warning.WARNING_VOLTAGE;
+				}
 			}
 
 			if (Inst.UiInstance.Vbatt < Inst.UiInstance.BattShutdownLow)
 			{ // Bad
 
-				Inst.UiInstance.Warning |= WARNING_VOLTAGE;
+				Inst.UiInstance.Warning |= (sbyte)Warning.WARNING_VOLTAGE;
 
-				ProgramEnd(USER_SLOT);
+				ProgramEnd(Slot.USER_SLOT);
 
 				if ((Inst.UiInstance.MilliSeconds - Inst.UiInstance.VoltageTimer) >= LOW_VOLTAGE_SHUTDOWN_TIME)
 				{ // Realy bad
@@ -1339,21 +1320,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			if (Inst.UiInstance.Iintegrated < 0.0)
 			{
-				Inst.UiInstance.Iintegrated = 0.0;
+				Inst.UiInstance.Iintegrated = 0.0f;
 			}
-			if (Inst.UiInstance.Iintegrated > LOAD_SHUTDOWN_FAIL)
+			if (Inst.UiInstance.Iintegrated > LOAD_SHUTDOWN_Result.FAIL)
 			{
-				Inst.UiInstance.Iintegrated = LOAD_SHUTDOWN_FAIL;
+				Inst.UiInstance.Iintegrated = LOAD_SHUTDOWN_Result.FAIL;
 			}
 
-			if ((Inst.UiInstance.Iintegrated >= LOAD_SHUTDOWN_HIGH) || (I >= LOAD_SHUTDOWN_FAIL))
+			if ((Inst.UiInstance.Iintegrated >= LOAD_SHUTDOWN_HIGH) || (I >= LOAD_SHUTDOWN_Result.FAIL))
 			{
-				Inst.UiInstance.Warning |= WARNING_CURRENT;
+				Inst.UiInstance.Warning |= (sbyte)Warning.WARNING_CURRENT;
 				Inst.UiInstance.PowerShutdown = 1;
 			}
 			if (Inst.UiInstance.Iintegrated <= LOAD_BREAK_EVEN)
 			{
-				Inst.UiInstance.Warning &= ~WARNING_CURRENT;
+				Inst.UiInstance.Warning &= ~(sbyte)Warning.WARNING_CURRENT;
 				Inst.UiInstance.PowerShutdown = 0;
 			}
 
@@ -1361,12 +1342,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				if (Inst.UiInstance.ScreenBlocked == 0)
 				{
-					if (ProgramStatus(USER_SLOT) != STOPPED)
+					if (ProgramStatus(Slot.USER_SLOT) != STOPPED)
 					{
 						Inst.UiInstance.PowerState = 1;
 					}
 				}
-				ProgramEnd(USER_SLOT);
+				ProgramEnd(Slot.USER_SLOT);
 			}
 
 			switch (Inst.UiInstance.PowerState)
@@ -1407,10 +1388,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X, Y, POP3_width, POP3_height, (UBYTE*)POP3_bits);
 
-						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 48, Y + 10, LARGE_ICON, WARNSIGN);
-						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 72, Y + 10, LARGE_ICON, WARN_POWER);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 48, Y + 10, IconType.LARGE_ICON, WARNSIGN);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 72, Y + 10, IconType.LARGE_ICON, WARN_POWER);
 						dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 5, Y + 39, X + 138, Y + 39);
-						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 56, Y + 40, LARGE_ICON, YES_SEL);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 56, Y + 40, IconType.LARGE_ICON, YES_SEL);
 						dLcdUpdate(Inst.UiInstance.pLcd);
 						cUiButtonFlush();
 						Inst.UiInstance.PowerState++;
@@ -1419,7 +1400,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				case 4:
 					{
-						if (cUiGetShortPress(ENTER_BUTTON) != 0)
+						if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 						{
 							if (Inst.UiInstance.ScreenBlocked != 0)
 							{
@@ -1448,31 +1429,6 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 		}
 
-		void cUiCheckTemp()
-		{
-			if ((Inst.UiInstance.MilliSeconds - Inst.UiInstance.TempTimer) >= CALL_INTERVAL)
-			{
-				Inst.UiInstance.TempTimer += CALL_INTERVAL;
-				Inst.UiInstance.Tbatt = new_bat_temp(Inst.UiInstance.Vbatt, (Inst.UiInstance.Ibatt * (DATAF)1.1));
-			}
-
-			if (Inst.UiInstance.Tbatt >= TEMP_SHUTDOWN_WARNING)
-			{
-				Inst.UiInstance.Warning |= WARNING_TEMP;
-			}
-			else
-			{
-				Inst.UiInstance.Warning &= ~WARNING_TEMP;
-			}
-
-
-			if (Inst.UiInstance.Tbatt >= TEMP_SHUTDOWN_FAIL)
-			{
-				ProgramEnd(USER_SLOT);
-				Inst.UiInstance.ShutDown = 1;
-			}
-		}
-
 		void cUiCheckMemory()
 		{ // 400mS
 
@@ -1484,12 +1440,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 			if (Free > LOW_MEMORY)
 			{ // Good
 
-				Inst.UiInstance.Warning &= ~WARNING_MEMORY;
+				Inst.UiInstance.Warning &= ~(sbyte)Warning.WARNING_MEMORY;
 			}
 			else
 			{ // Bad
 
-				Inst.UiInstance.Warning |= WARNING_MEMORY;
+				Inst.UiInstance.Warning |= (sbyte)Warning.WARNING_MEMORY;
 			}
 		}
 
@@ -1522,7 +1478,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			Inst.UiInstance.MilliSeconds += (ULONG)Time;
 
-			cUiUpdateButtons(Time);
+			cUiUpdateButtons((short)Time);
 			cUiUpdateInput();
 			cUiUpdateCnt();
 
@@ -1620,7 +1576,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 
 				// Get valid popup warnings
-				Warning = Inst.UiInstance.Warning & WARNINGS;
+				Warning = (sbyte)(Inst.UiInstance.Warning & (sbyte)lms2012.Warning.WARNINGS);
 
 				// Find warnings that has not been showed
 				Tmp = (sbyte)(Warning & ~Inst.UiInstance.WarningShowed);
@@ -1636,45 +1592,45 @@ namespace Ev3EmulatorCore.Lms.Cui
 							LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdSave, sizeof(Inst.UiInstance.LcdSave));
 							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, POP3_width, POP3_height, (UBYTE*)POP3_bits);
 
-							if ((Tmp & WARNING_TEMP) != 0)
+							if ((Tmp & (sbyte)lms2012.Warning.WARNING_TEMP) != 0)
 							{
 								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X1, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
 								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X2, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_POWER);
 								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X3, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, TO_MANUAL);
-								Inst.UiInstance.WarningShowed |= WARNING_TEMP;
+								Inst.UiInstance.WarningShowed |= (sbyte)lms2012.Warning.WARNING_TEMP;
 							}
 							else
 							{
-								if ((Tmp & WARNING_CURRENT) != 0)
+								if ((Tmp & (sbyte)lms2012.Warning.WARNING_CURRENT) != 0)
 								{
 									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X1, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
 									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X2, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_POWER);
 									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X3, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, TO_MANUAL);
-									Inst.UiInstance.WarningShowed |= WARNING_CURRENT;
+									Inst.UiInstance.WarningShowed |= (sbyte)lms2012.Warning.WARNING_CURRENT;
 								}
 								else
 								{
-									if ((Tmp & WARNING_VOLTAGE) != 0)
+									if ((Tmp & (sbyte)lms2012.Warning.WARNING_VOLTAGE) != 0)
 									{
 										dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
 										dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_BATT);
-										Inst.UiInstance.WarningShowed |= WARNING_VOLTAGE;
+										Inst.UiInstance.WarningShowed |= (sbyte)lms2012.Warning.WARNING_VOLTAGE;
 									}
 									else
 									{
-										if ((Tmp & WARNING_MEMORY) != 0)
+										if ((Tmp & (sbyte)lms2012.Warning.WARNING_MEMORY) != 0)
 										{
 											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
 											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_MEMORY);
-											Inst.UiInstance.WarningShowed |= WARNING_MEMORY;
+											Inst.UiInstance.WarningShowed |= (sbyte)lms2012.Warning.WARNING_MEMORY;
 										}
 										else
 										{
-											if ((Tmp & WARNING_DSPSTAT) != 0)
+											if ((Tmp & (sbyte)lms2012.Warning.WARNING_DSPSTAT) != 0)
 											{
 												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
 												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, PROGRAM_ERROR);
-												Inst.UiInstance.WarningShowed |= WARNING_DSPSTAT;
+												Inst.UiInstance.WarningShowed |= (sbyte)lms2012.Warning.WARNING_DSPSTAT;
 											}
 											else
 											{
@@ -1694,43 +1650,43 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				// Find warnings that have been showed but not confirmed
 				Tmp = Inst.UiInstance.WarningShowed;
-				Tmp &= ~Inst.UiInstance.WarningConfirmed;
+				Tmp &= (sbyte)~Inst.UiInstance.WarningConfirmed;
 
 				if (Tmp != 0)
 				{
-					if (cUiGetShortPress(ENTER_BUTTON) != 0)
+					if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 					{
 						Inst.UiInstance.ScreenBlocked = 0;
 						LCDCopy(&Inst.UiInstance.LcdSave, &Inst.UiInstance.LcdSafe, sizeof(Inst.UiInstance.LcdSafe));
 						dLcdUpdate(Inst.UiInstance.pLcd);
-						if ((Tmp & WARNING_TEMP) != 0)
+						if ((Tmp & (sbyte)lms2012.Warning.WARNING_TEMP) != 0)
 						{
-							Inst.UiInstance.WarningConfirmed |= WARNING_TEMP;
+							Inst.UiInstance.WarningConfirmed |= (sbyte)lms2012.Warning.WARNING_TEMP;
 						}
 						else
 						{
-							if ((Tmp & WARNING_CURRENT) != 0)
+							if ((Tmp & (sbyte)lms2012.Warning.WARNING_CURRENT) != 0)
 							{
-								Inst.UiInstance.WarningConfirmed |= WARNING_CURRENT;
+								Inst.UiInstance.WarningConfirmed |= (sbyte)lms2012.Warning.WARNING_CURRENT;
 							}
 							else
 							{
-								if ((Tmp & WARNING_VOLTAGE) != 0)
+								if ((Tmp & (sbyte)lms2012.Warning.WARNING_VOLTAGE) != 0)
 								{
-									Inst.UiInstance.WarningConfirmed |= WARNING_VOLTAGE;
+									Inst.UiInstance.WarningConfirmed |= (sbyte)lms2012.Warning.WARNING_VOLTAGE;
 								}
 								else
 								{
-									if ((Tmp & WARNING_MEMORY) != 0)
+									if ((Tmp & (sbyte)lms2012.Warning.WARNING_MEMORY) != 0)
 									{
-										Inst.UiInstance.WarningConfirmed |= WARNING_MEMORY;
+										Inst.UiInstance.WarningConfirmed |= (sbyte)lms2012.Warning.WARNING_MEMORY;
 									}
 									else
 									{
-										if ((Tmp & WARNING_DSPSTAT) != 0)
+										if ((Tmp & (sbyte)lms2012.Warning.WARNING_DSPSTAT) != 0)
 										{
-											Inst.UiInstance.WarningConfirmed |= WARNING_DSPSTAT;
-											Inst.UiInstance.Warning &= ~WARNING_DSPSTAT;
+											Inst.UiInstance.WarningConfirmed |= (sbyte)lms2012.Warning.WARNING_DSPSTAT;
+											Inst.UiInstance.Warning &= ~(sbyte)lms2012.Warning.WARNING_DSPSTAT;
 										}
 										else
 										{
@@ -1743,19 +1699,19 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 
 				// Find warnings that have been showed, confirmed and removed
-				Tmp = ~Warning;
-				Tmp &= WARNINGS;
+				Tmp = (sbyte)~Warning;
+				Tmp &= (sbyte)lms2012.Warning.WARNINGS;
 				Tmp &= Inst.UiInstance.WarningShowed;
 				Tmp &= Inst.UiInstance.WarningConfirmed;
 
-				Inst.UiInstance.WarningShowed &= ~Tmp;
-				Inst.UiInstance.WarningConfirmed &= ~Tmp;
+				Inst.UiInstance.WarningShowed &= (sbyte)~Tmp;
+				Inst.UiInstance.WarningConfirmed &= (sbyte)~Tmp;
 			}
 		}
 
 		DATA8 cUiNotification(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2, DATA8 Icon3, DATA8* pText, DATA8* pState)
 		{
-			RESULT Result = BUSY;
+			Result Result = Result.BUSY;
 			NOTIFY* pQ;
 			DATA16 AvailableX;
 			DATA16 UsedX;
@@ -1782,26 +1738,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 				(*pQ).IconHeight = dLcdGetIconHeight(LARGE_ICON);
 				(*pQ).IconSpaceX = (*pQ).IconWidth;
 
-				(*pQ).YesNoStartX = (*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2);
-				(*pQ).YesNoStartX -= ((*pQ).IconWidth + 8) / 2;
+				(*pQ).YesNoStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
+				(*pQ).YesNoStartX -= (short)(((*pQ).IconWidth + 8) / 2);
 				(*pQ).YesNoStartX = cUiAlignX((*pQ).YesNoStartX);
-				(*pQ).YesNoStartY = (*pQ).ScreenStartY + 40;
+				(*pQ).YesNoStartY = (short)((*pQ).ScreenStartY + 40);
 
-				(*pQ).LineStartX = (*pQ).ScreenStartX + 5;
-				(*pQ).LineStartY = (*pQ).ScreenStartY + 39;
-				(*pQ).LineEndX = (*pQ).LineStartX + 134;
+				(*pQ).LineStartX = (short)((*pQ).ScreenStartX + 5);
+				(*pQ).LineStartY = (short)((*pQ).ScreenStartY + 39);
+				(*pQ).LineEndX = (short)((*pQ).LineStartX + 134);
 
 				// Find no of icons
 				(*pQ).NoOfIcons = 0;
-				if (Icon1 > ICON_NONE)
+				if (Icon1 > (sbyte)NIcon.ICON_NONE)
 				{
 					(*pQ).NoOfIcons++;
 				}
-				if (Icon2 > ICON_NONE)
+				if (Icon2 > (sbyte)NIcon.ICON_NONE)
 				{
 					(*pQ).NoOfIcons++;
 				}
-				if (Icon3 > ICON_NONE)
+				if (Icon3 > (sbyte)NIcon.ICON_NONE)
 				{
 					(*pQ).NoOfIcons++;
 				}
@@ -1810,21 +1766,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 			  (*pQ).TextLines = 0;
 				if (pText[0] != 0)
 				{
-					(*pQ).IconStartX = (*pQ).ScreenStartX + 8;
+					(*pQ).IconStartX = (short)((*pQ).ScreenStartX + 8);
 					(*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
 
 					AvailableX = (*pQ).ScreenWidth;
-					AvailableX -= (((*pQ).IconStartX - (*pQ).ScreenStartX)) * 2;
+					AvailableX -= (short)((((*pQ).IconStartX - (*pQ).ScreenStartX)) * 2);
 
-					AvailableX -= (*pQ).NoOfIcons * (*pQ).IconSpaceX;
+					AvailableX -= (short)((*pQ).NoOfIcons * (*pQ).IconSpaceX);
 
 
 					(*pQ).NoOfChars = strlen((char*)pText);
 
 
-					(*pQ).Font = SMALL_FONT;
+					(*pQ).Font = (sbyte)FontType.SMALL_FONT;
 					(*pQ).FontWidth = dLcdGetFontWidth((*pQ).Font);
-					UsedX = (*pQ).FontWidth * (*pQ).NoOfChars;
+					UsedX = (short)((*pQ).FontWidth * (*pQ).NoOfChars);
 
 					Line = 0;
 
@@ -1840,16 +1796,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Line++;
 						(*pQ).TextLines++;
 
-						(*pQ).TextStartX = (*pQ).IconStartX + ((*pQ).NoOfIcons * (*pQ).IconSpaceX);
-						(*pQ).TextStartY = (*pQ).ScreenStartY + 18;
+						(*pQ).TextStartX = (short)((*pQ).IconStartX + ((*pQ).NoOfIcons * (*pQ).IconSpaceX));
+						(*pQ).TextStartY = (short)((*pQ).ScreenStartY + 18);
 						(*pQ).TextSpaceY = dLcdGetFontHeight((*pQ).Font) + 1;
 					}
 					else
 					{ // one or more lines - tiny font
 
-						(*pQ).Font = TINY_FONT;
+						(*pQ).Font = (sbyte)FontType.TINY_FONT;
 						(*pQ).FontWidth = dLcdGetFontWidth((*pQ).Font);
-						UsedX = (*pQ).FontWidth * (*pQ).NoOfChars;
+						UsedX = (short)((*pQ).FontWidth * (*pQ).NoOfChars);
 						AvailableX -= (*pQ).FontWidth;
 
 						CharIn = 0;
@@ -1863,7 +1819,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 								Character = pText[CharIn];
 								if (Character == '_')
 								{
-									Character = ' ';
+									Character = (sbyte)' ';
 								}
 							  (*pQ).TextLine[Line][CharOut] = Character;
 								CharIn++;
@@ -1924,19 +1880,19 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				X2 = (*pQ).IconStartX;
 
-				if (Icon1 > ICON_NONE)
+				if (Icon1 > (sbyte)NIcon.ICON_NONE)
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, LARGE_ICON, Icon1);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, IconType.LARGE_ICON, Icon1);
 					X2 += (*pQ).IconSpaceX;
 				}
-				if (Icon2 > ICON_NONE)
+				if (Icon2 > (sbyte)NIcon.ICON_NONE)
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, LARGE_ICON, Icon2);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, IconType.LARGE_ICON, Icon2);
 					X2 += (*pQ).IconSpaceX;
 				}
-				if (Icon3 > ICON_NONE)
+				if (Icon3 > (sbyte)NIcon.ICON_NONE)
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, LARGE_ICON, Icon3);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, IconType.LARGE_ICON, Icon3);
 					X2 += (*pQ).IconSpaceX;
 				}
 
@@ -1951,26 +1907,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).LineStartX, (*pQ).LineStartY, (*pQ).LineEndX, (*pQ).LineStartY);
 
-				dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, YES_SEL);
+				dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, IconType.LARGE_ICON, YES_SEL);
 
 				cUiUpdateLcd();
 				Inst.UiInstance.ScreenBusy = 0;
 			}
 
-			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 			{
 				cUiButtonFlush();
-				Result = OK;
+				Result = Result.OK;
 				*pState = 0;
 			}
 
-			return (Result);
+			return (sbyte)(Result);
 		}
 
 
 		DATA8 cUiQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2, DATA8* pText, DATA8* pState, DATA8* pAnswer)
 		{
-			RESULT Result = BUSY;
+			Result Result = Result.BUSY;
 			TQUESTION* pQ;
 			DATA16 Inc;
 
@@ -1981,7 +1937,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				(*pQ).NeedUpdate = 1;
 
-				*pAnswer += Inc;
+				*pAnswer += (sbyte)(Inc);
 
 				if (*pAnswer > 1)
 				{
@@ -2000,15 +1956,15 @@ namespace Ev3EmulatorCore.Lms.Cui
 				*pState = 1;
 				(*pQ).ScreenStartX = X;
 				(*pQ).ScreenStartY = Y;
-				(*pQ).IconWidth = dLcdGetIconWidth(LARGE_ICON);
-				(*pQ).IconHeight = dLcdGetIconHeight(LARGE_ICON);
+				(*pQ).IconWidth = dLcdGetIconWidth(IconType.LARGE_ICON);
+				(*pQ).IconHeight = dLcdGetIconHeight(IconType.LARGE_ICON);
 
 				(*pQ).NoOfIcons = 0;
-				if (Icon1 > ICON_NONE)
+				if (Icon1 > (sbyte)NIcon.ICON_NONE)
 				{
 					(*pQ).NoOfIcons++;
 				}
-				if (Icon2 > ICON_NONE)
+				if (Icon2 > (sbyte)NIcon.ICON_NONE)
 				{
 					(*pQ).NoOfIcons++;
 				}
@@ -2027,42 +1983,42 @@ namespace Ev3EmulatorCore.Lms.Cui
 				(*pQ).ScreenWidth = POP3_width;
 				(*pQ).ScreenHeight = POP3_height;
 
-				(*pQ).IconStartX = (*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2);
+				(*pQ).IconStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
 				if ((*pQ).NoOfIcons > 1)
 				{
 					(*pQ).IconStartX -= (*pQ).IconWidth;
 				}
 				else
 				{
-					(*pQ).IconStartX -= (*pQ).IconWidth / 2;
+					(*pQ).IconStartX -= (short)((*pQ).IconWidth / 2);
 				}
 				(*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
 				(*pQ).IconSpaceX = (*pQ).IconWidth;
-				(*pQ).IconStartY = (*pQ).ScreenStartY + 10;
+				(*pQ).IconStartY = (short)((*pQ).ScreenStartY + 10);
 
-				(*pQ).YesNoStartX = (*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2);
+				(*pQ).YesNoStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
 				(*pQ).YesNoStartX -= 8;
 				(*pQ).YesNoStartX -= (*pQ).IconWidth;
 				(*pQ).YesNoStartX = cUiAlignX((*pQ).YesNoStartX);
-				(*pQ).YesNoSpaceX = (*pQ).IconWidth + 16;
-				(*pQ).YesNoStartY = (*pQ).ScreenStartY + 40;
+				(*pQ).YesNoSpaceX = (short)((*pQ).IconWidth + 16);
+				(*pQ).YesNoStartY = (short)((*pQ).ScreenStartY + 40);
 
-				(*pQ).LineStartX = (*pQ).ScreenStartX + 5;
-				(*pQ).LineStartY = (*pQ).ScreenStartY + 39;
-				(*pQ).LineEndX = (*pQ).LineStartX + 134;
+				(*pQ).LineStartX = (short)((*pQ).ScreenStartX + 5);
+				(*pQ).LineStartY = (short)((*pQ).ScreenStartY + 39);
+				(*pQ).LineEndX = (short)((*pQ).LineStartX + 134);
 
 				switch ((*pQ).NoOfIcons)
 				{
 					case 1:
 						{
-							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, LARGE_ICON, Icon1);
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, IconType.LARGE_ICON, Icon1);
 						}
 						break;
 
 					case 2:
 						{
-							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, LARGE_ICON, Icon1);
-							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX + (*pQ).IconSpaceX, (*pQ).IconStartY, LARGE_ICON, Icon2);
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, IconType.LARGE_ICON, Icon1);
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX + (*pQ).IconSpaceX, (*pQ).IconStartY, IconType.LARGE_ICON, Icon2);
 						}
 						break;
 
@@ -2070,13 +2026,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				if (*pAnswer == 0)
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, NO_SEL);
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, LARGE_ICON, YES_NOTSEL);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, IconType.LARGE_ICON, NO_SEL);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, IconType.LARGE_ICON, YES_NOTSEL);
 				}
 				else
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, NO_NOTSEL);
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, LARGE_ICON, YES_SEL);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, IconType.LARGE_ICON, NO_NOTSEL);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, IconType.LARGE_ICON, YES_SEL);
 				}
 
 				dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).LineStartX, (*pQ).LineStartY, (*pQ).LineEndX, (*pQ).LineStartY);
@@ -2084,27 +2040,27 @@ namespace Ev3EmulatorCore.Lms.Cui
 				cUiUpdateLcd();
 				Inst.UiInstance.ScreenBusy = 0;
 			}
-			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 			{
 				cUiButtonFlush();
-				Result = OK;
+				Result = Result.OK;
 				*pState = 0;
 			}
-			if (cUiGetShortPress(BACK_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 			{
 				cUiButtonFlush();
-				Result = OK;
+				Result = Result.OK;
 				*pState = 0;
 				*pAnswer = -1;
 			}
 
-			return (Result);
+			return (sbyte)(Result);
 		}
 
 
-		RESULT cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8* pState, DATA32* pIcons)
+		Result cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8* pState, DATA32* pIcons)
 		{
-			RESULT Result = BUSY;
+			Result Result = Result.BUSY;
 			IQUESTION* pQ;
 			DATA32 Mask;
 			DATA32 TmpIcons;
@@ -2121,8 +2077,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 				(*pQ).ScreenStartY = Y;
 				(*pQ).ScreenWidth = POP2_width;
 				(*pQ).ScreenHeight = POP2_height;
-				(*pQ).IconWidth = dLcdGetIconWidth(LARGE_ICON);
-				(*pQ).IconHeight = dLcdGetIconHeight(LARGE_ICON);
+				(*pQ).IconWidth = dLcdGetIconWidth(IconType.LARGE_ICON);
+				(*pQ).IconHeight = dLcdGetIconHeight(IconType.LARGE_ICON);
 				(*pQ).Frame = 2;
 				(*pQ).Icons = *pIcons;
 				(*pQ).NoOfIcons = 0;
@@ -2140,20 +2096,20 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				if ((*pQ).NoOfIcons != 0)
 				{
-					(*pQ).IconStartY = (*pQ).ScreenStartY + (((*pQ).ScreenHeight - (*pQ).IconHeight) / 2);
+					(*pQ).IconStartY = (short)((*pQ).ScreenStartY + (((*pQ).ScreenHeight - (*pQ).IconHeight) / 2));
 
-					(*pQ).IconSpaceX = (((*pQ).ScreenWidth - ((*pQ).IconWidth * (*pQ).NoOfIcons)) / (*pQ).NoOfIcons) + (*pQ).IconWidth;
-					(*pQ).IconSpaceX = (*pQ).IconSpaceX & ~7;
+					(*pQ).IconSpaceX = (short)((((*pQ).ScreenWidth - ((*pQ).IconWidth * (*pQ).NoOfIcons)) / (*pQ).NoOfIcons) + (*pQ).IconWidth);
+					(*pQ).IconSpaceX = (short)((*pQ).IconSpaceX & ~7);
 
-					Tmp = (*pQ).IconSpaceX * (*pQ).NoOfIcons - ((*pQ).IconSpaceX - (*pQ).IconWidth);
+					Tmp = (short)((*pQ).IconSpaceX * (*pQ).NoOfIcons - ((*pQ).IconSpaceX - (*pQ).IconWidth));
 
-					(*pQ).IconStartX = (*pQ).ScreenStartX + (((*pQ).ScreenWidth - Tmp) / 2);
-					(*pQ).IconStartX = ((*pQ).IconStartX + 7) & ~7;
+					(*pQ).IconStartX = (short)((*pQ).ScreenStartX + (((*pQ).ScreenWidth - Tmp) / 2));
+					(*pQ).IconStartX = (short)(((*pQ).IconStartX + 7) & ~7);
 
-					(*pQ).SelectStartX = (*pQ).IconStartX - 1;
-					(*pQ).SelectStartY = (*pQ).IconStartY - 1;
-					(*pQ).SelectWidth = (*pQ).IconWidth + 2;
-					(*pQ).SelectHeight = (*pQ).IconHeight + 2;
+					(*pQ).SelectStartX = (short)((*pQ).IconStartX - 1);
+					(*pQ).SelectStartY = (short)((*pQ).IconStartY - 1);
+					(*pQ).SelectWidth = (short)((*pQ).IconWidth + 2);
+					(*pQ).SelectHeight = (short)((*pQ).IconHeight + 2);
 					(*pQ).SelectSpaceX = (*pQ).IconSpaceX;
 				}
 
@@ -2177,7 +2133,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					}
 					if ((*pQ).PointerX >= (*pQ).NoOfIcons)
 					{
-						(*pQ).PointerX = (*pQ).NoOfIcons - 1;
+						(*pQ).PointerX = (short)((*pQ).NoOfIcons - 1);
 						(*pQ).NeedUpdate = 0;
 					}
 				}
@@ -2216,23 +2172,23 @@ namespace Ev3EmulatorCore.Lms.Cui
 				cUiUpdateLcd();
 				Inst.UiInstance.ScreenBusy = 0;
 			}
-			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 			{
 				if ((*pQ).NoOfIcons != 0)
 				{
 					Mask = 0x00000001;
 					TmpIcons = (*pQ).Icons;
-					Loop = (*pQ).PointerX + 1;
+					Loop = (short)((*pQ).PointerX + 1);
 
 					do
 					{
-						if (TmpIcons & Mask)
+						if ((TmpIcons & Mask) != 0)
 						{
 							Loop--;
 						}
 						Mask <<= 1;
 					}
-					while ((Loop && Mask) != 0);
+					while (Loop != 0 && Mask != 0);
 					Mask >>= 1;
 					*pIcons = Mask;
 				}
@@ -2241,14 +2197,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 					*pIcons = 0;
 				}
 				cUiButtonFlush();
-				Result = OK;
+				Result = Result.OK;
 				*pState = 0;
 			}
-			if (cUiGetShortPress(BACK_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 			{
 				*pIcons = 0;
 				cUiButtonFlush();
-				Result = OK;
+				Result = Result.OK;
 				*pState = 0;
 			}
 
@@ -2313,21 +2269,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 				(*pK).ScreenStartX = X;
 				(*pK).ScreenStartY = Y;
 
-				if ((Icon >= 0) && (Icon < N_ICON_NOS))
+				if ((Icon >= 0) && (Icon < (sbyte)NIcon.ICON_BRICK1))
 				{
-					(*pK).IconStartX = cUiAlignX((*pK).ScreenStartX + 7);
-					(*pK).IconStartY = (*pK).ScreenStartY + 4;
-					(*pK).TextStartX = (*pK).IconStartX + dLcdGetIconWidth(NORMAL_ICON);
+					(*pK).IconStartX = cUiAlignX((short)((*pK).ScreenStartX + 7));
+					(*pK).IconStartY = (short)((*pK).ScreenStartY + 4);
+					(*pK).TextStartX = (*pK).IconStartX + dLcdGetIconWidth(IconType.NORMAL_ICON);
 				}
 				else
 				{
-					(*pK).TextStartX = cUiAlignX((*pK).ScreenStartX + 9);
+					(*pK).TextStartX = cUiAlignX((short)((*pK).ScreenStartX + 9));
 				}
-				(*pK).TextStartY = (*pK).ScreenStartY + 7;
-				(*pK).StringStartX = (*pK).ScreenStartX + 8;
-				(*pK).StringStartY = (*pK).ScreenStartY + 22;
-				(*pK).KeybStartX = (*pK).ScreenStartX + 13;
-				(*pK).KeybStartY = (*pK).ScreenStartY + 40;
+				(*pK).TextStartY = (short)((*pK).ScreenStartY + 7);
+				(*pK).StringStartX = (short)((*pK).ScreenStartX + 8);
+				(*pK).StringStartY = (short)((*pK).ScreenStartY + 22);
+				(*pK).KeybStartX = (short)((*pK).ScreenStartX + 13);
+				(*pK).KeybStartY = (short)((*pK).ScreenStartY + 40);
 				(*pK).KeybSpaceX = 11;
 				(*pK).KeybSpaceY = 14;
 				(*pK).KeybHeight = 13;
@@ -2365,12 +2321,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			TmpChar = KeyboardLayout[(*pK).Layout][(*pK).PointerY][(*pK).PointerX];
 
-			if (cUiGetShortPress(BACK_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 			{
 				SelectedChar = 0x0D;
 				pAnswer[0] = 0;
 			}
-			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 			{
 				SelectedChar = TmpChar;
 
@@ -2411,14 +2367,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 						break;
 
-					case '\r':
+					case (sbyte)'\r':
 						{
 						}
 						break;
 
 					default:
 						{
-							if (ValidateChar(&SelectedChar, (*pK).CharSet) == OK)
+							if (ValidateChar(&SelectedChar, (*pK).CharSet) == Result.OK)
 							{
 								Tmp = (DATA16)strlen((char*)pAnswer);
 								pAnswer[Tmp] = SelectedChar;
@@ -2472,13 +2428,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 						break;
 
 				}
-				if ((Icon >= 0) && (Icon < N_ICON_NOS))
+				if ((Icon >= 0) && (Icon < (sbyte)NIcon.ICON_BRICK1))
 				{
-					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).IconStartX, (*pK).IconStartY, NORMAL_ICON, Icon);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).IconStartX, (*pK).IconStartY, IconType.NORMAL_ICON, Icon);
 				}
 				if (pText[0] != 0)
 				{
-					dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).TextStartX, (*pK).TextStartY, SMALL_FONT, pText);
+					dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).TextStartX, (*pK).TextStartY, FontType.SMALL_FONT, pText);
 				}
 
 
@@ -2486,16 +2442,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 				X3 = strlen((char*)pAnswer);
 				if (X3 > 15)
 				{
-					X4 = X3 - 15;
+					X4 = (short)(X3 - 15);
 				}
 
-				dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX, (*pK).StringStartY, NORMAL_FONT, &pAnswer[X4]);
-				dLcdDrawChar((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX + (X3 - X4) * 8, (*pK).StringStartY, NORMAL_FONT, '_');
+				dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX, (*pK).StringStartY, FontType.NORMAL_FONT, &pAnswer[X4]);
+				dLcdDrawChar((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX + (X3 - X4) * 8, (*pK).StringStartY, FontType.NORMAL_FONT, '_');
 
 
 
-				SX = (*pK).KeybStartX + (*pK).PointerX * (*pK).KeybSpaceX;
-				SY = (*pK).KeybStartY + (*pK).PointerY * (*pK).KeybSpaceY;
+				SX = (short)((*pK).KeybStartX + (*pK).PointerX * (*pK).KeybSpaceX);
+				SY = (short)((*pK).KeybStartY + (*pK).PointerY * (*pK).KeybSpaceY);
 
 				switch (TmpChar)
 				{
@@ -2521,11 +2477,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 					case 0x0D:
 						{
-							SX = (*pK).KeybStartX + 112;
-							SY = (*pK).KeybStartY + 1 * (*pK).KeybSpaceY;
+							SX = (short)((*pK).KeybStartX + 112);
+							SY = (short)((*pK).KeybStartY + 1 * (*pK).KeybSpaceY);
 							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX, SY, (*pK).KeybWidth + 5, (*pK).KeybSpaceY + 1);
-							SX = (*pK).KeybStartX + 103;
-							SY = (*pK).KeybStartY + 1 + 2 * (*pK).KeybSpaceY;
+							SX = (short)((*pK).KeybStartX + 103);
+							SY = (short)((*pK).KeybStartY + 1 + 2 * (*pK).KeybSpaceY);
 							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX, SY, (*pK).KeybWidth + 14, (*pK).KeybSpaceY * 2 - 4);
 						}
 						break;
@@ -2665,9 +2621,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 		}
 
-		RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8 Lng, DATA8* pType, DATA8* pAnswer)
+		Result cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8 Lng, DATA8* pType, DATA8* pAnswer)
 		{
-			RESULT Result = BUSY;
+			Result Result = Result.BUSY;
 			DATA32 Image;
 			BROWSER* pB;
 			PRGID PrgId;
@@ -2685,14 +2641,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA8 Data8;
 			DATA32 Total;
 			DATA32 Free;
-			RESULT TmpResult;
+			Result TmpResult;
 			HANDLER TmpHandle;
 
-			PrgId = CurrentProgramId();
-			ObjId = CallingObjectId();
+			PrgId = Inst.CurrentProgramId();
+			ObjId = Inst.CallingObjectId();
 			pB = &Inst.UiInstance.Browser;
 
-			Color = FG_COLOR;
+			Color = (sbyte)FG_COLOR;
 
 			// Test ignore horizontal update
 			if ((Type & 0x20) != 0)
@@ -2714,35 +2670,32 @@ namespace Ev3EmulatorCore.Lms.Cui
 			// Isolate browser type
 			Type &= 0x0F;
 
-			CheckUsbstick(&Data8, &Total, &Free, 0);
+			Inst.CheckUsbstick(&Data8, &Total, &Free, 0);
 			if (Data8 != 0)
 			{
 				Inst.UiInstance.UiUpdate = 1;
 			}
-			CheckSdcard(&Data8, &Total, &Free, 0);
+			Inst.CheckSdcard(&Data8, &Total, &Free, 0);
 			if (Data8 != 0)
 			{
 				Inst.UiInstance.UiUpdate = 1;
 			}
 
-			if (ProgramStatusChange(USER_SLOT) == STOPPED)
+			if (ProgramStatusChange(Slot.USER_SLOT) == STOPPED)
 			{
-				if (Type != BROWSE_FILES)
+				if (Type != (sbyte)BrowserType.BROWSE_FILES)
 				{
-					Result = OK;
+					Result = Result.OK;
 					*pType = 0;
-# ifdef DEBUG
-					printf("Browser interrupted\r\n");
-#endif
 				}
 			}
 
-			if ((*pType == TYPE_REFRESH_BROWSER))
+			if ((*pType == (sbyte)FileType.TYPE_REFRESH_BROWSER))
 			{
 				Inst.UiInstance.UiUpdate = 1;
 			}
 
-			if ((*pType == TYPE_RESTART_BROWSER))
+			if ((*pType == (sbyte)FileType.TYPE_RESTART_BROWSER))
 			{
 				if ((*pB).hFiles != 0)
 				{
@@ -2752,13 +2705,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 				{
 					cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
 				}
-			  (*pB).PrgId = 0;
+				(*pB).PrgId = 0;
 				(*pB).ObjId = 0;
 				//    pAnswer[0]          =  0;
 				*pType = 0;
-# ifdef DEBUG
-				printf("Restarting browser\r\n");
-#endif
 			}
 
 			if (((*pB).PrgId == 0) && ((*pB).ObjId == 0))
@@ -2774,36 +2724,36 @@ namespace Ev3EmulatorCore.Lms.Cui
 				// calculate lines on screen
 				(*pB).LineSpace = 5;
 				(*pB).IconHeight = dLcdGetIconHeight(NORMAL_ICON);
-				(*pB).LineHeight = (*pB).IconHeight + (*pB).LineSpace;
-				(*pB).Lines = ((*pB).ScreenHeight / (*pB).LineHeight);
+				(*pB).LineHeight = (short)((*pB).IconHeight + (*pB).LineSpace);
+				(*pB).Lines = (short)((*pB).ScreenHeight / (*pB).LineHeight);
 
 				// calculate chars and lines on screen
 				(*pB).CharWidth = dLcdGetFontWidth(NORMAL_FONT);
 				(*pB).CharHeight = dLcdGetFontHeight(NORMAL_FONT);
 				(*pB).IconWidth = dLcdGetIconWidth(NORMAL_ICON);
-				(*pB).Chars = (((*pB).ScreenWidth - (*pB).IconWidth) / (*pB).CharWidth);
+				(*pB).Chars = (short)(((*pB).ScreenWidth - (*pB).IconWidth) / (*pB).CharWidth);
 
 				// calculate start of icon
 				(*pB).IconStartX = cUiAlignX((*pB).ScreenStartX);
-				(*pB).IconStartY = (*pB).ScreenStartY + (*pB).LineSpace / 2;
+				(*pB).IconStartY = (short)((*pB).ScreenStartY + (*pB).LineSpace / 2);
 
 				// calculate start of text
-				(*pB).TextStartX = cUiAlignX((*pB).ScreenStartX + (*pB).IconWidth);
-				(*pB).TextStartY = (*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2;
+				(*pB).TextStartX = cUiAlignX((short)((*pB).ScreenStartX + (*pB).IconWidth));
+				(*pB).TextStartY = (short)((*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2);
 
 				// Calculate selection barBrowser
-				(*pB).SelectStartX = (*pB).ScreenStartX + 1;
-				(*pB).SelectWidth = (*pB).ScreenWidth - ((*pB).CharWidth + 5);
-				(*pB).SelectStartY = (*pB).IconStartY - 1;
-				(*pB).SelectHeight = (*pB).IconHeight + 2;
+				(*pB).SelectStartX = (short)((*pB).ScreenStartX + 1);
+				(*pB).SelectWidth = (short)((*pB).ScreenWidth - ((*pB).CharWidth + 5));
+				(*pB).SelectStartY = (short)((*pB).IconStartY - 1);
+				(*pB).SelectHeight = (short)((*pB).IconHeight + 2);
 
 				// Calculate scroll bar
 				(*pB).ScrollWidth = 6;
 				(*pB).NobHeight = 9;
-				(*pB).ScrollStartX = (*pB).ScreenStartX + (*pB).ScreenWidth - (*pB).ScrollWidth;
-				(*pB).ScrollStartY = (*pB).ScreenStartY + 1;
-				(*pB).ScrollHeight = (*pB).ScreenHeight - 2;
-				(*pB).ScrollSpan = (*pB).ScrollHeight - (*pB).NobHeight;
+				(*pB).ScrollStartX = (short)((*pB).ScreenStartX + (*pB).ScreenWidth - (*pB).ScrollWidth);
+				(*pB).ScrollStartY = (short)((*pB).ScreenStartY + 1);
+				(*pB).ScrollHeight = (short)((*pB).ScreenHeight - 2);
+				(*pB).ScrollSpan = (short)((*pB).ScrollHeight - (*pB).NobHeight);
 
 				strncpy((char*)(*pB).TopFolder, (char*)pAnswer, MAX_FILENAME_SIZE);
 
@@ -2844,10 +2794,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 					switch (Type)
 					{
-						case BROWSE_FOLDERS:
-						case BROWSE_FOLDS_FILES:
+						case (sbyte)BrowserType.BROWSE_FOLDERS:
+						case (sbyte)BrowserType.BROWSE_FOLDS_FILES:
 							{
-								if (cMemoryOpenFolder(PrgId, TYPE_FOLDER, (*pB).TopFolder, &(*pB).hFolders) == OK)
+								if (cMemoryOpenFolder(PrgId, (sbyte)FileType.TYPE_FOLDER, (*pB).TopFolder, &(*pB).hFolders) == Result.OK)
 								{
 									//******************************************************************************************************
 									if ((*pB).OpenFolder != 0)
@@ -2858,7 +2808,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 											Item = (*pB).ItemPointer;
 											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
 											Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
-											*pType = TYPE_SDCARD;
+											*pType = (sbyte)FileType.TYPE_SDCARD;
 
 											snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
 										}
@@ -2869,14 +2819,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 												Item = (*pB).ItemPointer;
 												cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
 												Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
-												*pType = TYPE_USBSTICK;
+												*pType = (sbyte)FileType.TYPE_USBSTICK;
 
 												snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
 											}
 											else
 											{
 												Result = cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).SubFolder, &(*pB).hFiles);
-												Result = BUSY;
+												Result = Result.BUSY;
 											}
 										}
 									}
@@ -2890,14 +2840,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 							break;
 
-						case BROWSE_CACHE:
+						case (sbyte)BrowserType.BROWSE_CACHE:
 							{
 							}
 							break;
 
-						case BROWSE_FILES:
+						case (sbyte)BrowserType.BROWSE_FILES:
 							{
-								if (cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).TopFolder, &(*pB).hFiles) == OK)
+								if (cMemoryOpenFolder(PrgId, (sbyte)FileType.FILETYPE_UNKNOWN, (*pB).TopFolder, &(*pB).hFiles) == Result.OK)
 								{
 
 
@@ -2931,30 +2881,30 @@ namespace Ev3EmulatorCore.Lms.Cui
 					(*pB).Usbstick = 0;
 				}
 
-				TmpResult = OK;
+				TmpResult = Result.OK;
 				switch (Type)
 				{
-					case BROWSE_FOLDERS:
-					case BROWSE_FOLDS_FILES:
+					case (sbyte)BrowserType.BROWSE_FOLDERS:
+					case (sbyte)BrowserType.BROWSE_FOLDS_FILES:
 						{
 							// Collect folders in directory
 							TmpResult = cMemoryGetFolderItems((*pB).PrgId, (*pB).hFolders, &(*pB).Folders);
 
 							// Collect files in folder
-							if (((*pB).OpenFolder) && (TmpResult == OK))
+							if (((*pB).OpenFolder != 0) && (TmpResult == Result.OK))
 							{
 								TmpResult = cMemoryGetFolderItems((*pB).PrgId, (*pB).hFiles, &(*pB).Files);
 							}
 						}
 						break;
 
-					case BROWSE_CACHE:
+					case (sbyte)BrowserType.BROWSE_CACHE:
 						{
 							(*pB).Folders = (DATA16)cMemoryGetCacheFiles();
 						}
 						break;
 
-					case BROWSE_FILES:
+					case (sbyte)BrowserType.BROWSE_FILES:
 						{
 							TmpResult = cMemoryGetFolderItems((*pB).PrgId, (*pB).hFiles, &(*pB).Files);
 						}
@@ -2964,7 +2914,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				if (((*pB).OpenFolder != 0) && ((*pB).OpenFolder == (*pB).ItemPointer))
 				{
-					if (cUiGetShortPress(BACK_BUTTON) != 0)
+					if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 					{
 						// Close folder
 						cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
@@ -2981,7 +2931,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				{
 					if ((*pB).OpenFolder == 0)
 					{
-						if (cUiGetShortPress(BACK_BUTTON) != 0)
+						if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 						{
 							// Collapse sdcard
 							if ((*pB).hFiles != 0)
@@ -2992,7 +2942,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 							{
 								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
 							}
-						  (*pB).PrgId = 0;
+							(*pB).PrgId = 0;
 							(*pB).ObjId = 0;
 							strcpy((char*)pAnswer, vmPRJS_DIR);
 							*pType = 0;
@@ -3004,7 +2954,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				{
 					if ((*pB).OpenFolder == 0)
 					{
-						if (cUiGetShortPress(BACK_BUTTON) != 0)
+						if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 						{
 							// Collapse usbstick
 							if ((*pB).hFiles != 0)
@@ -3015,7 +2965,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 							{
 								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
 							}
-						  (*pB).PrgId = 0;
+							(*pB).PrgId = 0;
 							(*pB).ObjId = 0;
 							strcpy((char*)pAnswer, vmPRJS_DIR);
 							*pType = 0;
@@ -3029,7 +2979,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					(*pB).NeedUpdate = 1;
 				}
 
-				if (cUiGetShortPress(ENTER_BUTTON) != 0)
+				if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 				{
 					(*pB).OldFiles = 0;
 					if ((*pB).OpenFolder != 0)
@@ -3037,7 +2987,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						if (((*pB).ItemPointer > (*pB).OpenFolder) && ((*pB).ItemPointer <= ((*pB).OpenFolder + (*pB).Files)))
 						{ // File selected
 
-							Item = (*pB).ItemPointer - (*pB).OpenFolder;
+							Item = (sbyte)((*pB).ItemPointer - (*pB).OpenFolder);
 							Result = cMemoryGetItem((*pB).PrgId, (*pB).hFiles, Item, Lng, (*pB).FullPath, pType);
 
 							snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
@@ -3068,7 +3018,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						switch (Type)
 						{
-							case BROWSE_FOLDERS:
+							case (sbyte)BrowserType.BROWSE_FOLDERS:
 								{ // Folder
 
 									Item = (*pB).ItemPointer;
@@ -3076,11 +3026,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 									Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
 
 									snprintf((char*)pAnswer, Lng, "%s/%s", (char*)(*pB).FullPath, (char*)(*pB).Filename);
-									*pType = TYPE_BYTECODE;
+									*pType = (sbyte)FileType.TYPE_BYTECODE;
 								}
 								break;
 
-							case BROWSE_FOLDS_FILES:
+							case (sbyte)BrowserType.BROWSE_FOLDS_FILES:
 								{ // Folder & File
 
 									(*pB).OpenFolder = (*pB).ItemPointer;
@@ -3090,7 +3040,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 										Item = (*pB).ItemPointer;
 										cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
 										Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
-										*pType = TYPE_SDCARD;
+										*pType = (sbyte)FileType.TYPE_SDCARD;
 
 										snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
 									}
@@ -3101,7 +3051,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 											Item = (*pB).ItemPointer;
 											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
 											Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
-											*pType = TYPE_USBSTICK;
+											*pType = (sbyte)FileType.TYPE_USBSTICK;
 
 											snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
 										}
@@ -3110,33 +3060,33 @@ namespace Ev3EmulatorCore.Lms.Cui
 											(*pB).ItemStart = (*pB).ItemPointer;
 											Result = cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).SubFolder, &(*pB).hFiles);
 
-											Result = BUSY;
+											Result = Result.BUSY;
 										}
 									}
 								}
 								break;
-							case BROWSE_CACHE:
+							case (sbyte)BrowserType.BROWSE_CACHE:
 								{ // Cache
 
 									Item = (*pB).ItemPointer;
 
 									*pType = cMemoryGetCacheName(Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (char*)(*pB).FullPath, (char*)(*pB).Filename);
 									snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
-									Result = OK;
+									Result = Result.OK;
 								}
 								break;
-							case BROWSE_FILES:
+							case (sbyte)BrowserType.BROWSE_FILES:
 								{ // File
 
 									if (((*pB).ItemPointer > (*pB).OpenFolder) && ((*pB).ItemPointer <= ((*pB).OpenFolder + (*pB).Files)))
 									{ // File selected
 
-										Item = (*pB).ItemPointer - (*pB).OpenFolder;
+										Item = (short)((*pB).ItemPointer - (*pB).OpenFolder);
 
 										Result = cMemoryGetItem((*pB).PrgId, (*pB).hFiles, Item, Lng, (*pB).FullPath, pType);
 
 										snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
-										Result = OK;
+										Result = Result.OK;
 									}
 								}
 								break;
@@ -3146,8 +3096,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 				  (*pB).NeedUpdate = 1;
 				}
 
-				TotalItems = (*pB).Folders + (*pB).Files;
-				if (TmpResult == OK)
+				TotalItems = (short)((*pB).Folders + (*pB).Files);
+				if (TmpResult == Result.OK)
 				{
 					if (TotalItems != 0)
 					{
@@ -3200,7 +3150,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 				if ((*pB).ItemPointer >= ((*pB).ItemStart + (*pB).Lines))
 				{
-					(*pB).ItemStart = (*pB).ItemPointer - (*pB).Lines;
+					(*pB).ItemStart = (short)((*pB).ItemPointer - (*pB).Lines);
 					(*pB).ItemStart++;
 				}
 
@@ -3215,7 +3165,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					OldPriority = 0;
 					for (Tmp = 0; Tmp < (*pB).Lines; Tmp++)
 					{
-						Item = Tmp + (*pB).ItemStart;
+						Item = (short)(Tmp + (*pB).ItemStart);
 						Folder = 1;
 						Priority = OldPriority;
 
@@ -3243,10 +3193,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 								switch (Type)
 								{
-									case BROWSE_FOLDERS:
+									case (sbyte)BrowserType.BROWSE_FOLDERS:
 										{
 											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
-											if (cMemoryGetItemIcon((*pB).PrgId, (*pB).hFolders, Item, &TmpHandle, &Image) == OK)
+											if (cMemoryGetItemIcon((*pB).PrgId, (*pB).hFolders, Item, &TmpHandle, &Image) == Result.OK)
 											{
 												dLcdDrawBitmap((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), (IP)Image);
 												cMemoryCloseFile((*pB).PrgId, TmpHandle);
@@ -3261,11 +3211,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 											{
 												if (Inst.UiInstance.BtOn != 0)
 												{
-													(*pB).Text[0] = '+';
+													(*pB).Text[0] = (sbyte)'+';
 												}
 												else
 												{
-													(*pB).Text[0] = '-';
+													(*pB).Text[0] = (sbyte)'-';
 												}
 											}
 											else
@@ -3274,16 +3224,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 												{
 													if (Inst.UiInstance.WiFiOn != 0)
 													{
-														(*pB).Text[0] = '+';
+														(*pB).Text[0] = (sbyte)'+';
 													}
 													else
 													{
-														(*pB).Text[0] = '-';
+														(*pB).Text[0] = (sbyte)'-';
 													}
 												}
 												else
 												{
-													if (cMemoryGetItemText((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Text) != OK)
+													if (cMemoryGetItemText((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Text) != Result.OK)
 													{
 														(*pB).Text[0] = 0;
 													}
@@ -3296,16 +3246,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 													}
 													break;
 
-												case '+':
+												case (sbyte)'+':
 													{
-														Indent = ((*pB).Chars - 1) * (*pB).CharWidth - dLcdGetIconWidth(MENU_ICON);
+														Indent = ((*pB).Chars - 1) * (*pB).CharWidth - dLcdGetIconWidth(IconType.MENU_ICON);
 														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, ((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight), MENU_ICON, ICON_CHECKED);
 													}
 													break;
 
-												case '-':
+												case (sbyte)'-':
 													{
-														Indent = ((*pB).Chars - 1) * (*pB).CharWidth - dLcdGetIconWidth(MENU_ICON);
+														Indent = ((*pB).Chars - 1) * (*pB).CharWidth - dLcdGetIconWidth(IconType.MENU_ICON);
 														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, ((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight), MENU_ICON, ICON_CHECKBOX);
 													}
 													break;
@@ -3322,30 +3272,30 @@ namespace Ev3EmulatorCore.Lms.Cui
 										}
 										break;
 
-									case BROWSE_FOLDS_FILES:
+									case (sbyte)BrowserType.BROWSE_FOLDS_FILES:
 										{
 											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
-											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 
 											if ((Priority == 1) || (Priority == 2))
 											{
-												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_FOLDER2);
+												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, ICON_FOLDER2);
 											}
 											else
 											{
 												if (Priority == 3)
 												{
-													dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_SD);
+													dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, ICON_SD);
 												}
 												else
 												{
 													if (Priority == 4)
 													{
-														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_USB);
+														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, ICON_USB);
 													}
 													else
 													{
-														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 													}
 												}
 											}
@@ -3362,28 +3312,28 @@ namespace Ev3EmulatorCore.Lms.Cui
 										}
 										break;
 
-									case BROWSE_CACHE:
+									case (sbyte)BrowserType.BROWSE_CACHE:
 										{
 											TmpType = cMemoryGetCacheName(Item, (*pB).Chars, (char*)(*pB).FullPath, (char*)(*pB).Filename);
-											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 										}
 										break;
 
-									case BROWSE_FILES:
+									case (sbyte)BrowserType.BROWSE_FILES:
 										{
 											cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
-											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 										}
 										break;
 
 								}
 								// Draw folder name
-								dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Filename);
+								dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX, (*pB).TextStartY + (Tmp * (*pB).LineHeight), FontType.NORMAL_FONT, (*pB).Filename);
 
 								// Draw open folder
 								if (Item == (*pB).OpenFolder)
 								{
-									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, 144, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_OPENFOLDER);
+									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, 144, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, ICON_OPENFOLDER);
 								}
 
 								// Draw selection
@@ -3395,9 +3345,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 								// Draw end line
 								switch (Type)
 								{
-									case BROWSE_FOLDERS:
-									case BROWSE_FOLDS_FILES:
-									case BROWSE_FILES:
+									case (sbyte)BrowserType.BROWSE_FOLDERS:
+									case (sbyte)BrowserType.BROWSE_FOLDS_FILES:
+									case (sbyte)BrowserType.BROWSE_FILES:
 										{
 											if (((Tmp + (*pB).ItemStart) == TotalItems) && (Tmp < ((*pB).Lines - 1)))
 											{
@@ -3406,7 +3356,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 										}
 										break;
 
-									case BROWSE_CACHE:
+									case (sbyte)BrowserType.BROWSE_CACHE:
 										{
 											if (((Tmp + (*pB).ItemStart) == 1) && (Tmp < ((*pB).Lines - 1)))
 											{
@@ -3428,10 +3378,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 								cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (*pB).Chars - 1, (*pB).Filename, &TmpType, &Priority);
 
 								// show File icons
-								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth, (*pB).IconStartY + (Tmp * (*pB).LineHeight), IconType.NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 
 								// Draw file name
-								dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + (*pB).CharWidth, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Filename);
+								dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + (*pB).CharWidth, (*pB).TextStartY + (Tmp * (*pB).LineHeight), FontType.NORMAL_FONT, (*pB).Filename);
 
 								// Draw folder line
 								if ((Tmp == ((*pB).Lines - 1)) || (Item == (*pB).Files))
@@ -3462,7 +3412,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					Inst.UiInstance.ScreenBusy = 0;
 				}
 
-				if (Result != OK)
+				if (Result != Result.OK)
 				{
 					Tmp = cUiTestHorz();
 					if (Ignore == Tmp)
@@ -3471,9 +3421,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Tmp = 0;
 					}
 
-					if ((Tmp != 0) || (cUiTestShortPress(BACK_BUTTON) != 0) || (cUiTestLongPress(BACK_BUTTON) != 0))
+					if ((Tmp != 0) || (cUiTestShortPress((sbyte)ButtonType.BACK_BUTTON) != 0) || (cUiTestLongPress((sbyte)ButtonType.BACK_BUTTON) != 0))
 					{
-						if (Type != BROWSE_CACHE)
+						if (Type != (sbyte)BrowserType.BROWSE_CACHE)
 						{
 							if ((*pB).OpenFolder != 0)
 							{
@@ -3487,12 +3437,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
 							}
 						}
-					  (*pB).PrgId = 0;
+						(*pB).PrgId = 0;
 						(*pB).ObjId = 0;
 						(*pB).SubFolder[0] = 0;
 						pAnswer[0] = 0;
 						*pType = 0;
-						Result = OK;
+						Result = Result.OK;
 					}
 				}
 				else
@@ -3504,7 +3454,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				pAnswer[0] = 0;
 				*pType = TYPE_RESTART_BROWSER;
-				Result = FAIL;
+				Result = Result.FAIL;
 			}
 
 			if (*pType > 0)
@@ -3519,7 +3469,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 			}
 
-			if (Result != BUSY)
+			if (Result != Result.BUSY)
 			{
 				//* EXIT *****************************************************************************************************
 
@@ -3534,7 +3484,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA16 Lines = 0;
 			DATA8 DelPoi;
 
-			if (Del < DELS)
+			if (Del < (sbyte)Delimeter.DELS)
 			{
 				while (pText[Point] != 0 && (Point < Size))
 				{
@@ -3567,7 +3517,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA32 Point = 0;
 			DATA8 DelPoi = 0;
 
-			if (Del < DELS)
+			if (Del < (sbyte)Delimeter.DELS)
 			{
 				while ((pText[Point] != 0) && (Point < Size))
 				{
@@ -3602,10 +3552,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA8 DelPoi = 0;
 
 			*pFont = 0;
-			if (Del < DELS)
+			if (Del < (sbyte)Delimeter.DELS)
 			{
 				Result = Point;
-				while ((Line != 0) && (pText[Point]) && (Point < Size))
+				while ((Line != 0) && (pText[Point] != 0) && (Point < Size))
 				{
 
 					DelPoi = 0;
@@ -3636,7 +3586,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 				if (Result >= 0)
 				{
-					if ((pText[Result] > 0) && (pText[Result] < FONTTYPES))
+					if ((pText[Result] > 0) && (pText[Result] < (sbyte)FontType.FONTTYPES))
 					{
 						*pFont = pText[Result];
 						Result++;
@@ -3685,16 +3635,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				if (((Point - Start) + 1) < (DATA32)Lng)
 				{
-					Lng = (DATA8)(Point - Start) + 1;
+					Lng = (DATA8)((Point - Start) + 1);
 				}
 				snprintf((char*)pLine, Lng, "%s", (char*)&pText[Start]);
 			}
 		}
 
 
-		RESULT cUiTextbox(DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8* pText, DATA32 Size, DATA8 Del, DATA16* pLine)
+		Result cUiTextbox(DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8* pText, DATA32 Size, DATA8 Del, DATA16* pLine)
 		{
-			RESULT Result = BUSY;
+			Result Result = Result.BUSY;
 			TXTBOX* pB;
 			DATA16 Item;
 			DATA16 TotalItems;
@@ -3723,26 +3673,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 				// calculate lines on screen
 				(*pB).LineSpace = 5;
-				(*pB).LineHeight = (*pB).CharHeight + (*pB).LineSpace;
-				(*pB).Lines = ((*pB).ScreenHeight / (*pB).LineHeight);
+				(*pB).LineHeight = (short)((*pB).CharHeight + (*pB).LineSpace);
+				(*pB).Lines = (short)((*pB).ScreenHeight / (*pB).LineHeight);
 
 				// calculate start of text
 				(*pB).TextStartX = cUiAlignX((*pB).ScreenStartX);
-				(*pB).TextStartY = (*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2;
+				(*pB).TextStartY = (short)((*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2);
 
 				// Calculate selection barBrowser
 				(*pB).SelectStartX = (*pB).ScreenStartX;
-				(*pB).SelectWidth = (*pB).ScreenWidth - ((*pB).CharWidth + 5);
-				(*pB).SelectStartY = (*pB).TextStartY - 1;
-				(*pB).SelectHeight = (*pB).CharHeight + 1;
+				(*pB).SelectWidth = (short)((*pB).ScreenWidth - ((*pB).CharWidth + 5));
+				(*pB).SelectStartY = (short)((*pB).TextStartY - 1);
+				(*pB).SelectHeight = (short)((*pB).CharHeight + 1);
 
 				// Calculate scroll bar
 				(*pB).ScrollWidth = 5;
 				(*pB).NobHeight = 7;
-				(*pB).ScrollStartX = (*pB).ScreenStartX + (*pB).ScreenWidth - (*pB).ScrollWidth;
-				(*pB).ScrollStartY = (*pB).ScreenStartY + 1;
-				(*pB).ScrollHeight = (*pB).ScreenHeight - 2;
-				(*pB).ScrollSpan = (*pB).ScrollHeight - (*pB).NobHeight;
+				(*pB).ScrollStartX = (short)((*pB).ScreenStartX + (*pB).ScreenWidth - (*pB).ScrollWidth);
+				(*pB).ScrollStartY = (short)((*pB).ScreenStartY + 1);
+				(*pB).ScrollHeight = (short)((*pB).ScreenHeight - 2);
+				(*pB).ScrollSpan = (short)((*pB).ScrollHeight - (*pB).NobHeight);
 
 				(*pB).Items = cUiTextboxGetLines(pText, Size, Del);
 				(*pB).ItemStart = 1;
@@ -3785,21 +3735,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 			if ((*pB).ItemPointer >= ((*pB).ItemStart + (*pB).Lines))
 			{
-				(*pB).ItemStart = (*pB).ItemPointer - (*pB).Lines;
+				(*pB).ItemStart = (short)((*pB).ItemPointer - (*pB).Lines);
 				(*pB).ItemStart++;
 			}
 
-			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.ENTER_BUTTON) != 0)
 			{
 				*pLine = (*pB).ItemPointer;
 
-				Result = OK;
+				Result = Result.OK;
 			}
-			if (cUiGetShortPress(BACK_BUTTON) != 0)
+			if (cUiGetShortPress((sbyte)ButtonType.BACK_BUTTON) != 0)
 			{
 				*pLine = -1;
 
-				Result = OK;
+				Result = Result.OK;
 			}
 
 
@@ -3811,11 +3761,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 				// clear screen
 				dLcdFillRect((*Inst.UiInstance.pLcd).Lcd, BG_COLOR, (*pB).ScreenStartX, (*pB).ScreenStartY, (*pB).ScreenWidth, (*pB).ScreenHeight);
 
-				Ypos = (*pB).TextStartY + 2;
+				Ypos = (sbyte)((*pB).TextStartY + 2);
 
 				for (Tmp = 0; Tmp < (*pB).Lines; Tmp++)
 				{
-					Item = Tmp + (*pB).ItemStart;
+					Item = (sbyte)(Tmp + (*pB).ItemStart);
 
 					if (Item <= TotalItems)
 					{
@@ -3827,16 +3777,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						// calculate lines on screen
 						(*pB).LineSpace = 2;
-						(*pB).LineHeight = (*pB).CharHeight + (*pB).LineSpace;
-						(*pB).Lines = ((*pB).ScreenHeight / (*pB).LineHeight);
+						(*pB).LineHeight = (short)((*pB).CharHeight + (*pB).LineSpace);
+						(*pB).Lines = (short)((*pB).ScreenHeight / (*pB).LineHeight);
 
 						// Calculate selection barBrowser
 						(*pB).SelectStartX = (*pB).ScreenStartX;
-						(*pB).SelectWidth = (*pB).ScreenWidth - ((*pB).ScrollWidth + 2);
-						(*pB).SelectStartY = (*pB).TextStartY - 1;
-						(*pB).SelectHeight = (*pB).CharHeight + 1;
+						(*pB).SelectWidth = (short)((*pB).ScreenWidth - ((*pB).ScrollWidth + 2));
+						(*pB).SelectStartY = (short)((*pB).TextStartY - 1);
+						(*pB).SelectHeight = (short)((*pB).CharHeight + 1);
 
-						(*pB).Chars = ((*pB).SelectWidth / (*pB).CharWidth);
+						(*pB).Chars = (short)((*pB).SelectWidth / (*pB).CharWidth);
 
 						(*pB).Text[(*pB).Chars] = 0;
 
@@ -4000,7 +3950,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 					{
 						Item = View;
 
-						Y1 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]);
+						Y1 = (short)(Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]);
 
 						// Draw buffers
 						X = Inst.UiInstance.Graph.GraphStartX;
@@ -4045,7 +3995,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 								/*
 											printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,Inst.UiInstance.Graph.pMin[Item],Inst.UiInstance.Graph.pMax[Item],Inst.UiInstance.Graph.pOffset[Item],Inst.UiInstance.Graph.pSpan[Item],Value);
 								*/
-								Y2 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]) - Value;
+								Y2 = (short)((Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]) - Value);
 								if (Pointer > 1)
 								{
 									if (Y2 > Y1)
@@ -4088,9 +4038,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 						// Draw buffers
 						for (Item = 0; Item < Inst.UiInstance.Graph.Items; Item++)
 						{
-							Y1 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]);
+							Y1 = (short)(Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]);
 
-							X = Inst.UiInstance.Graph.GraphStartX + 1;
+							X = (short)(Inst.UiInstance.Graph.GraphStartX + 1);
 							for (Pointer = 0; Pointer < Inst.UiInstance.Graph.Pointer; Pointer++)
 							{
 								Sample = Inst.UiInstance.Graph.Buffer[Item][Pointer];
@@ -4107,7 +4057,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 								{
 									Value = 0;
 								}
-								Y2 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]) - Value;
+								Y2 = (short)((Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]) - Value);
 								if (Pointer > 1)
 								{
 
@@ -4152,8 +4102,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 			PRGID TmpPrgId;
 			OBJID TmpObjId;
 			IP TmpIp;
-			DATA8 GBuffer[25];
-			UBYTE pBmp[LCD_BUFFER_SIZE];
+			DATA8[] GBuffer = new DATA8[25];
+			UBYTE[] pBmp = new UBYTE[LCD_BUFFER_SIZE];
 			DATA8 Cmd;
 			DATA8 Color;
 			DATA16 X;
@@ -4208,9 +4158,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA8* pCharSet;
 			DATA16* pLine;
 
-			TmpPrgId = CurrentProgramId();
+			TmpPrgId = Inst.CurrentProgramId();
 
-			if ((TmpPrgId != GUI_SLOT) && (TmpPrgId != DEBUG_SLOT))
+			if ((TmpPrgId != (ushort)Slot.GUI_SLOT) && (TmpPrgId != (ushort)Slot.DEBUG_SLOT))
 			{
 				Inst.UiInstance.RunScreenEnabled = 0;
 			}
@@ -4220,7 +4170,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 			else
 			{
-				TmpObjId = CallingObjectId();
+				TmpObjId = Inst.CallingObjectId();
 				if ((TmpPrgId == Inst.UiInstance.ScreenPrgId) && (TmpObjId == Inst.UiInstance.ScreenObjId))
 				{
 					Blocked = 0;
@@ -4231,12 +4181,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 			}
 
-			TmpIp = GetObjectIp();
-			Cmd = *(DATA8*)PrimParPointer();
+			TmpIp = Inst.GetObjectIp();
+			Cmd = *(DATA8*)Inst.PrimParPointer();
 
 			switch (Cmd)
 			{ // Function
-				case UPDATE:
+				case (sbyte)UiDrawSubcode.UPDATE:
 					{
 						if (Blocked == 0)
 						{
@@ -4245,14 +4195,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case CLEAN:
+				case (sbyte)UiDrawSubcode.CLEAN:
 					{
 						if (Blocked == 0)
 						{
-							Inst.UiInstance.Font = NORMAL_FONT;
+							Inst.UiInstance.Font = (sbyte)FontType.NORMAL_FONT;
 
-							Color = BG_COLOR;
-							if (Color)
+							Color = (sbyte)BG_COLOR;
+							if (Color != 0)
 							{
 								Color = -1;
 							}
@@ -4262,39 +4212,39 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case TEXTBOX:
+				case (sbyte)UiDrawSubcode.TEXTBOX:
 					{
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						X1 = *(DATA16*)PrimParPointer();  // size x
-						Y1 = *(DATA16*)PrimParPointer();  // size y
-						pText = (DATA8*)PrimParPointer();    // textbox
-						Size = *(DATA32*)PrimParPointer();  // textbox size
-						Del = *(DATA8*)PrimParPointer();   // delimitter
-						pLine = (DATA16*)PrimParPointer();   // line
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						X1 = *(DATA16*)Inst.PrimParPointer();  // size x
+						Y1 = *(DATA16*)Inst.PrimParPointer();  // size y
+						pText = (DATA8*)Inst.PrimParPointer();    // textbox
+						Size = *(DATA32*)Inst.PrimParPointer();  // textbox size
+						Del = *(DATA8*)Inst.PrimParPointer();   // delimitter
+						pLine = (DATA16*)Inst.PrimParPointer();   // line
 
 						if (Blocked == 0)
 						{
-							if (cUiTextbox(X, Y, X1, Y1, pText, Size, Del, pLine) == BUSY)
+							if (cUiTextbox(X, Y, X1, Y1, pText, Size, Del, pLine) == Result.BUSY)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(BUSYBREAK);
 						}
 					}
 					break;
-				case FILLRECT:
+				case (sbyte)UiDrawSubcode.FILLRECT:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						X1 = *(DATA16*)PrimParPointer();
-						Y1 = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						X1 = *(DATA16*)Inst.PrimParPointer();
+						Y1 = *(DATA16*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdFillRect((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
@@ -4302,12 +4252,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case INVERSERECT:
+				case (sbyte)UiDrawSubcode.INVERSERECT:
 					{
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						X1 = *(DATA16*)PrimParPointer();
-						Y1 = *(DATA16*)PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						X1 = *(DATA16*)Inst.PrimParPointer();
+						Y1 = *(DATA16*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, X, Y, X1, Y1);
@@ -4315,13 +4265,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case RECT:
+				case (sbyte)UiDrawSubcode.RECT:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						X1 = *(DATA16*)PrimParPointer();
-						Y1 = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						X1 = *(DATA16*)Inst.PrimParPointer();
+						Y1 = *(DATA16*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdRect((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
@@ -4329,11 +4279,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case PIXEL:
+				case (sbyte)UiDrawSubcode.PIXEL:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X, Y);
@@ -4341,13 +4291,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case LINE:
+				case (sbyte)UiDrawSubcode.LINE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						X1 = *(DATA16*)PrimParPointer();
-						Y1 = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						X1 = *(DATA16*)Inst.PrimParPointer();
+						Y1 = *(DATA16*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
@@ -4355,15 +4305,15 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case DOTLINE:
+				case (sbyte)UiDrawSubcode.DOTLINE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						X1 = *(DATA16*)PrimParPointer();
-						Y1 = *(DATA16*)PrimParPointer();
-						On = *(DATA16*)PrimParPointer();
-						Off = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						X1 = *(DATA16*)Inst.PrimParPointer();
+						Y1 = *(DATA16*)Inst.PrimParPointer();
+						On = *(DATA16*)Inst.PrimParPointer();
+						Off = *(DATA16*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdDrawDotLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1, On, Off);
@@ -4371,12 +4321,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case CIRCLE:
+				case (sbyte)UiDrawSubcode.CIRCLE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						R = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						R = *(DATA16*)Inst.PrimParPointer();
 						if (R != 0)
 						{
 							if (Blocked == 0)
@@ -4387,12 +4337,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case FILLCIRCLE:
+				case (sbyte)UiDrawSubcode.FILLCIRCLE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						R = *(DATA16*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						R = *(DATA16*)Inst.PrimParPointer();
 						if (R != 0)
 						{
 							if (Blocked == 0)
@@ -4403,12 +4353,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case TEXT:
+				case (sbyte)UiDrawSubcode.TEXT:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						pText = (DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						pText = (DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, Inst.UiInstance.Font, pText);
@@ -4416,13 +4366,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case ICON:
+				case (sbyte)UiDrawSubcode.ICON:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						Type = *(DATA8*)PrimParPointer();
-						No = *(DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						Type = *(DATA8*)Inst.PrimParPointer();
+						No = *(DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, Type, No);
@@ -4430,16 +4380,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case BMPFILE:
+				case (sbyte)UiDrawSubcode.BMPFILE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						pText = (DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						pText = (DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
-							if (cMemoryGetImage(pText, LCD_BUFFER_SIZE, pBmp) == OK)
+							if (cMemoryGetImage(pText, LCD_BUFFER_SIZE, pBmp) == Result.OK)
 							{
 								dLcdDrawBitmap((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, pBmp);
 								Inst.UiInstance.ScreenBusy = 1;
@@ -4447,12 +4397,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case PICTURE:
+				case (sbyte)UiDrawSubcode.PICTURE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						pI = *(IP*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						pI = *(IP*)Inst.PrimParPointer();
 						if (pI != null)
 						{
 							if (Blocked == 0)
@@ -4463,27 +4413,27 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case VALUE:
+				case (sbyte)UiDrawSubcode.VALUE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						DataF = *(DATAF*)PrimParPointer();
-						Figures = *(DATA8*)PrimParPointer();
-						Decimals = *(DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						DataF = *(DATAF*)Inst.PrimParPointer();
+						Figures = *(DATA8*)Inst.PrimParPointer();
+						Decimals = *(DATA8*)Inst.PrimParPointer();
 
 						if (float.IsNaN(DataF))
 						{
 							for (Lng = 0; Lng < Figures; Lng++)
 							{
-								GBuffer[Lng] = '-';
+								GBuffer[Lng] = (sbyte)'-';
 							}
 						}
 						else
 						{
 							if (Figures < 0)
 							{
-								Figures = 0 - Figures;
+								Figures = (sbyte)(0 - Figures);
 								snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
 							}
 							else
@@ -4505,21 +4455,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case VIEW_VALUE:
+				case (sbyte)UiDrawSubcode.VIEW_VALUE:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						DataF = *(DATAF*)PrimParPointer();
-						Figures = *(DATA8*)PrimParPointer();
-						Decimals = *(DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						DataF = *(DATAF*)Inst.PrimParPointer();
+						Figures = *(DATA8*)Inst.PrimParPointer();
+						Decimals = *(DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							TmpColor = Color;
 							CharWidth = dLcdGetFontWidth(Inst.UiInstance.Font);
 							CharHeight = dLcdGetFontHeight(Inst.UiInstance.Font);
-							X1 = ((CharWidth + 2) / 3) - 1;
-							Y1 = (CharHeight / 2);
+							X1 = (short)(((CharWidth + 2) / 3) - 1);
+							Y1 = (short)(CharHeight / 2);
 
 							Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
 
@@ -4535,7 +4485,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 								else
 								{ // Positive
 
-									TmpColor = 1 - Color;
+									TmpColor = (sbyte)(1 - Color);
 									pText = GBuffer;
 								}
 
@@ -4557,7 +4507,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 									for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
 									{
-										GBuffer[Tmp] = '-';
+										GBuffer[Tmp] = (sbyte)'-';
 									}
 									GBuffer[Tmp] = 0;
 
@@ -4573,21 +4523,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 										for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
 										{
-											GBuffer[Tmp] = '>';
+											GBuffer[Tmp] = (sbyte)'>';
 										}
 										GBuffer[Tmp] = 0;
-										Lng = (DATA16)Figures;
+										Lng = (sbyte)Figures;
 										pText = GBuffer;
-										TmpColor = 1 - Color;
+										TmpColor = (sbyte)(1 - Color);
 
 										// Find X indent
-										Tmp = ((DATA16)Figures - Lng) * CharWidth;
+										Tmp = (short)(((DATA16)Figures - Lng) * CharWidth);
 									}
 									else
 									{ // Centre figures
 
 										// Find X indent
-										Tmp = ((((DATA16)Figures - Lng) + 1) / 2) * CharWidth;
+										Tmp = (short)(((((DATA16)Figures - Lng) + 1) / 2) * CharWidth);
 									}
 
 									// Draw figures
@@ -4605,24 +4555,24 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case VIEW_UNIT:
+				case (sbyte)UiDrawSubcode.VIEW_UNIT:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();
-						DataF = *(DATAF*)PrimParPointer();
-						Figures = *(DATA8*)PrimParPointer();
-						Decimals = *(DATA8*)PrimParPointer();
-						Length = *(DATA8*)PrimParPointer();
-						pUnit = (DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
+						DataF = *(DATAF*)Inst.PrimParPointer();
+						Figures = *(DATA8*)Inst.PrimParPointer();
+						Decimals = *(DATA8*)Inst.PrimParPointer();
+						Length = *(DATA8*)Inst.PrimParPointer();
+						pUnit = (DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							TmpColor = Color;
 							CharWidth = dLcdGetFontWidth(LARGE_FONT);
 							CharHeight = dLcdGetFontHeight(LARGE_FONT);
-							X1 = ((CharWidth + 2) / 3) - 1;
-							Y1 = (CharHeight / 2);
+							X1 = (short)(((CharWidth + 2) / 3) - 1);
+							Y1 = (short)(CharHeight / 2);
 
 							Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
 
@@ -4638,7 +4588,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 								else
 								{ // Positive
 
-									TmpColor = 1 - Color;
+									TmpColor = (sbyte)(1 - Color);
 									pText = GBuffer;
 								}
 
@@ -4660,12 +4610,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 									for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
 									{
-										GBuffer[Tmp] = '-';
+										GBuffer[Tmp] = (sbyte)'-';
 									}
 									GBuffer[Tmp] = 0;
 
 									// Draw figures
-									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, LARGE_FONT, GBuffer);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, FontType.LARGE_FONT, GBuffer);
 								}
 								else
 								{ // Normal number
@@ -4676,26 +4626,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 										for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
 										{
-											GBuffer[Tmp] = '>';
+											GBuffer[Tmp] = (sbyte)'>';
 										}
 										GBuffer[Tmp] = 0;
-										Lng = (DATA16)Figures;
+										Lng = Figures;
 										pText = GBuffer;
-										TmpColor = 1 - Color;
+										TmpColor = (sbyte)(1 - Color);
 
 										// Find X indent
-										Tmp = ((DATA16)Figures - Lng) * CharWidth;
+										Tmp = (short)(((DATA16)Figures - Lng) * CharWidth);
 									}
 									else
 									{ // Centre figures
 
 										// Find X indent
-										Tmp = ((((DATA16)Figures - Lng) + 1) / 2) * CharWidth;
+										Tmp = (short)(((((DATA16)Figures - Lng) + 1) / 2) * CharWidth);
 									}
 									Tmp = 0;
 
 									// Draw figures
-									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, LARGE_FONT, pText);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, FontType.LARGE_FONT, pText);
 
 									// Draw negative sign
 									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
@@ -4704,9 +4654,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
 									}
 
-									Tmp = ((((DATA16)Lng))) * CharWidth;
+									Tmp = (short)(((((DATA16)Lng))) * CharWidth);
 									snprintf((char*)GBuffer, Length, "%s", pUnit);
-									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, SMALL_FONT, GBuffer);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, FontType.SMALL_FONT, GBuffer);
 
 								}
 							}
@@ -4714,91 +4664,91 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case NOTIFICATION:
+				case (sbyte)UiDrawSubcode.NOTIFICATION:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						Icon1 = *(DATA8*)PrimParPointer();
-						Icon2 = *(DATA8*)PrimParPointer();
-						Icon3 = *(DATA8*)PrimParPointer();
-						pText = (DATA8*)PrimParPointer();
-						pState = (DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						Icon1 = *(DATA8*)Inst.PrimParPointer();
+						Icon2 = *(DATA8*)Inst.PrimParPointer();
+						Icon3 = *(DATA8*)Inst.PrimParPointer();
+						pText = (DATA8*)Inst.PrimParPointer();
+						pState = (DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
-							if (cUiNotification(Color, X, Y, Icon1, Icon2, Icon3, pText, pState) == BUSY)
+							if (cUiNotification(Color, X, Y, Icon1, Icon2, Icon3, pText, pState) == (sbyte)Result.BUSY)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case QUESTION:
+				case (sbyte)UiDrawSubcode.QUESTION:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						Icon1 = *(DATA8*)PrimParPointer();
-						Icon2 = *(DATA8*)PrimParPointer();
-						pText = (DATA8*)PrimParPointer();
-						pState = (DATA8*)PrimParPointer();
-						pAnswer = (DATA8*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						Icon1 = *(DATA8*)Inst.PrimParPointer();
+						Icon2 = *(DATA8*)Inst.PrimParPointer();
+						pText = (DATA8*)Inst.PrimParPointer();
+						pState = (DATA8*)Inst.PrimParPointer();
+						pAnswer = (DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
-							if (cUiQuestion(Color, X, Y, Icon1, Icon2, pText, pState, pAnswer) == BUSY)
+							if (cUiQuestion(Color, X, Y, Icon1, Icon2, pText, pState, pAnswer) == (sbyte)Result.BUSY)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case ICON_QUESTION:
+				case (sbyte)UiDrawSubcode.ICON_QUESTION:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						pState = (DATA8*)PrimParPointer();
-						pIcons = (DATA32*)PrimParPointer();
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						pState = (DATA8*)Inst.PrimParPointer();
+						pIcons = (DATA32*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
-							if (cUiIconQuestion(Color, X, Y, pState, pIcons) == BUSY)
+							if (cUiIconQuestion(Color, X, Y, pState, pIcons) == Result.BUSY)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case KEYBOARD:
+				case (sbyte)UiDrawSubcode.KEYBOARD:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						No = *(DATA8*)PrimParPointer();   // Icon
-						Lng = *(DATA8*)PrimParPointer();   // length
-						pText = (DATA8*)PrimParPointer();    // default
-						pCharSet = (DATA8*)PrimParPointer();    // valid char set
-						pAnswer = (DATA8*)PrimParPointer();    // string
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						No = *(DATA8*)Inst.PrimParPointer();   // Icon
+						Lng = *(DATA8*)Inst.PrimParPointer();   // length
+						pText = (DATA8*)Inst.PrimParPointer();    // default
+						pCharSet = (DATA8*)Inst.PrimParPointer();    // valid char set
+						pAnswer = (DATA8*)Inst.PrimParPointer();    // string
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -4812,27 +4762,27 @@ namespace Ev3EmulatorCore.Lms.Cui
 							// Wait for "ENTER"
 							if (SelectedChar != 0x0D)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case BROWSE:
+				case (sbyte)UiDrawSubcode.BROWSE:
 					{
-						Type = *(DATA8*)PrimParPointer();   // Browser type
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						X1 = *(DATA16*)PrimParPointer();  // size x
-						Y1 = *(DATA16*)PrimParPointer();  // size y
-						Lng = *(DATA8*)PrimParPointer();   // length
-						pType = (DATA8*)PrimParPointer();    // item type
-						pAnswer = (DATA8*)PrimParPointer();    // item name
+						Type = *(DATA8*)Inst.PrimParPointer();   // Browser type
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						X1 = *(DATA16*)Inst.PrimParPointer();  // size x
+						Y1 = *(DATA16*)Inst.PrimParPointer();  // size y
+						Lng = *(DATA8*)Inst.PrimParPointer();   // length
+						pType = (DATA8*)Inst.PrimParPointer();    // item type
+						pAnswer = (DATA8*)Inst.PrimParPointer();    // item name
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -4841,29 +4791,29 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						if (Blocked == 0)
 						{
-							if (cUiBrowser(Type, X, Y, X1, Y1, Lng, pType, pAnswer) == BUSY)
+							if (cUiBrowser(Type, X, Y, X1, Y1, Lng, pType, pAnswer) == Result.BUSY)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case VERTBAR:
+				case (sbyte)UiDrawSubcode.VERTBAR:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						X = *(DATA16*)PrimParPointer();  // start x
-						Y = *(DATA16*)PrimParPointer();  // start y
-						X1 = *(DATA16*)PrimParPointer();  // size x
-						Y1 = *(DATA16*)PrimParPointer();  // size y
-						Min = *(DATA16*)PrimParPointer();  // min
-						Max = *(DATA16*)PrimParPointer();  // max
-						Act = *(DATA16*)PrimParPointer();  // actual
+						Color = *(DATA8*)Inst.PrimParPointer();
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						X1 = *(DATA16*)Inst.PrimParPointer();  // size x
+						Y1 = *(DATA16*)Inst.PrimParPointer();  // size y
+						Min = *(DATA16*)Inst.PrimParPointer();  // min
+						Max = *(DATA16*)Inst.PrimParPointer();  // max
+						Act = *(DATA16*)Inst.PrimParPointer();  // actual
 
 						if (Blocked == 0)
 						{
@@ -4871,14 +4821,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case SELECT_FONT:
+				case (sbyte)UiDrawSubcode.SELECT_FONT:
 					{
-						Inst.UiInstance.Font = *(DATA8*)PrimParPointer();
+						Inst.UiInstance.Font = *(DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
-							if (Inst.UiInstance.Font >= FONTTYPES)
+							if (Inst.UiInstance.Font >= (sbyte)FontType.FONTTYPES)
 							{
-								Inst.UiInstance.Font = (FONTTYPES - 1);
+								Inst.UiInstance.Font = ((sbyte)FontType.FONTTYPES - 1);
 							}
 							if (Inst.UiInstance.Font < 0)
 							{
@@ -4887,19 +4837,19 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case TOPLINE:
+				case (sbyte)UiDrawSubcode.TOPLINE:
 					{
-						Inst.UiInstance.TopLineEnabled = *(DATA8*)PrimParPointer();
+						Inst.UiInstance.TopLineEnabled = *(DATA8*)Inst.PrimParPointer();
 					}
 					break;
-				case FILLWINDOW:
+				case (sbyte)UiDrawSubcode.FILLWINDOW:
 					{
-						Color = *(DATA8*)PrimParPointer();
-						Y = *(DATA16*)PrimParPointer();  // start y
-						Y1 = *(DATA16*)PrimParPointer();  // size y
+						Color = *(DATA8*)Inst.PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();  // start y
+						Y1 = *(DATA16*)Inst.PrimParPointer();  // size y
 						if (Blocked == 0)
 						{
-							Inst.UiInstance.Font = NORMAL_FONT;
+							Inst.UiInstance.Font = (sbyte)FontType.NORMAL_FONT;
 
 							if ((Y + Y1) < LCD_HEIGHT)
 							{
@@ -4913,7 +4863,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 									}
 									else
 									{
-										Y1 = LCD_BUFFER_SIZE - Y;
+										Y1 = (short)(LCD_BUFFER_SIZE - Y);
 									}
 
 									if (Color != 0)
@@ -4931,9 +4881,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 									Y2 = ((LCD_WIDTH + 7) / 8);
 									for (Tmp = Y; Tmp < Y1; Tmp++)
 									{
-										Y3 = Tmp * ((LCD_WIDTH + 7) / 8);
+										Y3 = (short)(Tmp * ((LCD_WIDTH + 7) / 8));
 										memset(&((*Inst.UiInstance.pLcd).Lcd[Y3]), Color, Y2);
-										Color = ~Color;
+										Color = (sbyte)~Color;
 									}
 								}
 							}
@@ -4942,9 +4892,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case STORE:
+				case (sbyte)UiDrawSubcode.STORE:
 					{
-						No = *(DATA8*)PrimParPointer();
+						No = *(DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							if (No < LCD_STORE_LEVELS)
@@ -4954,9 +4904,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case RESTORE:
+				case (sbyte)UiDrawSubcode.RESTORE:
 					{
-						No = *(DATA8*)PrimParPointer();
+						No = *(DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							if (No < LCD_STORE_LEVELS)
@@ -4967,16 +4917,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GRAPH_SETUP:
+				case (sbyte)UiDrawSubcode.GRAPH_SETUP:
 					{
-						X = *(DATA16*)PrimParPointer();  // start x
-						X1 = *(DATA16*)PrimParPointer();  // size y
-						Items = *(DATA8*)PrimParPointer();   // items
-						pOffset = (DATA16*)PrimParPointer();  // handle to offset Y
-						pSpan = (DATA16*)PrimParPointer();  // handle to span y
-						pMin = (DATAF*)PrimParPointer();  // handle to min
-						pMax = (DATAF*)PrimParPointer();  // handle to max
-						pVal = (DATAF*)PrimParPointer();  // handle to val
+						X = *(DATA16*)Inst.PrimParPointer();  // start x
+						X1 = *(DATA16*)Inst.PrimParPointer();  // size y
+						Items = *(DATA8*)Inst.PrimParPointer();   // items
+						pOffset = (DATA16*)Inst.PrimParPointer();  // handle to offset Y
+						pSpan = (DATA16*)Inst.PrimParPointer();  // handle to span y
+						pMin = (DATAF*)Inst.PrimParPointer();  // handle to min
+						pMax = (DATAF*)Inst.PrimParPointer();  // handle to max
+						pVal = (DATAF*)Inst.PrimParPointer();  // handle to val
 
 						if (Blocked == 0)
 						{
@@ -4984,37 +4934,37 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GRAPH_DRAW:
+				case (sbyte)UiDrawSubcode.GRAPH_DRAW:
 					{
-						View = *(DATA8*)PrimParPointer();   // view
+						View = *(DATA8*)Inst.PrimParPointer();   // view
 
 						cUiGraphDraw(View, &Actual, &Lowest, &Highest, &Average);
 
-						*(DATAF*)PrimParPointer() = Actual;
-						*(DATAF*)PrimParPointer() = Lowest;
-						*(DATAF*)PrimParPointer() = Highest;
-						*(DATAF*)PrimParPointer() = Average;
+						*(DATAF*)Inst.PrimParPointer() = Actual;
+						*(DATAF*)Inst.PrimParPointer() = Lowest;
+						*(DATAF*)Inst.PrimParPointer() = Highest;
+						*(DATAF*)Inst.PrimParPointer() = Average;
 					}
 					break;
-				case SCROLL:
+				case (sbyte)UiDrawSubcode.SCROLL:
 					{
-						Y = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)Inst.PrimParPointer();
 						if ((Y > 0) && (Y < LCD_HEIGHT))
 						{
 							dLcdScroll((*Inst.UiInstance.pLcd).Lcd, Y);
 						}
 					}
 					break;
-				case POPUP:
+				case (sbyte)UiDrawSubcode.POPUP:
 					{
-						Open = *(DATA8*)PrimParPointer();
+						Open = *(DATA8*)Inst.PrimParPointer();
 						if (Blocked == 0)
 						{
 							if (Open != 0)
 							{
-								if (!Inst.UiInstance.ScreenBusy)
+								if (Inst.UiInstance.ScreenBusy == 0)
 								{
-									TmpObjId = CallingObjectId();
+									TmpObjId = Inst.CallingObjectId();
 
 									LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdSave, sizeof(Inst.UiInstance.LcdSave));
 									Inst.UiInstance.ScreenPrgId = TmpPrgId;
@@ -5024,8 +4974,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 								else
 								{ // Wait on scrreen
 
-									SetObjectIp(TmpIp - 1);
-									SetDispatchStatus(BUSYBREAK);
+									Inst.SetObjectIp(TmpIp - 1);
+									Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 								}
 							}
 							else
@@ -5041,8 +4991,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 						else
 						{ // Wait on not blocked
 
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
@@ -5084,17 +5034,17 @@ namespace Ev3EmulatorCore.Lms.Cui
 			OBJHEAD* pObjHead;
 
 
-			TmpIp = GetObjectIp();
-			Cmd = *(DATA8*)PrimParPointer();
+			TmpIp = Inst.GetObjectIp();
+			Cmd = *(DATA8*)Inst.PrimParPointer();
 
 			switch (Cmd)
 			{ // Function
-				case GET_STRING:
+				case (sbyte)UiReadSubcode.GET_STRING:
 					{
 						if (Inst.UiInstance.Keys != 0)
 						{
-							Lng = *(DATA8*)PrimParPointer();
-							pDestination = (DATA8*)PrimParPointer();
+							Lng = *(DATA8*)Inst.PrimParPointer();
+							pDestination = (DATA8*)Inst.PrimParPointer();
 							pSource = (DATA8*)Inst.UiInstance.KeyBuffer;
 
 							while ((Inst.UiInstance.Keys != 0) && (Lng != 0))
@@ -5110,16 +5060,16 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case KEY:
+				case (sbyte)UiReadSubcode.KEY:
 					{
 						if (Inst.UiInstance.KeyBufIn != 0)
 						{
-							*(DATA8*)PrimParPointer() = (DATA8)Inst.UiInstance.KeyBuffer[0];
+							*(DATA8*)Inst.PrimParPointer() = (DATA8)Inst.UiInstance.KeyBuffer[0];
 							Inst.UiInstance.KeyBufIn--;
 
 							for (Lng = 0; Lng < Inst.UiInstance.KeyBufIn; Lng++)
@@ -5129,26 +5079,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 						else
 						{
-							*(DATA8*)PrimParPointer() = (DATA8)0;
+							*(DATA8*)Inst.PrimParPointer() = (DATA8)0;
 						}
 					}
 					break;
-				case GET_SHUTDOWN:
+				case (sbyte)UiReadSubcode.GET_SHUTDOWN:
 					{
-						*(DATA8*)PrimParPointer() = Inst.UiInstance.ShutDown;
+						*(DATA8*)Inst.PrimParPointer() = Inst.UiInstance.ShutDown;
 						Inst.UiInstance.ShutDown = 0;
 					}
 					break;
-				case GET_WARNING:
+				case (sbyte)UiReadSubcode.GET_WARNING:
 					{
-						*(DATA8*)PrimParPointer() = Inst.UiInstance.Warning;
+						*(DATA8*)Inst.PrimParPointer() = Inst.UiInstance.Warning;
 					}
 					break;
-				case GET_LBATT:
+				case (sbyte)UiReadSubcode.GET_LBATT:
 					{
 						Data16 = (DATA16)(Inst.UiInstance.Vbatt * 1000.0);
 						Data16 -= Inst.UiInstance.BattIndicatorLow;
-						Data16 = (Data16 * 100) / (Inst.UiInstance.BattIndicatorHigh - Inst.UiInstance.BattIndicatorLow);
+						Data16 = (short)((Data16 * 100) / (Inst.UiInstance.BattIndicatorHigh - Inst.UiInstance.BattIndicatorLow));
 						if (Data16 > 100)
 						{
 							Data16 = 100;
@@ -5157,29 +5107,29 @@ namespace Ev3EmulatorCore.Lms.Cui
 						{
 							Data16 = 0;
 						}
-						*(DATA8*)PrimParPointer() = (DATA8)Data16;
+						*(DATA8*)Inst.PrimParPointer() = (DATA8)Data16;
 					}
 					break;
-				case ADDRESS:
+				case (sbyte)UiWriteSubcode.ADDRESS:
 					{
 						if (Inst.UiInstance.Keys != 0)
 						{
-							*(DATA32*)PrimParPointer() = (DATA32)atol((const char*)Inst.UiInstance.KeyBuffer);
+							*(DATA32*)Inst.PrimParPointer() = (DATA32)atol((const char*)Inst.UiInstance.KeyBuffer);
 							Inst.UiInstance.Keys = 0;
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case CODE:
+				case (sbyte)UiWriteSubcode.CODE:
 					{
 						if (Inst.UiInstance.Keys != 0)
 						{
-							Length = *(DATA32*)PrimParPointer();
-							pImage = *(DATA32*)PrimParPointer();
+							Length = *(DATA32*)Inst.PrimParPointer();
+							pImage = *(DATA32*)Inst.PrimParPointer();
 
 							pImgHead = (IMGHEAD*)pImage;
 							pObjHead = (OBJHEAD*)(pImage + sizeof(IMGHEAD));
@@ -5188,10 +5138,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 							if (Length > (sizeof(IMGHEAD) + sizeof(OBJHEAD)))
 							{
 
-								(*pImgHead).Sign[0] = 'l';
-								(*pImgHead).Sign[1] = 'e';
-								(*pImgHead).Sign[2] = 'g';
-								(*pImgHead).Sign[3] = 'o';
+								(*pImgHead).Sign[0] = (byte)'l';
+								(*pImgHead).Sign[1] = (byte)'e';
+								(*pImgHead).Sign[2] = (byte)'g';
+								(*pImgHead).Sign[3] = (byte)'o';
 								(*pImgHead).ImageSize = 0;
 								(*pImgHead).VersionInfo = (UWORD)(VERS * 100.0);
 								(*pImgHead).NumberOfObjects = 1;
@@ -5222,7 +5172,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 									{
 										Tmp = 0;
 									}
-									*pDestination = Tmp;
+									*pDestination = (sbyte)Tmp;
 									pDestination++;
 									Length--;
 									Size++;
@@ -5232,21 +5182,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 								(*pImgHead).ImageSize = Size;
 								memset(Inst.UiInstance.Globals, 0, sizeof(Inst.UiInstance.Globals));
 
-								*(DATA32*)PrimParPointer() = (DATA32)Inst.UiInstance.Globals;
-								*(DATA8*)PrimParPointer() = 1;
+								*(DATA32*)Inst.PrimParPointer() = (DATA32)Inst.UiInstance.Globals;
+								*(DATA8*)Inst.PrimParPointer() = 1;
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case GET_HW_VERS:
+				case (sbyte)UiReadSubcode.GET_HW_VERS:
 					{
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -5263,10 +5213,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GET_FW_VERS:
+				case (sbyte)UiReadSubcode.GET_FW_VERS:
 					{
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -5283,10 +5233,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GET_FW_BUILD:
+				case (sbyte)UiReadSubcode.GET_FW_BUILD:
 					{
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -5303,10 +5253,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GET_OS_VERS:
+				case (sbyte)UiReadSubcode.GET_OS_VERS:
 					{
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -5323,10 +5273,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GET_OS_BUILD:
+				case (sbyte)UiReadSubcode.GET_OS_BUILD:
 					{
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -5343,11 +5293,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GET_VERSION:
+				case (sbyte)UiReadSubcode.GET_VERSION:
 					{
 						snprintf((char*)Inst.UiInstance.ImageBuffer, IMAGEBUFFER_SIZE, "%s V%4.2f%c(%s %s)", PROJECT, VERS, SPECIALVERS, __DATE__, __TIME__);
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 						pSource = (DATA8*)Inst.UiInstance.ImageBuffer;
 
 						if (VMInstance.Handle >= 0)
@@ -5365,10 +5315,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case GET_IP:
+				case (sbyte)UiReadSubcode.GET_IP:
 					{
-						Lng = *(DATA8*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						if (VMInstance.Handle >= 0)
 						{
@@ -5386,69 +5336,69 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 					}
 					break;
-				case GET_POWER:
+				case (sbyte)UiReadSubcode.GET_POWER:
 					{
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Vbatt;
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Ibatt;
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Iintegrated;
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Imotor;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Vbatt;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Ibatt;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Iintegrated;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Imotor;
 					}
 					break;
-				case GET_VBATT:
+				case (sbyte)UiReadSubcode.GET_VBATT:
 					{
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Vbatt;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Vbatt;
 					}
 					break;
-				case GET_IBATT:
+				case (sbyte)UiReadSubcode.GET_IBATT:
 					{
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Ibatt;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Ibatt;
 					}
 					break;
-				case GET_IINT:
+				case (sbyte)UiReadSubcode.GET_IINT:
 					{
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Iintegrated;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Iintegrated;
 					}
 					break;
-				case GET_IMOTOR:
+				case (sbyte)UiReadSubcode.GET_IMOTOR:
 					{
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Imotor;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Imotor;
 					}
 					break;
-				case GET_EVENT:
+				case (sbyte)UiReadSubcode.GET_EVENT:
 					{
-						*(DATA8*)PrimParPointer() = Inst.UiInstance.Event;
+						*(DATA8*)Inst.PrimParPointer() = Inst.UiInstance.Event;
 						Inst.UiInstance.Event = 0;
 					}
 					break;
-				case GET_TBATT:
+				case (sbyte)UiReadSubcode.GET_TBATT:
 					{
-						*(DATAF*)PrimParPointer() = Inst.UiInstance.Tbatt;
+						*(DATAF*)Inst.PrimParPointer() = Inst.UiInstance.Tbatt;
 					}
 					break;
-				case TEXTBOX_READ:
+				case (sbyte)UiReadSubcode.TEXTBOX_READ:
 					{
-						pSource = (DATA8*)PrimParPointer();
-						Size = *(DATA32*)PrimParPointer();
-						Data8 = *(DATA8*)PrimParPointer();
-						Lng = *(DATA8*)PrimParPointer();
-						Data16 = *(DATA16*)PrimParPointer();
-						pDestination = (DATA8*)PrimParPointer();
+						pSource = (DATA8*)Inst.PrimParPointer();
+						Size = *(DATA32*)Inst.PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
+						Lng = *(DATA8*)Inst.PrimParPointer();
+						Data16 = *(DATA16*)Inst.PrimParPointer();
+						pDestination = (DATA8*)Inst.PrimParPointer();
 
 						cUiTextboxReadLine(pSource, Size, Data8, Lng, Data16, pDestination, &Data8);
 					}
 					break;
-				case GET_SDCARD:
+				case (sbyte)UiReadSubcode.GET_SDCARD:
 					{
-						*(DATA8*)PrimParPointer() = CheckSdcard(&Data8, &Total, &Size, 0);
-						*(DATA32*)PrimParPointer() = Total;
-						*(DATA32*)PrimParPointer() = Size;
+						*(DATA8*)Inst.PrimParPointer() = Inst.CheckSdcard(&Data8, &Total, &Size, 0);
+						*(DATA32*)Inst.PrimParPointer() = Total;
+						*(DATA32*)Inst.PrimParPointer() = Size;
 					}
 					break;
-				case GET_USBSTICK:
+				case (sbyte)UiReadSubcode.GET_USBSTICK:
 					{
-						*(DATA8*)PrimParPointer() = CheckUsbstick(&Data8, &Total, &Size, 0);
-						*(DATA32*)PrimParPointer() = Total;
-						*(DATA32*)PrimParPointer() = Size;
+						*(DATA8*)Inst.PrimParPointer() = Inst.CheckUsbstick(&Data8, &Total, &Size, 0);
+						*(DATA32*)Inst.PrimParPointer() = Total;
+						*(DATA32*)Inst.PrimParPointer() = Size;
 					}
 					break;
 
@@ -5460,8 +5410,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 			IP TmpIp;
 			DATA8 Cmd;
 			DATA8* pSource;
-			DSPSTAT DspStat = BUSYBREAK;
-			DATA8 Buffer[50];
+			DSPSTAT DspStat = DSPSTAT.BUSYBREAK;
+			DATA8[] Buffer = new DATA8[50];
 			DATA8 Data8;
 			DATA16 Data16;
 			DATA32 Data32;
@@ -5474,51 +5424,51 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA8* pText;
 
 
-			TmpIp = GetObjectIp();
-			Cmd = *(DATA8*)PrimParPointer();
+			TmpIp = Inst.GetObjectIp();
+			Cmd = *(DATA8*)Inst.PrimParPointer();
 
 			switch (Cmd)
 			{ // Function
 
-				case WRITE_FLUSH:
+				case (sbyte)UiWriteSubcode.WRITE_FLUSH:
 					{
 						cUiFlush();
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case FLOATVALUE:
+				case (sbyte)UiWriteSubcode.FLOATVALUE:
 					{
-						DataF = *(DATAF*)PrimParPointer();
-						Figures = *(DATA8*)PrimParPointer();
-						Decimals = *(DATA8*)PrimParPointer();
+						DataF = *(DATAF*)Inst.PrimParPointer();
+						Figures = *(DATA8*)Inst.PrimParPointer();
+						Decimals = *(DATA8*)Inst.PrimParPointer();
 
 						snprintf((char*)Buffer, 32, "%*.*f", Figures, Decimals, DataF);
 						cUiWriteString(Buffer);
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case STAMP:
+				case (sbyte)UiWriteSubcode.STAMP:
 					{ // write time, prgid, objid, ip
 
-						pSource = (DATA8*)PrimParPointer();
-						snprintf((char*)Buffer, 50, "####[ %09u %01u %03u %06u %s]####\r\n", GetTime(), CurrentProgramId(), CallingObjectId(), CurrentObjectIp(), pSource);
+						pSource = (DATA8*)Inst.PrimParPointer();
+						snprintf((char*)Buffer, 50, "####[ %09u %01u %03u %06u %s]####\r\n", GetTime(), Inst.CurrentProgramId(), Inst.CallingObjectId(), CurrentObjectIp(), pSource);
 						cUiWriteString(Buffer);
 						cUiFlush();
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case PUT_STRING:
+				case (sbyte)UiWriteSubcode.PUT_STRING:
 					{
-						pSource = (DATA8*)PrimParPointer();
+						pSource = (DATA8*)Inst.PrimParPointer();
 						cUiWriteString(pSource);
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case CODE:
+				case (sbyte)UiWriteSubcode.CODE:
 					{
-						pGlobal = *(DATA32*)PrimParPointer();
-						Data32 = *(DATA32*)PrimParPointer();
+						pGlobal = *(DATA32*)Inst.PrimParPointer();
+						Data32 = *(DATA32*)Inst.PrimParPointer();
 
 						pSource = (DATA8*)pGlobal;
 
@@ -5537,40 +5487,40 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 						}
 						cUiWriteString((DATA8*)"\r\n");
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case TEXTBOX_APPEND:
+				case (sbyte)UiWriteSubcode.TEXTBOX_APPEND:
 					{
-						pText = (DATA8*)PrimParPointer();
-						Data32 = *(DATA32*)PrimParPointer();
-						Data8 = *(DATA8*)PrimParPointer();
-						pSource = (DATA8*)PrimParPointer();
+						pText = (DATA8*)Inst.PrimParPointer();
+						Data32 = *(DATA32*)Inst.PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
+						pSource = (DATA8*)Inst.PrimParPointer();
 
 						cUiTextboxAppendLine(pText, Data32, Data8, pSource, Inst.UiInstance.Font);
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case SET_BUSY:
+				case (sbyte)UiWriteSubcode.SET_BUSY:
 					{
-						Data8 = *(DATA8*)PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
 
 						if (Data8 != 0)
 						{
-							Inst.UiInstance.Warning |= WARNING_BUSY;
+							unchecked { Inst.UiInstance.Warning |= (sbyte)Warning.WARNING_BUSY; }
 						}
 						else
 						{
-							Inst.UiInstance.Warning &= ~WARNING_BUSY;
+							Inst.UiInstance.Warning &= (sbyte)~Warning.WARNING_BUSY;
 						}
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case VALUE8:
+				case (sbyte)UiWriteSubcode.VALUE8:
 					{
-						Data8 = *(DATA8*)PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
 						if (Data8 != DATA8_NAN)
 						{
 							snprintf((char*)Buffer, 7, "%d", (int)Data8);
@@ -5581,12 +5531,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 						cUiWriteString(Buffer);
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case VALUE16:
+				case (sbyte)UiWriteSubcode.VALUE16:
 					{
-						Data16 = *(DATA16*)PrimParPointer();
+						Data16 = *(DATA16*)Inst.PrimParPointer();
 						if (Data16 != DATA16_NAN)
 						{
 							snprintf((char*)Buffer, 9, "%d", Data16 & 0xFFFF);
@@ -5597,12 +5547,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 						cUiWriteString(Buffer);
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case VALUE32:
+				case (sbyte)UiWriteSubcode.VALUE32:
 					{
-						Data32 = *(DATA32*)PrimParPointer();
+						Data32 = *(DATA32*)Inst.PrimParPointer();
 						if (Data32 != DATA32_NAN)
 						{
 							snprintf((char*)Buffer, 14, "%ld", (long unsigned int)(Data32 & 0xFFFFFFFF));
@@ -5614,21 +5564,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 						cUiWriteString(Buffer);
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case VALUEF:
+				case (sbyte)UiWriteSubcode.VALUEF:
 					{
-						DataF = *(DATAF*)PrimParPointer();
+						DataF = *(DATAF*)Inst.PrimParPointer();
 						snprintf((char*)Buffer, 24, "%f", DataF);
 						cUiWriteString(Buffer);
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case LED:
+				case (sbyte)UiWriteSubcode.LED:
 					{
-						Data8 = *(DATA8*)PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
 						if (Data8 < 0)
 						{
 							Data8 = 0;
@@ -5640,88 +5590,88 @@ namespace Ev3EmulatorCore.Lms.Cui
 						cUiSetLed(Data8);
 						Inst.UiInstance.RunLedEnabled = 0;
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case POWER:
+				case (sbyte)UiWriteSubcode.POWER:
 					{
-						Data8 = *(DATA8*)PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
 
 						if (Inst.UiInstance.PowerFile >= 0)
 						{
 							ioctl(Inst.UiInstance.PowerFile, 0, (size_t) & Data8);
 						}
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case TERMINAL:
+				case (sbyte)UiWriteSubcode.TERMINAL:
 					{
-						No = *(DATA8*)PrimParPointer();
+						No = *(DATA8*)Inst.PrimParPointer();
 
 						if (No != 0)
 						{
-							SetTerminalEnable(1);
+							Inst.SetTerminalEnable(1);
 						}
 						else
 						{
-							SetTerminalEnable(0);
+                            Inst.SetTerminalEnable(0);
 						}
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case SET_TESTPIN:
+				case (sbyte)UiWriteSubcode.SET_TESTPIN:
 					{
-						Data8 = *(DATA8*)PrimParPointer();
+						Data8 = *(DATA8*)Inst.PrimParPointer();
 						cUiTestpin(Data8);
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case INIT_RUN:
+				case (sbyte)UiWriteSubcode.INIT_RUN:
 					{
 						Inst.UiInstance.RunScreenEnabled = 3;
 
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case UPDATE_RUN:
+				case (sbyte)UiWriteSubcode.UPDATE_RUN:
 					{
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case GRAPH_SAMPLE:
+				case (sbyte)UiWriteSubcode.GRAPH_SAMPLE:
 					{
 						cUiGraphSample();
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case DOWNLOAD_END:
+				case (sbyte)UiWriteSubcode.DOWNLOAD_END:
 					{
 						Inst.UiInstance.UiUpdate = 1;
 						cUiDownloadSuccesSound();
-						DspStat = NOBREAK;
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
-				case SCREEN_BLOCK:
+				case (sbyte)UiWriteSubcode.SCREEN_BLOCK:
 					{
-						Inst.UiInstance.ScreenBlocked = *(DATA8*)PrimParPointer();
-						DspStat = NOBREAK;
+						Inst.UiInstance.ScreenBlocked = *(DATA8*)Inst.PrimParPointer();
+						DspStat = DSPSTAT.NOBREAK;
 					}
 					break;
 				default:
 					{
-						DspStat = FAILBREAK;
+						DspStat = DSPSTAT.FAILBREAK;
 					}
 					break;
 			}
 
-			if (DspStat == BUSYBREAK)
+			if (DspStat == DSPSTAT.BUSYBREAK)
 			{ // Rewind IP
 
-				SetObjectIp(TmpIp - 1);
+				Inst.SetObjectIp(TmpIp - 1);
 			}
-			SetDispatchStatus(DspStat);
+			Inst.SetDispatchStatus(DspStat);
 		}
 
 		void cUiButton()
@@ -5735,8 +5685,8 @@ namespace Ev3EmulatorCore.Lms.Cui
 			DATA16 Inc;
 			DATA8 Blocked;
 
-			TmpIp = GetObjectIp();
-			TmpPrgId = CurrentProgramId();
+			TmpIp = Inst.GetObjectIp();
+			TmpPrgId = Inst.CurrentProgramId();
 
 			if (Inst.UiInstance.ScreenBlocked == 0)
 			{
@@ -5744,7 +5694,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 			else
 			{
-				TmpObjId = CallingObjectId();
+				TmpObjId = Inst.CallingObjectId();
 				if ((TmpPrgId == Inst.UiInstance.ScreenPrgId) && (TmpObjId == Inst.UiInstance.ScreenObjId))
 				{
 					Blocked = 0;
@@ -5755,70 +5705,70 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 			}
 
-			Cmd = *(DATA8*)PrimParPointer();
+			Cmd = *(DATA8*)Inst.PrimParPointer();
 
 			State = 0;
 			Inc = 0;
 
 			switch (Cmd)
 			{ // Function
-				case PRESS:
+				case (sbyte)UiButtonSubcode.PRESS:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 						cUiSetPress(Button, 1);
 					}
 					break;
-				case RELEASE:
+				case (sbyte)UiButtonSubcode.RELEASE:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 						cUiSetPress(Button, 0);
 					}
 					break;
-				case SHORTPRESS:
+				case (sbyte)UiButtonSubcode.SHORTPRESS:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							State = cUiGetShortPress(Button);
 						}
-						*(DATA8*)PrimParPointer() = State;
+						*(DATA8*)Inst.PrimParPointer() = State;
 					}
 					break;
-				case GET_BUMBED:
+				case (sbyte)UiButtonSubcode.GET_BUMBED:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							State = cUiGetBumbed(Button);
 						}
-						*(DATA8*)PrimParPointer() = State;
+						*(DATA8*)Inst.PrimParPointer() = State;
 					}
 					break;
-				case PRESSED:
+				case (sbyte)UiButtonSubcode.PRESSED:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							State = cUiGetPress(Button);
 						}
-						*(DATA8*)PrimParPointer() = State;
+						*(DATA8*)Inst.PrimParPointer() = State;
 					}
 					break;
-				case LONGPRESS:
+				case (sbyte)UiButtonSubcode.LONGPRESS:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							State = cUiGetLongPress(Button);
 						}
-						*(DATA8*)PrimParPointer() = State;
+						*(DATA8*)Inst.PrimParPointer() = State;
 					}
 					break;
-				case FLUSH:
+				case (sbyte)UiButtonSubcode.FLUSH:
 					{
 						if (Blocked == 0)
 						{
@@ -5826,76 +5776,76 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case WAIT_FOR_PRESS:
+				case (sbyte)UiButtonSubcode.WAIT_FOR_PRESS:
 					{
 						if (Blocked == 0)
 						{
 							if (cUiWaitForPress() == 0)
 							{
-								SetObjectIp(TmpIp - 1);
-								SetDispatchStatus(BUSYBREAK);
+								Inst.SetObjectIp(TmpIp - 1);
+								Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 							}
 						}
 						else
 						{
-							SetObjectIp(TmpIp - 1);
-							SetDispatchStatus(BUSYBREAK);
+							Inst.SetObjectIp(TmpIp - 1);
+							Inst.SetDispatchStatus(DSPSTAT.BUSYBREAK);
 						}
 					}
 					break;
-				case GET_HORZ:
+				case (sbyte)UiButtonSubcode.GET_HORZ:
 					{
 						if (Blocked == 0)
 						{
 							Inc = cUiGetHorz();
 						}
-						*(DATA16*)PrimParPointer() = Inc;
+						*(DATA16*)Inst.PrimParPointer() = Inc;
 					}
 					break;
-				case GET_VERT:
+				case (sbyte)UiButtonSubcode.GET_VERT:
 					{
 						if (Blocked == 0)
 						{
 							Inc = cUiGetVert();
 						}
-						*(DATA16*)PrimParPointer() = Inc;
+						*(DATA16*)Inst.PrimParPointer() = Inc;
 					}
 					break;
-				case SET_BACK_BLOCK:
+				case (sbyte)UiButtonSubcode.SET_BACK_BLOCK:
 					{
-						Inst.UiInstance.BackButtonBlocked = *(DATA8*)PrimParPointer();
+						Inst.UiInstance.BackButtonBlocked = *(DATA8*)Inst.PrimParPointer();
 					}
 					break;
-				case GET_BACK_BLOCK:
+				case (sbyte)UiButtonSubcode.GET_BACK_BLOCK:
 					{
-						*(DATA8*)PrimParPointer() = Inst.UiInstance.BackButtonBlocked;
+						*(DATA8*)Inst.PrimParPointer() = Inst.UiInstance.BackButtonBlocked;
 					}
 					break;
-				case TESTSHORTPRESS:
+				case (sbyte)UiButtonSubcode.TESTSHORTPRESS:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							State = cUiTestShortPress(Button);
 						}
-						*(DATA8*)PrimParPointer() = State;
+						*(DATA8*)Inst.PrimParPointer() = State;
 					}
 					break;
-				case TESTLONGPRESS:
+				case (sbyte)UiButtonSubcode.TESTLONGPRESS:
 					{
-						Button = *(DATA8*)PrimParPointer();
+						Button = *(DATA8*)Inst.PrimParPointer();
 
 						if (Blocked == 0)
 						{
 							State = cUiTestLongPress(Button);
 						}
-						*(DATA8*)PrimParPointer() = State;
+						*(DATA8*)Inst.PrimParPointer() = State;
 					}
 					break;
-				case GET_CLICK:
+				case (sbyte)UiButtonSubcode.GET_CLICK:
 					{
-						*(DATA8*)PrimParPointer() = Inst.UiInstance.Click;
+						*(DATA8*)Inst.PrimParPointer() = Inst.UiInstance.Click;
 						Inst.UiInstance.Click = 0;
 					}
 					break;
@@ -5905,7 +5855,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 		public unsafe void cUiKeepAlive()
 		{
 			cUiAlive();
-			*(DATA8*)PrimParPointer() = GetSleepMinutes();
+			*(DATA8*)Inst.PrimParPointer() = Inst.GetSleepMinutes();
 		}
 	}
 }

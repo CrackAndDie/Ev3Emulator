@@ -13,7 +13,12 @@ namespace Ev3EmulatorCore.Lms.Lms2012
 			return 1;
 		}
 
-		public DATA8 GetSleepMinutes()
+        public void SetTerminalEnable(DATA8 value)
+        {
+            // TODO
+        }
+
+        public DATA8 GetSleepMinutes()
 		{
 			// TODO
 			return 0;
@@ -31,7 +36,23 @@ namespace Ev3EmulatorCore.Lms.Lms2012
 			return 0;
 		}
 
-		public unsafe DATA8 CheckUsbstick(DATA8* changed, DATA32* total, DATA32* free, DATA8 force)
+		public unsafe IP GetObjectIp()
+		{
+			// TODO
+			return null;
+		}
+
+        public unsafe void SetObjectIp(IP ip)
+        {
+            // TODO
+        }
+
+		public void SetDispatchStatus(DSPSTAT stat)
+		{
+			// TODO
+		}
+
+        public unsafe DATA8 CheckUsbstick(DATA8* changed, DATA32* total, DATA32* free, DATA8 force)
 		{
 			// TODO
 			return 0;
