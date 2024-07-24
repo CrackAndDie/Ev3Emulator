@@ -36,7 +36,7 @@ target_include_directories (lms2012 PUBLIC
     ${LMS2012_INCLUDE_DIRS}
     ${LMS2012_DEPS_INCLUDE_DIRS}
 )
-add_dependencies (lms2012 bytecodes.h)
+
 target_link_libraries (lms2012 ${LMS2012_DEPS_LIBRARIES} -pthread dl m)
 if (CMAKE_CROSSCOMPILING)
     # These are not picked up automatically when cross compiling for some reason

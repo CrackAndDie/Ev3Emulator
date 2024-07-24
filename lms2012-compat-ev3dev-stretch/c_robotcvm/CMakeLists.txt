@@ -9,4 +9,3 @@ target_include_directories (c_robotcvm PUBLIC
     ${CMAKE_BINARY_DIR}/lms2012
     ${CMAKE_SOURCE_DIR}/c_dynload
 )
-add_dependencies (c_robotcvm bytecodes.h)

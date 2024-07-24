@@ -39,4 +39,3 @@ target_include_directories (c_com PUBLIC
     ${CMAKE_SOURCE_DIR}/c_output
     ${LMS2012_DEPS_INCLUDE_DIRS}
 )
-add_dependencies (c_com bytecodes.h)
