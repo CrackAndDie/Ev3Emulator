@@ -20,6 +20,8 @@
 			new BmpImage("KEY_CAPCHAR", BmpType.KeyboardCap),
 			new BmpImage("KEY_NumSymb", BmpType.KeyboardNum),
 			new BmpImage("KEY_SmCHAR", BmpType.KeyboardSmp),
+
+			new BmpImage("24x12_PCApp", BmpType.App),
 		};
 
 		public List<BmpImage> Images => _images;
@@ -49,6 +51,7 @@
 			KeyboardCap,
 			KeyboardNum,
 			KeyboardSmp,
+			App,
 		}
 
 		public class BmpImage

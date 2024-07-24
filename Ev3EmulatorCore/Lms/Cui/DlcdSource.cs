@@ -59,7 +59,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 			// TODO
 		}
 
-        public void dLcdRect(LCD lcd, byte color, short x0, short y0, short x1, short y1)
+		public void dLcdDrawDotLine(LCD lcd, byte color, short x0, short y0, short x1, short y1, short on, short off)
+		{
+			// TODO
+		}
+
+		public void dLcdRect(LCD lcd, byte color, short x0, short y0, short x1, short y1)
         {
             // TODO
         }
@@ -75,6 +80,11 @@ namespace Ev3EmulatorCore.Lms.Cui
         }
 
         public void dLcdDrawPicture(LCD lcd, byte color, short x0, short y0, short iconWidth, short iconHeight, byte[] data)
+		{
+			// TODO
+		}
+
+		public void dLcdDrawBitmap(LCD lcd, byte color, short x0, short y0, byte[] data)
 		{
 			// TODO
 		}

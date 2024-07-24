@@ -15,7 +15,12 @@ namespace Ev3EmulatorCore.Lms.Cmemory
             return lms2012.Result.OK;
         }
 
-        public lms2012.Result cMemoryGetItem(ushort prgId, short handle, short item, byte len, byte[] name, ref sbyte tp)
+		public void cMemoryCloseFile(ushort prgId, ref short handle)
+		{
+			// TODO
+		}
+
+		public lms2012.Result cMemoryGetItem(ushort prgId, short handle, short item, byte len, byte[] name, ref sbyte tp)
         {
             // TODO
             return lms2012.Result.OK;
@@ -27,7 +32,20 @@ namespace Ev3EmulatorCore.Lms.Cmemory
             return lms2012.Result.OK;
         }
 
-        public sbyte cMemoryGetCacheName(byte item, byte maxLen, byte[] filename, byte[] name)
+		public lms2012.Result cMemoryGetItemText(ushort prgId, short handle, short item, byte len, byte[] text)
+		{
+			// TODO
+			return lms2012.Result.OK;
+		}
+
+		public lms2012.Result cMemoryGetItemIcon(ushort prgId, short handle, short item, ref short pHandle, out byte[] image)
+		{
+            // TODO
+            image = new byte[0];
+			return lms2012.Result.OK;
+		}
+
+		public sbyte cMemoryGetCacheName(byte item, byte maxLen, byte[] filename, byte[] name)
         {
             // TODO
             return 0;

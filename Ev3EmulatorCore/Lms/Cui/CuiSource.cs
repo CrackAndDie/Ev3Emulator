@@ -994,7 +994,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 			}
 		}
 
-		public lms2012.Result cUiNotification(byte color, short x, short y, lms2012.NIcon icon1, lms2012.NIcon icon2, lms2012.NIcon icon3, byte[] text, byte[] state)
+		public lms2012.Result cUiNotification(byte color, short x, short y, lms2012.NIcon icon1, lms2012.NIcon icon2, lms2012.NIcon icon3, byte[] text, ref byte state)
 		{
 			lms2012.Result result = lms2012.Result.BUSY;
 			NOTIFY pQ;
@@ -1012,9 +1012,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 			var pop3 = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.POP3);
 			pQ = LmsInstance.Inst.UiInstance.Notify;
 
-			if (state[0] == 0)
+			if (state == 0)
 			{
-				state[0] = 1;
+				state = 1;
 				pQ.ScreenStartX = x;
 				pQ.ScreenStartY = y;
 				pQ.ScreenWidth = pop3.Width;
@@ -1193,13 +1193,13 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				cUiButtonFlush();
 				result = lms2012.Result.OK;
-				state[0] = 0;
+				state = 0;
 			}
 
 			return result;
 		}
 
-		lms2012.Result cUiQuestion(byte Color, short X, short Y, lms2012.NIcon Icon1, lms2012.NIcon Icon2, byte[] pText, byte[] pState, sbyte[] pAnswer)
+		lms2012.Result cUiQuestion(byte Color, short X, short Y, lms2012.NIcon Icon1, lms2012.NIcon Icon2, byte[] pText, ref byte pState, sbyte[] pAnswer)
 		{
 			lms2012.Result Result = lms2012.Result.BUSY;
 			TQUESTION pQ;
@@ -1227,9 +1227,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 			}
 
-			if (pState[0] == 0)
+			if (pState == 0)
 			{
-				pState[0] = 1;
+				pState = 1;
 				pQ.ScreenStartX = X;
 				pQ.ScreenStartY = Y;
 				pQ.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.LARGE_ICON);
@@ -1320,20 +1320,20 @@ namespace Ev3EmulatorCore.Lms.Cui
 			{
 				cUiButtonFlush();
 				Result = lms2012.Result.OK;
-				pState[0] = 0;
+				pState = 0;
 			}
 			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
 			{
 				cUiButtonFlush();
 				Result = lms2012.Result.OK;
-				pState[0] = 0;
+				pState = 0;
 				pAnswer[0] = -1;
 			}
 
 			return (Result);
 		}
 
-		lms2012.Result cUiIconQuestion(byte Color, short X, short Y, byte[] pState, int[] pIcons)
+		lms2012.Result cUiIconQuestion(byte Color, short X, short Y, ref byte pState, ref int pIcons)
 		{
 			lms2012.Result Result = lms2012.Result.BUSY;
 			IQUESTION pQ;
@@ -1346,9 +1346,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 			var pop2 = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.POP2);
 			pQ = LmsInstance.Inst.UiInstance.IconQuestion;
 
-			if (pState[0] == 0)
+			if (pState == 0)
 			{
-				pState[0] = 1;
+				pState = 1;
 				pQ.ScreenStartX = X;
 				pQ.ScreenStartY = Y;
 				pQ.ScreenWidth = pop2.Width;
@@ -1356,7 +1356,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 				pQ.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.LARGE_ICON);
 				pQ.IconHeight = LmsInstance.Inst.DlcdClass.dLcdGetIconHeight(lms2012.IconType.LARGE_ICON);
 				pQ.Frame = 2;
-				pQ.Icons = pIcons[0];
+				pQ.Icons = pIcons;
 				pQ.NoOfIcons = 0;
 				pQ.PointerX = 0;
 
@@ -1465,26 +1465,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 					}
 					while (Loop != 0 && Mask != 0);
 					Mask >>= 1;
-					pIcons[0] = Mask;
+					pIcons = Mask;
 				}
 				else
 				{
-					pIcons[0] = 0;
+					pIcons = 0;
 				}
 				cUiButtonFlush();
 				Result = lms2012.Result.OK;
-				pState[0] = 0;
+				pState = 0;
 			}
 			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
 			{
-				pIcons[0] = 0;
+				pIcons = 0;
 				cUiButtonFlush();
 				Result = lms2012.Result.OK;
-				pState[0] = 0;
+				pState = 0;
 			}
 			return (Result);
 		}
-		byte cUiKeyboard(byte Color, short X, short Y, lms2012.NIcon Icon, byte Lng, byte[] pText, byte[] pCharSet, byte[] pAnswer)
+		byte cUiKeyboard(byte Color, short X, short Y, lms2012.NIcon Icon, byte Lng, byte[] pText, ref byte pCharSet, byte[] pAnswer)
 		{
 			KEYB pK;
 			short Width;
@@ -1538,10 +1538,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 			pK = LmsInstance.Inst.UiInstance.Keyboard;
 
-			if (pCharSet[0] != 0)
+			if (pCharSet != 0)
 			{
-				pK.CharSet = pCharSet[0];
-				pCharSet[0] = 0;
+				pK.CharSet = pCharSet;
+				pCharSet = 0;
 				pK.ScreenStartX = X;
 				pK.ScreenStartY = Y;
 
@@ -1870,7 +1870,7 @@ namespace Ev3EmulatorCore.Lms.Cui
         lms2012.Result cUiBrowser(byte Type, short X, short Y, short X1, short Y1, byte Lng, ref sbyte pType, byte[] pAnswer)
         {
             lms2012.Result Result = lms2012.Result.BUSY;
-            int Image;
+            byte[] Image;
             BROWSER pB;
             ushort PrgId;
             ushort ObjId;
@@ -1888,7 +1888,7 @@ namespace Ev3EmulatorCore.Lms.Cui
             int Total = 0;
             int Free = 0;
             lms2012.Result TmpResult;
-            short TmpHandle;
+            short TmpHandle = 0;
 
             PrgId = LmsInstance.Inst.CurrentProgramId();
             ObjId = LmsInstance.Inst.CallingObjectId();
@@ -2449,14 +2449,15 @@ namespace Ev3EmulatorCore.Lms.Cui
                                     case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
                                         {
                                             LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
-                                            if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemIcon(pB.PrgId, pB.hFolders, Item, ref TmpHandle, &Image) == lms2012.Result.OK)
+                                            if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemIcon(pB.PrgId, pB.hFolders, Item, ref TmpHandle, out Image) == lms2012.Result.OK)
                                             {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawBitmap(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, pB.IconStartY + (Tmp * pB.LineHeight), (IP)Image);
-                                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFile(pB.PrgId, TmpHandle);
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawBitmap(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), Image);
+                                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFile(pB.PrgId, ref TmpHandle);
                                             }
                                             else
                                             {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, pB.IconStartY + (Tmp * pB.LineHeight), PCApp_width, PCApp_height, (UBYTE*)PCApp_bits);
+												var appp = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.App);
+												LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), appp.Width, appp.Height, appp.Data);
                                             }
 
 											pB.Text[0] = 0;
@@ -2486,7 +2487,7 @@ namespace Ev3EmulatorCore.Lms.Cui
                                                 }
                                                 else
                                                 {
-                                                    if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemText(pB.PrgId, pB.hFolders, Item, pB.Chars, pB.Text) != lms2012.Result.OK)
+                                                    if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemText(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Text) != lms2012.Result.OK)
                                                     {
                                                         pB.Text[0] = 0;
                                                     }
@@ -2558,7 +2559,7 @@ namespace Ev3EmulatorCore.Lms.Cui
                                                 {
                                                     if (Tmp != 0)
                                                     {
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                                        LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
                                                     }
                                                 }
                                             }
@@ -2604,7 +2605,7 @@ namespace Ev3EmulatorCore.Lms.Cui
                                         {
                                             if (((Tmp + pB.ItemStart) == TotalItems) && (Tmp < (pB.Lines - 1)))
                                             {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
                                             }
                                         }
                                         break;
@@ -2613,11 +2614,11 @@ namespace Ev3EmulatorCore.Lms.Cui
                                         {
                                             if (((Tmp + pB.ItemStart) == 1) && (Tmp < (pB.Lines - 1)))
                                             {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
                                             }
                                             if (((Tmp + pB.ItemStart) == TotalItems) && (Tmp < (pB.Lines - 1)))
                                             {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, pB.SelectStartX + pB.SelectWidth, pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2, 1, 2);
+                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
                                             }
                                         }
                                         break;
