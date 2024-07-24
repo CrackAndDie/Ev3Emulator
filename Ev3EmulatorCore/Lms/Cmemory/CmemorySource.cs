@@ -1,63 +1,63 @@
-﻿using EV3DecompilerLib.Decompile;
+﻿using static EV3DecompilerLib.Decompile.lms2012;
 
 namespace Ev3EmulatorCore.Lms.Cmemory
 {
     public partial class CmemoryClass
     {
-        public void cMemoryCloseFolder(ushort prgId, ref short handle)
+        public unsafe void cMemoryCloseFolder(PRGID prgId, HANDLER* handle)
         {
             // TODO
         }
 
-        public lms2012.Result cMemoryOpenFolder(ushort prgId, byte tp, byte[] folderName, ref short handle)
+        public unsafe Result cMemoryOpenFolder(PRGID prgId, DATA8 tp, DATA8* folderName, HANDLER* handle)
         {
             // TODO
-            return lms2012.Result.OK;
+            return Result.OK;
         }
 
-		public void cMemoryCloseFile(ushort prgId, ref short handle)
+		public DSPSTAT cMemoryCloseFile(PRGID prgId, HANDLER handle)
+		{
+            // TODO
+            return DSPSTAT.NOBREAK;
+		}
+
+		public unsafe Result cMemoryGetItem(PRGID prgId, HANDLER handle, DATA16 item, DATA8 len, DATA8* name, DATA8* tp)
+        {
+            // TODO
+            return Result.OK;
+        }
+
+        public unsafe Result cMemoryGetItemName(PRGID prgId, HANDLER handle, DATA16 item, DATA8 len, DATA8* name, DATA8* tp, DATA8* priority)
+        {
+            // TODO
+            return Result.OK;
+        }
+
+		public unsafe Result cMemoryGetItemText(PRGID prgId, HANDLER handle, DATA16 item, DATA8 len, DATA8* text)
 		{
 			// TODO
+			return Result.OK;
 		}
 
-		public lms2012.Result cMemoryGetItem(ushort prgId, short handle, short item, byte len, byte[] name, ref sbyte tp)
-        {
-            // TODO
-            return lms2012.Result.OK;
-        }
-
-        public lms2012.Result cMemoryGetItemName(ushort prgId, short handle, short item, byte len, byte[] name, ref sbyte tp, ref byte priority)
-        {
-            // TODO
-            return lms2012.Result.OK;
-        }
-
-		public lms2012.Result cMemoryGetItemText(ushort prgId, short handle, short item, byte len, byte[] text)
-		{
-			// TODO
-			return lms2012.Result.OK;
-		}
-
-		public lms2012.Result cMemoryGetItemIcon(ushort prgId, short handle, short item, ref short pHandle, out byte[] image)
+		public unsafe Result cMemoryGetItemIcon(PRGID prgId, HANDLER handle, DATA16 item, HANDLER* pHandle, DATA32* image)
 		{
             // TODO
-            image = new byte[0];
-			return lms2012.Result.OK;
+			return Result.OK;
 		}
 
-		public sbyte cMemoryGetCacheName(byte item, byte maxLen, byte[] filename, byte[] name)
+		public unsafe DATA8 cMemoryGetCacheName(DATA8 item, DATA8 maxLen, DATA8* filename, DATA8* name)
         {
             // TODO
             return 0;
         }
 
-        public lms2012.Result cMemoryGetFolderItems(ushort prgId, short handle, ref short items)
+        public unsafe Result cMemoryGetFolderItems(PRGID prgId, HANDLER handle, DATA16* items)
         {
             // TODO
-            return lms2012.Result.OK;
+            return Result.OK;
         }
 
-        public byte cMemoryGetCacheFiles()
+        public DATA8 cMemoryGetCacheFiles()
         {
             // TODO
             return 0;

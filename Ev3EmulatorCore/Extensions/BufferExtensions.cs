@@ -33,5 +33,18 @@
             a2.CopyTo(z, a1.Length);
 			return z;
         }
+
+		public static T[] SubSet<T>(this T[] arr, int start)
+		{
+			int newLen = arr.Length - start;
+			T[] newArr = new T[newLen];
+			Array.Copy(arr, start, newArr, 0, newLen);
+			return newArr;
+		}
+
+		public static V GetDicValue<K, V>(this KeyValuePair<K, V>[] dic, K key)
+		{
+			return dic.First(x => x.Key.Equals(key)).Value;
+		}
 	}
 }

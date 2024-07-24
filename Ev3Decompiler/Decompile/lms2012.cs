@@ -1019,7 +1019,7 @@
             [ProgramInfoSubcode.SET_INSTR] = new[] { Param.PAR16, },
         };
 
-        internal enum UiDrawSubcode
+        public enum UiDrawSubcode : byte
         {
             UPDATE = 0,
             CLEAN = 1,
@@ -1467,7 +1467,9 @@
             NORMAL_FONT = 0,
             SMALL_FONT = 1,
             LARGE_FONT = 2,
-            TINY_FONT = 3
+            TINY_FONT = 3,
+
+            FONTTYPES
         }
 
         public enum IconType : byte
@@ -1501,8 +1503,8 @@
             SICON_USB = 21
         }
 
-        public enum NIcon : sbyte
-        {
+        public enum NIcon : DATA8
+		{
             ICON_NONE = -1,
             ICON_RUN = 0,
             ICON_FOLDER = 1,
@@ -1649,7 +1651,7 @@
             START = 8
         }
 
-        internal enum Delimeter
+        public enum Delimeter : byte
         {
             DEL_NONE = 0,
             DEL_TAB = 1,
@@ -1658,7 +1660,9 @@
             DEL_COLON = 4,
             DEL_COMMA = 5,
             DEL_LINEFEED = 6,
-            DEL_CRLF = 7
+            DEL_CRLF = 7,
+
+            DELS
         }
 
         internal enum HardwareTransportLayer

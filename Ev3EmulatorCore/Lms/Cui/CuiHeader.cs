@@ -1,6 +1,8 @@
 ﻿using EV3DecompilerLib.Decompile;
 using Ev3EmulatorCore.Helpers;
-using System.Security.Cryptography.X509Certificates;
+using YamlDotNet.Core.Tokens;
+using static EV3DecompilerLib.Decompile.lms2012;
+using static Ev3EmulatorCore.Lms.Lms2012.LmsInstance;
 
 namespace Ev3EmulatorCore.Lms.Cui
 {
@@ -8,413 +10,413 @@ namespace Ev3EmulatorCore.Lms.Cui
 	// the file is https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.h
 	public partial class CuiClass
 	{
-        public static KeyValuePair<lms2012.ButtonType, byte>[] MappedToReal =
-        {
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.UP_BUTTON, 0),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.ENTER_BUTTON, 1),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.DOWN_BUTTON, 2),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.RIGHT_BUTTON, 3),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.LEFT_BUTTON, 4),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.BACK_BUTTON, 5),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.ANY_BUTTON, lms2012.REAL_ANY_BUTTON),
-            new KeyValuePair<lms2012.ButtonType, byte>(lms2012.ButtonType.NO_BUTTON, lms2012.REAL_NO_BUTTON),
-        };
-
-		public static KeyValuePair<lms2012.FileType, lms2012.NIcon>[] FiletypeToNormalIcon =
-	    {
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.FILETYPE_UNKNOWN, lms2012.NIcon.ICON_FOLDER),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_FOLDER, lms2012.NIcon.ICON_FOLDER),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_SOUND, lms2012.NIcon.ICON_SOUND),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_BYTECODE, lms2012.NIcon.ICON_RUN),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_GRAPHICS, lms2012.NIcon.ICON_IMAGE),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_DATALOG, lms2012.NIcon.ICON_OBD),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_PROGRAM, lms2012.NIcon.ICON_OBP),
-			new KeyValuePair<lms2012.FileType, lms2012.NIcon>(lms2012.FileType.TYPE_TEXT, lms2012.NIcon.ICON_TEXT),
+		public static KeyValuePair<ButtonType, DATA8>[] MappedToReal =
+		{
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.UP_BUTTON, 0),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.ENTER_BUTTON, 1),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.DOWN_BUTTON, 2),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.RIGHT_BUTTON, 3),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.LEFT_BUTTON, 4),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.BACK_BUTTON, 5),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.ANY_BUTTON, REAL_ANY_BUTTON),
+			new KeyValuePair<ButtonType, DATA8>(ButtonType.NO_BUTTON, REAL_NO_BUTTON),
 		};
 
-		byte[] DownloadSuccesSound = { (byte)lms2012.Op.INFO, (byte)lms2012.LC0((int)lms2012.InfoSubcode.GET_VOLUME), (byte)lms2012.LV0(0), (byte)lms2012.Op.SOUND, (byte)lms2012.LC0((int)lms2012.SoundSubcode.PLAY), (byte)lms2012.LV0(0), (byte)lms2012.LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, (byte)lms2012.Op.SOUND_READY, (byte)lms2012.Op.OBJECT_END };
-		
-		public static byte[] TopLineBattIconMap =
+		public static KeyValuePair<FileType, DATA8>[] FiletypeToNormalIcon =
 		{
-            (byte)lms2012.StatusIcon.SICON_BATT_0,           //  0
-            (byte)lms2012.StatusIcon.SICON_BATT_1,           //  1
-            (byte)lms2012.StatusIcon.SICON_BATT_2,           //  2
-            (byte)lms2012.StatusIcon.SICON_BATT_3,           //  3
-            (byte)lms2012.StatusIcon.SICON_BATT_4            //  4
+			new KeyValuePair<FileType, DATA8>(FileType.FILETYPE_UNKNOWN, (DATA8)NIcon.ICON_FOLDER),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_FOLDER, (DATA8)NIcon.ICON_FOLDER),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_SOUND, (DATA8)NIcon.ICON_SOUND),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_BYTECODE, (DATA8)NIcon.ICON_RUN),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_GRAPHICS, (DATA8)NIcon.ICON_IMAGE),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_DATALOG, (DATA8)NIcon.ICON_OBD),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_PROGRAM, (DATA8)NIcon.ICON_OBP),
+			new KeyValuePair<FileType, DATA8>(FileType.TYPE_TEXT, (DATA8)NIcon.ICON_TEXT),
+		};
+
+		public static KeyValuePair<Delimeter, string>[] Delimiter =
+		{
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_NONE, ""),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_TAB, "\t"),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_SPACE, " "),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_RETURN, "\r"),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_COLON, ":"),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_COMMA, ","),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_LINEFEED, "\n"),
+			new KeyValuePair<Delimeter, string>(Delimeter.DEL_CRLF, "\r\n"),
+		};
+
+		IMGDATA[] DownloadSuccesSound = { (byte)Op.INFO, (byte)LC0((int)InfoSubcode.GET_VOLUME), (byte)LV0(0), (byte)Op.SOUND, (byte)LC0((int)SoundSubcode.PLAY), (byte)LV0(0), (byte)LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, (byte)Op.SOUND_READY, (byte)Op.OBJECT_END };
+
+		public static UBYTE[] TopLineBattIconMap =
+		{
+			(UBYTE)StatusIcon.SICON_BATT_0,           //  0
+            (UBYTE)StatusIcon.SICON_BATT_1,           //  1
+            (UBYTE)StatusIcon.SICON_BATT_2,           //  2
+            (UBYTE)StatusIcon.SICON_BATT_3,           //  3
+            (UBYTE)StatusIcon.SICON_BATT_4            //  4
         };
 
-		public static byte[] TopLineBtIconMap =
+		public static UBYTE[] TopLineBtIconMap =
 		{
-            (byte)lms2012.StatusIcon.SICON_BT_ON,            //  001
-            (byte)lms2012.StatusIcon.SICON_BT_VISIBLE,       //  011
-            (byte)lms2012.StatusIcon.SICON_BT_CONNECTED,     //  101
-            (byte)lms2012.StatusIcon.SICON_BT_CONNVISIB,     //  111
+			(UBYTE)StatusIcon.SICON_BT_ON,            //  001
+            (UBYTE)StatusIcon.SICON_BT_VISIBLE,       //  011
+            (UBYTE)StatusIcon.SICON_BT_CONNECTED,     //  101
+            (UBYTE)StatusIcon.SICON_BT_CONNVISIB,     //  111
         };
 
-		public static byte[] TopLineWifiIconMap =
+		public static UBYTE[] TopLineWifiIconMap =
 		{
-            (byte)lms2012.StatusIcon.SICON_WIFI_3,            //  001
-            (byte)lms2012.StatusIcon.SICON_WIFI_3,       //  011
-            (byte)lms2012.StatusIcon.SICON_BT_CONNECTED,     //  101
-            (byte)lms2012.StatusIcon.SICON_BT_CONNVISIB,     //  111
+			(UBYTE)StatusIcon.SICON_WIFI_3,            //  001
+            (UBYTE)StatusIcon.SICON_WIFI_3,       //  011
+            (UBYTE)StatusIcon.SICON_BT_CONNECTED,     //  101
+            (UBYTE)StatusIcon.SICON_BT_CONNVISIB,     //  111
         };
 
-        public class GRAPH
+		public unsafe struct GRAPH
 		{
-			IntPtr pMin; // float
-			IntPtr pMax; // float
-			IntPtr pVal; // float
-			IntPtr pOffset; // int 16
-			IntPtr pSpan; // int 16
-			float[][] Buffer = CommonHelper.GenerateTwoDimArray<float>(lms2012.GRAPH_BUFFERS, lms2012.GRAPH_BUFFER_SIZE);
-			Int16 Pointer;
-			Int16 GraphStartX;
-			Int16 GraphSizeX;
-			byte Type;
-			byte Items;
-			byte Initialized;
+			public DATAF* pMin;
+			public DATAF* pMax;
+			public DATAF* pVal;
+			public DATA16* pOffset;
+			public DATA16* pSpan;
+			public DATAF[][] Buffer = CommonHelper.GenerateTwoDimArray<DATAF>(GRAPH_BUFFERS, GRAPH_BUFFER_SIZE);
+			public DATA16 Pointer;
+			public DATA16 GraphStartX;
+			public DATA16 GraphSizeX;
+			public DATA8 Type;
+			public DATA8 Items;
+			public DATA8 Initialized;
 
-			float Value;
-			float Inc;
-			byte Down;
+			public DATAF Value;
+			public DATAF Inc;
+			public DATA8 Down;
 
 			public GRAPH()
 			{
 			}
 		}
 
-		public class NOTIFY
+		public struct NOTIFY
 		{
-		    public Int16 ScreenStartX;
-			public Int16 ScreenStartY;
-			public Int16 ScreenWidth;
-			public Int16 ScreenHeight;
-			public Int16 NoOfIcons;
-			public Int16 NoOfChars;
-			public Int16 FontWidth;
-			public Int16 TextStartX;
-			public Int16 TextStartY;
-			public Int16 TextSpaceY;
-			public Int16 TextChars;
-			public Int16 TextLines;
-			public byte[][] TextLine = CommonHelper.GenerateTwoDimArray<byte>(lms2012.MAX_NOTIFY_LINES, lms2012.MAX_NOTIFY_LINE_CHARS);
-			public Int16 IconWidth;
-			public Int16 IconHeight;
-			public Int16 IconStartX;
-			public Int16 IconStartY;
-			public Int16 IconSpaceX;
-			public Int16 LineStartX;
-			public Int16 LineStartY;
-			public Int16 LineEndX;
-			public Int16 YesNoStartX;
-			public Int16 YesNoStartY;
-			public lms2012.FontType Font;
-			public byte NeedUpdate;
+			public DATA16 ScreenStartX;
+			public DATA16 ScreenStartY;
+			public DATA16 ScreenWidth;
+			public DATA16 ScreenHeight;
+			public DATA16 NoOfIcons;
+			public DATA16 NoOfChars;
+			public DATA16 FontWidth;
+			public DATA16 TextStartX;
+			public DATA16 TextStartY;
+			public DATA16 TextSpaceY;
+			public DATA16 TextChars;
+			public DATA16 TextLines;
+			public DATA8[][] TextLine = CommonHelper.GenerateTwoDimArray<DATA8>(MAX_NOTIFY_LINES, MAX_NOTIFY_LINE_CHARS);
+			public DATA16 IconWidth;
+			public DATA16 IconHeight;
+			public DATA16 IconStartX;
+			public DATA16 IconStartY;
+			public DATA16 IconSpaceX;
+			public DATA16 LineStartX;
+			public DATA16 LineStartY;
+			public DATA16 LineEndX;
+			public DATA16 YesNoStartX;
+			public DATA16 YesNoStartY;
+			public DATA8 Font;
+			public DATA8 NeedUpdate;
 
 			public NOTIFY()
 			{
 			}
 		}
 
-		public class IQUESTION
+		public struct IQUESTION
 		{
-			public Int16 ScreenStartX;
-			public Int16 ScreenStartY;
-			public Int16 ScreenWidth;
-			public Int16 ScreenHeight;
-			public Int16 Frame;
-			public Int32 Icons;
-			public Int16 NoOfIcons;
-			public Int16 IconWidth;
-			public Int16 IconHeight;
-			public Int16 IconStartX;
-			public Int16 IconStartY;
-			public Int16 IconSpaceX;
-			public Int16 PointerX;
-			public Int16 SelectStartX;
-			public Int16 SelectStartY;
-			public Int16 SelectWidth;
-			public Int16 SelectHeight;
-			public Int16 SelectSpaceX;
-			public byte NeedUpdate;
+			public DATA16 ScreenStartX;
+			public DATA16 ScreenStartY;
+			public DATA16 ScreenWidth;
+			public DATA16 ScreenHeight;
+			public DATA16 Frame;
+			public DATA32 Icons;
+			public DATA16 NoOfIcons;
+			public DATA16 IconWidth;
+			public DATA16 IconHeight;
+			public DATA16 IconStartX;
+			public DATA16 IconStartY;
+			public DATA16 IconSpaceX;
+			public DATA16 PointerX;
+			public DATA16 SelectStartX;
+			public DATA16 SelectStartY;
+			public DATA16 SelectWidth;
+			public DATA16 SelectHeight;
+			public DATA16 SelectSpaceX;
+			public DATA8 NeedUpdate;
 		}
 
-		public class TQUESTION
+		public struct TQUESTION
 		{
-			public Int16 ScreenStartX;
-			public Int16 ScreenStartY;
-			public Int16 ScreenWidth;
-			public Int16 ScreenHeight;
-			public Int16 NoOfIcons;
-			public Int16 IconWidth;
-			public Int16 IconHeight;
-			public Int16 IconStartX;
-			public Int16 IconStartY;
-			public Int16 IconSpaceX;
-			public Int16 LineStartX;
-			public Int16 LineStartY;
-			public Int16 LineEndX;
-			public Int16 YesNoStartX;
-			public Int16 YesNoStartY;
-			public Int16 YesNoSpaceX;
-			public byte Default;
-			public byte NeedUpdate;
+			public DATA16 ScreenStartX;
+			public DATA16 ScreenStartY;
+			public DATA16 ScreenWidth;
+			public DATA16 ScreenHeight;
+			public DATA16 NoOfIcons;
+			public DATA16 IconWidth;
+			public DATA16 IconHeight;
+			public DATA16 IconStartX;
+			public DATA16 IconStartY;
+			public DATA16 IconSpaceX;
+			public DATA16 LineStartX;
+			public DATA16 LineStartY;
+			public DATA16 LineEndX;
+			public DATA16 YesNoStartX;
+			public DATA16 YesNoStartY;
+			public DATA16 YesNoSpaceX;
+			public DATA8 Default;
+			public DATA8 NeedUpdate;
 		}
 
-		public class KEYB
+		public struct KEYB
 		{
-			public Int16 ScreenStartX;
-			public Int16 ScreenStartY;
-			public Int16 IconStartX;
-			public Int16 IconStartY;
-			public Int16 TextStartX;
-			public Int16 TextStartY;
-			public Int16 StringStartX;
-			public Int16 StringStartY;
-			public Int16 KeybStartX;
-			public Int16 KeybStartY;
-			public Int16 KeybSpaceX;
-			public Int16 KeybSpaceY;
-			public Int16 KeybWidth;
-			public Int16 KeybHeight;
-			public Int16 PointerX;
-			public Int16 PointerY;
-			public Int16 OldX;
-			public Int16 OldY;
-			public byte Layout;
-			public byte CharSet;
-			public byte NeedUpdate;
+			public DATA16 ScreenStartX;
+			public DATA16 ScreenStartY;
+			public DATA16 IconStartX;
+			public DATA16 IconStartY;
+			public DATA16 TextStartX;
+			public DATA16 TextStartY;
+			public DATA16 StringStartX;
+			public DATA16 StringStartY;
+			public DATA16 KeybStartX;
+			public DATA16 KeybStartY;
+			public DATA16 KeybSpaceX;
+			public DATA16 KeybSpaceY;
+			public DATA16 KeybWidth;
+			public DATA16 KeybHeight;
+			public DATA16 PointerX;
+			public DATA16 PointerY;
+			public DATA16 OldX;
+			public DATA16 OldY;
+			public DATA8 Layout;
+			public DATA8 CharSet;
+			public DATA8 NeedUpdate;
 		}
 
-		public class BROWSER
+		public unsafe struct BROWSER
 		{
-			public Int16 ScreenStartX;
-			public Int16 ScreenStartY;
-			public Int16 ScreenWidth;
-			public Int16 ScreenHeight;
-			public Int16 CharWidth;
-			public Int16 CharHeight;
-			public Int16 LineSpace;
-			public Int16 LineHeight;
-			public Int16 IconWidth;
-			public Int16 IconHeight;
-			public Int16 IconStartX;
-			public Int16 IconStartY;
-			public Int16 TextStartX;
-			public Int16 TextStartY;
-			public Int16 SelectStartX;
-			public Int16 SelectStartY;
-			public Int16 SelectWidth;
-			public Int16 SelectHeight;
-			public Int16 ScrollStartX;
-			public Int16 ScrollStartY;
-			public Int16 ScrollWidth;
-			public Int16 ScrollHeight;
-			public Int16 NobHeight;
-			public Int16 ScrollSpan;
+			public DATA16 ScreenStartX;
+			public DATA16 ScreenStartY;
+			public DATA16 ScreenWidth;
+			public DATA16 ScreenHeight;
+			public DATA16 CharWidth;
+			public DATA16 CharHeight;
+			public DATA16 LineSpace;
+			public DATA16 LineHeight;
+			public DATA16 IconWidth;
+			public DATA16 IconHeight;
+			public DATA16 IconStartX;
+			public DATA16 IconStartY;
+			public DATA16 TextStartX;
+			public DATA16 TextStartY;
+			public DATA16 SelectStartX;
+			public DATA16 SelectStartY;
+			public DATA16 SelectWidth;
+			public DATA16 SelectHeight;
+			public DATA16 ScrollStartX;
+			public DATA16 ScrollStartY;
+			public DATA16 ScrollWidth;
+			public DATA16 ScrollHeight;
+			public DATA16 NobHeight;
+			public DATA16 ScrollSpan;
 
-			public Int16 Chars;
-			public Int16 Lines;
+			public DATA16 Chars;
+			public DATA16 Lines;
 
-			public Int16 hFolders = 0;
-			public Int16 hFiles = 0;
-			public UInt16 PrgId;
-			public UInt16 ObjId;
+			public HANDLER hFolders;
+			public HANDLER hFiles;
+			public PRGID PrgId;
+			public OBJID ObjId;
 
-			public Int16 OldFiles;
-			public Int16 Folders;                      // Number of folders [0..DIR_DEEPT]
-			public Int16 OpenFolder;                   // Folder number open (0 = none) [0..DIR_DEEPT]
-			public Int16 Files;                        // Number of files in open folder [0..DIR_DEEPT]
-			public Int16 ItemStart;                    // Item number at top of list (shown)
-			public Int16 ItemPointer;                  // Item list pointer - folder or file
+			public DATA16 OldFiles;
+			public DATA16 Folders;                      // Number of folders [0..DIR_DEEPT]
+			public DATA16 OpenFolder;                   // Folder number open (0 = none) [0..DIR_DEEPT]
+			public DATA16 Files;                        // Number of files in open folder [0..DIR_DEEPT]
+			public DATA16 ItemStart;                    // Item number at top of list (shown)
+			public DATA16 ItemPointer;                  // Item list pointer - folder or file
 
-			public byte NeedUpdate;                   // Flag set if returning without closing browser
+			public DATA8 NeedUpdate;                   // Flag set if returning without closing browser
 
-			// removed some defines
+			public DATA8 Sdcard;
 
-			public byte[] TopFolder = new byte[lms2012.MAX_FILENAME_SIZE];
-			public byte[] SubFolder = new byte[lms2012.MAX_FILENAME_SIZE];
-			public byte[] FullPath = new byte[lms2012.MAX_FILENAME_SIZE];
-			public byte[] Filename = new byte[lms2012.MAX_FILENAME_SIZE];
-			public byte[] Text = new byte[lms2012.TEXTSIZE];
+			public DATA8 Usbstick;
 
-			public BROWSER()
-			{
-			}
+			public fixed DATA8 TopFolder[MAX_FILENAME_SIZE];
+			public fixed DATA8 SubFolder[MAX_FILENAME_SIZE];
+			public fixed DATA8 FullPath[MAX_FILENAME_SIZE];
+			public fixed DATA8 Filename[MAX_FILENAME_SIZE];
+			public fixed DATA8 Text[TEXTSIZE];
 		}
 
-		public class TXTBOX
+		public unsafe struct TXTBOX
 		{
-			Int16 ScreenStartX;
-			Int16 ScreenStartY;
-			Int16 ScreenWidth;
-			Int16 ScreenHeight;
-			Int16 CharWidth;
-			Int16 CharHeight;
-			Int16 LineSpace;
-			Int16 LineHeight;
-			byte NeedUpdate;                   // Flag set if returning without closing browser
-			Int16 TextStartX;
-			Int16 TextStartY;
-			Int16 SelectStartX;
-			Int16 SelectStartY;
-			Int16 SelectWidth;
-			Int16 SelectHeight;
-			Int16 ScrollStartX;
-			Int16 ScrollStartY;
-			Int16 ScrollWidth;
-			Int16 ScrollHeight;
-			Int16 NobHeight;
-			Int16 ScrollSpan;
+			public DATA16 ScreenStartX;
+			public DATA16 ScreenStartY;
+			public DATA16 ScreenWidth;
+			public DATA16 ScreenHeight;
+			public DATA16 CharWidth;
+			public DATA16 CharHeight;
+			public DATA16 LineSpace;
+			public DATA16 LineHeight;
+			public DATA8 NeedUpdate;                   // Flag set if returning without closing browser
+			public DATA16 TextStartX;
+			public DATA16 TextStartY;
+			public DATA16 SelectStartX;
+			public DATA16 SelectStartY;
+			public DATA16 SelectWidth;
+			public DATA16 SelectHeight;
+			public DATA16 ScrollStartX;
+			public DATA16 ScrollStartY;
+			public DATA16 ScrollWidth;
+			public DATA16 ScrollHeight;
+			public DATA16 NobHeight;
+			public DATA16 ScrollSpan;
 
-			Int16 Chars;
-			Int16 Lines;
+			public DATA16 Chars;
+			public DATA16 Lines;
 
-			Int16 Items;
-			Int16 ItemStart;                    // Item number at top of list (shown)
-			Int16 ItemPointer;                  // Item list pointer - folder or file
+			public DATA16 Items;
+			public DATA16 ItemStart;                    // Item number at top of list (shown)
+			public DATA16 ItemPointer;                  // Item list pointer - folder or file
 
-			byte Font;
-			byte[] Text = new byte[lms2012.TEXTSIZE];
-
-			public TXTBOX()
-			{
-			}
+			public DATA8 Font;
+			public fixed DATA8 Text[TEXTSIZE];
 		}
 
-		public class UI_GLOBALS
+		public unsafe struct UI_GLOBALS
 		{
 			//*****************************************************************************
 			// Ui Global variables
 			//*****************************************************************************
 
-			public DlcdClass.LCD LcdSafe = new DlcdClass.LCD();
-			public DlcdClass.LCD LcdSave = new DlcdClass.LCD();
-			public DlcdClass.LCD[] LcdPool = new DlcdClass.LCD[lms2012.LCD_STORE_LEVELS] 
+			public LCD LcdSafe;
+			public LCD LcdSave;
+			public LCD[] LcdPool = new LCD[LCD_STORE_LEVELS]
 			{
-                new DlcdClass.LCD(),
-                new DlcdClass.LCD(),
-				new DlcdClass.LCD()
-            };
-			public DlcdClass.LCD LcdBuffer = new DlcdClass.LCD();
-			public DlcdClass.LCD Lcd = new DlcdClass.LCD(); // ClcdClass.LCD
+				new LCD(),
+				new LCD(),
+				new LCD(),
+			};
+			public LCD LcdBuffer;
+			public LCD* pLcd;
 
-			//UI UiSafe;
-			//UI* pUi;
+			public ANALOG Analog;
+			public ANALOG* pAnalog;
 
-			//ANALOG Analog;
-			//ANALOG* pAnalog;
-
-			public NOTIFY Notify = new NOTIFY();
-			public TQUESTION Question = new TQUESTION();
-			public IQUESTION IconQuestion = new IQUESTION();
-			public BROWSER Browser = new BROWSER();
-			public KEYB Keyboard = new KEYB();
-			public GRAPH Graph = new GRAPH();
-			public TXTBOX Txtbox = new TXTBOX();
+			public	NOTIFY Notify;
+			public TQUESTION Question;
+			public IQUESTION IconQuestion;
+			public BROWSER Browser;
+			public KEYB Keyboard;
+			public GRAPH Graph;
+			public TXTBOX Txtbox;
 
 			public int PowerFile;
 			public int UiFile;
 			public int AdcFile;
 			public int DispFile;
 
-			public ulong SleepTimer;
+			public ULONG SleepTimer;
 
-			public ulong MilliSeconds;
-			public ulong RunScreenTimer;
-			public ulong PowerTimer;
-			public ulong VoltageTimer;
+			public ULONG MilliSeconds;
+			public ULONG RunScreenTimer;
+			public ULONG PowerTimer;
+			public ULONG VoltageTimer;
 
-			// removed some defines here
+			public DATAF CinCnt;
+			public DATAF CoutCnt;
+			public DATAF VinCnt;
 
-			public float CinCnt;
-			public float CoutCnt;
-			public float VinCnt;
+			public DATAF Tbatt;
+			public DATAF Vbatt;
+			public DATAF Ibatt;
+			public DATAF Imotor;
+			public DATAF Iintegrated;
 
-			// removed some defines here
+			public UBYTE PowerInitialized;
 
-			public float Tbatt;
-			public float Vbatt;
-			public float Ibatt;
-			public float Imotor;
-			public float Iintegrated;
+			public DATA8 UpdateState;
+			public ULONG UpdateStateTimer;
+			public UBYTE ReadyForWarnings;
 
-			public float PowerInitialized;
+			public DATA8 TopLineEnabled;
+			public DATA8 RunScreenEnabled;
+			public DATA8 RunLedEnabled;
+			public DATA8 BackButtonBlocked;
+			public DATA8 RunScreenNumber;
+			public DATA8 RunScreenCounter;
+			public DATA8 Escape;
 
-			public byte UpdateState;
-			public ulong UpdateStateTimer;
-			public byte ReadyForWarnings;
+			public DATA8 LedState;
 
-			public byte TopLineEnabled;
-			public byte RunScreenEnabled;
-			public byte RunLedEnabled;
-			public byte BackButtonBlocked;
-			public byte RunScreenNumber;
-			public byte RunScreenCounter;
-			public byte Escape;
+			public fixed DATA8 ButtonState[BUTTONS];
+			public fixed DATA16 ButtonTimer[BUTTONS];
+			public fixed DATA16 ButtonDebounceTimer[BUTTONS];
+			public fixed DATA16 ButtonRepeatTimer[BUTTONS];
+			public DATA8 Activated;
 
-			public byte LedState;
+			public DATA8 ScreenBusy;
+			public DATA8 ScreenBlocked;
+			public PRGID ScreenPrgId;
+			public OBJID ScreenObjId;
 
-			public byte[] ButtonState = new byte[lms2012.BUTTONS];
-			public UInt16[] ButtonTimer = new UInt16[lms2012.BUTTONS];
-			public UInt16[] ButtonDebounceTimer = new UInt16[lms2012.BUTTONS];
-			public UInt16[] ButtonRepeatTimer = new UInt16[lms2012.BUTTONS];
-			public byte Activated;
+			public DATA8 ShutDown;
+			public DATA8 Accu;
+			public DATA8 PowerShutdown;
+			public DATA8 PowerState;
+			public DATA8 VoltShutdown;
+			public DATA8 VoltageState;
+			public DATA8 Warnlight;
+			public DATA8 Warning;
+			public DATA8 WarningShowed;
+			public DATA8 WarningConfirmed;
+			public DATA8 UiUpdate;
 
-			public byte ScreenBusy;
-			public byte ScreenBlocked;
-			public UInt16 ScreenPrgId;
-			public UInt16 ScreenObjId;
+			public DATA8 BtOn;
+			public DATA8 WiFiOn;
 
-			public byte ShutDown;
-			public byte Accu;
-			public byte PowerShutdown;
-			public byte PowerState;
-			public byte VoltShutdown;
-			public byte VoltageState;
-			public byte Warnlight;
-			public byte Warning;
-			public byte WarningShowed;
-			public byte WarningConfirmed;
-			public byte UiUpdate;
+			public DATA16 BattIndicatorHigh;
+			public DATA16 BattIndicatorLow;
+			public DATAF BattWarningHigh;
+			public DATAF BattWarningLow;
+			public DATAF BattShutdownHigh;
+			public DATAF BattShutdownLow;
 
-			public byte BtOn;
-			public byte WiFiOn;
+			public DATA8 Event;
 
-			public Int16 BattIndicatorHigh;
-			public Int16 BattIndicatorLow;
-			public float BattWarningHigh;
-			public float BattWarningLow;
-			public float BattShutdownHigh;
-			public float BattShutdownLow;
-			public byte Event;
+			public DATA8 Click;
 
-			public byte Click;
+			public DATA8 Font;
 
-			public lms2012.FontType Font;
+			public fixed IMGDATA ImageBuffer[IMAGEBUFFER_SIZE];
 
-			public byte[] ImageBuffer = new byte[lms2012.IMAGEBUFFER_SIZE];
+			public fixed DATA8 KeyBuffer[KEYBUF_SIZE + 1];
+			public DATA8 KeyBufIn;
+			public DATA8 Keys;
 
-			public byte[] KeyBuffer = new byte[lms2012.KEYBUF_SIZE + 1];
-			public byte KeyBufIn;
-			public byte Keys;
+			public fixed DATA8 UiWrBuffer[UI_WR_BUFFER_SIZE];
+			public DATA16 UiWrBufferSize;
 
-			public byte[] UiWrBuffer = new byte[lms2012.UI_WR_BUFFER_SIZE];
-			public Int16 UiWrBufferSize;
+			public IMINDEX Point;
+			public IMINDEX Size;
 
-			public ulong Point;
-			public ulong Size;
+			public fixed DATA8 HwVers[HWVERS_SIZE];
+			public fixed DATA8 FwVers[FWVERS_SIZE];
+			public fixed DATA8 FwBuild[FWBUILD_SIZE];
+			public fixed DATA8 OsVers[OSVERS_SIZE];
+			public fixed DATA8 OsBuild[OSBUILD_SIZE];
+			public fixed DATA8 IpAddr[IPADDR_SIZE];
 
-			public char[] HwVers = new char[lms2012.HWVERS_SIZE];
-			public char[] FwVers = new char[lms2012.FWVERS_SIZE];
-			public char[] FwBuild = new char[lms2012.FWBUILD_SIZE];
-			public char[] OsVers = new char[lms2012.OSVERS_SIZE];
-			public char[] OsBuild = new char[lms2012.OSBUILD_SIZE];
-			public char[] IpAddr = new char[lms2012.IPADDR_SIZE];
+			public DATA8 Hw;
 
-			public byte Hw;
-
-			public byte[] Globals = new byte[lms2012.MAX_COMMAND_GLOBALS];
+			public fixed IMGDATA Globals[MAX_COMMAND_GLOBALS];
 
 			public UI_GLOBALS()
 			{

@@ -1,138 +1,212 @@
 ﻿using EV3DecompilerLib.Decompile;
+using Ev3EmulatorCore.Helpers;
 using Ev3EmulatorCore.Lms.Cui;
+using static EV3DecompilerLib.Decompile.lms2012;
+using static Ev3EmulatorCore.Lms.Cui.DlcdClass;
+using static Ev3EmulatorCore.Lms.Lms2012.LmsInstance;
 
 namespace Ev3EmulatorCore.Lms.Lms2012
 {
 	public partial class LmsInstance
 	{
-		public class NONVOL
+		public struct NONVOL
 		{
-			byte VolumePercent;                //!< System default volume [0..100%]
-			byte SleepMinutes;                 //!< System sleep          [0..120min] (0 = ~)
+			public DATA8 VolumePercent;                //!< System default volume [0..100%]
+			public DATA8 SleepMinutes;                 //!< System sleep          [0..120min] (0 = ~)
 		}
 
-		public class BRKP
+		public struct LABEL
 		{
-			ulong Addr;                         //!< Offset to breakpoint address from image start
-			lms2012.Op OpCode;                       //!< Saved substituted opcode
+			public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
 		}
 
-		public class LABEL
+		/*! \struct OBJ
+		 *          Object data is used to hold the variables used for an object (allocated at image load time)
+		 */
+		public unsafe struct OBJ                      // Object
 		{
-			ulong Addr;                         //!< Offset to breakpoint address from image start
+			public IP Ip;                           //!< Object instruction pointer
+			public LP pLocal;                       //!< Local variable pointer
+
+			public UWORD ObjStatus;                    //!< Object status
+			public (OBJID CallerId, TRIGGER TriggerCount) u;
+			public VARDATA[] Local;                      //!< Poll of bytes used for local variables
 		}
 
-		public class OBJ // Object
+
+		/*! \struct BRKP
+		 *          Breakpoint data hold information used for breakpoint
+		 */
+		public unsafe struct BRKP
 		{
-			byte[] Ip;                           //!< Object instruction pointer
-			byte[] pLocal;                       //!< Local variable pointer
-			short ObjStatus;   
-			ushort CallerId;                   //!< Caller id used for SUBCALL to save object id to return to
-			ushort TriggerCount;               //!< Trigger count used by BLOCK's trigger logic
-			byte[] Local;                      //!< Poll of bytes used for local variables
+			public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
+			public Op OpCode;                       //!< Saved substituted opcode
 		}
 
-		public class PRG
+		public unsafe struct PRG
 		{
-			public ulong InstrCnt;                   //!< Instruction counter used for performance analyses
-			public ulong InstrTime;                  //!< Instruction time used for performance analyses
+			public ULONG InstrCnt;                   //!< Instruction counter used for performance analyses
+			public ULONG InstrTime;                  //!< Instruction time used for performance analyses
 
-			public ulong StartTime;                  //!< Program start time [mS]
-			public ulong RunTime;                    //!< Program run time [uS]
+			public ULONG StartTime;                  //!< Program start time [mS]
+			public ULONG RunTime;                    //!< Program run time [uS]
 
-			public byte[] pImage;                     //!< Pointer to start of image
-			public byte[] pData;                      //!< Pointer to start of data
-			public byte[] pGlobal;                    //!< Pointer to start of global bytes
-			public lms2012.ObjectHeader[] pObjHead;                   //!< Pointer to start of object headers
-			public OBJ[][] pObjList;                   //!< Pointer to object pointer list
-			public byte[] ObjectIp;                   //!< Working object Ip
-			public byte[] ObjectLocal;                //!< Working object locals
+			public IP pImage;                     //!< Pointer to start of image
+			public GP pData;                      //!< Pointer to start of data
+			public GP pGlobal;                    //!< Pointer to start of global bytes
+			public OBJHEAD* pObjHead;                   //!< Pointer to start of object headers
+			public OBJ** pObjList;                   //!< Pointer to object pointer list
+			public IP ObjectIp;                   //!< Working object Ip
+			public LP ObjectLocal;                //!< Working object locals
 
-			public ushort Objects;                    //!< No of objects in image
-			public ushort ObjectId;                   //!< Active object id
+			public OBJID Objects;                    //!< No of objects in image
+			public OBJID ObjectId;                   //!< Active object id
 
-			public lms2012.ObjectStatus Status;                     //!< Program status
-			public lms2012.ObjectStatus StatusChange;               //!< Program status change
-			public lms2012.Result Result;                     //!< Program result (OK, BUSY, FAIL)
+			public ObjectStatus Status;                     //!< Program status
+			public ObjectStatus StatusChange;               //!< Program status change
+			public Result Result;                     //!< Program result (OK, BUSY, FAIL)
 
-			public BRKP[] Brkp = Enumerable.Repeat(new BRKP(), lms2012.MAX_BREAKPOINTS).ToArray();      //!< Storage for breakpoint logic
+			public BRKP[] Brkp = new BRKP[MAX_BREAKPOINTS];      //!< Storage for breakpoint logic
 
-			public LABEL[] Label = Enumerable.Repeat(new LABEL(), lms2012.MAX_LABELS).ToArray();          //!< Storage for labels
-			public ushort Debug;                      //!< Debug flag
+			public LABEL[] Label = new LABEL[MAX_LABELS];          //!< Storage for labels
+			public UWORD Debug;                      //!< Debug flag
 
-			public byte[] Name = new byte[lms2012.FILENAME_SIZE];
+			public fixed DATA8 Name[FILENAME_SIZE];
+
+			public PRG()
+			{
+			}
 		}
 
-		public class GLOBALS
+		public unsafe struct COLORSTRUCT
 		{
-			public NONVOL NonVol = new NONVOL();
-			public byte[] FirstProgram = new byte[lms2012.MAX_FILENAME_SIZE];
+			public ULONG[][] Calibration = CommonHelper.GenerateTwoDimArray<ULONG>(CALPOINTS, COLORS);
+			public fixed UWORD CalLimits[CALPOINTS - 1];
+			public UWORD Crc;
+			public fixed UWORD ADRaw[COLORS];
+			public fixed UWORD SensorRaw[COLORS];
 
-			public char[] PrintBuffer = new char[lms2012.PRINTBUFFERSIZE + 1];
-			public byte TerminalEnabled;
+			public COLORSTRUCT()
+			{
+			}
+		}
 
-			public ushort FavouritePrg;
-			public ushort ProgramId;                    //!< Program id running
-			public PRG[] Program = Enumerable.Repeat(new PRG(), lms2012.MAX_PROGRAMS).ToArray();       //!< Program[0] is the UI byte codes running
+		public unsafe struct ANALOG
+		{
+			public fixed DATA16 InPin1[INPUTS];         //!< Analog value at input port connection 1
+			public fixed DATA16 InPin6[INPUTS];         //!< Analog value at input port connection 6
+			public fixed DATA16 OutPin5[OUTPUTS];       //!< Analog value at output port connection 5
+			public DATA16 BatteryTemp;            //!< Battery temperature
+			public DATA16 MotorCurrent;           //!< Current flowing to motors
+			public DATA16 BatteryCurrent;         //!< Current flowing from the battery
+			public DATA16 Cell123456;             //!< Voltage at battery cell 1, 2, 3,4, 5, and 6
 
-			public ulong InstrCnt;                     //!< Instruction counter (performance test)
-			public byte[] pImage;                       //!< Pointer to start of image
-			public byte[] pGlobal;                      //!< Pointer to start of global bytes
-			public lms2012.ObjectHeader[] pObjHead;                     //!< Pointer to start of object headers
-			public OBJ[][] pObjList;                     //!< Pointer to object pointer list
+			public DATA16[][] Pin1 = CommonHelper.GenerateTwoDimArray<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);      //!< Raw value from analog device
+			public DATA16[][] Pin6 = CommonHelper.GenerateTwoDimArray<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);      //!< Raw value from analog device
+			public fixed UWORD Actual[INPUTS];
+			public fixed UWORD LogIn[INPUTS];
+			public fixed UWORD LogOut[INPUTS];
 
-			public byte[] ObjectIp;                     //!< Working object Ip
-			public byte[] ObjectLocal;                  //!< Working object locals
-			public ushort Objects;                      //!< No of objects in image
-			public ushort ObjectId;                     //!< Active object id
+			public COLORSTRUCT[] NxtCol = new COLORSTRUCT[INPUTS];
 
-			public byte[] ObjIpSave;
-			public byte[] ObjGlobalSave;
-			public byte[] ObjLocalSave;
-			public lms2012.DSPSTAT DispatchStatusSave;
-			public ulong PrioritySave;
+			public fixed DATA16 OutPin5Low[OUTPUTS];    //!< Analog value at output port connection 5 when connection 6 is low
+
+			public fixed DATA8 Updated[INPUTS];
+
+			public fixed DATA8 InDcm[INPUTS];          //!< Input port device types
+			public fixed DATA8 InConn[INPUTS];
+
+			public fixed DATA8 OutDcm[OUTPUTS];        //!< Output port device types
+			public fixed DATA8 OutConn[OUTPUTS];
+
+			public ANALOG()
+			{
+			}
+		}
+
+		public unsafe struct LCD
+		{
+			public fixed UBYTE Lcd[LCD_BUFFER_SIZE];
+		}
+
+		public unsafe struct GLOBALS
+		{
+			public NONVOL NonVol;
+			public fixed DATA8 FirstProgram[MAX_FILENAME_SIZE];
+
+			public fixed DATA8 PrintBuffer[PRINTBUFFERSIZE + 1];
+			public DATA8 TerminalEnabled;
+
+			public PRGID FavouritePrg;
+			public PRGID ProgramId;                    //!< Program id running
+			public PRG[] Program = new PRG[MAX_PROGRAMS];        //!< Program[0] is the UI byte codes running
+
+			public ULONG InstrCnt;                     //!< Instruction counter (performance test)
+			public IP pImage;                       //!< Pointer to start of image
+			public GP pGlobal;                      //!< Pointer to start of global bytes
+			public OBJHEAD* pObjHead;                     //!< Pointer to start of object headers
+			public OBJ** pObjList;                     //!< Pointer to object pointer list
+
+			public IP ObjectIp;                     //!< Working object Ip
+			public LP ObjectLocal;                  //!< Working object locals
+			public OBJID Objects;                      //!< No of objects in image
+			public OBJID ObjectId;                     //!< Active object id
+
+			public IP ObjIpSave;
+			public GP ObjGlobalSave;
+			public LP ObjLocalSave;
+			public DSPSTAT DispatchStatusSave;
+			public ULONG PrioritySave;
 
 			public long TimerDataSec;
 			public long TimerDatanSec;
 
-			public ushort Debug;
+			public UWORD Debug;
 
-			public ushort Test;
+			public UWORD Test;
 
-			public ushort RefCount;
+			public UWORD RefCount;
 
-			public ulong TimeuS;
+			public ULONG TimeuS;
 
-			public ulong OldTime1;
-			public ulong OldTime2;
-			public ulong NewTime;
+			public ULONG OldTime1;
+			public ULONG OldTime2;
+			public ULONG NewTime;
 
-			public lms2012.DSPSTAT DispatchStatus;               //!< Dispatch status
-			public ulong Priority;                     //!< Object priority
+			public DSPSTAT DispatchStatus;               //!< Dispatch status
+			public ULONG Priority;                     //!< Object priority
 
-			public ulong Value;
-			public short Handle;
+			public ULONG Value;
+			public HANDLER Handle;
 
-			public lms2012.Error[] Errors = new lms2012.Error[lms2012.ERROR_BUFFER_SIZE];
-			public byte ErrorIn;
-			public byte ErrorOut;
+			public Error[] Errors = new Error[ERROR_BUFFER_SIZE];
+			public UBYTE ErrorIn;
+			public UBYTE ErrorOut;
 
-			public int MemorySize;
-			public int MemoryFree;
-			public ulong MemoryTimer;
+			public DATA32 MemorySize;
+			public DATA32 MemoryFree;
+			public ULONG MemoryTimer;
 
-			public int SdcardSize;
-			public int SdcardFree;
-			public ulong SdcardTimer;
-			public byte SdcardOk;
+			public DATA32 SdcardSize;
+			public DATA32 SdcardFree;
+			public ULONG SdcardTimer;
+			public DATA8 SdcardOk;
 
-			public int UsbstickSize;
-			public int UsbstickFree;
-			public ulong UsbstickTimer;
-			public byte UsbstickOk;
+			public DATA32 UsbstickSize;
+			public DATA32 UsbstickFree;
+			public ULONG UsbstickTimer;
+			public DATA8 UsbstickOk;
 
-			public DlcdClass.LCD LcdBuffer = new DlcdClass.LCD();                    //!< Copy of last LCD update
-			public byte LcdUpdated;                   //!< LCD updated
+			public LCD LcdBuffer;                    //!< Copy of last LCD update
+			public DATA8 LcdUpdated;                   //!< LCD updated
+
+			public ANALOG Analog;
+			public ANALOG* pAnalog;
+			public int AdcFile;
+
+			public GLOBALS()
+			{
+			}
 		}
 	}
 }

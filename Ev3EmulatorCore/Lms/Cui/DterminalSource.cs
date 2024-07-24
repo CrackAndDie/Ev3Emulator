@@ -1,31 +1,32 @@
 ﻿using EV3DecompilerLib.Decompile;
+using static EV3DecompilerLib.Decompile.lms2012;
 
 namespace Ev3EmulatorCore.Lms.Cui
 {
 	public partial class DterminalClass
 	{
-		public lms2012.Result dTerminalInit()
+		public Result dTerminalInit()
 		{
 			//TODO
-			return lms2012.Result.OK;
+			return Result.OK;
 		}
 
-		public lms2012.Result dTerminalExit()
+		public Result dTerminalExit()
 		{
 			//TODO
-			return lms2012.Result.OK;
+			return Result.OK;
 		}
 
-		public lms2012.Result dTerminalRead(ref char key)
+		public unsafe Result dTerminalRead(UBYTE* data)
 		{
 			// TODO
-			return lms2012.Result.OK;
+			return Result.OK;
 		}
 
-		public lms2012.Result dTerminalWrite(byte[] data, short amount)
+		public unsafe Result dTerminalWrite(UBYTE* data, UWORD amount)
 		{
 			// TODO
-			return lms2012.Result.OK;
+			return Result.OK;
 		}
 	}
 }

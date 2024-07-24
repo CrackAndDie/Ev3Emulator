@@ -1,62 +1,65 @@
 ﻿using EV3DecompilerLib.Decompile;
+using System.Runtime.CompilerServices;
+using static EV3DecompilerLib.Decompile.lms2012;
 using static Ev3EmulatorCore.Lms.Lms2012.LmsInstance;
 
 namespace Ev3EmulatorCore.Lms.Lms2012
 {
 	public partial class LmsInstance
 	{
-		public bool GetTerminalEnabled()
+		public DATA8 GetTerminalEnabled()
 		{
 			// TODO
-			return true;
+			return 1;
 		}
 
-		public byte GetSleepMinutes()
-        {
-            // TODO
-			return 0;
-		}
-
-        public ushort CurrentProgramId()
+		public DATA8 GetSleepMinutes()
 		{
 			// TODO
 			return 0;
 		}
 
-        public ushort CallingObjectId()
-        {
-            // TODO
-            return 0;
-        }
-
-		public byte CheckUsbstick(ref byte changed, ref int total, ref int free, byte force)
+		public PRGID CurrentProgramId()
 		{
 			// TODO
 			return 0;
 		}
 
-        public byte CheckSdcard(ref byte changed, ref int total, ref int free, byte force)
-        {
-            // TODO
-            return 0;
-        }
-
-		public lms2012.ObjectStatus ProgramStatusChange(ushort prgId)
+		public OBJID CallingObjectId()
 		{
 			// TODO
-			return lms2012.ObjectStatus.STOPPED;
+			return 0;
 		}
 
-        public lms2012.Result ValidateChar(byte[] pChar, byte Set)
+		public unsafe DATA8 CheckUsbstick(DATA8* changed, DATA32* total, DATA32* free, DATA8 force)
 		{
-			lms2012.Result Result = lms2012.Result.OK;
+			// TODO
+			return 0;
+		}
 
-			if ((lms2012.ValidChars[pChar[0]] & Set) == 0)
-			{
-				pChar[0] = (byte)'_';
-				Result = lms2012.Result.FAIL;
-			}
+		public unsafe DATA8 CheckSdcard(DATA8* changed, DATA32* total, DATA32* free, DATA8 force)
+		{
+			// TODO
+			return 0;
+		}
 
+		public ObjectStatus ProgramStatusChange(PRGID prgId)
+		{
+			// TODO
+			return ObjectStatus.STOPPED;
+		}
+
+		
+		public unsafe void* PrimParPointer()
+		{
+			// TODO
+			return null;
+		}
+
+        public unsafe Result ValidateChar(DATA8* pChar, DATA8 Set)
+		{
+			Result Result = Result.OK;
+			// TODO
 			return (Result);
 		}
 	}

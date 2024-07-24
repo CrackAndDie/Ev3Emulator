@@ -4,119 +4,122 @@ namespace Ev3EmulatorCore.Lms.Cui
 {
 	public partial class DlcdClass
 	{
-		public void dLcdInit(byte[] image)
+		public unsafe void dLcdInit(UBYTE* image)
 		{
 			// TODO
 		}
 
-		public byte dLcdRead()
-		{
-			// TODO
-			return 0;
-		}
-
-		public void dLcdDrawIcon(LCD lcd, byte color, short x0, short y0, lms2012.IconType tp, int no) 
-		{
-			// TODO
-		}
-
-		public short dLcdGetIconWidth(lms2012.IconType icon)
+		public UBYTE dLcdRead()
 		{
 			// TODO
 			return 0;
 		}
 
-		public short dLcdGetIconHeight(lms2012.IconType icon)
+		public unsafe void dLcdDrawIcon(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA8 tp, DATA8 no) 
+		{
+			// TODO
+		}
+
+		public DATA16 dLcdGetIconWidth(DATA8 icon)
 		{
 			// TODO
 			return 0;
 		}
 
-		public short dLcdGetFontWidth(lms2012.FontType font)
+		public DATA16 dLcdGetIconHeight(DATA8 icon)
 		{
 			// TODO
 			return 0;
 		}
 
-		public short dLcdGetFontHeight(lms2012.FontType font)
+		public DATA16 dLcdGetFontWidth(DATA8 font)
 		{
 			// TODO
 			return 0;
 		}
 
-		public void dLcdDrawText(LCD lcd, byte color, short x0, short y0, lms2012.FontType font, byte[] text)
+		public DATA16 dLcdGetFontHeight(DATA8 font)
+		{
+			// TODO
+			return 0;
+		}
+
+		public unsafe void dLcdDrawText(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA8 font, DATA8* text)
 		{
 			// TODO
 		}
 
-		public void dLcdDrawChar(LCD lcd, byte color, short x0, short y0, lms2012.FontType font, byte data)
+		public unsafe void dLcdDrawChar(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA8 font, DATA8 data)
 		{
 			// TODO
 		}
 
-		public void dLcdDrawLine(LCD lcd, byte color, short x0, short y0, short x1, short y1)
+		public unsafe void dLcdDrawLine(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA16 x1, DATA16 y1)
 		{
 			// TODO
 		}
 
-		public void dLcdDrawDotLine(LCD lcd, byte color, short x0, short y0, short x1, short y1, short on, short off)
+		public unsafe void dLcdDrawDotLine(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA16 x1, DATA16 y1, DATA16 on, DATA16 off)
 		{
 			// TODO
 		}
 
-		public void dLcdRect(LCD lcd, byte color, short x0, short y0, short x1, short y1)
+		public unsafe void dLcdRect(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA16 x1, DATA16 y1)
         {
             // TODO
         }
 
-        public void dLcdFillRect(LCD lcd, byte color, short x0, short y0, short x1, short y1)
+		public unsafe void dLcdFillRect(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA16 x1, DATA16 y1)
         {
             // TODO
         }
 
-        public void dLcdDrawPixel(LCD lcd, byte color, short x0, short y0)
+		public unsafe void dLcdDrawPixel(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0)
         {
             // TODO
         }
 
-        public void dLcdDrawPicture(LCD lcd, byte color, short x0, short y0, short iconWidth, short iconHeight, byte[] data)
+		public unsafe void dLcdDrawPicture(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, DATA16 iconWidth, DATA16 iconHeight, UBYTE* data)
 		{
 			// TODO
 		}
 
-		public void dLcdDrawBitmap(LCD lcd, byte color, short x0, short y0, byte[] data)
+		public unsafe void dLcdDrawBitmap(UBYTE* lcd, DATA8 color, DATA16 x0, DATA16 y0, IP data)
 		{
 			// TODO
 		}
 
-		public void dLcdInverseRect(LCD lcd, short x0, short y0, short x1, short y1)
+		public unsafe void dLcdInverseRect(UBYTE* lcd, DATA16 x0, DATA16 y0, DATA16 x1, DATA16 y1)
 		{
 			// TODO
 		}
 
-		public void dLcdUpdate(LCD lcd)
+		public unsafe void dLcdUpdate(UBYTE* lcd)
 		{
 			// TODO
 		}
 
-        public void LcdClearTopline(DlcdClass.LCD lcd)
+        public unsafe void LcdClearTopline(UBYTE* lcd)
 		{
             for (int i = 0; i < lms2012.LCD_TOPLINE_SIZE; ++i)
             {
-                lcd.Lcd[i] = (byte)lms2012.BG_COLOR;
+                lcd[i] = (byte)lms2012.BG_COLOR;
             }
         }
 
-        public void LcdClear(DlcdClass.LCD lcd)
+        public unsafe void LcdClear(UBYTE* lcd)
         {
-            lcd.Lcd = Enumerable.Repeat((byte)lms2012.BG_COLOR, lms2012.LCD_BUFFER_SIZE).ToArray();
-        }
+			for (int i = 0; i < lms2012.LCD_BUFFER_SIZE; ++i)
+			{
+				lcd[i] = (byte)lms2012.BG_COLOR;
+			}
+		}
 
-        public void LcdErase(DlcdClass.LCD lcd)
+        public unsafe void LcdErase(UBYTE* lcd)
         {
 			for (int i = lms2012.LCD_TOPLINE_SIZE; i < lms2012.LCD_BUFFER_SIZE; ++i)
 			{
-                lcd.Lcd[i] = (byte)lms2012.BG_COLOR;
+                lcd[i] = (byte)lms2012.BG_COLOR;
             }
         }
     }

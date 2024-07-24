@@ -2,6 +2,7 @@
 using Ev3EmulatorCore.Extensions;
 using Ev3EmulatorCore.Helpers;
 using Ev3EmulatorCore.Lms.Lms2012;
+using System;
 
 namespace Ev3EmulatorCore.Lms.Cui
 {
@@ -9,7 +10,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 	{
 		public void cUiDownloadSuccessSound()
 		{
-			byte[] locals = new byte[1];
+			UBYTE[] locals = new UBYTE[1];
 			LmsInstance.Inst.ExecuteBytecode(DownloadSuccesSound, null, locals);
 		}
 
@@ -2730,10 +2731,1519 @@ namespace Ev3EmulatorCore.Lms.Cui
 
             if (Result != lms2012.Result.BUSY)
             {
-                //* EXIT *****************************************************************************************************
-            }
+				//* EXIT *****************************************************************************************************
+			}
+			return (Result);
+		}
 
-            return (Result);
-        }
-    }
+		short cUiTextboxGetLines(byte[] pText, int Size, byte Del)
+		{
+			int Point = 0;
+			short Lines = 0;
+			byte DelPoi;
+
+			if (Del < (byte)lms2012.Delimeter.DELS)
+			{
+				while (pText[Point] != 0 && (Point < Size))
+				{
+					DelPoi = 0;
+					while ((pText[Point] != 0) && (Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0) && (pText[Point] == Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi]))
+					{
+						DelPoi++;
+						Point++;
+					}
+					if (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] == 0)
+					{
+						Lines++;
+					}
+					else
+					{
+						if ((pText[Point] != 0) && (Point < Size))
+						{
+							Point++;
+						}
+					}
+				}
+			}
+			return (Lines);
+		}
+
+		void cUiTextboxAppendLine(byte[] pText, int Size, byte Del, ref byte pLine, byte Font)
+		{
+			int Point = 0;
+			byte DelPoi = 0;
+
+			if (Del < (byte)lms2012.Delimeter.DELS)
+			{
+				while ((pText[Point] != 0) && (Point < Size))
+				{
+					Point++;
+				}
+				if ((Point < Size) && (Font != 0))
+				{
+					pText[Point] = Font;
+					Point++;
+				}
+
+				while ((Point < Size) && pLine != 0)
+				{
+					pText[Point] = pLine;
+					Point++;
+					pLine++;
+				}
+				while ((Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0))
+				{
+					pText[Point] = (byte)Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi];
+					Point++;
+					DelPoi++;
+				}
+			}
+		}
+
+
+		int cUiTextboxFindLine(byte[] pText, int Size, byte Del, short Line, ref byte pFont)
+		{
+			int Result = -1;
+			int Point = 0;
+			byte DelPoi = 0;
+
+			pFont = 0;
+			if (Del < (byte)lms2012.Delimeter.DELS)
+			{
+				Result = Point;
+				while ((Line != 0) && (pText[Point] != 0) && (Point < Size))
+				{
+
+					DelPoi = 0;
+					while ((pText[Point] != 0) && (Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0) && (pText[Point] == Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi]))
+					{
+						DelPoi++;
+						Point++;
+					}
+					if (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] == 0)
+					{
+						Line--;
+						if (Line != 0)
+						{
+							Result = Point;
+						}
+					}
+					else
+					{
+						if ((pText[Point] != 0) && (Point < Size))
+						{
+							Point++;
+						}
+					}
+				}
+				if (Line != 0)
+				{
+					Result = -1;
+				}
+				if (Result >= 0)
+				{
+					if ((pText[Result] > 0) && (pText[Result] < (byte)lms2012.FontType.FONTTYPES))
+					{
+						pFont = pText[Result];
+						Result++;
+					}
+				}
+			}
+
+			return (Result);
+		}
+
+		void cUiTextboxReadLine(byte[] pText, int Size, byte Del, byte Lng, short Line, byte[] pLine, ref byte pFont)
+		{
+			int Start;
+			int Point = 0;
+			byte DelPoi = 0;
+			byte Run = 1;
+
+			Start = cUiTextboxFindLine(pText, Size, Del, Line, ref pFont);
+			Point = Start;
+
+			pLine[0] = 0;
+
+			if (Point >= 0)
+			{
+				while ((Run != 0) && (pText[Point] != 0) && (Point < Size))
+				{
+					DelPoi = 0;
+					while ((pText[Point] != 0) && (Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0) && (pText[Point] == Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi]))
+					{
+						DelPoi++;
+						Point++;
+					}
+					if (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] == 0)
+					{
+						Run = 0;
+					}
+					else
+					{
+						if ((pText[Point] != 0) && (Point < Size))
+						{
+							Point++;
+						}
+					}
+				}
+				Point -= (int)DelPoi;
+
+				if (((Point - Start) + 1) < (int)Lng)
+				{
+					Lng = (byte)((Point - Start) + 1);
+				}
+				pLine.WriteBytes(pText.SubSet(Start));
+			}
+		}
+
+
+		lms2012.Result cUiTextbox(short X, short Y, short X1, short Y1, byte[] pText, int Size, byte Del, ref short pLine)
+		{
+			lms2012.Result Result = lms2012.Result.BUSY;
+			TXTBOX pB;
+			short Item;
+			short TotalItems;
+			short Tmp;
+			short Ypos;
+			byte Color;
+
+			pB = LmsInstance.Inst.UiInstance.Txtbox;
+			Color = lms2012.FG_COLOR;
+
+			if (pLine < 0)
+			{
+				//* INIT *****************************************************************************************************
+				// Define screen
+				pB.ScreenStartX = X;
+				pB.ScreenStartY = Y;
+				pB.ScreenWidth = X1;
+				pB.ScreenHeight = Y1;
+
+				pB.Font = LmsInstance.Inst.UiInstance.Font;
+
+				// calculate chars and lines on screen
+				pB.CharWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(pB.Font);
+				pB.CharHeight = LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(pB.Font);
+				pB.Chars = (short)(pB.ScreenWidth / pB.CharWidth);
+
+				// calculate lines on screen
+				pB.LineSpace = 5;
+				pB.LineHeight = (short)(pB.CharHeight + pB.LineSpace);
+				pB.Lines = (short)(pB.ScreenHeight / pB.LineHeight);
+
+				// calculate start of text
+				pB.TextStartX = cUiAlignX(pB.ScreenStartX);
+				pB.TextStartY = (short)(pB.ScreenStartY + (pB.LineHeight - pB.CharHeight) / 2);
+
+				// Calculate selection barBrowser
+				pB.SelectStartX = pB.ScreenStartX;
+				pB.SelectWidth = (short)(pB.ScreenWidth - (pB.CharWidth + 5));
+				pB.SelectStartY = (short)(pB.TextStartY - 1);
+				pB.SelectHeight = (short)(pB.CharHeight + 1);
+
+				// Calculate scroll bar
+				pB.ScrollWidth = 5;
+				pB.NobHeight = 7;
+				pB.ScrollStartX = (short)(pB.ScreenStartX + pB.ScreenWidth - pB.ScrollWidth);
+				pB.ScrollStartY = (short)(pB.ScreenStartY + 1);
+				pB.ScrollHeight = (short)(pB.ScreenHeight - 2);
+				pB.ScrollSpan = (short)(pB.ScrollHeight - pB.NobHeight);
+
+				pB.Items = cUiTextboxGetLines(pText, Size, Del);
+				pB.ItemStart = 1;
+				pB.ItemPointer = 1;
+
+				pB.NeedUpdate = 1;
+
+				pLine = 0;
+			}
+
+			TotalItems = pB.Items;
+
+			Tmp = cUiGetVert();
+			if (Tmp != 0)
+			{ // up/down arrow pressed
+
+				pB.NeedUpdate = 1;
+
+				// Calculate item pointer
+				pB.ItemPointer += Tmp;
+				if (pB.ItemPointer < 1)
+				{
+					pB.ItemPointer = 1;
+					pB.NeedUpdate = 0;
+				}
+				if (pB.ItemPointer > TotalItems)
+				{
+					pB.ItemPointer = TotalItems;
+					pB.NeedUpdate = 0;
+				}
+			}
+
+			// Calculate item start
+			if (pB.ItemPointer < pB.ItemStart)
+			{
+				if (pB.ItemPointer > 0)
+				{
+					pB.ItemStart = pB.ItemPointer;
+				}
+			}
+			if (pB.ItemPointer >= (pB.ItemStart + pB.Lines))
+			{
+				pB.ItemStart = (short)(pB.ItemPointer - pB.Lines);
+				pB.ItemStart++;
+			}
+
+			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
+			{
+				pLine = pB.ItemPointer;
+
+				Result = lms2012.Result.OK;
+			}
+			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
+			{
+				pLine = -1;
+
+				Result = lms2012.Result.OK;
+			}
+
+
+			if (pB.NeedUpdate != 0)
+			{
+				//* UPDATE ***************************************************************************************************
+				pB.NeedUpdate = 0;
+
+				// clear screen
+				LmsInstance.Inst.DlcdClass.dLcdFillRect(LmsInstance.Inst.UiInstance.Lcd, lms2012.BG_COLOR, pB.ScreenStartX, pB.ScreenStartY, pB.ScreenWidth, pB.ScreenHeight);
+
+				Ypos = (short)(pB.TextStartY + 2);
+
+				for (Tmp = 0; Tmp < pB.Lines; Tmp++)
+				{
+					Item = (short)(Tmp + pB.ItemStart);
+
+					if (Item <= TotalItems)
+					{
+						byte tmpFont = (byte)pB.Font;
+						cUiTextboxReadLine(pText, Size, Del, lms2012.TEXTSIZE, Item, pB.Text, ref tmpFont);
+						pB.Font = (lms2012.FontType)tmpFont;
+
+						// calculate chars and lines on screen
+						pB.CharWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(pB.Font);
+						pB.CharHeight = LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(pB.Font);
+
+						// calculate lines on screen
+						pB.LineSpace = 2;
+						pB.LineHeight = (short)(pB.CharHeight + pB.LineSpace);
+						pB.Lines = (short)(pB.ScreenHeight / pB.LineHeight);
+
+						// Calculate selection barBrowser
+						pB.SelectStartX = pB.ScreenStartX;
+						pB.SelectWidth = (short)(pB.ScreenWidth - (pB.ScrollWidth + 2));
+						pB.SelectStartY = (short)(pB.TextStartY - 1);
+						pB.SelectHeight = (short)(pB.CharHeight + 1);
+
+						pB.Chars = (short)(pB.SelectWidth / pB.CharWidth);
+
+						pB.Text[pB.Chars] = 0;
+
+						if ((Ypos + pB.LineHeight) <= (pB.ScreenStartY + pB.ScreenHeight))
+						{
+							LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pB.TextStartX, Ypos, pB.Font, pB.Text);
+						}
+						else
+						{
+							Tmp = pB.Lines;
+						}
+					}
+
+					cUiDrawBar(1, pB.ScrollStartX, pB.ScrollStartY, pB.ScrollWidth, pB.ScrollHeight, 0, TotalItems, pB.ItemPointer);
+
+					if ((Ypos + pB.LineHeight) <= (pB.ScreenStartY + pB.ScreenHeight))
+					{
+						// Draw selection
+						if (pB.ItemPointer == (Tmp + pB.ItemStart))
+						{
+							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, pB.SelectStartX, (short)(Ypos - 1), pB.SelectWidth, pB.LineHeight);
+						}
+					}
+					Ypos += pB.LineHeight;
+				}
+
+				// Update
+				cUiUpdateLcd();
+				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
+			}
+
+			return (Result);
+		}
+		void cUiGraphSetup(short StartX, short SizeX, byte Items, short[] pOffset, short[] pSpan, float[] pMin, float[] pMax, float[] pVal)
+		{
+			short Item;
+			short Pointer;
+			LmsInstance.Inst.UiInstance.Graph.Initialized = 0;
+
+			LmsInstance.Inst.UiInstance.Graph.pOffset = pOffset;
+			LmsInstance.Inst.UiInstance.Graph.pSpan = pSpan;
+			LmsInstance.Inst.UiInstance.Graph.pMin = pMin;
+			LmsInstance.Inst.UiInstance.Graph.pMax = pMax;
+			LmsInstance.Inst.UiInstance.Graph.pVal = pVal;
+
+			if (Items < 0)
+			{
+				Items = 0;
+			}
+			if (Items > lms2012.GRAPH_BUFFERS)
+			{
+				Items = lms2012.GRAPH_BUFFERS;
+			}
+
+
+			LmsInstance.Inst.UiInstance.Graph.GraphStartX = StartX;
+			LmsInstance.Inst.UiInstance.Graph.GraphSizeX = SizeX;
+			LmsInstance.Inst.UiInstance.Graph.Items = Items;
+			LmsInstance.Inst.UiInstance.Graph.Pointer = 0;
+
+			for (Item = 0; Item < LmsInstance.Inst.UiInstance.Graph.Items; Item++)
+			{
+				for (Pointer = 0; Pointer < LmsInstance.Inst.UiInstance.Graph.GraphSizeX; Pointer++)
+				{
+					LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = float.NaN;
+				}
+			}
+
+			LmsInstance.Inst.UiInstance.Graph.Initialized = 1;
+
+			// Simulate graph
+			LmsInstance.Inst.UiInstance.Graph.Value = LmsInstance.Inst.UiInstance.Graph.pMin[0];
+			LmsInstance.Inst.UiInstance.Graph.Down = 0;
+			LmsInstance.Inst.UiInstance.Graph.Inc = (LmsInstance.Inst.UiInstance.Graph.pMax[0] - LmsInstance.Inst.UiInstance.Graph.pMin[0]) / (float)20;
+		}
+
+		void cUiGraphSample()
+		{
+			float Sample;
+			short Item;
+			short Pointer;
+
+			if (LmsInstance.Inst.UiInstance.Graph.Initialized != 0)
+			{ // Only if initialized
+
+				if (LmsInstance.Inst.UiInstance.Graph.Pointer < LmsInstance.Inst.UiInstance.Graph.GraphSizeX)
+				{
+					for (Item = 0; Item < (LmsInstance.Inst.UiInstance.Graph.Items); Item++)
+					{
+						// Insert sample
+						Sample = LmsInstance.Inst.UiInstance.Graph.pVal[Item];
+
+						if (!(float.IsNaN(Sample)))
+						{
+							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][LmsInstance.Inst.UiInstance.Graph.Pointer] = Sample;
+						}
+						else
+						{
+							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][LmsInstance.Inst.UiInstance.Graph.Pointer] = float.NaN;
+						}
+					}
+					LmsInstance.Inst.UiInstance.Graph.Pointer++;
+				}
+				else
+				{
+					// Scroll buffers
+					for (Item = 0; Item < (LmsInstance.Inst.UiInstance.Graph.Items); Item++)
+					{
+						for (Pointer = 0; Pointer < (LmsInstance.Inst.UiInstance.Graph.GraphSizeX - 1); Pointer++)
+						{
+							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer + 1];
+						}
+
+						// Insert sample
+						Sample = LmsInstance.Inst.UiInstance.Graph.pVal[Item];
+
+						if (!(float.IsNaN(Sample)))
+						{
+							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = Sample;
+						}
+						else
+						{
+							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = float.NaN;
+						}
+					}
+				}
+			}
+		}
+		void cUiGraphDraw(byte View, ref float pActual, ref float pLowest, ref float pHighest, ref float pAverage)
+		{
+			float Sample;
+			byte Samples;
+			short Value;
+			short Item;
+			short Pointer;
+			short X;
+			short Y1;
+			short Y2;
+			byte Color = 1;
+			pActual = float.NaN;
+			pLowest = float.NaN;
+			pHighest = float.NaN;
+			pAverage = float.NaN;
+			Samples = 0;
+
+			if (LmsInstance.Inst.UiInstance.Graph.Initialized != 0)
+			{ 
+				// Only if initialized
+				if (LmsInstance.Inst.UiInstance.ScreenBlocked == 0)
+				{
+					// View or all
+					if ((View >= 0) && (View < LmsInstance.Inst.UiInstance.Graph.Items))
+					{
+						Item = View;
+
+						Y1 = (short)(LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]);
+
+						// Draw buffers
+						X = LmsInstance.Inst.UiInstance.Graph.GraphStartX;
+						for (Pointer = 0; Pointer < LmsInstance.Inst.UiInstance.Graph.Pointer; Pointer++)
+						{
+							Sample = LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer];
+							if (!(float.IsNaN(Sample)))
+							{
+								pActual = Sample;
+								if (float.IsNaN(pAverage))
+								{
+									pAverage = (float)0;
+									pLowest = pActual;
+									pHighest = pActual;
+								}
+								else
+								{
+									if (pActual < pLowest)
+									{
+										pLowest = pActual;
+									}
+									if (pActual > pHighest)
+									{
+										pHighest = pActual;
+									}
+								}
+								pAverage += pActual;
+								Samples++;
+
+								// Scale Y axis
+								Value = (short)((((Sample - LmsInstance.Inst.UiInstance.Graph.pMin[Item]) * (float)LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) / (LmsInstance.Inst.UiInstance.Graph.pMax[Item] - LmsInstance.Inst.UiInstance.Graph.pMin[Item])));
+
+								// Limit Y axis
+								if (Value > LmsInstance.Inst.UiInstance.Graph.pSpan[Item])
+								{
+									Value = LmsInstance.Inst.UiInstance.Graph.pSpan[Item];
+								}
+								if (Value < 0)
+								{
+									Value = 0;
+								}
+								/*
+											printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,UiInstance.Graph.pMin[Item],UiInstance.Graph.pMax[Item],UiInstance.Graph.pOffset[Item],UiInstance.Graph.pSpan[Item],Value);
+								*/
+								Y2 = (short)((LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) - Value);
+								if (Pointer > 1)
+								{
+									if (Y2 > Y1)
+									{
+										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
+										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
+									}
+									else
+									{
+										if (Y2 < Y1)
+										{
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
+										}
+										else
+										{
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
+										}
+									}
+									LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), Y1, X, Y2);
+								}
+								else
+								{
+									LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, X, Y2);
+								}
+								Y1 = Y2;
+							}
+							X++;
+						}
+						if (Samples != 0)
+						{
+							pAverage = pAverage / (float)Samples;
+						}
+					}
+					else
+					{
+						// Draw buffers
+						for (Item = 0; Item < LmsInstance.Inst.UiInstance.Graph.Items; Item++)
+						{
+							Y1 = (short)(LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]);
+
+							X = (short)(LmsInstance.Inst.UiInstance.Graph.GraphStartX + 1);
+							for (Pointer = 0; Pointer < LmsInstance.Inst.UiInstance.Graph.Pointer; Pointer++)
+							{
+								Sample = LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer];
+
+								// Scale Y axis
+								Value = (short)((((Sample - LmsInstance.Inst.UiInstance.Graph.pMin[Item]) * (float)LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) / (LmsInstance.Inst.UiInstance.Graph.pMax[Item] - LmsInstance.Inst.UiInstance.Graph.pMin[Item])));
+
+								// Limit Y axis
+								if (Value > LmsInstance.Inst.UiInstance.Graph.pSpan[Item])
+								{
+									Value = LmsInstance.Inst.UiInstance.Graph.pSpan[Item];
+								}
+								if (Value < 0)
+								{
+									Value = 0;
+								}
+								Y2 = (short)((LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) - Value);
+								if (Pointer > 1)
+								{
+									if (Y2 > Y1)
+									{
+										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
+										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
+									}
+									else
+									{
+										if (Y2 < Y1)
+										{
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
+										}
+										else
+										{
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
+											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
+										}
+									}
+									LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), Y1, X, Y2);
+								}
+								else
+								{
+									LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, X, Y2);
+								}
+								Y1 = Y2;
+								X++;
+							}
+						}
+					}
+					LmsInstance.Inst.UiInstance.ScreenBusy = 1;
+				}
+			}
+		}
+
+		public unsafe void cUiDraw()
+		{
+			ushort TmpPrgId;
+			ushort TmpObjId;
+			byte[] TmpIp;
+			byte[] GBuffer = new byte[25];
+			byte[] pBmp = new byte[lms2012.LCD_BUFFER_SIZE];
+			byte Cmd;
+			byte Color;
+			short X;
+			short Y;
+			short X1;
+			short Y1;
+			short Y2;
+			short Y3;
+			int Size;
+			short R;
+			byte[] pText;
+			byte No;
+			byte DataF;
+			byte Figures;
+			byte Decimals;
+			byte[] pI;
+			byte pState;
+			byte[] pAnswer;
+			byte Lng;
+			byte SelectedChar;
+			sbyte pType;
+			byte Type;
+			short On;
+			short Off;
+			short CharWidth;
+			short CharHeight;
+			byte TmpColor;
+			short Tmp;
+			byte Length;
+			byte[] pUnit;
+			int pIcons;
+			byte Items;
+			byte View;
+			short[] pOffset;
+			short[] pSpan;
+			float[] pMin;
+			float[] pMax;
+			float[] pVal;
+			short Min;
+			short Max;
+			short Act;
+			float Actual;
+			float Lowest;
+			float Highest;
+			float Average;
+			byte Icon1;
+			byte Icon2;
+			byte Icon3;
+			byte Blocked;
+			byte Open;
+			byte Del;
+			byte pCharSet;
+			short pLine;
+
+			TmpPrgId = LmsInstance.Inst.CurrentProgramId();
+
+			if ((TmpPrgId != (short)lms2012.Slot.GUI_SLOT) && (TmpPrgId != (short)lms2012.Slot.DEBUG_SLOT))
+			{
+				LmsInstance.Inst.UiInstance.RunScreenEnabled = 0;
+			}
+			if (LmsInstance.Inst.UiInstance.ScreenBlocked == 0)
+			{
+				Blocked = 0;
+			}
+			else
+			{
+				TmpObjId = LmsInstance.Inst.CallingObjectId();
+				if ((TmpPrgId == LmsInstance.Inst.UiInstance.ScreenPrgId) && (TmpObjId == LmsInstance.Inst.UiInstance.ScreenObjId))
+				{
+					Blocked = 0;
+				}
+				else
+				{
+					Blocked = 1;
+				}
+			}
+
+			TmpIp = LmsInstance.Inst.GetObjectIp();
+			Cmd = *(byte*)LmsInstance.Inst.PrimParPointer();
+
+			switch (Cmd)
+			{ 
+				// Function
+				case (byte)lms2012.UiDrawSubcode.UPDATE:
+					{
+						if (Blocked == 0)
+						{
+							cUiUpdateLcd();
+							UiInstance.ScreenBusy = 0;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.CLEAN:
+					{
+						if (Blocked == 0)
+						{
+							UiInstance.Font = NORMAL_FONT;
+
+							Color = BG_COLOR;
+							if (Color)
+							{
+								Color = -1;
+							}
+							memset(&((*UiInstance.pLcd).Lcd[0]), Color, LCD_BUFFER_SIZE);
+
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.TEXTBOX:
+					{
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						X1 = *(DATA16*)PrimParPointer();  // size x
+						Y1 = *(DATA16*)PrimParPointer();  // size y
+						pText = (DATA8*)PrimParPointer();    // textbox
+						Size = *(DATA32*)PrimParPointer();  // textbox size
+						Del = *(DATA8*)PrimParPointer();   // delimitter
+						pLine = (DATA16*)PrimParPointer();   // line
+
+						if (Blocked == 0)
+						{
+							if (cUiTextbox(X, Y, X1, Y1, pText, Size, Del, pLine) == BUSY)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.FILLRECT:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						X1 = *(DATA16*)PrimParPointer();
+						Y1 = *(DATA16*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdFillRect((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.INVERSERECT:
+					{
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						X1 = *(DATA16*)PrimParPointer();
+						Y1 = *(DATA16*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdInverseRect((*UiInstance.pLcd).Lcd, X, Y, X1, Y1);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.RECT:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						X1 = *(DATA16*)PrimParPointer();
+						Y1 = *(DATA16*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdRect((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.PIXEL:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdDrawPixel((*UiInstance.pLcd).Lcd, Color, X, Y);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.LINE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						X1 = *(DATA16*)PrimParPointer();
+						Y1 = *(DATA16*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdDrawLine((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.DOTLINE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						X1 = *(DATA16*)PrimParPointer();
+						Y1 = *(DATA16*)PrimParPointer();
+						On = *(DATA16*)PrimParPointer();
+						Off = *(DATA16*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdDrawDotLine((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1, On, Off);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.CIRCLE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						R = *(DATA16*)PrimParPointer();
+						if (R)
+						{
+							if (Blocked == 0)
+							{
+								dLcdDrawCircle((*UiInstance.pLcd).Lcd, Color, X, Y, R);
+								UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.FILLCIRCLE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						R = *(DATA16*)PrimParPointer();
+						if (R)
+						{
+							if (Blocked == 0)
+							{
+								dLcdDrawFilledCircle((*UiInstance.pLcd).Lcd, Color, X, Y, R);
+								UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.TEXT:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						pText = (DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, UiInstance.Font, pText);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.ICON:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						Type = *(DATA8*)PrimParPointer();
+						No = *(DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							dLcdDrawIcon((*UiInstance.pLcd).Lcd, Color, X, Y, Type, No);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.BMPFILE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						pText = (DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cMemoryGetImage(pText, LCD_BUFFER_SIZE, pBmp) == OK)
+							{
+								dLcdDrawBitmap((*UiInstance.pLcd).Lcd, Color, X, Y, pBmp);
+								UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.PICTURE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						pI = *(IP*)PrimParPointer();
+						if (pI != NULL)
+						{
+							if (Blocked == 0)
+							{
+								dLcdDrawBitmap((*UiInstance.pLcd).Lcd, Color, X, Y, pI);
+								UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.VALUE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						DataF = *(DATAF*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						Decimals = *(DATA8*)PrimParPointer();
+
+						if (isnan(DataF))
+						{
+							for (Lng = 0; Lng < Figures; Lng++)
+							{
+								GBuffer[Lng] = '-';
+							}
+						}
+						else
+						{
+							if (Figures < 0)
+							{
+								Figures = 0 - Figures;
+								snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+							}
+							else
+							{
+								snprintf((char*)GBuffer, 24, "%*.*f", Figures, Decimals, DataF);
+							}
+							if (GBuffer[0] == '-')
+							{ // Negative
+
+								Figures++;
+							}
+						}
+						GBuffer[Figures] = 0;
+						pText = GBuffer;
+						if (Blocked == 0)
+						{
+							dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, UiInstance.Font, pText);
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.VIEW_VALUE:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						DataF = *(DATAF*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						Decimals = *(DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+
+							TmpColor = Color;
+							CharWidth = dLcdGetFontWidth(UiInstance.Font);
+							CharHeight = dLcdGetFontHeight(UiInstance.Font);
+							X1 = ((CharWidth + 2) / 3) - 1;
+							Y1 = (CharHeight / 2);
+
+							Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+
+							if (Lng)
+							{
+								if (GBuffer[0] == '-')
+								{ // Negative
+
+									TmpColor = Color;
+									Lng--;
+									pText = &GBuffer[1];
+								}
+								else
+								{ // Positive
+
+									TmpColor = 1 - Color;
+									pText = GBuffer;
+								}
+
+								// Make sure negative sign is deleted from last time
+								dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
+								if (CharHeight > 12)
+								{
+									dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
+								}
+
+								// Check for "not a number"
+								Tmp = 0;
+								while ((pText[Tmp] != 0) && (pText[Tmp] != 'n'))
+								{
+									Tmp++;
+								}
+								if (pText[Tmp] == 'n')
+								{ // "nan"
+
+									for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+									{
+										GBuffer[Tmp] = '-';
+									}
+									GBuffer[Tmp] = 0;
+
+									// Draw figures
+									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, UiInstance.Font, GBuffer);
+								}
+								else
+								{ // Normal number
+
+									// Check number of figures
+									if (Lng > Figures)
+									{ // Limit figures
+
+										for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+										{
+											GBuffer[Tmp] = '>';
+										}
+										GBuffer[Tmp] = 0;
+										Lng = (DATA16)Figures;
+										pText = GBuffer;
+										TmpColor = 1 - Color;
+
+										// Find X indent
+										Tmp = ((DATA16)Figures - Lng) * CharWidth;
+									}
+									else
+									{ // Centre figures
+
+										// Find X indent
+										Tmp = ((((DATA16)Figures - Lng) + 1) / 2) * CharWidth;
+									}
+
+									// Draw figures
+									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X + Tmp, Y, UiInstance.Font, pText);
+
+									// Draw negative sign
+									dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
+									if (CharHeight > 12)
+									{
+										dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
+									}
+								}
+							}
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.VIEW_UNIT:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();
+						DataF = *(DATAF*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						Decimals = *(DATA8*)PrimParPointer();
+						Length = *(DATA8*)PrimParPointer();
+						pUnit = (DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							TmpColor = Color;
+							CharWidth = dLcdGetFontWidth(LARGE_FONT);
+							CharHeight = dLcdGetFontHeight(LARGE_FONT);
+							X1 = ((CharWidth + 2) / 3) - 1;
+							Y1 = (CharHeight / 2);
+
+							Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+
+							if (Lng)
+							{
+								if (GBuffer[0] == '-')
+								{ // Negative
+
+									TmpColor = Color;
+									Lng--;
+									pText = &GBuffer[1];
+								}
+								else
+								{ // Positive
+
+									TmpColor = 1 - Color;
+									pText = GBuffer;
+								}
+
+								// Make sure negative sign is deleted from last time
+								dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
+								if (CharHeight > 12)
+								{
+									dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
+								}
+
+								// Check for "not a number"
+								Tmp = 0;
+								while ((pText[Tmp] != 0) && (pText[Tmp] != 'n'))
+								{
+									Tmp++;
+								}
+								if (pText[Tmp] == 'n')
+								{ // "nan"
+
+									for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+									{
+										GBuffer[Tmp] = '-';
+									}
+									GBuffer[Tmp] = 0;
+
+									// Draw figures
+									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, LARGE_FONT, GBuffer);
+								}
+								else
+								{ // Normal number
+
+									// Check number of figures
+									if (Lng > Figures)
+									{ // Limit figures
+
+										for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+										{
+											GBuffer[Tmp] = '>';
+										}
+										GBuffer[Tmp] = 0;
+										Lng = (DATA16)Figures;
+										pText = GBuffer;
+										TmpColor = 1 - Color;
+
+										// Find X indent
+										Tmp = ((DATA16)Figures - Lng) * CharWidth;
+									}
+									else
+									{ // Centre figures
+
+										// Find X indent
+										Tmp = ((((DATA16)Figures - Lng) + 1) / 2) * CharWidth;
+									}
+									Tmp = 0;
+
+									// Draw figures
+									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X + Tmp, Y, LARGE_FONT, pText);
+
+									// Draw negative sign
+									dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
+									if (CharHeight > 12)
+									{
+										dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
+									}
+
+									Tmp = ((((DATA16)Lng))) * CharWidth;
+									snprintf((char*)GBuffer, Length, "%s", pUnit);
+									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X + Tmp, Y, SMALL_FONT, GBuffer);
+
+								}
+							}
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.NOTIFICATION:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						Icon1 = *(DATA8*)PrimParPointer();
+						Icon2 = *(DATA8*)PrimParPointer();
+						Icon3 = *(DATA8*)PrimParPointer();
+						pText = (DATA8*)PrimParPointer();
+						pState = (DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cUiNotification(Color, X, Y, Icon1, Icon2, Icon3, pText, pState) == BUSY)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.QUESTION:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						Icon1 = *(DATA8*)PrimParPointer();
+						Icon2 = *(DATA8*)PrimParPointer();
+						pText = (DATA8*)PrimParPointer();
+						pState = (DATA8*)PrimParPointer();
+						pAnswer = (DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cUiQuestion(Color, X, Y, Icon1, Icon2, pText, pState, pAnswer) == BUSY)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.ICON_QUESTION:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						pState = (DATA8*)PrimParPointer();
+						pIcons = (DATA32*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cUiIconQuestion(Color, X, Y, pState, pIcons) == BUSY)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.KEYBOARD:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						No = *(DATA8*)PrimParPointer();   // Icon
+						Lng = *(DATA8*)PrimParPointer();   // length
+						pText = (DATA8*)PrimParPointer();    // default
+						pCharSet = (DATA8*)PrimParPointer();    // valid char set
+						pAnswer = (DATA8*)PrimParPointer();    // string
+
+						if (VMInstance.Handle >= 0)
+						{
+							pAnswer = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+
+						if (Blocked == 0)
+						{
+							SelectedChar = cUiKeyboard(Color, X, Y, No, Lng, pText, pCharSet, pAnswer);
+
+							// Wait for "ENTER"
+							if (SelectedChar != 0x0D)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.BROWSE:
+					{
+						Type = *(DATA8*)PrimParPointer();   // Browser type
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						X1 = *(DATA16*)PrimParPointer();  // size x
+						Y1 = *(DATA16*)PrimParPointer();  // size y
+						Lng = *(DATA8*)PrimParPointer();   // length
+						pType = (DATA8*)PrimParPointer();    // item type
+						pAnswer = (DATA8*)PrimParPointer();    // item name
+
+						if (VMInstance.Handle >= 0)
+						{
+							pAnswer = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+
+						if (Blocked == 0)
+						{
+							if (cUiBrowser(Type, X, Y, X1, Y1, Lng, pType, pAnswer) == BUSY)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.VERTBAR:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						X = *(DATA16*)PrimParPointer();  // start x
+						Y = *(DATA16*)PrimParPointer();  // start y
+						X1 = *(DATA16*)PrimParPointer();  // size x
+						Y1 = *(DATA16*)PrimParPointer();  // size y
+						Min = *(DATA16*)PrimParPointer();  // min
+						Max = *(DATA16*)PrimParPointer();  // max
+						Act = *(DATA16*)PrimParPointer();  // actual
+
+						if (Blocked == 0)
+						{
+							cUiDrawBar(Color, X, Y, X1, Y1, Min, Max, Act);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.SELECT_FONT:
+					{
+						UiInstance.Font = *(DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (UiInstance.Font >= FONTTYPES)
+							{
+								UiInstance.Font = (FONTTYPES - 1);
+							}
+							if (UiInstance.Font < 0)
+							{
+								UiInstance.Font = 0;
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.TOPLINE:
+					{
+						UiInstance.TopLineEnabled = *(DATA8*)PrimParPointer();
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.FILLWINDOW:
+					{
+						Color = *(DATA8*)PrimParPointer();
+						Y = *(DATA16*)PrimParPointer();  // start y
+						Y1 = *(DATA16*)PrimParPointer();  // size y
+						if (Blocked == 0)
+						{
+							UiInstance.Font = NORMAL_FONT;
+
+							if ((Y + Y1) < LCD_HEIGHT)
+							{
+								if ((Color == 0) || (Color == 1))
+								{
+									Y *= ((LCD_WIDTH + 7) / 8);
+
+									if (Y1)
+									{
+										Y1 *= ((LCD_WIDTH + 7) / 8);
+									}
+									else
+									{
+										Y1 = LCD_BUFFER_SIZE - Y;
+									}
+
+									if (Color)
+									{
+										Color = -1;
+									}
+									memset(&((*UiInstance.pLcd).Lcd[Y]), Color, Y1);
+								}
+								else
+								{
+									if (Y1 == 0)
+									{
+										Y1 = LCD_HEIGHT;
+									}
+									Y2 = ((LCD_WIDTH + 7) / 8);
+									for (Tmp = Y; Tmp < Y1; Tmp++)
+									{
+										Y3 = Tmp * ((LCD_WIDTH + 7) / 8);
+										memset(&((*UiInstance.pLcd).Lcd[Y3]), Color, Y2);
+										Color = ~Color;
+									}
+								}
+							}
+
+							UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.STORE:
+					{
+						No = *(DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (No < LCD_STORE_LEVELS)
+							{
+								LCDCopy(&UiInstance.LcdSafe, &UiInstance.LcdPool[No], sizeof(LCD));
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.RESTORE:
+					{
+						No = *(DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (No < LCD_STORE_LEVELS)
+							{
+								LCDCopy(&UiInstance.LcdPool[No], &UiInstance.LcdSafe, sizeof(LCD));
+								UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.GRAPH_SETUP:
+					{
+						X = *(DATA16*)PrimParPointer();  // start x
+						X1 = *(DATA16*)PrimParPointer();  // size y
+						Items = *(DATA8*)PrimParPointer();   // items
+						pOffset = (DATA16*)PrimParPointer();  // handle to offset Y
+						pSpan = (DATA16*)PrimParPointer();  // handle to span y
+						pMin = (DATAF*)PrimParPointer();  // handle to min
+						pMax = (DATAF*)PrimParPointer();  // handle to max
+						pVal = (DATAF*)PrimParPointer();  // handle to val
+
+						if (Blocked == 0)
+						{
+							cUiGraphSetup(X, X1, Items, pOffset, pSpan, pMin, pMax, pVal);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.GRAPH_DRAW:
+					{
+						View = *(DATA8*)PrimParPointer();   // view
+
+						cUiGraphDraw(View, &Actual, &Lowest, &Highest, &Average);
+
+						*(DATAF*)PrimParPointer() = Actual;
+						*(DATAF*)PrimParPointer() = Lowest;
+						*(DATAF*)PrimParPointer() = Highest;
+						*(DATAF*)PrimParPointer() = Average;
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.SCROLL:
+					{
+						Y = *(DATA16*)PrimParPointer();
+						if ((Y > 0) && (Y < LCD_HEIGHT))
+						{
+							dLcdScroll((*UiInstance.pLcd).Lcd, Y);
+						}
+					}
+					break;
+				case (byte)lms2012.UiDrawSubcode.POPUP:
+					{
+						Open = *(DATA8*)PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (Open)
+							{
+								if (!UiInstance.ScreenBusy)
+								{
+									TmpObjId = CallingObjectId();
+
+									LCDCopy(&UiInstance.LcdSafe, &UiInstance.LcdSave, sizeof(UiInstance.LcdSave));
+									UiInstance.ScreenPrgId = TmpPrgId;
+									UiInstance.ScreenObjId = TmpObjId;
+									UiInstance.ScreenBlocked = 1;
+								}
+								else
+								{ // Wait on scrreen
+
+									SetObjectIp(TmpIp - 1);
+									SetDispatchStatus(BUSYBREAK);
+								}
+							}
+							else
+							{
+								LCDCopy(&UiInstance.LcdSave, &UiInstance.LcdSafe, sizeof(UiInstance.LcdSafe));
+								dLcdUpdate(UiInstance.pLcd);
+
+								UiInstance.ScreenPrgId = -1;
+								UiInstance.ScreenObjId = -1;
+								UiInstance.ScreenBlocked = 0;
+							}
+						}
+						else
+						{ // Wait on not blocked
+
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+			}
+		}
+	}
 }

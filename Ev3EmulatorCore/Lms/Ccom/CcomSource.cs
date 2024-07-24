@@ -2,24 +2,24 @@
 {
     public partial class CcomClass
     {
-        public byte cComGetBtStatus()
+        public UBYTE cComGetBtStatus()
         {
             // TODO
             return 1;
         }
 
-        public byte cComGetWifiStatus()
+        public UBYTE cComGetWifiStatus()
         {
             // TODO
             return 1;
         }
 
-        public void cComGetBrickName(int size, byte[] data)
+        public unsafe void cComGetBrickName(DATA8 size, DATA8* data)
         {
             // TODO
         }
 
-        public byte cComGetEvent()
+        public DATA8 cComGetEvent()
         {
             // TODO
             return 1;

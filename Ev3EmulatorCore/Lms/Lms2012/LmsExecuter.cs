@@ -1,4 +1,5 @@
 ﻿using EV3DecompilerLib.Decompile;
+using static EV3DecompilerLib.Decompile.lms2012;
 
 namespace Ev3EmulatorCore.Lms.Lms2012
 {
@@ -11,10 +12,10 @@ namespace Ev3EmulatorCore.Lms.Lms2012
 		/// <param name="globals">Globals</param>
 		/// <param name="locals">Locals</param>
 		/// <returns>Stat</returns>
-		public lms2012.DSPSTAT ExecuteBytecode(byte[] bytecode, byte[] globals, byte[] locals)
+		public unsafe DSPSTAT ExecuteBytecode(IP bytecode, GP globals, LP locals)
 		{
 			// TODO
-			return lms2012.DSPSTAT.NOBREAK;
+			return DSPSTAT.NOBREAK;
 		}
 	}
 }

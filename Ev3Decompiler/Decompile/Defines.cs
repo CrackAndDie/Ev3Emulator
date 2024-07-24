@@ -96,6 +96,9 @@
 		internal const string TEST_UART_DEVICE = "lms_tst_uart";   //!< TEST UART device name
 		internal const string TEST_UART_DEVICE_NAME = "/dev/lms_tst_uart";  //!< TEST UART device file name
 
+		internal const int COLORS = 4;
+		internal const int CALPOINTS = 3;
+
 
 		internal const int DIR_DEEPT = 127;    //!< Max directory items allocated
 
@@ -285,8 +288,8 @@
 
 		public const byte BUTTON_SET = (BUTTON_ALIVE | BUTTON_CLICK);
 
-		public const byte REAL_ANY_BUTTON = 6;
-		public const byte REAL_NO_BUTTON = 7;
+		public const DATA8 REAL_ANY_BUTTON = 6;
+		public const DATA8 REAL_NO_BUTTON = 7;
 
 		// Used when no battery is present
 		public const byte DEFAULT_BATTERY_VOLTAGE = 9;
