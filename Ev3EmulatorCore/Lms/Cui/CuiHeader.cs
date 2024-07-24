@@ -290,6 +290,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 			public fixed DATA8 Text[TEXTSIZE];
 		}
 
+		public unsafe struct UI
+		{
+			public fixed DATA8 Pressed[BUTTONS];                   //!< Pressed status
+		}
+
 		public unsafe struct UI_GLOBALS
 		{
 			//*****************************************************************************
@@ -306,6 +311,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 			};
 			public LCD LcdBuffer;
 			public LCD* pLcd;
+
+			public UI UiSafe;
+			public UI* pUi;
 
 			public ANALOG Analog;
 			public ANALOG* pAnalog;

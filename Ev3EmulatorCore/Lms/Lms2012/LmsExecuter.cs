@@ -12,7 +12,7 @@ namespace Ev3EmulatorCore.Lms.Lms2012
 		/// <param name="globals">Globals</param>
 		/// <param name="locals">Locals</param>
 		/// <returns>Stat</returns>
-		public unsafe DSPSTAT ExecuteBytecode(IP bytecode, GP globals, LP locals)
+		public unsafe DSPSTAT ExecuteByteCode(IP bytecode, GP globals, LP locals)
 		{
 			// TODO
 			return DSPSTAT.NOBREAK;

@@ -1,1507 +1,2273 @@
 ﻿using EV3DecompilerLib.Decompile;
-using Ev3EmulatorCore.Extensions;
-using Ev3EmulatorCore.Helpers;
 using Ev3EmulatorCore.Lms.Lms2012;
-using System;
+using static EV3DecompilerLib.Decompile.lms2012;
+using static Ev3EmulatorCore.Lms.Lms2012.LmsInstance;
 
 namespace Ev3EmulatorCore.Lms.Cui
 {
-	public partial class CuiClass
+	// https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.c
+	public unsafe partial class CuiClass
 	{
-		public void cUiDownloadSuccessSound()
-		{
-			UBYTE[] locals = new UBYTE[1];
-			LmsInstance.Inst.ExecuteBytecode(DownloadSuccesSound, null, locals);
-		}
+		// TODO: there was a battery shite
 
-		public void cUiButtonClr()
+		public void cUiDownloadSuccesSound()
 		{
-			for (byte i = 0; i < lms2012.BUTTONS; ++i)
+			VARDATA[] Locals = new VARDATA[1];
+			fixed (byte* pSuccess = &DownloadSuccesSound[0])
+			fixed (byte* pLocals = &Locals[0])
 			{
-				unchecked
-				{
-					LmsInstance.Inst.UiInstance.ButtonState[i] &= (byte)~lms2012.BUTTON_CLR;
-				}
+				Inst.ExecuteByteCode(pSuccess, null, pLocals);
 			}
 		}
 
-		public void cUiButtonFlush()
+		void cUiButtonClr()
 		{
-			for (byte i = 0; i < lms2012.BUTTONS; ++i)
+			DATA8 Button;
+
+			for (Button = 0; Button < BUTTONS; Button++)
 			{
-				unchecked
-				{
-					LmsInstance.Inst.UiInstance.ButtonState[i] &= (byte)~lms2012.BUTTON_FLUSH;
-				}
+				Inst.UiInstance.ButtonState[Button] &= ~BUTTON_CLR;
 			}
 		}
 
-		public void cUiSetLed(byte state)
+		void cUiButtonFlush()
 		{
-			byte[] buffer = new byte[2];
-			LmsInstance.Inst.UiInstance.LedState = state;
+			DATA8 Button;
 
-			if (LmsInstance.Inst.UiInstance.UiFile >= lms2012.MIN_HANDLE)
+			for (Button = 0; Button < BUTTONS; Button++)
 			{
-				if (LmsInstance.Inst.UiInstance.Warnlight != 0)
+				Inst.UiInstance.ButtonState[Button] &= ~BUTTON_FLUSH;
+			}
+		}
+
+		void cUiSetLed(DATA8 State)
+		{
+			DATA8[] Buffer = new DATA8[2];
+
+			Inst.UiInstance.LedState = State;
+
+			if (Inst.UiInstance.UiFile >= MIN_HANDLE)
+			{
+				if (Inst.UiInstance.Warnlight != 0)
 				{
-					if (state == (byte)lms2012.LedPattern.LED_GREEN_FLASH || state == (byte)lms2012.LedPattern.LED_RED_FLASH || state == (byte)lms2012.LedPattern.LED_ORANGE_FLASH)
+					if ((State == LED_GREEN_FLASH) || (State == LED_RED_FLASH) || (State == LED_ORANGE_FLASH))
 					{
-						buffer[0] = (byte)lms2012.LedPattern.LED_ORANGE_FLASH + '0';
-					}
-					else if (state == (byte)lms2012.LedPattern.LED_GREEN_PULSE || state == (byte)lms2012.LedPattern.LED_RED_PULSE || state == (byte)lms2012.LedPattern.LED_ORANGE_PULSE)
-					{
-						buffer[0] = (byte)lms2012.LedPattern.LED_ORANGE_PULSE + '0';
+						Buffer[0] = LED_ORANGE_FLASH + '0';
 					}
 					else
 					{
-						buffer[0] = (byte)lms2012.LedPattern.LED_ORANGE + '0';
+						if ((State == LED_GREEN_PULSE) || (State == LED_RED_PULSE) || (State == LED_ORANGE_PULSE))
+						{
+							Buffer[0] = LED_ORANGE_PULSE + '0';
+						}
+						else
+						{
+							Buffer[0] = LED_ORANGE + '0';
+						}
 					}
 				}
 				else
 				{
-					buffer[0] = (byte)(LmsInstance.Inst.UiInstance.LedState + '0');
+					Buffer[0] = Inst.UiInstance.LedState + '0';
 				}
-				buffer[1] = 0;
-				LmsInstance.Inst.UiFileHandler.Write(LmsInstance.Inst.UiInstance.UiFile, buffer, 2);
+				Buffer[1] = 0;
+				write(Inst.UiInstance.UiFile, Buffer, 2);
 			}
 		}
 
-		public void cUiAlive()
+
+		void cUiAlive()
 		{
-			LmsInstance.Inst.UiInstance.SleepTimer = 0;
+			Inst.UiInstance.SleepTimer = 0;
 		}
 
-		public lms2012.Result cUiInit()
+
+		RESULT cUiInit()
 		{
-			lms2012.Result result;
+			RESULT Result = OK;
+			UI* pUiTmp;
+			ANALOG* pAdcTmp;
+			UBYTE Tmp;
+			DATAF Hw;
+			DATA8 Buffer[32];
+			DATA8 OsBuf[2000];
+			int Lng;
+			int Start;
+			int Sid;
 
 			cUiAlive();
 
-			LmsInstance.Inst.UiInstance.ReadyForWarnings = 0;
-			LmsInstance.Inst.UiInstance.UpdateState = 0;
-			LmsInstance.Inst.UiInstance.RunLedEnabled = 0;
-			LmsInstance.Inst.UiInstance.RunScreenEnabled = 0;
-			LmsInstance.Inst.UiInstance.TopLineEnabled = 0;
-			LmsInstance.Inst.UiInstance.BackButtonBlocked = 0;
-			LmsInstance.Inst.UiInstance.Escape = 0;
-			LmsInstance.Inst.UiInstance.KeyBufIn = 0;
-			LmsInstance.Inst.UiInstance.Keys = 0;
-			LmsInstance.Inst.UiInstance.UiWrBufferSize = 0;
+			Inst.UiInstance.ReadyForWarnings = 0;
+			Inst.UiInstance.UpdateState = 0;
+			Inst.UiInstance.RunLedEnabled = 0;
+			Inst.UiInstance.RunScreenEnabled = 0;
+			Inst.UiInstance.TopLineEnabled = 0;
+			Inst.UiInstance.BackButtonBlocked = 0;
+			Inst.UiInstance.Escape = 0;
+			Inst.UiInstance.KeyBufIn = 0;
+			Inst.UiInstance.Keys = 0;
+			Inst.UiInstance.UiWrBufferSize = 0;
 
-			LmsInstance.Inst.UiInstance.ScreenBusy = 0;
-			LmsInstance.Inst.UiInstance.ScreenBlocked = 0;
-			LmsInstance.Inst.UiInstance.ScreenPrgId = 0; // there was -1
-			LmsInstance.Inst.UiInstance.ScreenObjId = 0; // there was -1
+			Inst.UiInstance.ScreenBusy = 0;
+			Inst.UiInstance.ScreenBlocked = 0;
+			Inst.UiInstance.ScreenPrgId = -1;
+			Inst.UiInstance.ScreenObjId = -1;
 
-			LmsInstance.Inst.UiInstance.ShutDown = 0; 
+			Inst.UiInstance.PowerInitialized = 0;
+			Inst.UiInstance.ShutDown = 0;
 
-			LmsInstance.Inst.UiInstance.PowerShutdown = 0; 
-			LmsInstance.Inst.UiInstance.PowerState = 0; 
-			LmsInstance.Inst.UiInstance.VoltShutdown = 0; 
-			LmsInstance.Inst.UiInstance.Warnlight = 0; 
-			LmsInstance.Inst.UiInstance.Warning = 0; 
-			LmsInstance.Inst.UiInstance.WarningShowed = 0; 
-			LmsInstance.Inst.UiInstance.WarningConfirmed = 0; 
-			LmsInstance.Inst.UiInstance.VoltageState = 0;
-			
-			LmsInstance.Inst.UiInstance.Lcd = LmsInstance.Inst.UiInstance.LcdSafe; 
- 
-			LmsInstance.Inst.UiInstance.Browser.PrgId = 0; 
-			LmsInstance.Inst.UiInstance.Browser.ObjId = 0; 
+			Inst.UiInstance.PowerShutdown = 0;
+			Inst.UiInstance.PowerState = 0;
+			Inst.UiInstance.VoltShutdown = 0;
+			Inst.UiInstance.Warnlight = 0;
+			Inst.UiInstance.Warning = 0;
+			Inst.UiInstance.WarningShowed = 0;
+			Inst.UiInstance.WarningConfirmed = 0;
+			Inst.UiInstance.VoltageState = 0;
 
-			LmsInstance.Inst.UiInstance.Tbatt = 0; 
-			LmsInstance.Inst.UiInstance.Vbatt = lms2012.DEFAULT_BATTERY_VOLTAGE; 
-			LmsInstance.Inst.UiInstance.Ibatt = 0; 
-			LmsInstance.Inst.UiInstance.Imotor = 0; 
-			LmsInstance.Inst.UiInstance.Iintegrated = 0;
+			Inst.UiInstance.pLcd = &Inst.UiInstance.LcdSafe;
+			Inst.UiInstance.pUi = &Inst.UiInstance.UiSafe;
+			Inst.UiInstance.pAnalog = &Inst.UiInstance.Analog;
 
-			result = LmsInstance.Inst.DterminalClass.dTerminalInit();
+			Inst.UiInstance.Browser.PrgId = 0;
+			Inst.UiInstance.Browser.ObjId = 0;
 
-			LmsInstance.Inst.DlcdClass.dLcdInit(LmsInstance.Inst.UiInstance.Lcd.Lcd);
+			Inst.UiInstance.Tbatt = 0.0;
+			Inst.UiInstance.Vbatt = 9.0;
+			Inst.UiInstance.Ibatt = 0.0;
+			Inst.UiInstance.Imotor = 0.0;
+			Inst.UiInstance.Iintegrated = 0.0;
+# ifdef Linux_X86
+			Inst.UiInstance.Ibatt = 0.1;
+			Inst.UiInstance.Imotor = 0.0;
+#endif
 
-			// https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.c#L780C3-L780C11
-			// or 
-			// https://github.com/ev3dev/lms2012-compat/blob/ev3dev-stretch/c_ui/c_ui.c#L334
-			LmsInstance.Inst.UiInstance.HwVers.WriteString("ev3rcv");
-			LmsInstance.Inst.UiInstance.Hw = 0;
-			LmsInstance.Inst.UiInstance.FwVers.WriteString("V1.3.37");
-			LmsInstance.Inst.UiInstance.FwBuild.WriteString("20Jan201020");
+			Result = dTerminalInit();
 
-			LmsInstance.Inst.UiInstance.OsVers.WriteString("Anime1337 WAYDH");
-			LmsInstance.Inst.UiInstance.OsBuild.WriteString("20Jan201020");
+			Inst.UiInstance.PowerFile = open(POWER_DEVICE_NAME, O_RDWR);
+			Inst.UiInstance.UiFile = open(UI_DEVICE_NAME, O_RDWR | O_SYNC);
+			Inst.UiInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
 
-			LmsInstance.Inst.UiInstance.IpAddr.WriteString("0.0.0.0");
+			dLcdInit((*Inst.UiInstance.pLcd).Lcd);
 
-			cUiButtonClr();
-
-			LmsInstance.Inst.UiInstance.Accu = 1;
-			LmsInstance.Inst.UiInstance.BattIndicatorHigh = lms2012.ACCU_INDICATOR_HIGH;
-			LmsInstance.Inst.UiInstance.BattIndicatorLow = lms2012.ACCU_INDICATOR_LOW;
-			LmsInstance.Inst.UiInstance.BattWarningHigh = lms2012.ACCU_WARNING_HIGH;
-			LmsInstance.Inst.UiInstance.BattWarningLow = lms2012.ACCU_WARNING_LOW;
-			LmsInstance.Inst.UiInstance.BattShutdownHigh = lms2012.ACCU_SHUTDOWN_HIGH;
-			LmsInstance.Inst.UiInstance.BattShutdownLow = lms2012.ACCU_SHUTDOWN_LOW;
-
-			return result;
-		}
-
-		public lms2012.Result cUiOpen()
-		{
-			lms2012.Result result;
-
-			LmsInstance.Inst.UiInstance.LcdPool[0] = (DlcdClass.LCD)LmsInstance.Inst.UiInstance.LcdSafe.Clone();
-
-			cUiButtonClr();
-			cUiSetLed((byte)lms2012.LedPattern.LED_GREEN_PULSE);
-			LmsInstance.Inst.UiInstance.RunScreenEnabled = 3;
-			LmsInstance.Inst.UiInstance.RunLedEnabled = 1;
-			LmsInstance.Inst.UiInstance.TopLineEnabled = 0;
-
-			result = lms2012.Result.OK;
-			return result;
-		}
-
-		public lms2012.Result cUiClose()
-		{
-			lms2012.Result result;
-			unchecked
+			Hw = 0;
+			if (Inst.UiInstance.UiFile >= MIN_HANDLE)
 			{
-				LmsInstance.Inst.UiInstance.Warning &= (byte)~lms2012.Warning.WARNING_BUSY;
-			}
-			LmsInstance.Inst.UiInstance.RunLedEnabled = 0;
-			LmsInstance.Inst.UiInstance.RunScreenEnabled = 0;
-			LmsInstance.Inst.UiInstance.TopLineEnabled = 1;
-			LmsInstance.Inst.UiInstance.BackButtonBlocked = 0;
-			LmsInstance.Inst.UiInstance.Browser.NeedUpdate = 1;
-			cUiSetLed((byte)lms2012.LedPattern.LED_GREEN);
+				pUiTmp = (UI*)mmap(0, sizeof(UI), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, Inst.UiInstance.UiFile, 0);
 
-			cUiButtonClr();
-
-			result = lms2012.Result.OK;
-			return result;
-		}
-
-		public lms2012.Result cUiExit()
-		{
-			lms2012.Result result;
-
-			result = LmsInstance.Inst.DterminalClass.dTerminalExit();
-
-			LmsInstance.Inst.UiFileHandler.OnExit();
-
-			return result;
-		}
-
-		public void cUiUpdateButtons(UInt16 time)
-		{
-			byte button;
-			for (button = 0; button < lms2012.BUTTONS; ++button)
-			{
-				if (LmsInstance.Inst.UiFileHandler.IsButtonPressed(button))
+				if (pUiTmp == MAP_FAILED)
 				{
-					if (LmsInstance.Inst.UiInstance.ButtonDebounceTimer[button] == 0)
-					{
-						LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_ACTIVE;
-					}
-					LmsInstance.Inst.UiInstance.ButtonDebounceTimer[button] = lms2012.BUTTON_DEBOUNCE_TIME;
+# ifndef Linux_X86
+					LogErrorNumber(UI_SHARED_MEMORY);
+					Result = FAIL;
+#endif
 				}
 				else
 				{
-					if (LmsInstance.Inst.UiInstance.ButtonDebounceTimer[button] > 0)
-					{
-						LmsInstance.Inst.UiInstance.ButtonDebounceTimer[button] -= time;
-						if (LmsInstance.Inst.UiInstance.ButtonDebounceTimer[button] <= 0)
-						{
-							unchecked
-							{
-								LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_ACTIVE;
-							}
-							LmsInstance.Inst.UiInstance.ButtonDebounceTimer[button] = 0;
-						}
-					}
+					Inst.UiInstance.pUi = pUiTmp;
 				}
 
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVE) != 0)
-				{
-					if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_PRESSED) == 0)
-					{
-						LmsInstance.Inst.UiInstance.Activated = lms2012.BUTTON_SET;
-						LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_PRESSED;
-						LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_ACTIVATED;
-						LmsInstance.Inst.UiInstance.ButtonTimer[button] = 0;
-						LmsInstance.Inst.UiInstance.ButtonRepeatTimer[button] = lms2012.BUTTON_START_REPEAT_TIME;
-					}
-
-					if (LmsInstance.Inst.UiInstance.ButtonRepeatTimer[button] > time)
-					{
-						LmsInstance.Inst.UiInstance.ButtonRepeatTimer[button] -= time;
-					}
-					else
-					{
-						if ((button != 1) && (button != 5))
-						{
-							LmsInstance.Inst.UiInstance.Activated |= lms2012.BUTTON_SET;
-							LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_ACTIVATED;
-							LmsInstance.Inst.UiInstance.ButtonRepeatTimer[button] = lms2012.BUTTON_REPEAT_TIME;
-						}
-					}
-
-					// long press
-					LmsInstance.Inst.UiInstance.ButtonTimer[button] += time;
-					if (LmsInstance.Inst.UiInstance.ButtonTimer[button] >= lms2012.LONG_PRESS_TIME)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONG_LATCH) == 0)
-						{
-							LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_LONG_LATCH;
-
-							// WARNING: idk what is this
-							if (button == 2)
-							{
-								LmsInstance.Inst.UiInstance.Activated |= lms2012.BUTTON_BUFPRINT;
-							}
-						}
-						LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_LONGPRESS;
-					}
-				}
-				else
-				{
-					// released
-					if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_PRESSED) != 0)
-					{
-						unchecked
-						{
-							LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_PRESSED;
-							LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_LONG_LATCH;
-							LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_BUMBED;
-						}
-					}
-				}
-			}
-		}
-
-		public lms2012.Result cUiUpdateInput()
-		{
-			char key = ' ';
-
-			if (LmsInstance.Inst.GetTerminalEnabled())
-			{
-				if (LmsInstance.Inst.DterminalClass.dTerminalRead(ref key) == lms2012.Result.OK)
-				{
-					switch (key)
-					{
-						case ' ':
-						case '<':
-							LmsInstance.Inst.UiInstance.Escape = (byte)key;
-							break;
-						case '\r':
-						case '\n':
-							if (LmsInstance.Inst.UiInstance.KeyBufIn != 0)
-							{
-								LmsInstance.Inst.UiInstance.Keys = LmsInstance.Inst.UiInstance.KeyBufIn;
-								LmsInstance.Inst.UiInstance.KeyBufIn = 0;
-							}
-							break;
-						default:
-							LmsInstance.Inst.UiInstance.KeyBuffer[LmsInstance.Inst.UiInstance.KeyBufIn] = (byte)key;
-							if (++LmsInstance.Inst.UiInstance.KeyBufIn >= lms2012.KEYBUF_SIZE)
-								LmsInstance.Inst.UiInstance.KeyBufIn--;
-							LmsInstance.Inst.UiInstance.KeyBuffer[LmsInstance.Inst.UiInstance.KeyBufIn] = 0;
-							break;
-					}
-				}
-			}
-
-			LmsInstance.Inst.DlcdClass.dLcdRead();
-
-			return lms2012.Result.OK;
-		}
-
-		public byte cUiEscape()
-		{
-			byte result = LmsInstance.Inst.UiInstance.Escape;
-			LmsInstance.Inst.UiInstance.Escape = 0;
-			return result;
-		}
-
-		public void cUiTestpin(byte state)
-		{
-			LmsInstance.Inst.UiFileHandler.Write(UiFileHandler.POWER_FILE_HANDLER, [state], 1);
-		}
-
-		public byte AtoN(char ch)
-		{
-			byte tmp = 0;
-			if (ch >= '0' && ch <= '9')
-			{
-				tmp = (byte)(ch - '0');
+				read(Inst.UiInstance.UiFile, Inst.UiInstance.HwVers, HWVERS_SIZE);
+				sscanf(&Inst.UiInstance.HwVers[1], "%f", &Hw);
 			}
 			else
 			{
-				ch |= (char)0x20;
-				if (ch >= 'a' && ch <= 'f')
+# ifndef Linux_X86
+				LogErrorNumber(UI_DEVICE_FILE_NOT_FOUND);
+				Result = FAIL;
+#else
+				snprintf(Inst.UiInstance.HwVers, HWVERS_SIZE, "X86");
+#endif
+			}
+			Hw *= (DATAF)10;
+			Inst.UiInstance.Hw = (DATA8)Hw;
+
+			if (Inst.UiInstance.AdcFile >= MIN_HANDLE)
+			{
+				pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, Inst.UiInstance.AdcFile, 0);
+
+				if (pAdcTmp == MAP_FAILED)
 				{
-					tmp = (byte)((byte)(ch - 'a') + 10);
+# ifndef Linux_X86
+					LogErrorNumber(ANALOG_SHARED_MEMORY);
+					Result = FAIL;
+#endif
+				}
+				else
+				{
+					Inst.UiInstance.pAnalog = pAdcTmp;
 				}
 			}
-			return tmp;
+			else
+			{
+# ifndef Linux_X86
+				LogErrorNumber(ANALOG_DEVICE_FILE_NOT_FOUND);
+				Result = FAIL;
+#endif
+			}
+
+			if (SPECIALVERS < '0')
+			{
+				snprintf(Inst.UiInstance.FwVers, FWVERS_SIZE, "V%4.2f", VERS);
+			}
+			else
+			{
+				snprintf(Inst.UiInstance.FwVers, FWVERS_SIZE, "V%4.2f%c", VERS, SPECIALVERS);
+			}
+
+
+			snprintf(Buffer, 32, "%s %s", __DATE__, __TIME__);
+#warning uncomment
+			// strptime((const char*)Buffer,(const char*)"%B %d %Y %H:%M:%S",(struct tm*)&tm);
+			strftime(Inst.UiInstance.FwBuild, FWBUILD_SIZE, "%y%m%d%H%M", &tm);
+
+#warning uncomment
+			// pOs = (struct utsname*)OsBuf;
+			uname(pOs);
+
+			snprintf(Inst.UiInstance.OsVers, OSVERS_SIZE, "%s %s", (*pOs).sysname, (*pOs).release);
+
+			sprintf((char*)Inst.UiInstance.OsBuild, "?");
+
+			Lng = strlen((*pOs).version) - 9;
+			if (Lng > 0)
+			{
+				(*pOs).version[Lng++] = ' ';
+				(*pOs).version[Lng++] = ' ';
+				(*pOs).version[Lng++] = ' ';
+				(*pOs).version[Lng++] = ' ';
+
+				Lng = strlen((*pOs).version);
+				Tmp = 0;
+				Start = 0;
+
+				while ((Start < Lng) && (Tmp == 0))
+				{
+#warning uncomment
+					// if (strptime((const char*)&(*pOs).version[Start],(const char*)"%B %d %H:%M:%S %Y",(struct tm*)&tm) != null)
+					{
+						Tmp = 1;
+					}
+					Start++;
+				}
+				if (Tmp)
+				{
+					strftime((char*)Inst.UiInstance.OsBuild, OSBUILD_SIZE, "%y%m%d%H%M", &tm);
+				}
+			}
+
+			Inst.UiInstance.IpAddr[0] = 0;
+			Sid = socket(AF_INET, SOCK_DGRAM, 0);
+			Sifr.ifr_addr.sa_family = AF_INET;
+			strncpy(Sifr.ifr_name, "eth0", IFNAMSIZ - 1);
+			if (ioctl(Sid, SIOCGIFADDR, &Sifr) >= 0)
+			{
+#warning uncomment
+				// snprintf(Inst.UiInstance.IpAddr, IPADDR_SIZE, "%s", inet_ntoa(((struct sockaddr_in *)&Sifr.ifr_addr)->sin_addr));
+			}
+			close(Sid);
+
+			cUiButtonClr();
+
+			Inst.UiInstance.BattIndicatorHigh = BATT_INDICATOR_HIGH;
+			Inst.UiInstance.BattIndicatorLow = BATT_INDICATOR_LOW;
+			Inst.UiInstance.BattWarningHigh = BATT_WARNING_HIGH;
+			Inst.UiInstance.BattWarningLow = BATT_WARNING_LOW;
+			Inst.UiInstance.BattShutdownHigh = BATT_SHUTDOWN_HIGH;
+			Inst.UiInstance.BattShutdownLow = BATT_SHUTDOWN_LOW;
+
+			Inst.UiInstance.Accu = 0;
+			if (Inst.UiInstance.PowerFile >= MIN_HANDLE)
+			{
+				read(Inst.UiInstance.PowerFile, Buffer, 2);
+				if (Buffer[0] == '1')
+				{
+					Inst.UiInstance.Accu = 1;
+					Inst.UiInstance.BattIndicatorHigh = ACCU_INDICATOR_HIGH;
+					Inst.UiInstance.BattIndicatorLow = ACCU_INDICATOR_LOW;
+					Inst.UiInstance.BattWarningHigh = ACCU_WARNING_HIGH;
+					Inst.UiInstance.BattWarningLow = ACCU_WARNING_LOW;
+					Inst.UiInstance.BattShutdownHigh = ACCU_SHUTDOWN_HIGH;
+					Inst.UiInstance.BattShutdownLow = ACCU_SHUTDOWN_LOW;
+				}
+			}
+
+# ifdef DEBUG_VIRTUAL_BATT_TEMP
+			cUiInitTemp();
+#endif
+
+			return (Result);
 		}
 
-		public void cUiFlushBuffer()
+
+		RESULT cUiOpen()
 		{
-			if (LmsInstance.Inst.UiInstance.UiWrBufferSize != 0)
+			RESULT Result = FAIL;
+
+			// Save screen before run
+			LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdPool[0], sizeof(LCD));
+
+			cUiButtonClr();
+			cUiSetLed(LED_GREEN_PULSE);
+			Inst.UiInstance.RunScreenEnabled = 3;
+			Inst.UiInstance.RunLedEnabled = 1;
+			Inst.UiInstance.TopLineEnabled = 0;
+
+			Result = OK;
+
+			return (Result);
+		}
+
+
+		RESULT cUiClose()
+		{
+			RESULT Result = FAIL;
+
+			Inst.UiInstance.Warning &= ~WARNING_BUSY;
+			Inst.UiInstance.RunLedEnabled = 0;
+			Inst.UiInstance.RunScreenEnabled = 0;
+			Inst.UiInstance.TopLineEnabled = 1;
+			Inst.UiInstance.BackButtonBlocked = 0;
+			Inst.UiInstance.Browser.NeedUpdate = 1;
+			cUiSetLed(LED_GREEN);
+
+			cUiButtonClr();
+
+			Result = OK;
+
+			return (Result);
+		}
+
+
+		RESULT cUiExit()
+		{
+			RESULT Result = FAIL;
+
+# ifdef DEBUG_VIRTUAL_BATT_TEMP
+			cUiExitTemp();
+#endif
+
+			Result = dTerminalExit();
+
+			if (Inst.UiInstance.AdcFile >= MIN_HANDLE)
 			{
-				if (LmsInstance.Inst.GetTerminalEnabled())
-				{
-					LmsInstance.Inst.DterminalClass.dTerminalWrite(LmsInstance.Inst.UiInstance.UiWrBuffer, LmsInstance.Inst.UiInstance.UiWrBufferSize);
+				munmap(Inst.UiInstance.pAnalog, sizeof(ANALOG));
+				close(Inst.UiInstance.AdcFile);
+			}
+
+			if (Inst.UiInstance.UiFile >= MIN_HANDLE)
+			{
+				munmap(Inst.UiInstance.pUi, sizeof(UI));
+				close(Inst.UiInstance.UiFile);
+			}
+
+			if (Inst.UiInstance.PowerFile >= MIN_HANDLE)
+			{
+				close(Inst.UiInstance.PowerFile);
+			}
+
+			Result = OK;
+
+			return (Result);
+		}
+
+
+		void cUiUpdateButtons(DATA16 Time)
+		{
+			DATA8 Button;
+
+			for (Button = 0; Button < BUTTONS; Button++)
+			{
+
+				// Check real hardware buttons
+
+				if ((*Inst.UiInstance.pUi).Pressed[Button] != 0)
+				{ // Button pressed
+
+					if (Inst.UiInstance.ButtonDebounceTimer[Button] == 0)
+					{ // Button activated
+
+						Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
+					}
+
+					Inst.UiInstance.ButtonDebounceTimer[Button] = BUTTON_DEBOUNCE_TIME;
 				}
-				LmsInstance.Inst.UiInstance.UiWrBufferSize = 0;
+				else
+				{ // Button not pressed
+
+					if (Inst.UiInstance.ButtonDebounceTimer[Button] > 0)
+					{ // Debounce delay
+
+						Inst.UiInstance.ButtonDebounceTimer[Button] -= Time;
+
+						if (Inst.UiInstance.ButtonDebounceTimer[Button] <= 0)
+						{ // Button released
+
+							Inst.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVE;
+							Inst.UiInstance.ButtonDebounceTimer[Button] = 0;
+						}
+					}
+				}
+
+				// Check virtual buttons (hardware, direct command, PC)
+
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVE) != 0)
+				{
+					if ((Inst.UiInstance.ButtonState[Button] & BUTTON_PRESSED) == 0)
+					{ // Button activated
+
+						Inst.UiInstance.Activated = BUTTON_SET;
+						Inst.UiInstance.ButtonState[Button] |= BUTTON_PRESSED;
+						Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVATED;
+						Inst.UiInstance.ButtonTimer[Button] = 0;
+						Inst.UiInstance.ButtonRepeatTimer[Button] = BUTTON_START_REPEAT_TIME;
+					}
+
+					// Control auto repeat
+
+					if (Inst.UiInstance.ButtonRepeatTimer[Button] > Time)
+					{
+						Inst.UiInstance.ButtonRepeatTimer[Button] -= Time;
+					}
+					else
+					{
+						if ((Button != 1) && (Button != 5))
+						{ // No repeat on ENTER and BACK
+
+							Inst.UiInstance.Activated |= BUTTON_SET;
+							Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVATED;
+							Inst.UiInstance.ButtonRepeatTimer[Button] = BUTTON_REPEAT_TIME;
+						}
+					}
+
+					// Control long press
+
+					Inst.UiInstance.ButtonTimer[Button] += Time;
+
+					if (Inst.UiInstance.ButtonTimer[Button] >= LONG_PRESS_TIME)
+					{
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONG_LATCH) == 0)
+						{ // Only once
+
+							Inst.UiInstance.ButtonState[Button] |= BUTTON_LONG_LATCH;
+
+# ifdef BUFPRINTSIZE
+							if (Button == 2)
+							{
+								Inst.UiInstance.Activated |= BUTTON_BUFPRINT;
+							}
+#endif
+						}
+						Inst.UiInstance.ButtonState[Button] |= BUTTON_LONGPRESS;
+					}
+
+				}
+				else
+				{
+					if ((Inst.UiInstance.ButtonState[Button] & BUTTON_PRESSED) != 0)
+					{ // Button released
+
+						Inst.UiInstance.ButtonState[Button] &= ~BUTTON_PRESSED;
+						Inst.UiInstance.ButtonState[Button] &= ~BUTTON_LONG_LATCH;
+						Inst.UiInstance.ButtonState[Button] |= BUTTON_BUMBED;
+					}
+				}
 			}
 		}
 
-		public void cUiWriteString(char[] str)
+		RESULT cUiUpdateInput()
 		{
-			foreach (char c in str)
+			UBYTE Key;
+
+			if (GetTerminalEnable() != 0)
 			{
-				LmsInstance.Inst.UiInstance.UiWrBuffer[LmsInstance.Inst.UiInstance.UiWrBufferSize] = (byte)c;
-				if (++LmsInstance.Inst.UiInstance.UiWrBufferSize >= lms2012.UI_WR_BUFFER_SIZE)
+				if (dTerminalRead(&Key) == OK)
+				{
+					switch (Key)
+					{
+						case ' ':
+							{
+								Inst.UiInstance.Escape = Key;
+							}
+							break;
+
+						case '<':
+							{
+								Inst.UiInstance.Escape = Key;
+							}
+							break;
+
+						case '\r':
+						case '\n':
+							{
+								if (Inst.UiInstance.KeyBufIn)
+								{
+									Inst.UiInstance.Keys = Inst.UiInstance.KeyBufIn;
+									Inst.UiInstance.KeyBufIn = 0;
+								}
+							}
+							break;
+
+						default:
+							{
+								Inst.UiInstance.KeyBuffer[Inst.UiInstance.KeyBufIn] = Key;
+								if (++Inst.UiInstance.KeyBufIn >= KEYBUF_SIZE)
+								{
+									Inst.UiInstance.KeyBufIn--;
+								}
+								Inst.UiInstance.KeyBuffer[Inst.UiInstance.KeyBufIn] = 0;
+							}
+							break;
+
+					}
+				}
+			}
+			dLcdRead();
+
+			return (OK);
+		}
+
+		DATA8 cUiEscape()
+		{
+			DATA8 Result;
+
+			Result = Inst.UiInstance.Escape;
+			Inst.UiInstance.Escape = 0;
+
+			return (Result);
+		}
+
+
+		void cUiTestpin(DATA8 State)
+		{
+			DATA8 Data8;
+
+			Data8 = State;
+			if (Inst.UiInstance.PowerFile >= MIN_HANDLE)
+			{
+				write(Inst.UiInstance.PowerFile, &Data8, 1);
+			}
+		}
+
+
+		UBYTE AtoN(DATA8 Char)
+		{
+			UBYTE Tmp = 0;
+
+			if ((Char >= '0') && (Char <= '9'))
+			{
+				Tmp = (UBYTE)(Char - '0');
+			}
+			else
+			{
+				Char |= 0x20;
+
+				if ((Char >= 'a') && (Char <= 'f'))
+				{
+					Tmp = (UBYTE)((Char - 'a') + 10);
+				}
+			}
+
+			return (Tmp);
+		}
+
+
+		void cUiFlushBuffer()
+		{
+			if (Inst.UiInstance.UiWrBufferSize != 0)
+			{
+				if (GetTerminalEnable() != 0)
+				{
+					dTerminalWrite((UBYTE*)Inst.UiInstance.UiWrBuffer, Inst.UiInstance.UiWrBufferSize);
+				}
+				Inst.UiInstance.UiWrBufferSize = 0;
+			}
+		}
+
+
+		void cUiWriteString(DATA8* pString)
+		{
+			while (*pString != 0)
+			{
+				Inst.UiInstance.UiWrBuffer[Inst.UiInstance.UiWrBufferSize] = *pString;
+				if (++Inst.UiInstance.UiWrBufferSize >= UI_WR_BUFFER_SIZE)
 				{
 					cUiFlushBuffer();
 				}
+				pString++;
 			}
 		}
 
-		public byte cUiButtonRemap(byte mapped)
+		DATA8 cUiButtonRemap(DATA8 Mapped)
 		{
-			byte real;
-			if (mapped >= 0 && mapped < lms2012.BUTTONTYPES)
+			DATA8 Real;
+
+			if ((Mapped >= 0) && (Mapped < BUTTONTYPES))
 			{
-				real = MappedToReal.First(x => (byte)x.Key == mapped).Value;
+				Real = MappedToReal[Mapped];
 			}
 			else
 			{
-				real = lms2012.REAL_ANY_BUTTON;
+				Real = REAL_ANY_BUTTON;
 			}
-			return real;
+
+			return (Real);
 		}
 
-		public void cUiSetPress(byte button, byte press)
-		{
-			button = cUiButtonRemap(button);
 
-			if (button < lms2012.BUTTONS)
+		void cUiSetPress(DATA8 Button, DATA8 Press)
+		{
+			Button = cUiButtonRemap(Button);
+
+			if (Button < BUTTONS)
 			{
-				if (press != 0)
-					LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_ACTIVE;
-				else
-					unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_ACTIVE; }
-			}
-			else
-			{
-				if (button == lms2012.REAL_ANY_BUTTON)
+				if (Press != 0)
 				{
-					if (press != 0)
+					Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
+				}
+				else
+				{
+					Inst.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVE;
+				}
+			}
+			else
+			{
+				if (Button == REAL_ANY_BUTTON)
+				{
+					if (Press != 0)
 					{
-						for (button = 0; button < lms2012.BUTTONS; ++button)
+						for (Button = 0; Button < BUTTONS; Button++)
 						{
-							LmsInstance.Inst.UiInstance.ButtonState[button] |= lms2012.BUTTON_ACTIVE;
+							Inst.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
 						}
 					}
 					else
 					{
-						for (button = 0; button < lms2012.BUTTONS; ++button)
+						for (Button = 0; Button < BUTTONS; Button++)
 						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_ACTIVE; }
+							Inst.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVE;
 						}
 					}
 				}
 			}
 		}
 
-		public byte cUiGetPress(byte button)
+
+		DATA8 cUiGetPress(DATA8 Button)
 		{
-			byte result = 0;
-			button = cUiButtonRemap(button);
+			DATA8 Result = 0;
 
-			if (button < lms2012.BUTTONS)
+			Button = cUiButtonRemap(Button);
+
+			if (Button < BUTTONS)
 			{
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_PRESSED) != 0)
-					result = 1;
-			}
-			else
-			{
-				if (button == lms2012.REAL_ANY_BUTTON)
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_PRESSED) != 0)
 				{
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_PRESSED) != 0)
-							result = 1;
-					}
-				}
-			}
-			return result;
-		}
-
-		public byte cUiTestShortPress(byte button)
-		{
-			byte result = 0;
-			button = cUiButtonRemap(button);
-
-			if (button < lms2012.BUTTONS)
-			{
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVATED) != 0)
-					result = 1;
-			}
-			else
-			{
-				if (button == lms2012.REAL_ANY_BUTTON)
-				{
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVATED) != 0)
-							result = 1;
-					}
-				}
-				else if (button == lms2012.REAL_NO_BUTTON)
-				{
-					result = 1;
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVATED) != 0)
-							result = 0;
-					}
-				}
-			}
-			return result;
-		}
-
-		public byte cUiGetShortPress(byte button)
-		{
-			byte result = 0;
-			button = cUiButtonRemap(button);
-
-			if (button < lms2012.BUTTONS)
-			{
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVATED) != 0)
-				{
-					unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_ACTIVATED; }
-					result = 1;
+					Result = 1;
 				}
 			}
 			else
 			{
-				if (button == lms2012.REAL_ANY_BUTTON)
+				if (Button == REAL_ANY_BUTTON)
 				{
-					for (button = 0; button < lms2012.BUTTONS; ++button)
+					for (Button = 0; Button < BUTTONS; Button++)
 					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVATED) != 0)
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_PRESSED) != 0)
 						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_ACTIVATED; }
-							result = 1;
+							Result = 1;
 						}
 					}
 				}
-				else if (button == lms2012.REAL_NO_BUTTON)
-				{
-					result = 1;
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_ACTIVATED) != 0)
-						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_ACTIVATED; }
-							result = 0;
-						}
-					}
-				}
-			}
-
-			if (result != 0)
-				LmsInstance.Inst.UiInstance.Click = 1;
-
-			return result;
-		}
-
-		public byte cUiGetBumped(byte button)
-		{
-			byte result = 0;
-			button = cUiButtonRemap(button);
-
-			if (button < lms2012.BUTTONS)
-			{
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_BUMBED) != 0)
-				{
-					unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_BUMBED; }
-					result = 1;
-				}
-			}
-			else
-			{
-				if (button == lms2012.REAL_ANY_BUTTON)
-				{
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_BUMBED) != 0)
-						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_BUMBED; }
-							result = 1;
-						}
-					}
-				}
-				else if (button == lms2012.REAL_NO_BUTTON)
-				{
-					result = 1;
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_BUMBED) != 0)
-						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_BUMBED; }
-							result = 0;
-						}
-					}
-				}
-			}
-
-			return result;
-		}
-
-		public byte cUiTestLongPress(byte button)
-		{
-			byte result = 0;
-			button = cUiButtonRemap(button);
-
-			if (button < lms2012.BUTTONS)
-			{
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONGPRESS) != 0)
-					result = 1;
-			}
-			else
-			{
-				if (button == lms2012.REAL_ANY_BUTTON)
-				{
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONGPRESS) != 0)
-							result = 1;
-					}
-				}
-				else if (button == lms2012.REAL_NO_BUTTON)
-				{
-					result = 1;
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONGPRESS) != 0)
-							result = 0;
-					}
-				}
-			}
-			return result;
-		}
-
-		public byte cUiGetLongPress(byte button)
-		{
-			byte result = 0;
-			button = cUiButtonRemap(button);
-
-			if (button < lms2012.BUTTONS)
-			{
-				if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONGPRESS) != 0)
-				{
-					unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_LONGPRESS; }
-					result = 1;
-				}
-			}
-			else
-			{
-				if (button == lms2012.REAL_ANY_BUTTON)
-				{
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONGPRESS) != 0)
-						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_LONGPRESS; }
-							result = 1;
-						}
-					}
-				}
-				else if (button == lms2012.REAL_NO_BUTTON)
-				{
-					result = 1;
-					for (button = 0; button < lms2012.BUTTONS; ++button)
-					{
-						if ((LmsInstance.Inst.UiInstance.ButtonState[button] & lms2012.BUTTON_LONGPRESS) != 0)
-						{
-							unchecked { LmsInstance.Inst.UiInstance.ButtonState[button] &= (byte)~lms2012.BUTTON_LONGPRESS; }
-							result = 0;
-						}
-					}
-				}
-			}
-
-			if (result != 0)
-				LmsInstance.Inst.UiInstance.Click = 1;
-
-			return result;
-		}
-
-		public short cUiTestHorz()
-		{
-			short result = 0;
-			if (cUiTestShortPress((byte)lms2012.ButtonType.LEFT_BUTTON) != 0)
-				result = -1;
-			if (cUiTestShortPress((byte)lms2012.ButtonType.RIGHT_BUTTON) != 0)
-				result = 1;
-			return result;
-		}
-
-		public short cUiGetHorz()
-		{
-			short result = 0;
-			if (cUiGetShortPress((byte)lms2012.ButtonType.LEFT_BUTTON) != 0)
-				result = -1;
-			if (cUiGetShortPress((byte)lms2012.ButtonType.RIGHT_BUTTON) != 0)
-				result = 1;
-			return result;
-		}
-
-		public short cUiGetVert()
-		{
-			short result = 0;
-			if (cUiGetShortPress((byte)lms2012.ButtonType.UP_BUTTON) != 0)
-				result = -1;
-			if (cUiGetShortPress((byte)lms2012.ButtonType.DOWN_BUTTON) != 0)
-				result = 1;
-			return result;
-		}
-
-		public byte cUiWaitForPress()
-		{
-			return cUiTestShortPress((byte)lms2012.ButtonType.ANY_BUTTON);
-		}
-
-		public short cUiAlignX(short x)
-		{
-			return (short)((x + 7) & ~7);
-		}
-
-		public void cUiUpdateCnt()
-		{
-			// TODO: probably not to do because it is probably a shite
-		}
-
-		public void cUiUpdatePower()
-		{
-			// TODO: probably not to do because it is probably a shite
-		}
-
-		void cUiUpdateTopline()
-		{
-			short x1, x2;
-			short v;
-			byte btStatus;
-			byte wifiStatus;
-			byte tmpStatus;
-			byte[] name = new byte[lms2012.NAME_LENGTH + 1];
-
-			if (LmsInstance.Inst.UiInstance.TopLineEnabled != 0)
-			{
-				LmsInstance.Inst.DlcdClass.LcdClearTopline(LmsInstance.Inst.UiInstance.Lcd);
-
-				// show bt status
-				tmpStatus = 0;
-				btStatus = LmsInstance.Inst.CcomClass.cComGetBtStatus();
-				if (btStatus > 0) 
-				{
-					tmpStatus = 1;
-					btStatus >>= 1;
-					if (btStatus >= 0 && btStatus < lms2012.TOP_BT_ICONS)
-					{
-                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 0, 1, lms2012.IconType.SMALL_ICON, TopLineWifiIconMap[btStatus]);
-                    }
-                }
-				if (LmsInstance.Inst.UiInstance.BtOn != tmpStatus)
-				{
-					LmsInstance.Inst.UiInstance.BtOn = tmpStatus;
-					LmsInstance.Inst.UiInstance.UiUpdate = 1;
-                }
-
-                // show wifi status
-                tmpStatus = 0;
-				wifiStatus = LmsInstance.Inst.CcomClass.cComGetWifiStatus();
-                if (wifiStatus > 0)
-                {
-                    tmpStatus = 1;
-                    wifiStatus >>= 1;
-                    if (wifiStatus >= 0 && wifiStatus < lms2012.TOP_WIFI_ICONS)
-                    {
-                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 16, 1, lms2012.IconType.SMALL_ICON, TopLineWifiIconMap[wifiStatus]);
-                    }
-                }
-                if (LmsInstance.Inst.UiInstance.WiFiOn != tmpStatus)
-                {
-                    LmsInstance.Inst.UiInstance.WiFiOn = tmpStatus;
-                    LmsInstance.Inst.UiInstance.UiUpdate = 1;
-                }
-
-				// TODO: battery shite was here
-
-				LmsInstance.Inst.CcomClass.cComGetBrickName(lms2012.NAME_LENGTH + 1, name);
-
-				x1 = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(lms2012.FontType.SMALL_FONT);
-				x2 = (short)(lms2012.LCD_WIDTH / x1);
-				x2 -= (short)name.Length;
-				x2 /= 2;
-				x2 *= x1;
-				LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, x2, 1, lms2012.FontType.SMALL_FONT, name);
-
-				x1 = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.SMALL_ICON);
-				x2 = (short)((lms2012.LCD_WIDTH - x1) / x1);
-
-				// TODO: show usb status here
-
-				// TODO: show battery was here
-
-				LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 0, lms2012.TOPLINE_HEIGHT, lms2012.LCD_WIDTH, lms2012.TOPLINE_HEIGHT);
-            }
-		}
-
-		public void cUiUpdateLcd()
-		{
-			LmsInstance.Inst.UiInstance.Font = lms2012.FontType.NORMAL_FONT;
-			cUiUpdateTopline();
-			LmsInstance.Inst.DlcdClass.dLcdUpdate(LmsInstance.Inst.UiInstance.Lcd);
-        }
-
-		public void cUiRunScreen()
-		{
-			if (LmsInstance.Inst.UiInstance.ScreenBlocked == 0)
-			{
-				switch (LmsInstance.Inst.UiInstance.RunScreenEnabled)
-				{
-					case 0:
-						break;
-					case 1:
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-                        break;
-                    case 2:
-                        LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-                        break;
-                    case 3:
-                        LmsInstance.Inst.UiInstance.RunScreenNumber = 1;
-
-						//clear
-						LmsInstance.Inst.DlcdClass.LcdClear(LmsInstance.Inst.UiInstance.Lcd);
-						cUiUpdateLcd();
-
-						var mindstorms = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Mindstorms);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 39, mindstorms.Width, mindstorms.Height, mindstorms.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 79, lms2012.FontType.SMALL_FONT, LmsInstance.Inst.VmInstance.Program[(int)lms2012.Slot.USER_SLOT].Name);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenTimer = 0;
-						LmsInstance.Inst.UiInstance.RunScreenCounter = 0;
-
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					case 4:
-						if (LmsInstance.Inst.UiInstance.RunLedEnabled != 0)
-						{
-							cUiSetLed((byte)lms2012.LedPattern.LED_GREEN_PULSE);
-						}
-
-						var ani1x = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Ani1x);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 67, ani1x.Width, ani1x.Height, ani1x.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenTimer = LmsInstance.Inst.UiInstance.MilliSeconds;
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					case 5:
-					case 6:
-					case 7:
-					case 8:
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					case 9:
-						var ani2x = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Ani2x);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 67, ani2x.Width, ani2x.Height, ani2x.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					case 10:
-						var ani3x = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Ani3x);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 67, ani3x.Width, ani3x.Height, ani3x.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					case 11:
-						var ani4x = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Ani4x);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 67, ani4x.Width, ani4x.Height, ani4x.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					case 12:
-						var ani5x = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Ani5x);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 67, ani5x.Width, ani5x.Height, ani5x.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenEnabled++;
-						break;
-					default:
-						var ani6x = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.Ani6x);
-						LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, lms2012.FG_COLOR, 8, 67, ani6x.Width, ani6x.Height, ani6x.Data);
-						cUiUpdateLcd();
-
-						LmsInstance.Inst.UiInstance.RunScreenEnabled = 4;
-						break;
-				}
-			}
-		}
-
-		// TODO cUiCheckVoltage(void) was here
-		// TODO cUiCheckPower(UWORD Time) was here
-		// TODO cUiCheckTemp(void) was here
-		// TODO cUiCheckMemory(void) was here
-
-		public void cUiCheckAlive(ushort time)
-		{
-			ulong timeout;
-
-			LmsInstance.Inst.UiInstance.SleepTimer += time;
-
-			if ((LmsInstance.Inst.UiInstance.Activated & lms2012.BUTTON_ALIVE) != 0)
-			{
-				unchecked { LmsInstance.Inst.UiInstance.Activated &= (byte)~lms2012.BUTTON_ALIVE; }
-				cUiAlive();
-			}
-
-			timeout = LmsInstance.Inst.GetSleepMinutes();
-
-			if (timeout != 0)
-			{
-				if (LmsInstance.Inst.UiInstance.SleepTimer >= (timeout * 60000L))
-				{
-					LmsInstance.Inst.UiInstance.ShutDown = 1;
-				}
-			}
-		}
-
-		public void cUiUpdate(ushort time)
-		{
-			byte warning;
-			byte tmp;
-
-			LmsInstance.Inst.UiInstance.MilliSeconds += time;
-
-			cUiUpdateButtons(time);
-			cUiUpdateInput();
-			cUiUpdateCnt();
-
-			if (LmsInstance.Inst.UiInstance.MilliSeconds - LmsInstance.Inst.UiInstance.UpdateStateTimer >= 50)
-			{
-				LmsInstance.Inst.UiInstance.UpdateStateTimer = LmsInstance.Inst.UiInstance.MilliSeconds;
-
-				if (LmsInstance.Inst.UiInstance.Event == 0)
-				{
-					LmsInstance.Inst.UiInstance.Event = LmsInstance.Inst.CcomClass.cComGetEvent();
-				}
-
-				switch (LmsInstance.Inst.UiInstance.UpdateState++)
-				{
-					case 0:
-						// TODO some checks were here
-						break;
-					case 1:
-						cUiRunScreen();
-						break;
-					case 2:
-						cUiCheckAlive(400);
-						// TODO some checks were here
-						break;
-					case 3:
-						cUiRunScreen();
-						break;
-					case 4:
-						// TODO some checks were here
-						break;
-					case 5:
-						cUiRunScreen();
-						break;
-					case 6:
-						if (LmsInstance.Inst.UiInstance.ScreenBusy == 0)
-						{
-							cUiUpdateTopline();
-							LmsInstance.Inst.DlcdClass.dLcdUpdate(LmsInstance.Inst.UiInstance.Lcd);
-						}
-						break;
-					default:
-						cUiRunScreen();
-						LmsInstance.Inst.UiInstance.UpdateState = 0;
-						LmsInstance.Inst.UiInstance.ReadyForWarnings = 1;
-						break;
-				}
-
-				if (LmsInstance.Inst.UiInstance.Warning != 0)
-				{
-					if (LmsInstance.Inst.UiInstance.Warnlight == 0)
-					{
-						LmsInstance.Inst.UiInstance.Warnlight = 1;
-						cUiSetLed(LmsInstance.Inst.UiInstance.LedState);
-					}
-				}
-				else
-				{
-					if (LmsInstance.Inst.UiInstance.Warnlight != 0)
-					{
-						LmsInstance.Inst.UiInstance.Warnlight = 0;
-						cUiSetLed(LmsInstance.Inst.UiInstance.LedState);
-					}
-				}
-
-				warning = (byte)(LmsInstance.Inst.UiInstance.Warning & (byte)lms2012.Warning.WARNINGS);
-				tmp = (byte)(warning & ~LmsInstance.Inst.UiInstance.WarningShowed);
-
-				if (tmp != 0)
-				{
-					// TODO!!!! showing warnings
-					// https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.c#L2622
-				}
-
-				// Find warnings that have been showed but not confirmed
-				tmp = LmsInstance.Inst.UiInstance.WarningShowed;
-				tmp &= (byte)(~LmsInstance.Inst.UiInstance.WarningShowed);
-
-				if (tmp != 0)
-				{
-					// TODO!!!! showing warnings
-					// https://github.com/mindboards/ev3sources/blob/master/lms2012/c_ui/source/c_ui.c#L2693
-				}
-
-				// Find warnings that have been showed, confirmed and removed
-				tmp = (byte)~warning;
-				tmp &= (byte)(lms2012.Warning.WARNINGS);
-				tmp &= (byte)(LmsInstance.Inst.UiInstance.WarningShowed);
-				tmp &= (byte)(LmsInstance.Inst.UiInstance.WarningConfirmed);
-
-				unchecked
-				{
-					LmsInstance.Inst.UiInstance.WarningShowed &= (byte)~tmp;
-					LmsInstance.Inst.UiInstance.WarningConfirmed &= (byte)~tmp;
-				}
-			}
-		}
-
-		public lms2012.Result cUiNotification(byte color, short x, short y, lms2012.NIcon icon1, lms2012.NIcon icon2, lms2012.NIcon icon3, byte[] text, ref byte state)
-		{
-			lms2012.Result result = lms2012.Result.BUSY;
-			NOTIFY pQ;
-			short availableX;
-			short usedX;
-			short line;
-			short charIn;
-			short charOut;
-			byte character;
-			short x2;
-			short y2;
-			short availableY;
-			short usedY;
-
-			var pop3 = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.POP3);
-			pQ = LmsInstance.Inst.UiInstance.Notify;
-
-			if (state == 0)
-			{
-				state = 1;
-				pQ.ScreenStartX = x;
-				pQ.ScreenStartY = y;
-				pQ.ScreenWidth = pop3.Width;
-				pQ.ScreenHeight = pop3.Height;
-				pQ.IconStartY = (short)(pQ.ScreenStartY + 10);
-				pQ.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.LARGE_ICON);
-				pQ.IconHeight = LmsInstance.Inst.DlcdClass.dLcdGetIconHeight(lms2012.IconType.LARGE_ICON);
-				pQ.IconSpaceX = pQ.IconWidth;
-
-				pQ.YesNoStartX = (short)(pQ.ScreenStartX + (pQ.ScreenWidth / 2));
-				pQ.YesNoStartX -= (short)((pQ.IconWidth + 8) / 2);
-				pQ.YesNoStartX = cUiAlignX(pQ.YesNoStartX);
-				pQ.YesNoStartY = (short)(pQ.ScreenStartY + 40);
-
-				pQ.LineStartX = (short)(pQ.ScreenStartX + 5);
-				pQ.LineStartY = (short)(pQ.ScreenStartY + 39);
-				pQ.LineEndX = (short)(pQ.LineStartX + 134);
-
-				pQ.NoOfIcons = 0;
-				if (icon1 > lms2012.NIcon.ICON_NONE)
-				{
-					pQ.NoOfIcons++;
-				}
-				if (icon2 > lms2012.NIcon.ICON_NONE)
-				{
-					pQ.NoOfIcons++;
-				}
-				if (icon3 > lms2012.NIcon.ICON_NONE)
-				{
-					pQ.NoOfIcons++;
-				}
-
-				pQ.TextLines = 0;
-				if (text.Length > 0)
-				{
-					pQ.IconStartX = (short)(pQ.ScreenStartX + 8);
-					pQ.IconStartX = cUiAlignX(pQ.IconStartX);
-
-					availableX = pQ.ScreenWidth;
-					availableX -= (short)((pQ.IconStartX - pQ.ScreenStartX) * 2);
-
-					availableX -= (short)(pQ.NoOfIcons * pQ.IconSpaceX);
-
-					pQ.NoOfChars = (short)text.Length;
-
-					pQ.Font = lms2012.FontType.SMALL_FONT;
-					pQ.FontWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(lms2012.FontType.SMALL_FONT);
-					usedX = (short)(pQ.FontWidth * pQ.NoOfChars);
-					line = 0;
-
-					if (usedX <= availableX)
-					{
-						if (availableX - usedX >= 32)
-						{
-							pQ.IconStartX += 32;
-						}
-
-						pQ.TextLine[line].WriteBytes(text);
-						line++;
-						pQ.TextLines++;
-
-						pQ.TextStartX = (short)(pQ.IconStartX + (pQ.NoOfIcons * pQ.IconSpaceX));
-						pQ.TextStartY = (short)(pQ.ScreenStartY + 18);
-						pQ.TextSpaceY = (short)(LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(pQ.Font) + 1);
-					}
-					else
-					{
-						pQ.Font = lms2012.FontType.TINY_FONT;
-						pQ.FontWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(lms2012.FontType.TINY_FONT);
-						usedX = (short)(pQ.FontWidth * pQ.NoOfChars);
-						availableX -= (short)(pQ.FontWidth);
-						charIn = 0;
-
-						while ((text[charIn] != 0) && (line < lms2012.MAX_NOTIFY_LINES))
-						{
-							charOut = 0;
-							usedX = 0;
-							while ((text[charIn] != 0) && (charOut < lms2012.MAX_NOTIFY_LINE_CHARS) && (usedX < (availableX - pQ.FontWidth)))
-							{
-								character = text[charIn];
-								if (character == '_')
-								{
-									character = (byte)' ';
-								}
-								pQ.TextLine[line][charOut] = character;
-								charIn++;
-								charOut++;
-								usedX += pQ.FontWidth;
-							}
-							while ((charOut > 8) && (text[charIn] != ' ') && (text[charIn] != '_') && (text[charIn] != 0))
-							{
-								charIn--;
-								charOut--;
-							}
-							if (text[charIn] != 0)
-							{
-								charIn++;
-							}
-							pQ.TextLine[line][charOut] = 0;
-							line++;
-						}
-
-						pQ.TextLines = line;
-
-						pQ.TextStartX = (short)(pQ.IconStartX + (pQ.NoOfIcons * pQ.IconSpaceX) + pQ.FontWidth);
-						pQ.TextSpaceY = (short)(LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(pQ.Font) + 1);
-
-
-						availableY = (short)(pQ.LineStartY - (pQ.ScreenStartY + 5));
-						usedY = (short)(pQ.TextLines * pQ.TextSpaceY);
-
-						while (usedY > availableY)
-						{
-							pQ.TextLines--;
-							usedY = (short)(pQ.TextLines * pQ.TextSpaceY);
-						}
-						y2 = (short)((availableY - usedY) / 2);
-
-						pQ.TextStartY = (short)(pQ.ScreenStartY + y2 + 5);
-					}
-				}
-				else
-				{
-					pQ.IconStartX = (short)(pQ.ScreenStartX + (pQ.ScreenWidth / 2));
-					pQ.IconStartX -= (short)((pQ.IconWidth + 8) / 2);
-					pQ.IconStartX -= (short)((pQ.NoOfIcons / 2) * pQ.IconWidth);
-					pQ.IconStartX = (short)(cUiAlignX(pQ.IconStartX));
-					pQ.TextStartY = (short)(pQ.ScreenStartY + 8);
-				}
-				pQ.NeedUpdate = 1;
-			}
-
-			if (pQ.NeedUpdate != 0)
-			{
-				//* UPDATE ***************************************************************************************************
-				pQ.NeedUpdate = 0;
-
-				LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, color, pQ.ScreenStartX, pQ.ScreenStartY, pop3.Width, pop3.Height, pop3.Data);
-
-				x2 = pQ.IconStartX;
-
-				if (icon1 > lms2012.NIcon.ICON_NONE)
-				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, color, x2, pQ.IconStartY, lms2012.IconType.LARGE_ICON, (sbyte)icon1);
-					x2 += pQ.IconSpaceX;
-				}
-				if (icon2 > lms2012.NIcon.ICON_NONE)
-				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, color, x2, pQ.IconStartY, lms2012.IconType.LARGE_ICON, (sbyte)icon2);
-					x2 += pQ.IconSpaceX;
-				}
-				if (icon3 > lms2012.NIcon.ICON_NONE)
-				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, color, x2, pQ.IconStartY, lms2012.IconType.LARGE_ICON, (sbyte)icon3);
-					x2 += pQ.IconSpaceX;
-				}
-
-				line = 0;
-				y2 = pQ.TextStartY;
-				while (line < pQ.TextLines)
-				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, color, pQ.TextStartX, y2, pQ.Font, pQ.TextLine[line]);
-					y2 += pQ.TextSpaceY;
-					line++;
-				}
-
-				LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, color, pQ.LineStartX, pQ.LineStartY, pQ.LineEndX, pQ.LineStartY);
-
-				LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, color, pQ.YesNoStartX, pQ.YesNoStartY, lms2012.IconType.LARGE_ICON, (byte)lms2012.LIcon.YES_SEL);
-
-				cUiUpdateLcd();
-				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
-			}
-
-			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
-			{
-				cUiButtonFlush();
-				result = lms2012.Result.OK;
-				state = 0;
-			}
-
-			return result;
-		}
-
-		lms2012.Result cUiQuestion(byte Color, short X, short Y, lms2012.NIcon Icon1, lms2012.NIcon Icon2, byte[] pText, ref byte pState, sbyte[] pAnswer)
-		{
-			lms2012.Result Result = lms2012.Result.BUSY;
-			TQUESTION pQ;
-			short Inc;
-
-			var pop3 = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.POP3);
-			pQ = LmsInstance.Inst.UiInstance.Question;
-
-			Inc = cUiGetHorz();
-			if (Inc != 0)
-			{
-				pQ.NeedUpdate = 1;
-
-				pAnswer[0] += (sbyte)Inc;
-
-				if (pAnswer[0] > 1)
-				{
-					pAnswer[0] = 1;
-					pQ.NeedUpdate = 0;
-				}
-				if (pAnswer[0] < 0)
-				{
-					pAnswer[0] = 0;
-					pQ.NeedUpdate = 0;
-				}
-			}
-
-			if (pState == 0)
-			{
-				pState = 1;
-				pQ.ScreenStartX = X;
-				pQ.ScreenStartY = Y;
-				pQ.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.LARGE_ICON);
-				pQ.IconHeight = LmsInstance.Inst.DlcdClass.dLcdGetIconHeight(lms2012.IconType.LARGE_ICON);
-
-				pQ.NoOfIcons = 0;
-				if (Icon1 > lms2012.NIcon.ICON_NONE)
-				{
-					pQ.NoOfIcons++;
-				}
-				if (Icon2 > lms2012.NIcon.ICON_NONE)
-				{
-					pQ.NoOfIcons++;
-				}
-				pQ.Default = (byte)pAnswer[0];
-
-				pQ.NeedUpdate = 1;
-			}
-
-
-			if (pQ.NeedUpdate != 0)
-			{
-				//* UPDATE ***************************************************************************************************
-				pQ.NeedUpdate = 0;
-
-				LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.ScreenStartX, pQ.ScreenStartY, pop3.Width, pop3.Height, pop3.Data);
-				pQ.ScreenWidth = pop3.Width;
-				pQ.ScreenHeight = pop3.Height;
-
-				pQ.IconStartX = (short)(pQ.ScreenStartX + (pQ.ScreenWidth / 2));
-				if (pQ.NoOfIcons > 1)
-				{
-					pQ.IconStartX -= pQ.IconWidth;
-				}
-				else
-				{
-					pQ.IconStartX -= (short)(pQ.IconWidth / 2);
-				}
-				pQ.IconStartX = cUiAlignX(pQ.IconStartX);
-				pQ.IconSpaceX = pQ.IconWidth;
-				pQ.IconStartY = (short)(pQ.ScreenStartY + 10);
-
-				pQ.YesNoStartX = (short)(pQ.ScreenStartX + (pQ.ScreenWidth / 2));
-				pQ.YesNoStartX -= 8;
-				pQ.YesNoStartX -= pQ.IconWidth;
-				pQ.YesNoStartX = cUiAlignX(pQ.YesNoStartX);
-				pQ.YesNoSpaceX = (short)(pQ.IconWidth + 16);
-				pQ.YesNoStartY = (short)(pQ.ScreenStartY + 40);
-
-				pQ.LineStartX = (short)(pQ.ScreenStartX + 5);
-				pQ.LineStartY = (short)(pQ.ScreenStartY + 39);
-				pQ.LineEndX = (short)(pQ.LineStartX + 134);
-
-				switch (pQ.NoOfIcons)
-				{
-					case 1:
-						{
-							LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.IconStartX, pQ.IconStartY, lms2012.IconType.LARGE_ICON, (byte)Icon1);
-						}
-						break;
-
-					case 2:
-						{
-							LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.IconStartX, pQ.IconStartY, lms2012.IconType.LARGE_ICON, (byte)Icon1);
-							LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pQ.IconStartX + pQ.IconSpaceX), pQ.IconStartY, lms2012.IconType.LARGE_ICON, (byte)Icon2);
-						}
-						break;
-
-				}
-
-				if (pAnswer[0] == 0)
-				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.YesNoStartX, pQ.YesNoStartY, lms2012.IconType.LARGE_ICON, (int)lms2012.LIcon.NO_SEL);
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pQ.YesNoStartX + pQ.YesNoSpaceX), pQ.YesNoStartY, lms2012.IconType.LARGE_ICON, (int)lms2012.LIcon.YES_NOTSEL);
-				}
-				else
-				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.YesNoStartX, pQ.YesNoStartY, lms2012.IconType.LARGE_ICON, (int)lms2012.LIcon.NO_NOTSEL);
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pQ.YesNoStartX + pQ.YesNoSpaceX), pQ.YesNoStartY, lms2012.IconType.LARGE_ICON, (int)lms2012.LIcon.YES_SEL);
-				}
-
-				LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.LineStartX, pQ.LineStartY, pQ.LineEndX, pQ.LineStartY);
-
-				cUiUpdateLcd();
-				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
-			}
-			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
-			{
-				cUiButtonFlush();
-				Result = lms2012.Result.OK;
-				pState = 0;
-			}
-			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
-			{
-				cUiButtonFlush();
-				Result = lms2012.Result.OK;
-				pState = 0;
-				pAnswer[0] = -1;
 			}
 
 			return (Result);
 		}
 
-		lms2012.Result cUiIconQuestion(byte Color, short X, short Y, ref byte pState, ref int pIcons)
+
+		DATA8 cUiTestShortPress(DATA8 Button)
 		{
-			lms2012.Result Result = lms2012.Result.BUSY;
-			IQUESTION pQ;
-			int Mask;
-			int TmpIcons;
-			short Tmp;
-			short Loop;
-			byte Icon;
+			DATA8 Result = 0;
 
-			var pop2 = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.POP2);
-			pQ = LmsInstance.Inst.UiInstance.IconQuestion;
+			Button = cUiButtonRemap(Button);
 
-			if (pState == 0)
+			if (Button < BUTTONS)
 			{
-				pState = 1;
-				pQ.ScreenStartX = X;
-				pQ.ScreenStartY = Y;
-				pQ.ScreenWidth = pop2.Width;
-				pQ.ScreenHeight = pop2.Height;
-				pQ.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.LARGE_ICON);
-				pQ.IconHeight = LmsInstance.Inst.DlcdClass.dLcdGetIconHeight(lms2012.IconType.LARGE_ICON);
-				pQ.Frame = 2;
-				pQ.Icons = pIcons;
-				pQ.NoOfIcons = 0;
-				pQ.PointerX = 0;
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
+				{
+					Result = 1;
+				}
+			}
+			else
+			{
+				if (Button == REAL_ANY_BUTTON)
+				{
+					for (Button = 0; Button < BUTTONS; Button++)
+					{
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
+						{
+							Result = 1;
+						}
+					}
+				}
+				else
+				{
+					if (Button == REAL_NO_BUTTON)
+					{
+						Result = 1;
+						for (Button = 0; Button < BUTTONS; Button++)
+						{
+							if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
+							{
+								Result = 0;
+							}
+						}
+					}
+				}
+			}
 
-				TmpIcons = pQ.Icons;
+			return (Result);
+		}
+
+
+		DATA8 cUiGetShortPress(DATA8 Button)
+		{
+			DATA8 Result = 0;
+
+			Button = cUiButtonRemap(Button);
+
+			if (Button < BUTTONS)
+			{
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
+				{
+					Inst.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVATED;
+					Result = 1;
+				}
+			}
+			else
+			{
+				if (Button == REAL_ANY_BUTTON)
+				{
+					for (Button = 0; Button < BUTTONS; Button++)
+					{
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
+						{
+							Inst.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVATED;
+							Result = 1;
+						}
+					}
+				}
+				else
+				{
+					if (Button == REAL_NO_BUTTON)
+					{
+						Result = 1;
+						for (Button = 0; Button < BUTTONS; Button++)
+						{
+							if ((Inst.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
+							{
+								Inst.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVATED;
+								Result = 0;
+							}
+						}
+					}
+				}
+			}
+			if (Result != 0)
+			{
+				Inst.UiInstance.Click = 1;
+			}
+
+			return (Result);
+		}
+
+
+		DATA8 cUiGetBumbed(DATA8 Button)
+		{
+			DATA8 Result = 0;
+
+			Button = cUiButtonRemap(Button);
+
+			if (Button < BUTTONS)
+			{
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_BUMBED) != 0)
+				{
+					Inst.UiInstance.ButtonState[Button] &= ~BUTTON_BUMBED;
+					Result = 1;
+				}
+			}
+			else
+			{
+				if (Button == REAL_ANY_BUTTON)
+				{
+					for (Button = 0; Button < BUTTONS; Button++)
+					{
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_BUMBED) != 0)
+						{
+							Inst.UiInstance.ButtonState[Button] &= ~BUTTON_BUMBED;
+							Result = 1;
+						}
+					}
+				}
+				else
+				{
+					if (Button == REAL_NO_BUTTON)
+					{
+						Result = 1;
+						for (Button = 0; Button < BUTTONS; Button++)
+						{
+							if ((Inst.UiInstance.ButtonState[Button] & BUTTON_BUMBED) != 0)
+							{
+								Inst.UiInstance.ButtonState[Button] &= ~BUTTON_BUMBED;
+								Result = 0;
+							}
+						}
+					}
+				}
+			}
+
+			return (Result);
+		}
+
+
+		DATA8 cUiTestLongPress(DATA8 Button)
+		{
+			DATA8 Result = 0;
+
+			Button = cUiButtonRemap(Button);
+
+			if (Button < BUTTONS)
+			{
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
+				{
+					Result = 1;
+				}
+			}
+			else
+			{
+				if (Button == REAL_ANY_BUTTON)
+				{
+					for (Button = 0; Button < BUTTONS; Button++)
+					{
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
+						{
+							Result = 1;
+						}
+					}
+				}
+				else
+				{
+					if (Button == REAL_NO_BUTTON)
+					{
+						Result = 1;
+						for (Button = 0; Button < BUTTONS; Button++)
+						{
+							if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
+							{
+								Result = 0;
+							}
+						}
+					}
+				}
+			}
+
+			return (Result);
+		}
+
+
+		DATA8 cUiGetLongPress(DATA8 Button)
+		{
+			DATA8 Result = 0;
+
+			Button = cUiButtonRemap(Button);
+
+			if (Button < BUTTONS)
+			{
+				if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
+				{
+					Inst.UiInstance.ButtonState[Button] &= ~BUTTON_LONGPRESS;
+					Result = 1;
+				}
+			}
+			else
+			{
+				if (Button == REAL_ANY_BUTTON)
+				{
+					for (Button = 0; Button < BUTTONS; Button++)
+					{
+						if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
+						{
+							Inst.UiInstance.ButtonState[Button] &= ~BUTTON_LONGPRESS;
+							Result = 1;
+						}
+					}
+				}
+				else
+				{
+					if (Button == REAL_NO_BUTTON)
+					{
+						Result = 1;
+						for (Button = 0; Button < BUTTONS; Button++)
+						{
+							if ((Inst.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
+							{
+								Inst.UiInstance.ButtonState[Button] &= ~BUTTON_LONGPRESS;
+								Result = 0;
+							}
+						}
+					}
+				}
+			}
+			if (Result != 0)
+			{
+				Inst.UiInstance.Click = 1;
+			}
+
+			return (Result);
+		}
+
+
+		DATA16 cUiTestHorz()
+		{
+			DATA16 Result = 0;
+
+			if (cUiTestShortPress(LEFT_BUTTON) != 0)
+			{
+				Result = -1;
+			}
+			if (cUiTestShortPress(RIGHT_BUTTON) != 0)
+			{
+				Result = 1;
+			}
+
+			return (Result);
+		}
+
+
+		DATA16 cUiGetHorz()
+		{
+			DATA16 Result = 0;
+
+			if (cUiGetShortPress(LEFT_BUTTON) != 0)
+			{
+				Result = -1;
+			}
+			if (cUiGetShortPress(RIGHT_BUTTON) != 0)
+			{
+				Result = 1;
+			}
+
+			return (Result);
+		}
+
+
+		DATA16 cUiGetVert()
+		{
+			DATA16 Result = 0;
+
+			if (cUiGetShortPress(UP_BUTTON) != 0)
+			{
+				Result = -1;
+			}
+			if (cUiGetShortPress(DOWN_BUTTON) != 0)
+			{
+				Result = 1;
+			}
+
+			return (Result);
+		}
+
+
+		DATA8 cUiWaitForPress()
+		{
+			DATA8 Result = 0;
+
+			Result = cUiTestShortPress(ANY_BUTTON);
+
+			return (Result);
+		}
+
+
+		DATA16 cUiAlignX(DATA16 X)
+		{
+			return ((short)((X + 7) & ~7));
+		}
+
+		void cUiUpdateCnt()
+		{
+			if (Inst.UiInstance.PowerInitialized != 0)
+			{
+				Inst.UiInstance.CinCnt *= (DATAF)(AVR_CIN - 1);
+				Inst.UiInstance.CoutCnt *= (DATAF)(AVR_COUT - 1);
+				Inst.UiInstance.VinCnt *= (DATAF)(AVR_VIN - 1);
+
+				Inst.UiInstance.CinCnt += (DATAF)(*Inst.UiInstance.pAnalog).BatteryCurrent;
+				Inst.UiInstance.CoutCnt += (DATAF)(*Inst.UiInstance.pAnalog).MotorCurrent;
+				Inst.UiInstance.VinCnt += (DATAF)(*Inst.UiInstance.pAnalog).Cell123456;
+
+				Inst.UiInstance.CinCnt /= (DATAF)(AVR_CIN);
+				Inst.UiInstance.CoutCnt /= (DATAF)(AVR_COUT);
+				Inst.UiInstance.VinCnt /= (DATAF)(AVR_VIN);
+			}
+			else
+			{
+				Inst.UiInstance.CinCnt = (DATAF)(*Inst.UiInstance.pAnalog).BatteryCurrent;
+				Inst.UiInstance.CoutCnt = (DATAF)(*Inst.UiInstance.pAnalog).MotorCurrent;
+				Inst.UiInstance.VinCnt = (DATAF)(*Inst.UiInstance.pAnalog).Cell123456;
+				Inst.UiInstance.PowerInitialized = 1;
+			}
+		}
+
+
+		void cUiUpdatePower()
+		{
+			DATAF CinV;
+			DATAF CoutV;
+
+			if ((Inst.UiInstance.Hw == FINAL) || (Inst.UiInstance.Hw == FINALB))
+			{
+				CinV = CNT_V(Inst.UiInstance.CinCnt) / AMP_CIN;
+				Inst.UiInstance.Vbatt = (CNT_V(Inst.UiInstance.VinCnt) / AMP_VIN) + CinV + VCE;
+
+				Inst.UiInstance.Ibatt = CinV / SHUNT_IN;
+				CoutV = CNT_V(Inst.UiInstance.CoutCnt) / AMP_COUT;
+				Inst.UiInstance.Imotor = CoutV / SHUNT_OUT;
+
+			}
+			else
+			{
+				CinV = CNT_V(Inst.UiInstance.CinCnt) / EP2_AMP_CIN;
+				Inst.UiInstance.Vbatt = (CNT_V(Inst.UiInstance.VinCnt) / AMP_VIN) + CinV + VCE;
+
+				Inst.UiInstance.Ibatt = CinV / EP2_SHUNT_IN;
+				Inst.UiInstance.Imotor = 0;
+			}
+		}
+
+		void cUiUpdateTopline()
+		{
+			DATA16 X1, X2;
+			DATA16 V;
+			DATA8 BtStatus;
+			DATA8 WifiStatus;
+			DATA8 TmpStatus;
+			DATA8 Name[NAME_LENGTH + 1];
+
+			DATA32 Total;
+			DATA32 Free;
+
+			if (Inst.UiInstance.TopLineEnabled != 0)
+			{
+				// Clear top line
+				LCDClearTopline(Inst.UiInstance.pLcd);
+
+				// Show BT status
+				TmpStatus = 0;
+				BtStatus = cComGetBtStatus();
+				if (BtStatus > 0)
+				{
+					TmpStatus = 1;
+					BtStatus >>= 1;
+					if ((BtStatus >= 0) && (BtStatus < TOP_BT_ICONS))
+					{
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 0, 1, SMALL_ICON, TopLineBtIconMap[BtStatus]);
+					}
+				}
+				if (Inst.UiInstance.BtOn != TmpStatus)
+				{
+					Inst.UiInstance.BtOn = TmpStatus;
+					Inst.UiInstance.UiUpdate = 1;
+				}
+
+				// Show WIFI status
+				TmpStatus = 0;
+				WifiStatus = cComGetWifiStatus();
+				if (WifiStatus > 0)
+				{
+					TmpStatus = 1;
+					WifiStatus >>= 1;
+					if ((WifiStatus >= 0) && (WifiStatus < TOP_WIFI_ICONS))
+					{
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 16, 1, SMALL_ICON, TopLineWifiIconMap[WifiStatus]);
+					}
+				}
+				if (Inst.UiInstance.WiFiOn != TmpStatus)
+				{
+					Inst.UiInstance.WiFiOn = TmpStatus;
+					Inst.UiInstance.UiUpdate = 1;
+				}
+
+				// Show brick name
+				cComGetBrickName(NAME_LENGTH + 1, Name);
+
+				X1 = dLcdGetFontWidth(SMALL_FONT);
+				X2 = LCD_WIDTH / X1;
+				X2 -= strlen((char*)Name);
+				X2 /= 2;
+				X2 *= X1;
+				dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X2, 1, SMALL_FONT, Name);
+
+				// Calculate number of icons
+				X1 = dLcdGetIconWidth(SMALL_ICON);
+				X2 = (LCD_WIDTH - X1) / X1;
+
+				// Show USB status
+				if (cComGetUsbStatus() != 0)
+				{
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, (X2 - 1) * X1, 1, SMALL_ICON, SICON_USB);
+				}
+
+				// Show battery
+				V = (DATA16)(Inst.UiInstance.Vbatt * 1000.0);
+				V -= Inst.UiInstance.BattIndicatorLow;
+				V = (V * (TOP_BATT_ICONS - 1)) / (Inst.UiInstance.BattIndicatorHigh - Inst.UiInstance.BattIndicatorLow);
+				if (V > (TOP_BATT_ICONS - 1))
+				{
+					V = (TOP_BATT_ICONS - 1);
+				}
+				if (V < 0)
+				{
+					V = 0;
+				}
+				dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X2 * X1, 1, SMALL_ICON, TopLineBattIconMap[V]);
+
+				// Show bottom line
+				dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 0, TOPLINE_HEIGHT, LCD_WIDTH, TOPLINE_HEIGHT);
+			}
+		}
+
+
+		void cUiUpdateLcd()
+		{
+			Inst.UiInstance.Font = NORMAL_FONT;
+			cUiUpdateTopline();
+			dLcdUpdate(Inst.UiInstance.pLcd);
+		}
+
+		void cUiRunScreen()
+		{
+			// 100mS
+			if (Inst.UiInstance.ScreenBlocked == 0)
+			{
+				switch (Inst.UiInstance.RunScreenEnabled)
+				{
+					case 0:
+						{
+						}
+						break;
+					case 1:
+						{ // 100mS
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 2:
+						{ // 200mS
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 3:
+						{
+							// Init animation number
+							Inst.UiInstance.RunScreenNumber = 1;
+
+							// Clear screen
+							LCDClear((*Inst.UiInstance.pLcd).Lcd);
+							cUiUpdateLcd();
+
+
+							// Enable top line
+
+							// Draw fixed image
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 39, mindstorms_width, mindstorms_height, (UBYTE*)mindstorms_bits);
+							cUiUpdateLcd();
+
+							// Draw user program name
+							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 79, 1, (DATA8*)VMInstance.Program[USER_SLOT].Name);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenTimer = 0;
+							Inst.UiInstance.RunScreenCounter = 0;
+
+							Inst.UiInstance.RunScreenEnabled++;
+
+							if (Inst.UiInstance.RunLedEnabled != 0)
+							{
+								cUiSetLed(LED_GREEN_PULSE);
+							}
+
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani1x_width, Ani1x_height, (UBYTE*)Ani1x_bits);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenTimer = Inst.UiInstance.MilliSeconds;
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 5:
+						{ // 100mS
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 6:
+						{ // 200mS
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 7:
+						{ // 300mS
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 8:
+						{ // 400mS
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 9:
+						{ // 500mS -> Ani2
+
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani2x_width, Ani2x_height, (UBYTE*)Ani2x_bits);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 10:
+						{ // 600mS -> Ani3
+
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani3x_width, Ani3x_height, (UBYTE*)Ani3x_bits);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 11:
+						{ // 700ms -> Ani4
+
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani4x_width, Ani4x_height, (UBYTE*)Ani4x_bits);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					case 12:
+						{ // 800ms -> Ani5
+
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani5x_width, Ani5x_height, (UBYTE*)Ani5x_bits);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenEnabled++;
+						}
+						break;
+					default:
+						{ // 900ms -> Ani6
+
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani6x_width, Ani6x_height, (UBYTE*)Ani6x_bits);
+							cUiUpdateLcd();
+
+							Inst.UiInstance.RunScreenEnabled = 4;
+						}
+						break;
+
+				}
+			}
+		}
+
+		void cUiCheckVoltage()
+		{ // 400mS
+
+			cUiUpdatePower();
+
+			if (Inst.UiInstance.Vbatt >= Inst.UiInstance.BattWarningHigh)
+			{
+				Inst.UiInstance.Warning &= ~WARNING_BATTLOW;
+			}
+
+			if (Inst.UiInstance.Vbatt <= Inst.UiInstance.BattWarningLow)
+			{
+				Inst.UiInstance.Warning |= WARNING_BATTLOW;
+			}
+
+			if (Inst.UiInstance.Vbatt >= Inst.UiInstance.BattShutdownHigh)
+			{ // Good
+
+				Inst.UiInstance.Warning &= ~WARNING_VOLTAGE;
+			}
+
+			if (Inst.UiInstance.Vbatt < Inst.UiInstance.BattShutdownLow)
+			{ // Bad
+
+				Inst.UiInstance.Warning |= WARNING_VOLTAGE;
+
+				ProgramEnd(USER_SLOT);
+
+				if ((Inst.UiInstance.MilliSeconds - Inst.UiInstance.VoltageTimer) >= LOW_VOLTAGE_SHUTDOWN_TIME)
+				{ // Realy bad
+
+					Inst.UiInstance.ShutDown = 1;
+				}
+			}
+			else
+			{
+				Inst.UiInstance.VoltageTimer = Inst.UiInstance.MilliSeconds;
+			}
+		}
+
+		void cUiCheckPower(UWORD Time)
+		{ // 400mS
+
+			DATA16 X, Y;
+			DATAF I;
+			DATAF Slope;
+
+			I = Inst.UiInstance.Ibatt + Inst.UiInstance.Imotor;
+
+			if (I > LOAD_BREAK_EVEN)
+			{
+				Slope = LOAD_SLOPE_UP;
+			}
+			else
+			{
+				Slope = LOAD_SLOPE_DOWN;
+			}
+
+			Inst.UiInstance.Iintegrated += (I - LOAD_BREAK_EVEN) * (Slope * (DATAF)Time / 1000.0);
+
+			if (Inst.UiInstance.Iintegrated < 0.0)
+			{
+				Inst.UiInstance.Iintegrated = 0.0;
+			}
+			if (Inst.UiInstance.Iintegrated > LOAD_SHUTDOWN_FAIL)
+			{
+				Inst.UiInstance.Iintegrated = LOAD_SHUTDOWN_FAIL;
+			}
+
+			if ((Inst.UiInstance.Iintegrated >= LOAD_SHUTDOWN_HIGH) || (I >= LOAD_SHUTDOWN_FAIL))
+			{
+				Inst.UiInstance.Warning |= WARNING_CURRENT;
+				Inst.UiInstance.PowerShutdown = 1;
+			}
+			if (Inst.UiInstance.Iintegrated <= LOAD_BREAK_EVEN)
+			{
+				Inst.UiInstance.Warning &= ~WARNING_CURRENT;
+				Inst.UiInstance.PowerShutdown = 0;
+			}
+
+			if (Inst.UiInstance.PowerShutdown != 0)
+			{
+				if (Inst.UiInstance.ScreenBlocked == 0)
+				{
+					if (ProgramStatus(USER_SLOT) != STOPPED)
+					{
+						Inst.UiInstance.PowerState = 1;
+					}
+				}
+				ProgramEnd(USER_SLOT);
+			}
+
+			switch (Inst.UiInstance.PowerState)
+			{
+				case 0:
+					{
+						if (Inst.UiInstance.PowerShutdown != 0)
+						{
+							Inst.UiInstance.PowerState++;
+						}
+					}
+					break;
+
+				case 1:
+					{
+						if (Inst.UiInstance.ScreenBusy == 0)
+						{
+							if ((Inst.UiInstance.VoltShutdown) == 0)
+							{
+								Inst.UiInstance.ScreenBlocked = 1;
+								Inst.UiInstance.PowerState++;
+							}
+						}
+					}
+					break;
+
+				case 2:
+					{
+						LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdSave, sizeof(Inst.UiInstance.LcdSave));
+						Inst.UiInstance.PowerState++;
+					}
+					break;
+
+				case 3:
+					{
+						X = 16;
+						Y = 52;
+
+						dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X, Y, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 48, Y + 10, LARGE_ICON, WARNSIGN);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 72, Y + 10, LARGE_ICON, WARN_POWER);
+						dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 5, Y + 39, X + 138, Y + 39);
+						dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, X + 56, Y + 40, LARGE_ICON, YES_SEL);
+						dLcdUpdate(Inst.UiInstance.pLcd);
+						cUiButtonFlush();
+						Inst.UiInstance.PowerState++;
+					}
+					break;
+
+				case 4:
+					{
+						if (cUiGetShortPress(ENTER_BUTTON) != 0)
+						{
+							if (Inst.UiInstance.ScreenBlocked != 0)
+							{
+								Inst.UiInstance.ScreenBlocked = 0;
+							}
+							LCDCopy(&Inst.UiInstance.LcdSave, &Inst.UiInstance.LcdSafe, sizeof(Inst.UiInstance.LcdSafe));
+							dLcdUpdate(Inst.UiInstance.pLcd);
+							Inst.UiInstance.PowerState++;
+						}
+						if ((Inst.UiInstance.PowerShutdown) == 0)
+						{
+							Inst.UiInstance.PowerState = 0;
+						}
+					}
+					break;
+
+				case 5:
+					{
+						if ((Inst.UiInstance.PowerShutdown) == 0)
+						{
+							Inst.UiInstance.PowerState = 0;
+						}
+					}
+					break;
+
+			}
+		}
+
+		void cUiCheckTemp()
+		{
+			if ((Inst.UiInstance.MilliSeconds - Inst.UiInstance.TempTimer) >= CALL_INTERVAL)
+			{
+				Inst.UiInstance.TempTimer += CALL_INTERVAL;
+				Inst.UiInstance.Tbatt = new_bat_temp(Inst.UiInstance.Vbatt, (Inst.UiInstance.Ibatt * (DATAF)1.1));
+			}
+
+			if (Inst.UiInstance.Tbatt >= TEMP_SHUTDOWN_WARNING)
+			{
+				Inst.UiInstance.Warning |= WARNING_TEMP;
+			}
+			else
+			{
+				Inst.UiInstance.Warning &= ~WARNING_TEMP;
+			}
+
+
+			if (Inst.UiInstance.Tbatt >= TEMP_SHUTDOWN_FAIL)
+			{
+				ProgramEnd(USER_SLOT);
+				Inst.UiInstance.ShutDown = 1;
+			}
+		}
+
+		void cUiCheckMemory()
+		{ // 400mS
+
+			DATA32 Total;
+			DATA32 Free;
+
+			cMemoryGetUsage(&Total, &Free, 0);
+
+			if (Free > LOW_MEMORY)
+			{ // Good
+
+				Inst.UiInstance.Warning &= ~WARNING_MEMORY;
+			}
+			else
+			{ // Bad
+
+				Inst.UiInstance.Warning |= WARNING_MEMORY;
+			}
+		}
+
+		void cUiCheckAlive(UWORD Time)
+		{
+			ULONG Timeout;
+
+			Inst.UiInstance.SleepTimer += Time;
+
+			if ((Inst.UiInstance.Activated & BUTTON_ALIVE) != 0)
+			{
+				Inst.UiInstance.Activated &= ~BUTTON_ALIVE;
+				cUiAlive();
+			}
+			Timeout = (ULONG)GetSleepMinutes();
+
+			if (Timeout != 0)
+			{
+				if (Inst.UiInstance.SleepTimer >= (Timeout * 60000L))
+				{
+					Inst.UiInstance.ShutDown = 1;
+				}
+			}
+		}
+
+		void cUiUpdate(UWORD Time)
+		{
+			DATA8 Warning;
+			DATA8 Tmp;
+
+			Inst.UiInstance.MilliSeconds += (ULONG)Time;
+
+			cUiUpdateButtons(Time);
+			cUiUpdateInput();
+			cUiUpdateCnt();
+
+			if ((Inst.UiInstance.MilliSeconds - Inst.UiInstance.UpdateStateTimer) >= 50)
+			{
+				Inst.UiInstance.UpdateStateTimer = Inst.UiInstance.MilliSeconds;
+
+				if (Inst.UiInstance.Event == 0)
+				{
+					Inst.UiInstance.Event = cComGetEvent();
+				}
+
+				switch (Inst.UiInstance.UpdateState++)
+				{
+					case 0:
+						{ //  50 mS
+
+						}
+						break;
+
+					case 1:
+						{ // 100 mS
+
+							cUiRunScreen();
+						}
+						break;
+
+					case 2:
+						{ // 150 mS
+
+						}
+						break;
+
+					case 3:
+						{ // 200 mS
+
+							cUiRunScreen();
+						}
+						break;
+
+					case 4:
+						{ // 250 mS
+
+						}
+						break;
+
+					case 5:
+						{ // 300 mS
+
+							cUiRunScreen();
+						}
+						break;
+
+					case 6:
+						{ // 350 mS
+
+							if (Inst.UiInstance.ScreenBusy == 0)
+							{
+								cUiUpdateTopline();
+								dLcdUpdate(Inst.UiInstance.pLcd);
+							}
+						}
+						break;
+
+					default:
+						{ // 400 mS
+
+							cUiRunScreen();
+							Inst.UiInstance.UpdateState = 0;
+							Inst.UiInstance.ReadyForWarnings = 1;
+						}
+						break;
+
+				}
+
+				if (Inst.UiInstance.Warning != 0)
+				{ // Some warning present
+
+					if (Inst.UiInstance.Warnlight == 0)
+					{ // If not on - turn orange light on
+
+						Inst.UiInstance.Warnlight = 1;
+						cUiSetLed(Inst.UiInstance.LedState);
+					}
+				}
+				else
+				{ // No warning
+
+					if (Inst.UiInstance.Warnlight != 0)
+					{ // If orange light on - turn it off
+
+						Inst.UiInstance.Warnlight = 0;
+						cUiSetLed(Inst.UiInstance.LedState);
+					}
+				}
+
+				// Get valid popup warnings
+				Warning = Inst.UiInstance.Warning & WARNINGS;
+
+				// Find warnings that has not been showed
+				Tmp = (sbyte)(Warning & ~Inst.UiInstance.WarningShowed);
+
+				if (Tmp != 0)
+				{ // Show popup
+
+					if (Inst.UiInstance.ScreenBusy == 0)
+					{ // Wait on screen
+
+						if (Inst.UiInstance.ScreenBlocked == 0)
+						{
+							LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdSave, sizeof(Inst.UiInstance.LcdSave));
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+
+							if ((Tmp & WARNING_TEMP) != 0)
+							{
+								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X1, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
+								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X2, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_POWER);
+								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X3, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, TO_MANUAL);
+								Inst.UiInstance.WarningShowed |= WARNING_TEMP;
+							}
+							else
+							{
+								if ((Tmp & WARNING_CURRENT) != 0)
+								{
+									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X1, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
+									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X2, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_POWER);
+									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X3, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, TO_MANUAL);
+									Inst.UiInstance.WarningShowed |= WARNING_CURRENT;
+								}
+								else
+								{
+									if ((Tmp & WARNING_VOLTAGE) != 0)
+									{
+										dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
+										dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_BATT);
+										Inst.UiInstance.WarningShowed |= WARNING_VOLTAGE;
+									}
+									else
+									{
+										if ((Tmp & WARNING_MEMORY) != 0)
+										{
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_MEMORY);
+											Inst.UiInstance.WarningShowed |= WARNING_MEMORY;
+										}
+										else
+										{
+											if ((Tmp & WARNING_DSPSTAT) != 0)
+											{
+												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
+												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, PROGRAM_ERROR);
+												Inst.UiInstance.WarningShowed |= WARNING_DSPSTAT;
+											}
+											else
+											{
+											}
+										}
+									}
+								}
+							}
+							dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_LINE_X, vmPOP3_ABS_WARN_LINE_Y, vmPOP3_ABS_WARN_LINE_ENDX, vmPOP3_ABS_WARN_LINE_Y);
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_YES_X, vmPOP3_ABS_WARN_YES_Y, LARGE_ICON, YES_SEL);
+							dLcdUpdate(Inst.UiInstance.pLcd);
+							cUiButtonFlush();
+							Inst.UiInstance.ScreenBlocked = 1;
+						}
+					}
+				}
+
+				// Find warnings that have been showed but not confirmed
+				Tmp = Inst.UiInstance.WarningShowed;
+				Tmp &= ~Inst.UiInstance.WarningConfirmed;
+
+				if (Tmp != 0)
+				{
+					if (cUiGetShortPress(ENTER_BUTTON) != 0)
+					{
+						Inst.UiInstance.ScreenBlocked = 0;
+						LCDCopy(&Inst.UiInstance.LcdSave, &Inst.UiInstance.LcdSafe, sizeof(Inst.UiInstance.LcdSafe));
+						dLcdUpdate(Inst.UiInstance.pLcd);
+						if ((Tmp & WARNING_TEMP) != 0)
+						{
+							Inst.UiInstance.WarningConfirmed |= WARNING_TEMP;
+						}
+						else
+						{
+							if ((Tmp & WARNING_CURRENT) != 0)
+							{
+								Inst.UiInstance.WarningConfirmed |= WARNING_CURRENT;
+							}
+							else
+							{
+								if ((Tmp & WARNING_VOLTAGE) != 0)
+								{
+									Inst.UiInstance.WarningConfirmed |= WARNING_VOLTAGE;
+								}
+								else
+								{
+									if ((Tmp & WARNING_MEMORY) != 0)
+									{
+										Inst.UiInstance.WarningConfirmed |= WARNING_MEMORY;
+									}
+									else
+									{
+										if ((Tmp & WARNING_DSPSTAT) != 0)
+										{
+											Inst.UiInstance.WarningConfirmed |= WARNING_DSPSTAT;
+											Inst.UiInstance.Warning &= ~WARNING_DSPSTAT;
+										}
+										else
+										{
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// Find warnings that have been showed, confirmed and removed
+				Tmp = ~Warning;
+				Tmp &= WARNINGS;
+				Tmp &= Inst.UiInstance.WarningShowed;
+				Tmp &= Inst.UiInstance.WarningConfirmed;
+
+				Inst.UiInstance.WarningShowed &= ~Tmp;
+				Inst.UiInstance.WarningConfirmed &= ~Tmp;
+			}
+		}
+
+		DATA8 cUiNotification(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2, DATA8 Icon3, DATA8* pText, DATA8* pState)
+		{
+			RESULT Result = BUSY;
+			NOTIFY* pQ;
+			DATA16 AvailableX;
+			DATA16 UsedX;
+			DATA16 Line;
+			DATA16 CharIn;
+			DATA16 CharOut;
+			DATA8 Character;
+			DATA16 X2;
+			DATA16 Y2;
+			DATA16 AvailableY;
+			DATA16 UsedY;
+
+			pQ = &Inst.UiInstance.Notify;
+
+			if (*pState == 0)
+			{
+				*pState = 1;
+				(*pQ).ScreenStartX = X;
+				(*pQ).ScreenStartY = Y;
+				(*pQ).ScreenWidth = POP3_width;
+				(*pQ).ScreenHeight = POP3_height;
+				(*pQ).IconStartY = (*pQ).ScreenStartY + 10;
+				(*pQ).IconWidth = dLcdGetIconWidth(LARGE_ICON);
+				(*pQ).IconHeight = dLcdGetIconHeight(LARGE_ICON);
+				(*pQ).IconSpaceX = (*pQ).IconWidth;
+
+				(*pQ).YesNoStartX = (*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2);
+				(*pQ).YesNoStartX -= ((*pQ).IconWidth + 8) / 2;
+				(*pQ).YesNoStartX = cUiAlignX((*pQ).YesNoStartX);
+				(*pQ).YesNoStartY = (*pQ).ScreenStartY + 40;
+
+				(*pQ).LineStartX = (*pQ).ScreenStartX + 5;
+				(*pQ).LineStartY = (*pQ).ScreenStartY + 39;
+				(*pQ).LineEndX = (*pQ).LineStartX + 134;
+
+				// Find no of icons
+				(*pQ).NoOfIcons = 0;
+				if (Icon1 > ICON_NONE)
+				{
+					(*pQ).NoOfIcons++;
+				}
+				if (Icon2 > ICON_NONE)
+				{
+					(*pQ).NoOfIcons++;
+				}
+				if (Icon3 > ICON_NONE)
+				{
+					(*pQ).NoOfIcons++;
+				}
+
+			  // Find no of text lines
+			  (*pQ).TextLines = 0;
+				if (pText[0] != 0)
+				{
+					(*pQ).IconStartX = (*pQ).ScreenStartX + 8;
+					(*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
+
+					AvailableX = (*pQ).ScreenWidth;
+					AvailableX -= (((*pQ).IconStartX - (*pQ).ScreenStartX)) * 2;
+
+					AvailableX -= (*pQ).NoOfIcons * (*pQ).IconSpaceX;
+
+
+					(*pQ).NoOfChars = strlen((char*)pText);
+
+
+					(*pQ).Font = SMALL_FONT;
+					(*pQ).FontWidth = dLcdGetFontWidth((*pQ).Font);
+					UsedX = (*pQ).FontWidth * (*pQ).NoOfChars;
+
+					Line = 0;
+
+					if (UsedX <= AvailableX)
+					{ // One line - small font
+
+						if ((AvailableX - UsedX) >= 32)
+						{
+							(*pQ).IconStartX += 32;
+						}
+
+						snprintf((char*)(*pQ).TextLine[Line], MAX_NOTIFY_LINE_CHARS, "%s", pText);
+						Line++;
+						(*pQ).TextLines++;
+
+						(*pQ).TextStartX = (*pQ).IconStartX + ((*pQ).NoOfIcons * (*pQ).IconSpaceX);
+						(*pQ).TextStartY = (*pQ).ScreenStartY + 18;
+						(*pQ).TextSpaceY = dLcdGetFontHeight((*pQ).Font) + 1;
+					}
+					else
+					{ // one or more lines - tiny font
+
+						(*pQ).Font = TINY_FONT;
+						(*pQ).FontWidth = dLcdGetFontWidth((*pQ).Font);
+						UsedX = (*pQ).FontWidth * (*pQ).NoOfChars;
+						AvailableX -= (*pQ).FontWidth;
+
+						CharIn = 0;
+
+						while ((pText[CharIn] != 0) && (Line < MAX_NOTIFY_LINES))
+						{
+							CharOut = 0;
+							UsedX = 0;
+							while ((pText[CharIn] != 0) && (CharOut < MAX_NOTIFY_LINE_CHARS) && (UsedX < (AvailableX - (*pQ).FontWidth)))
+							{
+								Character = pText[CharIn];
+								if (Character == '_')
+								{
+									Character = ' ';
+								}
+							  (*pQ).TextLine[Line][CharOut] = Character;
+								CharIn++;
+								CharOut++;
+								UsedX += (*pQ).FontWidth;
+							}
+							while ((CharOut > 8) && (pText[CharIn] != ' ') && (pText[CharIn] != '_') && (pText[CharIn] != 0))
+							{
+								CharIn--;
+								CharOut--;
+							}
+							if (pText[CharIn] != 0)
+							{
+								CharIn++;
+							}
+						  (*pQ).TextLine[Line][CharOut] = 0;
+							Line++;
+						}
+
+					  (*pQ).TextLines = Line;
+
+						(*pQ).TextStartX = (short)((*pQ).IconStartX + ((*pQ).NoOfIcons * (*pQ).IconSpaceX) + (*pQ).FontWidth);
+						(*pQ).TextSpaceY = dLcdGetFontHeight((*pQ).Font) + 1;
+
+
+						AvailableY = (short)((*pQ).LineStartY - ((*pQ).ScreenStartY + 5));
+						UsedY = (short)((*pQ).TextLines * (*pQ).TextSpaceY);
+
+						while (UsedY > AvailableY)
+						{
+							(*pQ).TextLines--;
+							UsedY = (short)((*pQ).TextLines * (*pQ).TextSpaceY);
+						}
+						Y2 = (short)((AvailableY - UsedY) / 2);
+
+						(*pQ).TextStartY = (short)((*pQ).ScreenStartY + Y2 + 5);
+					}
+
+				}
+				else
+				{
+					(*pQ).IconStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
+					(*pQ).IconStartX -= (short)(((*pQ).IconWidth + 8) / 2);
+					(*pQ).IconStartX -= (short)(((*pQ).NoOfIcons / 2) * (*pQ).IconWidth);
+					(*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
+					(*pQ).TextStartY = (short)((*pQ).ScreenStartY + 8);
+				}
+
+			  (*pQ).NeedUpdate = 1;
+			}
+
+			if ((*pQ).NeedUpdate != 0)
+			{
+				//* UPDATE ***************************************************************************************************
+				(*pQ).NeedUpdate = 0;
+
+				dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+
+				X2 = (*pQ).IconStartX;
+
+				if (Icon1 > ICON_NONE)
+				{
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, LARGE_ICON, Icon1);
+					X2 += (*pQ).IconSpaceX;
+				}
+				if (Icon2 > ICON_NONE)
+				{
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, LARGE_ICON, Icon2);
+					X2 += (*pQ).IconSpaceX;
+				}
+				if (Icon3 > ICON_NONE)
+				{
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X2, (*pQ).IconStartY, LARGE_ICON, Icon3);
+					X2 += (*pQ).IconSpaceX;
+				}
+
+				Line = 0;
+				Y2 = (*pQ).TextStartY;
+				while (Line < (*pQ).TextLines)
+				{
+					dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).TextStartX, Y2, (*pQ).Font, (*pQ).TextLine[Line]);
+					Y2 += (*pQ).TextSpaceY;
+					Line++;
+				}
+
+				dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).LineStartX, (*pQ).LineStartY, (*pQ).LineEndX, (*pQ).LineStartY);
+
+				dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, YES_SEL);
+
+				cUiUpdateLcd();
+				Inst.UiInstance.ScreenBusy = 0;
+			}
+
+			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			{
+				cUiButtonFlush();
+				Result = OK;
+				*pState = 0;
+			}
+
+			return (Result);
+		}
+
+
+		DATA8 cUiQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2, DATA8* pText, DATA8* pState, DATA8* pAnswer)
+		{
+			RESULT Result = BUSY;
+			TQUESTION* pQ;
+			DATA16 Inc;
+
+			pQ = &Inst.UiInstance.Question;
+
+			Inc = cUiGetHorz();
+			if (Inc != 0)
+			{
+				(*pQ).NeedUpdate = 1;
+
+				*pAnswer += Inc;
+
+				if (*pAnswer > 1)
+				{
+					*pAnswer = 1;
+					(*pQ).NeedUpdate = 0;
+				}
+				if (*pAnswer < 0)
+				{
+					*pAnswer = 0;
+					(*pQ).NeedUpdate = 0;
+				}
+			}
+
+			if (*pState == 0)
+			{
+				*pState = 1;
+				(*pQ).ScreenStartX = X;
+				(*pQ).ScreenStartY = Y;
+				(*pQ).IconWidth = dLcdGetIconWidth(LARGE_ICON);
+				(*pQ).IconHeight = dLcdGetIconHeight(LARGE_ICON);
+
+				(*pQ).NoOfIcons = 0;
+				if (Icon1 > ICON_NONE)
+				{
+					(*pQ).NoOfIcons++;
+				}
+				if (Icon2 > ICON_NONE)
+				{
+					(*pQ).NoOfIcons++;
+				}
+			  (*pQ).Default = *pAnswer;
+
+				(*pQ).NeedUpdate = 1;
+			}
+
+
+			if ((*pQ).NeedUpdate != 0)
+			{
+				//* UPDATE ***************************************************************************************************
+				(*pQ).NeedUpdate = 0;
+
+				dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+				(*pQ).ScreenWidth = POP3_width;
+				(*pQ).ScreenHeight = POP3_height;
+
+				(*pQ).IconStartX = (*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2);
+				if ((*pQ).NoOfIcons > 1)
+				{
+					(*pQ).IconStartX -= (*pQ).IconWidth;
+				}
+				else
+				{
+					(*pQ).IconStartX -= (*pQ).IconWidth / 2;
+				}
+				(*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
+				(*pQ).IconSpaceX = (*pQ).IconWidth;
+				(*pQ).IconStartY = (*pQ).ScreenStartY + 10;
+
+				(*pQ).YesNoStartX = (*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2);
+				(*pQ).YesNoStartX -= 8;
+				(*pQ).YesNoStartX -= (*pQ).IconWidth;
+				(*pQ).YesNoStartX = cUiAlignX((*pQ).YesNoStartX);
+				(*pQ).YesNoSpaceX = (*pQ).IconWidth + 16;
+				(*pQ).YesNoStartY = (*pQ).ScreenStartY + 40;
+
+				(*pQ).LineStartX = (*pQ).ScreenStartX + 5;
+				(*pQ).LineStartY = (*pQ).ScreenStartY + 39;
+				(*pQ).LineEndX = (*pQ).LineStartX + 134;
+
+				switch ((*pQ).NoOfIcons)
+				{
+					case 1:
+						{
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, LARGE_ICON, Icon1);
+						}
+						break;
+
+					case 2:
+						{
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, LARGE_ICON, Icon1);
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX + (*pQ).IconSpaceX, (*pQ).IconStartY, LARGE_ICON, Icon2);
+						}
+						break;
+
+				}
+
+				if (*pAnswer == 0)
+				{
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, NO_SEL);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, LARGE_ICON, YES_NOTSEL);
+				}
+				else
+				{
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, NO_NOTSEL);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, LARGE_ICON, YES_SEL);
+				}
+
+				dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).LineStartX, (*pQ).LineStartY, (*pQ).LineEndX, (*pQ).LineStartY);
+
+				cUiUpdateLcd();
+				Inst.UiInstance.ScreenBusy = 0;
+			}
+			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			{
+				cUiButtonFlush();
+				Result = OK;
+				*pState = 0;
+			}
+			if (cUiGetShortPress(BACK_BUTTON) != 0)
+			{
+				cUiButtonFlush();
+				Result = OK;
+				*pState = 0;
+				*pAnswer = -1;
+			}
+
+			return (Result);
+		}
+
+
+		RESULT cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8* pState, DATA32* pIcons)
+		{
+			RESULT Result = BUSY;
+			IQUESTION* pQ;
+			DATA32 Mask;
+			DATA32 TmpIcons;
+			DATA16 Tmp;
+			DATA16 Loop;
+			DATA8 Icon;
+
+			pQ = &Inst.UiInstance.IconQuestion;
+
+			if (*pState == 0)
+			{
+				*pState = 1;
+				(*pQ).ScreenStartX = X;
+				(*pQ).ScreenStartY = Y;
+				(*pQ).ScreenWidth = POP2_width;
+				(*pQ).ScreenHeight = POP2_height;
+				(*pQ).IconWidth = dLcdGetIconWidth(LARGE_ICON);
+				(*pQ).IconHeight = dLcdGetIconHeight(LARGE_ICON);
+				(*pQ).Frame = 2;
+				(*pQ).Icons = *pIcons;
+				(*pQ).NoOfIcons = 0;
+				(*pQ).PointerX = 0;
+
+				TmpIcons = (*pQ).Icons;
 				while (TmpIcons != 0)
 				{
 					if ((TmpIcons & 1) != 0)
 					{
-						pQ.NoOfIcons++;
+						(*pQ).NoOfIcons++;
 					}
 					TmpIcons >>= 1;
 				}
 
-				if (pQ.NoOfIcons != 0)
+				if ((*pQ).NoOfIcons != 0)
 				{
-					pQ.IconStartY = (short)(pQ.ScreenStartY + ((pQ.ScreenHeight - pQ.IconHeight) / 2));
+					(*pQ).IconStartY = (*pQ).ScreenStartY + (((*pQ).ScreenHeight - (*pQ).IconHeight) / 2);
 
-					pQ.IconSpaceX = (short)(((pQ.ScreenWidth - (pQ.IconWidth * pQ.NoOfIcons)) / pQ.NoOfIcons) + pQ.IconWidth);
-					pQ.IconSpaceX = (short)(pQ.IconSpaceX & ~7);
+					(*pQ).IconSpaceX = (((*pQ).ScreenWidth - ((*pQ).IconWidth * (*pQ).NoOfIcons)) / (*pQ).NoOfIcons) + (*pQ).IconWidth;
+					(*pQ).IconSpaceX = (*pQ).IconSpaceX & ~7;
 
-					Tmp = (short)(pQ.IconSpaceX * pQ.NoOfIcons - (pQ.IconSpaceX - pQ.IconWidth));
+					Tmp = (*pQ).IconSpaceX * (*pQ).NoOfIcons - ((*pQ).IconSpaceX - (*pQ).IconWidth);
 
-					pQ.IconStartX = (short)(pQ.ScreenStartX + ((pQ.ScreenWidth - Tmp) / 2));
-					pQ.IconStartX = (short)((pQ.IconStartX + 7) & ~7);
+					(*pQ).IconStartX = (*pQ).ScreenStartX + (((*pQ).ScreenWidth - Tmp) / 2);
+					(*pQ).IconStartX = ((*pQ).IconStartX + 7) & ~7;
 
-					pQ.SelectStartX = (short)(pQ.IconStartX - 1);
-					pQ.SelectStartY = (short)(pQ.IconStartY - 1);
-					pQ.SelectWidth = (short)(pQ.IconWidth + 2);
-					pQ.SelectHeight = (short)(pQ.IconHeight + 2);
-					pQ.SelectSpaceX = pQ.IconSpaceX;
+					(*pQ).SelectStartX = (*pQ).IconStartX - 1;
+					(*pQ).SelectStartY = (*pQ).IconStartY - 1;
+					(*pQ).SelectWidth = (*pQ).IconWidth + 2;
+					(*pQ).SelectHeight = (*pQ).IconHeight + 2;
+					(*pQ).SelectSpaceX = (*pQ).IconSpaceX;
 				}
-				pQ.NeedUpdate = 1;
+
+				(*pQ).NeedUpdate = 1;
 			}
 
-			if (pQ.NoOfIcons != 0)
+			if ((*pQ).NoOfIcons != 0)
 			{
 				// Check for move pointer
 				Tmp = cUiGetHorz();
 				if (Tmp != 0)
 				{
-					pQ.PointerX += Tmp;
+					(*pQ).PointerX += Tmp;
 
-					pQ.NeedUpdate = 1;
+					(*pQ).NeedUpdate = 1;
 
-					if (pQ.PointerX < 0)
+					if ((*pQ).PointerX < 0)
 					{
-						pQ.PointerX = 0;
-						pQ.NeedUpdate = 0;
+						(*pQ).PointerX = 0;
+						(*pQ).NeedUpdate = 0;
 					}
-					if (pQ.PointerX >= pQ.NoOfIcons)
+					if ((*pQ).PointerX >= (*pQ).NoOfIcons)
 					{
-						pQ.PointerX = (short)(pQ.NoOfIcons - 1);
-						pQ.NeedUpdate = 0;
+						(*pQ).PointerX = (*pQ).NoOfIcons - 1;
+						(*pQ).NeedUpdate = 0;
 					}
 				}
 			}
 
-			if (pQ.NeedUpdate != 0)
+			if ((*pQ).NeedUpdate != 0)
 			{
 				//* UPDATE ***************************************************************************************************
-				pQ.NeedUpdate = 0;
+				(*pQ).NeedUpdate = 0;
 
-				LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pQ.ScreenStartX, pQ.ScreenStartY, pop2.Width, pop2.Height, pop2.Data);
-				pQ.ScreenWidth = pop2.Width;
-				pQ.ScreenHeight = pop2.Height;
+				dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, POP2_width, POP2_height, (UBYTE*)POP2_bits);
+				(*pQ).ScreenWidth = POP2_width;
+				(*pQ).ScreenHeight = POP2_height;
 
 				// Show icons
 				Loop = 0;
 				Icon = 0;
-				TmpIcons = pQ.Icons;
-				while (Loop < pQ.NoOfIcons)
+				TmpIcons = (*pQ).Icons;
+				while (Loop < (*pQ).NoOfIcons)
 				{
 					while ((TmpIcons & 1) == 0)
 					{
 						Icon++;
 						TmpIcons >>= 1;
 					}
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pQ.IconStartX + pQ.IconSpaceX * Loop), pQ.IconStartY, lms2012.IconType.LARGE_ICON, Icon);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX + (*pQ).IconSpaceX * Loop, (*pQ).IconStartY, LARGE_ICON, Icon);
 					Loop++;
 					Icon++;
 					TmpIcons >>= 1;
 				}
 
 				// Show selection
-				LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(pQ.SelectStartX + pQ.SelectSpaceX * pQ.PointerX), pQ.SelectStartY, pQ.SelectWidth, pQ.SelectHeight);
+				dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, (*pQ).SelectStartX + (*pQ).SelectSpaceX * (*pQ).PointerX, (*pQ).SelectStartY, (*pQ).SelectWidth, (*pQ).SelectHeight);
 
 				// Update screen
 				cUiUpdateLcd();
-				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
+				Inst.UiInstance.ScreenBusy = 0;
 			}
-			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
+			if (cUiGetShortPress(ENTER_BUTTON) != 0)
 			{
-				if (pQ.NoOfIcons != 0)
+				if ((*pQ).NoOfIcons != 0)
 				{
 					Mask = 0x00000001;
-					TmpIcons = pQ.Icons;
-					Loop = (short)(pQ.PointerX + 1);
+					TmpIcons = (*pQ).Icons;
+					Loop = (*pQ).PointerX + 1;
 
 					do
 					{
-						if ((TmpIcons & Mask) != 0)
+						if (TmpIcons & Mask)
 						{
 							Loop--;
 						}
 						Mask <<= 1;
 					}
-					while (Loop != 0 && Mask != 0);
+					while ((Loop && Mask) != 0);
 					Mask >>= 1;
-					pIcons = Mask;
+					*pIcons = Mask;
 				}
 				else
 				{
-					pIcons = 0;
+					*pIcons = 0;
 				}
 				cUiButtonFlush();
-				Result = lms2012.Result.OK;
-				pState = 0;
+				Result = OK;
+				*pState = 0;
 			}
-			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
+			if (cUiGetShortPress(BACK_BUTTON) != 0)
 			{
-				pIcons = 0;
+				*pIcons = 0;
 				cUiButtonFlush();
-				Result = lms2012.Result.OK;
-				pState = 0;
+				Result = OK;
+				*pState = 0;
 			}
+
 			return (Result);
 		}
-		byte cUiKeyboard(byte Color, short X, short Y, lms2012.NIcon Icon, byte Lng, byte[] pText, ref byte pCharSet, byte[] pAnswer)
-		{
-			KEYB pK;
-			short Width;
-			short Height;
-			short Inc;
-			short SX;
-			short SY;
-			short X3;
-			short X4;
-			short Tmp;
-			byte TmpChar;
-			byte SelectedChar = 0;
 
-			var kbs = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.KeyboardSmp);
-			var kbc = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.KeyboardCap);
-			var kbn = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.KeyboardNum);
+		DATA8 cUiKeyboard(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon, DATA8 Lng, DATA8* pText, DATA8* pCharSet, DATA8* pAnswer)
+		{
+			KEYB* pK;
+			DATA16 Width;
+			DATA16 Height;
+			DATA16 Inc;
+			DATA16 SX;
+			DATA16 SY;
+			DATA16 X3;
+			DATA16 X4;
+			DATA16 Tmp;
+			DATA8 TmpChar;
+			DATA8 SelectedChar = 0;
 
 			//            Value    Marking
 			//  table  >  0x20  -> normal rect
@@ -1515,121 +2281,128 @@ namespace Ev3EmulatorCore.Lms.Cui
 			//  table  =  0x0D  -> enter
 			//
 
-			byte[][][] KeyboardLayout = new byte[lms2012.MAX_KEYB_DEEPT][][];
-			byte[][] lay1 = new byte[lms2012.MAX_KEYB_HEIGHT][];
-			byte[][] lay2 = new byte[lms2012.MAX_KEYB_HEIGHT][];
-			byte[][] lay3 = new byte[lms2012.MAX_KEYB_HEIGHT][];
 
-			lay1[0] = new byte[lms2012.MAX_KEYB_WIDTH] { (byte)'Q', (byte)'W', (byte)'E', (byte)'R', (byte)'T', (byte)'Y', (byte)'U', (byte)'I', (byte)'O', (byte)'P', 0x08, 0x00 };
-			lay1[1] = new byte[lms2012.MAX_KEYB_WIDTH] { 0x03, (byte)'A', (byte)'S', (byte)'D', (byte)'F', (byte)'G', (byte)'H', (byte)'J', (byte)'K', (byte)'L', 0x0D, 0x00 };
-			lay1[2] = new byte[lms2012.MAX_KEYB_WIDTH] { 0x01, (byte)'Z', (byte)'X', (byte)'C', (byte)'V', (byte)'B', (byte)'N', (byte)'M', 0x0D, 0x0D, 0x0D, 0x00 };
-			lay1[3] = new byte[lms2012.MAX_KEYB_WIDTH] { (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', 0x0D, 0x00 };
+			DATA8[][][] KeyboardLayout = new DATA8[lms2012.MAX_KEYB_DEEPT][][];
+			DATA8[][] lay1 = new DATA8[lms2012.MAX_KEYB_HEIGHT][];
+			DATA8[][] lay2 = new DATA8[lms2012.MAX_KEYB_HEIGHT][];
+			DATA8[][] lay3 = new DATA8[lms2012.MAX_KEYB_HEIGHT][];
 
-			lay2[0] = new byte[lms2012.MAX_KEYB_WIDTH] { (byte)'q', (byte)'w', (byte)'e', (byte)'r', (byte)'t', (byte)'y', (byte)'u', (byte)'i', (byte)'o', (byte)'p', 0x08, 0x00 };
-			lay2[1] = new byte[lms2012.MAX_KEYB_WIDTH] { 0x03, (byte)'a', (byte)'s', (byte)'d', (byte)'f', (byte)'g', (byte)'h', (byte)'j', (byte)'k', (byte)'l', 0x0D, 0x00 };
-			lay2[2] = new byte[lms2012.MAX_KEYB_WIDTH] { 0x01, (byte)'z', (byte)'x', (byte)'c', (byte)'v', (byte)'b', (byte)'n', (byte)'m', 0x0D, 0x0D, 0x0D, 0x00 };
-			lay2[3] = new byte[lms2012.MAX_KEYB_WIDTH] { (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', 0x0D, 0x00 };
+			lay1[0] = new DATA8[lms2012.MAX_KEYB_WIDTH] { (DATA8)'Q', (DATA8)'W', (DATA8)'E', (DATA8)'R', (DATA8)'T', (DATA8)'Y', (DATA8)'U', (DATA8)'I', (DATA8)'O', (DATA8)'P', 0x08, 0x00 };
+			lay1[1] = new DATA8[lms2012.MAX_KEYB_WIDTH] { 0x03, (DATA8)'A', (DATA8)'S', (DATA8)'D', (DATA8)'F', (DATA8)'G', (DATA8)'H', (DATA8)'J', (DATA8)'K', (DATA8)'L', 0x0D, 0x00 };
+			lay1[2] = new DATA8[lms2012.MAX_KEYB_WIDTH] { 0x01, (DATA8)'Z', (DATA8)'X', (DATA8)'C', (DATA8)'V', (DATA8)'B', (DATA8)'N', (DATA8)'M', 0x0D, 0x0D, 0x0D, 0x00 };
+			lay1[3] = new DATA8[lms2012.MAX_KEYB_WIDTH] { (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', 0x0D, 0x00 };
 
-			lay3[0] = new byte[lms2012.MAX_KEYB_WIDTH] { (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9', (byte)'0', 0x08, 0x00 };
-			lay3[1] = new byte[lms2012.MAX_KEYB_WIDTH] { 0x04, (byte)'+', (byte)'-', (byte)'=', (byte)'<', (byte)'>', (byte)'/', (byte)'\\', (byte)'*', (byte)':', 0x0D, 0x00 };
-			lay3[2] = new byte[lms2012.MAX_KEYB_WIDTH] { 0x04, (byte)'(', (byte)')', (byte)'_', (byte)'.', (byte)'@', (byte)'!', (byte)'?', 0x0D, 0x0D, 0x0D, 0x00 };
-			lay3[3] = new byte[lms2012.MAX_KEYB_WIDTH] { (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', (byte)' ', 0x0D, 0x00 };
+			lay2[0] = new DATA8[lms2012.MAX_KEYB_WIDTH] { (DATA8)'q', (DATA8)'w', (DATA8)'e', (DATA8)'r', (DATA8)'t', (DATA8)'y', (DATA8)'u', (DATA8)'i', (DATA8)'o', (DATA8)'p', 0x08, 0x00 };
+			lay2[1] = new DATA8[lms2012.MAX_KEYB_WIDTH] { 0x03, (DATA8)'a', (DATA8)'s', (DATA8)'d', (DATA8)'f', (DATA8)'g', (DATA8)'h', (DATA8)'j', (DATA8)'k', (DATA8)'l', 0x0D, 0x00 };
+			lay2[2] = new DATA8[lms2012.MAX_KEYB_WIDTH] { 0x01, (DATA8)'z', (DATA8)'x', (DATA8)'c', (DATA8)'v', (DATA8)'b', (DATA8)'n', (DATA8)'m', 0x0D, 0x0D, 0x0D, 0x00 };
+			lay2[3] = new DATA8[lms2012.MAX_KEYB_WIDTH] { (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', 0x0D, 0x00 };
+
+			lay3[0] = new DATA8[lms2012.MAX_KEYB_WIDTH] { (DATA8)'1', (DATA8)'2', (DATA8)'3', (DATA8)'4', (DATA8)'5', (DATA8)'6', (DATA8)'7', (DATA8)'8', (DATA8)'9', (DATA8)'0', 0x08, 0x00 };
+			lay3[1] = new DATA8[lms2012.MAX_KEYB_WIDTH] { 0x04, (DATA8)'+', (DATA8)'-', (DATA8)'=', (DATA8)'<', (DATA8)'>', (DATA8)'/', (DATA8)'\\', (DATA8)'*', (DATA8)':', 0x0D, 0x00 };
+			lay3[2] = new DATA8[lms2012.MAX_KEYB_WIDTH] { 0x04, (DATA8)'(', (DATA8)')', (DATA8)'_', (DATA8)'.', (DATA8)'@', (DATA8)'!', (DATA8)'?', 0x0D, 0x0D, 0x0D, 0x00 };
+			lay3[3] = new DATA8[lms2012.MAX_KEYB_WIDTH] { (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', 0x0D, 0x00 };
 
 			KeyboardLayout[0] = lay1; KeyboardLayout[1] = lay2; KeyboardLayout[2] = lay3;
 
-			pK = LmsInstance.Inst.UiInstance.Keyboard;
+			pK = &Inst.UiInstance.Keyboard;
 
-			if (pCharSet != 0)
+			if (*pCharSet != 0)
 			{
-				pK.CharSet = pCharSet;
-				pCharSet = 0;
-				pK.ScreenStartX = X;
-				pK.ScreenStartY = Y;
+				(*pK).CharSet = *pCharSet;
+				*pCharSet = 0;
+				(*pK).ScreenStartX = X;
+				(*pK).ScreenStartY = Y;
 
-				if ((Icon >= 0) && (Icon < lms2012.NIcon.ICON_BRICK1))
+				if ((Icon >= 0) && (Icon < N_ICON_NOS))
 				{
-					pK.IconStartX = cUiAlignX((short)(pK.ScreenStartX + 7));
-					pK.IconStartY = (short)(pK.ScreenStartY + 4);
-					pK.TextStartX = (short)(pK.IconStartX + LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.NORMAL_ICON));
+					(*pK).IconStartX = cUiAlignX((*pK).ScreenStartX + 7);
+					(*pK).IconStartY = (*pK).ScreenStartY + 4;
+					(*pK).TextStartX = (*pK).IconStartX + dLcdGetIconWidth(NORMAL_ICON);
 				}
 				else
 				{
-					pK.TextStartX = cUiAlignX((short)(pK.ScreenStartX + 9));
+					(*pK).TextStartX = cUiAlignX((*pK).ScreenStartX + 9);
 				}
-				pK.TextStartY = (short)(pK.ScreenStartY + 7);
-				pK.StringStartX = (short)(pK.ScreenStartX + 8);
-				pK.StringStartY = (short)(pK.ScreenStartY + 22);
-				pK.KeybStartX = (short)(pK.ScreenStartX + 13);
-				pK.KeybStartY = (short)(pK.ScreenStartY + 40);
-				pK.KeybSpaceX = 11;
-				pK.KeybSpaceY = 14;
-				pK.KeybHeight = 13;
-				pK.KeybWidth = 9;
-				pK.Layout = 0;
-				pK.PointerX = 10;
-				pK.PointerY = 1;
-				pK.NeedUpdate = 1;
+				(*pK).TextStartY = (*pK).ScreenStartY + 7;
+				(*pK).StringStartX = (*pK).ScreenStartX + 8;
+				(*pK).StringStartY = (*pK).ScreenStartY + 22;
+				(*pK).KeybStartX = (*pK).ScreenStartX + 13;
+				(*pK).KeybStartY = (*pK).ScreenStartY + 40;
+				(*pK).KeybSpaceX = 11;
+				(*pK).KeybSpaceY = 14;
+				(*pK).KeybHeight = 13;
+				(*pK).KeybWidth = 9;
+				(*pK).Layout = 0;
+				(*pK).PointerX = 10;
+				(*pK).PointerY = 1;
+				(*pK).NeedUpdate = 1;
 			}
 
-			Width = (short)(KeyboardLayout[pK.Layout][pK.PointerY].Length - 1);
-			Height = lms2012.MAX_KEYB_HEIGHT - 1;
+			Width = strlen((char*)KeyboardLayout[(*pK).Layout][(*pK).PointerY]) - 1;
+			Height = MAX_KEYB_HEIGHT - 1;
 
 			Inc = cUiGetHorz();
-			pK.PointerX += Inc;
-			if (pK.PointerX < 0)
+			(*pK).PointerX += Inc;
+			if ((*pK).PointerX < 0)
 			{
-				pK.PointerX = 0;
+				(*pK).PointerX = 0;
 			}
-			if (pK.PointerX > Width)
+			if ((*pK).PointerX > Width)
 			{
-				pK.PointerX = Width;
+				(*pK).PointerX = Width;
 			}
 			Inc = cUiGetVert();
-			pK.PointerY += Inc;
-			if (pK.PointerY < 0)
+			(*pK).PointerY += Inc;
+			if ((*pK).PointerY < 0)
 			{
-				pK.PointerY = 0;
+				(*pK).PointerY = 0;
 			}
-			if (pK.PointerY > Height)
+			if ((*pK).PointerY > Height)
 			{
-				pK.PointerY = Height;
+				(*pK).PointerY = Height;
 			}
 
-			TmpChar = KeyboardLayout[pK.Layout][pK.PointerY][pK.PointerX];
 
-			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
+			TmpChar = KeyboardLayout[(*pK).Layout][(*pK).PointerY][(*pK).PointerX];
+
+			if (cUiGetShortPress(BACK_BUTTON) != 0)
 			{
 				SelectedChar = 0x0D;
 				pAnswer[0] = 0;
 			}
-			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
+			if (cUiGetShortPress(ENTER_BUTTON) != 0)
 			{
 				SelectedChar = TmpChar;
+
 				switch (SelectedChar)
 				{
 					case 0x01:
 						{
-							pK.Layout = 2;
+							(*pK).Layout = 2;
 						}
 						break;
+
 					case 0x02:
 						{
-							pK.Layout = 0;
+							(*pK).Layout = 0;
 						}
 						break;
+
 					case 0x03:
 						{
-							pK.Layout = 1;
+							(*pK).Layout = 1;
 						}
 						break;
+
 					case 0x04:
 						{
-							pK.Layout = 0;
+							(*pK).Layout = 0;
 						}
 						break;
+
 					case 0x08:
 						{
-							Tmp = (short)pAnswer.Length;
+							Tmp = (DATA16)strlen((char*)pAnswer);
 							if (Tmp != 0)
 							{
 								Tmp--;
@@ -1637,17 +2410,18 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 						}
 						break;
-					case (byte)'\r':
+
+					case '\r':
 						{
 						}
 						break;
+
 					default:
 						{
-							var tmpArr = new byte[] { SelectedChar };
-							if (LmsInstance.Inst.ValidateChar(tmpArr, pK.CharSet) == lms2012.Result.OK)
+							if (ValidateChar(&SelectedChar, (*pK).CharSet) == OK)
 							{
-								Tmp = (short)pAnswer.Length;
-								pAnswer[Tmp] = tmpArr[0];
+								Tmp = (DATA16)strlen((char*)pAnswer);
+								pAnswer[Tmp] = SelectedChar;
 								if (++Tmp >= Lng)
 								{
 									Tmp--;
@@ -1656,63 +2430,72 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 						}
 						break;
+
+
 				}
 
-				TmpChar = KeyboardLayout[pK.Layout][pK.PointerY][pK.PointerX];
-				pK.NeedUpdate = 1;
+				TmpChar = KeyboardLayout[(*pK).Layout][(*pK).PointerY][(*pK).PointerX];
+
+				(*pK).NeedUpdate = 1;
 			}
 
-			if ((pK.OldX != pK.PointerX) || (pK.OldY != pK.PointerY))
+			if (((*pK).OldX != (*pK).PointerX) || ((*pK).OldY != (*pK).PointerY))
 			{
-				pK.OldX = pK.PointerX;
-				pK.OldY = pK.PointerY;
-				pK.NeedUpdate = 1;
+				(*pK).OldX = (*pK).PointerX;
+				(*pK).OldY = (*pK).PointerY;
+				(*pK).NeedUpdate = 1;
 			}
 
-			if (pK.NeedUpdate != 0)
+			if ((*pK).NeedUpdate != 0)
 			{
 				//* UPDATE ***************************************************************************************************
-				pK.NeedUpdate = 0;
+				(*pK).NeedUpdate = 0;
 
-				switch (pK.Layout)
+				switch ((*pK).Layout)
 				{
 					case 0:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pK.ScreenStartX, pK.ScreenStartY, kbc.Width, kbc.Height, kbc.Data);
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyboardc_width, keyboardc_height, (UBYTE*)keyboardc_bits);
 						}
 						break;
+
 					case 1:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pK.ScreenStartX, pK.ScreenStartY, kbs.Width, kbs.Height, kbs.Data);
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyboards_width, keyboards_height, (UBYTE*)keyboards_bits);
 						}
 						break;
+
 					case 2:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pK.ScreenStartX, pK.ScreenStartY, kbn.Width, kbn.Height, kbn.Data);
+							dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyboardn_width, keyboardn_height, (UBYTE*)keyboardn_bits);
 						}
 						break;
+
 				}
-				if ((Icon >= 0) && (Icon < lms2012.NIcon.ICON_BRICK1))
+				if ((Icon >= 0) && (Icon < N_ICON_NOS))
 				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pK.IconStartX, pK.IconStartY, lms2012.IconType.NORMAL_ICON, (byte)Icon);
+					dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).IconStartX, (*pK).IconStartY, NORMAL_ICON, Icon);
 				}
 				if (pText[0] != 0)
 				{
-					LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pK.TextStartX, pK.TextStartY, lms2012.FontType.SMALL_FONT, pText);
+					dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).TextStartX, (*pK).TextStartY, SMALL_FONT, pText);
 				}
+
 
 				X4 = 0;
-				X3 = (short)pAnswer.Length;
+				X3 = strlen((char*)pAnswer);
 				if (X3 > 15)
 				{
-					X4 = (short)(X3 - 15);
+					X4 = X3 - 15;
 				}
 
-				LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pK.StringStartX, pK.StringStartY, lms2012.FontType.NORMAL_FONT, pAnswer.Skip(X4).ToArray());
-				LmsInstance.Inst.DlcdClass.dLcdDrawChar(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pK.StringStartX + (X3 - X4) * 8), pK.StringStartY, lms2012.FontType.NORMAL_FONT, (byte)'_');
+				dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX, (*pK).StringStartY, NORMAL_FONT, &pAnswer[X4]);
+				dLcdDrawChar((*Inst.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX + (X3 - X4) * 8, (*pK).StringStartY, NORMAL_FONT, '_');
 
-				SX = (short)(pK.KeybStartX + pK.PointerX * pK.KeybSpaceX);
-				SY = (short)(pK.KeybStartY + pK.PointerY * pK.KeybSpaceY);
+
+
+				SX = (*pK).KeybStartX + (*pK).PointerX * (*pK).KeybSpaceX;
+				SY = (*pK).KeybStartY + (*pK).PointerY * (*pK).KeybSpaceY;
 
 				switch (TmpChar)
 				{
@@ -1720,1039 +2503,1048 @@ namespace Ev3EmulatorCore.Lms.Cui
 					case 0x02:
 					case 0x03:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX - 8), SY, (short)(pK.KeybWidth + 8), pK.KeybHeight);
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX - 8, SY, (*pK).KeybWidth + 8, (*pK).KeybHeight);
 						}
 						break;
+
 					case 0x04:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX - 8), (short)(pK.KeybStartY + 1 * pK.KeybSpaceY), (short)(pK.KeybWidth + 8), (short)(pK.KeybHeight * 2 + 1));
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX - 8, (*pK).KeybStartY + 1 * (*pK).KeybSpaceY, (*pK).KeybWidth + 8, (*pK).KeybHeight * 2 + 1);
 						}
 						break;
+
 					case 0x08:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX + 2), SY, (short)(pK.KeybWidth + 5), pK.KeybHeight);
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX + 2, SY, (*pK).KeybWidth + 5, (*pK).KeybHeight);
 						}
 						break;
+
 					case 0x0D:
 						{
-							SX = (short)(pK.KeybStartX + 112);
-							SY = (short)(pK.KeybStartY + 1 * pK.KeybSpaceY);
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, SX, SY, (short)(pK.KeybWidth + 5), (short)(pK.KeybSpaceY + 1));
-							SX = (short)(pK.KeybStartX + 103);
-							SY = (short)(pK.KeybStartY + 1 + 2 * pK.KeybSpaceY);
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, SX, SY, (short)(pK.KeybWidth + 14), (short)(pK.KeybSpaceY * 2 - 4));
+							SX = (*pK).KeybStartX + 112;
+							SY = (*pK).KeybStartY + 1 * (*pK).KeybSpaceY;
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX, SY, (*pK).KeybWidth + 5, (*pK).KeybSpaceY + 1);
+							SX = (*pK).KeybStartX + 103;
+							SY = (*pK).KeybStartY + 1 + 2 * (*pK).KeybSpaceY;
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX, SY, (*pK).KeybWidth + 14, (*pK).KeybSpaceY * 2 - 4);
 						}
 						break;
+
 					case 0x20:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(pK.KeybStartX + 11), (short)(SY + 1), (short)(pK.KeybWidth + 68), (short)(pK.KeybHeight - 3));
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, (*pK).KeybStartX + 11, SY + 1, (*pK).KeybWidth + 68, (*pK).KeybHeight - 3);
 						}
 						break;
+
 					default:
 						{
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(SX + 1), SY, pK.KeybWidth, pK.KeybHeight);
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, SX + 1, SY, (*pK).KeybWidth, (*pK).KeybHeight);
 						}
 						break;
+
 				}
 				cUiUpdateLcd();
-				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
+				Inst.UiInstance.ScreenBusy = 0;
 			}
 
 			return (SelectedChar);
 		}
 
-        void cUiDrawBar(byte Color, short X, short Y, short X1, short Y1, short Min, short Max, short Act)
-        {
-            short Tmp;
-            short Items;
-            short KnobHeight = 7;
 
-            Items = (short)(Max - Min);
+		void cUiDrawBar(DATA8 Color, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA16 Min, DATA16 Max, DATA16 Act)
+		{
+			DATA16 Tmp;
+			DATA16 Items;
+			DATA16 KnobHeight = 7;
+
+			Items = (short)(Max - Min);
+
+			switch (X1)
+			{
+				case 5:
+					{
+						KnobHeight = 7;
+					}
+					break;
+
+				case 6:
+					{
+						KnobHeight = 9;
+					}
+					break;
+
+				default:
+					{
+						if (Items > 0)
+						{
+							KnobHeight = (short)(Y1 / Items);
+						}
+					}
+					break;
 
-            switch (X1)
-            {
-                case 5:
-                    {
-                        KnobHeight = 7;
-                    }
-                    break;
-                case 6:
-                    {
-                        KnobHeight = 9;
-                    }
-                    break;
-                default:
-                    {
-                        if (Items > 0)
-                        {
-                            KnobHeight = (short)(Y1 / Items);
-                        }
-                    }
-                    break;
-            }
-
-            if (Act < Min)
-            {
-                Act = Min;
-            }
-            if (Act > Max)
-            {
-                Act = Max;
-            }
-
-            // Draw scroll bar
-            LmsInstance.Inst.DlcdClass.dLcdRect(LmsInstance.Inst.UiInstance.Lcd, Color, X, Y, X1, Y1);
-
-            // Draw nob
-            Tmp = Y;
-            if ((Items > 1) && (Act > 0))
-            {
-                Tmp += (short)(((Y1 - KnobHeight) * (Act - 1)) / (Items - 1));
-            }
-
-            switch (X1)
-            {
-                case 5:
-                    {
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                    }
-                    break;
-                case 6:
-                    {
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 4), Tmp);
-                        Tmp++;
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                        Tmp++;
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 1), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 4), Tmp);
-                        Tmp++;
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 2), Tmp);
-                        LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X + 3), Tmp);
-                    }
-                    break;
-                default:
-                    {
-                        LmsInstance.Inst.DlcdClass.dLcdFillRect(LmsInstance.Inst.UiInstance.Lcd, Color, X, Tmp, X1, KnobHeight);
-                    }
-                    break;
-            }
-        }
-
-        lms2012.Result cUiBrowser(byte Type, short X, short Y, short X1, short Y1, byte Lng, ref sbyte pType, byte[] pAnswer)
-        {
-            lms2012.Result Result = lms2012.Result.BUSY;
-            byte[] Image;
-            BROWSER pB;
-            ushort PrgId;
-            ushort ObjId;
-            short Tmp;
-            short Indent;
-            short Item;
-            short TotalItems;
-            sbyte TmpType = 0;
-            byte Folder;
-            byte OldPriority;
-            byte Priority = 0;
-            byte Color;
-            short Ignore;
-            byte Data8 = 0;
-            int Total = 0;
-            int Free = 0;
-            lms2012.Result TmpResult;
-            short TmpHandle = 0;
-
-            PrgId = LmsInstance.Inst.CurrentProgramId();
-            ObjId = LmsInstance.Inst.CallingObjectId();
-            pB = LmsInstance.Inst.UiInstance.Browser;
-
-            Color = lms2012.FG_COLOR;
-
-            // Test ignore horizontal update
-            if (((byte)Type & 0x20) != 0)
-            {
-                Ignore = -1;
-            }
-            else
-            {
-                if (((byte)Type & 0x10) != 0)
-                {
-                    Ignore = 1;
-                }
-                else
-                {
-                    Ignore = 0;
-                }
-            }
-
-            // Isolate browser type
-            Type &= 0x0F;
-
-            LmsInstance.Inst.CheckUsbstick(ref Data8, ref Total, ref Free, 0);
-            if (Data8 != 0)
-            {
-                LmsInstance.Inst.UiInstance.UiUpdate = 1;
-            }
-            LmsInstance.Inst.CheckSdcard(ref Data8, ref Total, ref Free, 0);
-            if (Data8 != 0)
-            {
-                LmsInstance.Inst.UiInstance.UiUpdate = 1;
-            }
-
-            if (LmsInstance.Inst.ProgramStatusChange((ushort)lms2012.Slot.USER_SLOT) == lms2012.ObjectStatus.STOPPED)
-            {
-                if (Type != (byte)lms2012.BrowserType.BROWSE_FILES)
-                {
-                    Result = lms2012.Result.OK;
-					pType = 0;
-                }
-            }
-
-            if ((pType == (short)lms2012.FileType.TYPE_REFRESH_BROWSER))
-            {
-                LmsInstance.Inst.UiInstance.UiUpdate = 1;
-            }
-
-            if ((pType == (short)lms2012.FileType.TYPE_RESTART_BROWSER))
-            {
-                if (pB.hFiles != 0)
-                {
-                    LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
-                }
-                if (pB.hFolders != 0)
-                {
-                    LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFolders);
-                }
-				pB.PrgId = 0;
-                pB.ObjId = 0;
-				//    pAnswer[0]          =  0;
-				pType = 0;
-            }
-
-            if ((pB.PrgId == 0) && (pB.ObjId == 0))
-            {
-                //* INIT *****************************************************************************************************
-
-                // Define screen
-                pB.ScreenStartX = X;
-                pB.ScreenStartY = Y;
-                pB.ScreenWidth = X1;
-                pB.ScreenHeight = Y1;
-
-                // calculate lines on screen
-                pB.LineSpace = 5;
-                pB.IconHeight = LmsInstance.Inst.DlcdClass.dLcdGetIconHeight(lms2012.IconType.NORMAL_ICON);
-                pB.LineHeight = (short)(pB.IconHeight + pB.LineSpace);
-                pB.Lines = (short)(pB.ScreenHeight / pB.LineHeight);
-
-                // calculate chars and lines on screen
-                pB.CharWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(lms2012.FontType.NORMAL_FONT);
-                pB.CharHeight = LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(lms2012.FontType.NORMAL_FONT);
-                pB.IconWidth = LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.NORMAL_ICON);
-                pB.Chars = (short)((pB.ScreenWidth - pB.IconWidth) / pB.CharWidth);
-
-                // calculate start of icon
-                pB.IconStartX = cUiAlignX(pB.ScreenStartX);
-                pB.IconStartY = (short)(pB.ScreenStartY + pB.LineSpace / 2);
-
-                // calculate start of text
-                pB.TextStartX = cUiAlignX((short)(pB.ScreenStartX + pB.IconWidth));
-                pB.TextStartY = (short)(pB.ScreenStartY + (pB.LineHeight - pB.CharHeight) / 2);
-
-                // Calculate selection barBrowser
-                pB.SelectStartX = (short)(pB.ScreenStartX + 1);
-                pB.SelectWidth = (short)(pB.ScreenWidth - (pB.CharWidth + 5));
-                pB.SelectStartY = (short)(pB.IconStartY - 1);
-                pB.SelectHeight = (short)(pB.IconHeight + 2);
-
-                // Calculate scroll bar
-                pB.ScrollWidth = 6;
-                pB.NobHeight = 9;
-                pB.ScrollStartX = (short)(pB.ScreenStartX + pB.ScreenWidth - pB.ScrollWidth);
-                pB.ScrollStartY = (short)(pB.ScreenStartY + 1);
-                pB.ScrollHeight = (short)(pB.ScreenHeight - 2);
-                pB.ScrollSpan = (short)(pB.ScrollHeight - pB.NobHeight);
-
-				pB.TopFolder.WriteBytes(pAnswer);
-
-                pB.PrgId = PrgId;
-                pB.ObjId = ObjId;
-
-                pB.OldFiles = 0;
-                pB.Folders = 0;
-                pB.OpenFolder = 0;
-                pB.Files = 0;
-                pB.ItemStart = 1;
-                pB.ItemPointer = 1;
-                pB.NeedUpdate = 1;
-                LmsInstance.Inst.UiInstance.UiUpdate = 1;
-            }
-
-            if ((pB.PrgId == PrgId) && (pB.ObjId == ObjId))
-            {
-                //* CTRL *****************************************************************************************************
-                if (LmsInstance.Inst.UiInstance.UiUpdate != 0)
-                {
-                    LmsInstance.Inst.UiInstance.UiUpdate = 0;
-                    if (pB.hFiles != 0)
-                    {
-                        LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
-                    }
-                    if (pB.hFolders != 0)
-                    {
-                        LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFolders);
-                    }
-
-					pB.OpenFolder = 0;
-                    pB.Files = 0;
-					pType = 0;
-
-                    switch (Type)
-                    {
-                        case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
-                        case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
-                            {
-                                if (LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.TYPE_FOLDER, pB.TopFolder, ref pB.hFolders) == lms2012.Result.OK)
-                                {
-                                    //******************************************************************************************************
-                                    if (pB.OpenFolder != 0)
-                                    {
-                                        LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.SubFolder, ref TmpType);
-                                        if (CommonHelper.Strcmp(pB.SubFolder, lms2012.SDCARD_FOLDER) == 0)
-                                        {
-                                            Item = pB.ItemPointer;
-                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
-                                            Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
-											pType = (sbyte)lms2012.FileType.TYPE_SDCARD;
-
-											pAnswer.WriteBytes(pB.FullPath);
-                                        }
-                                        else
-                                        {
-                                            if (CommonHelper.Strcmp(pB.SubFolder, lms2012.USBSTICK_FOLDER) == 0)
-                                            {
-                                                Item = pB.ItemPointer;
-                                                LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
-                                                Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
-                                                pType = (sbyte)lms2012.FileType.TYPE_USBSTICK;
-
-                                                pAnswer.WriteBytes(pB.FullPath);
-                                            }
-                                            else
-                                            {
-                                                Result = LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.FILETYPE_UNKNOWN, pB.SubFolder, ref pB.hFiles);
-                                                Result = lms2012.Result.BUSY;
-                                            }
-                                        }
-                                    }
-                                    //******************************************************************************************************
-                                }
-                                else
-                                {
-                                    pB.PrgId = 0;
-                                    pB.ObjId = 0;
-                                }
-                            }
-                            break;
-                        case (byte)lms2012.BrowserType.BROWSE_CACHE:
-                            {
-                            }
-                            break;
-                        case (byte)lms2012.BrowserType.BROWSE_FILES:
-                            {
-                                if (LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.FILETYPE_UNKNOWN, pB.TopFolder, ref pB.hFiles) == lms2012.Result.OK)
-                                {
-                                }
-                                else
-                                {
-                                    pB.PrgId = 0;
-                                    pB.ObjId = 0;
-                                }
-                            }
-                            break;
-
-                    }
-                }
-
-				// TODO: probably uncomment
-				
-                //if (CommonHelper.Strstr((char*)pB.SubFolder, SDCARD_FOLDER))
-                //{
-                //    pB.Sdcard = 1;
-                //}
-                //else
-                //{
-                //    pB.Sdcard = 0;
-                //}
-
-                //if (strstr((char*)pB.SubFolder, USBSTICK_FOLDER))
-                //{
-                //    pB.Usbstick = 1;
-                //}
-                //else
-                //{
-                //    pB.Usbstick = 0;
-                //}
-
-                TmpResult = lms2012.Result.OK;
-                switch (Type)
-                {
-                    case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
-                    case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
-                        {
-                            // Collect folders in directory
-                            TmpResult = LmsInstance.Inst.CmemoryClass.cMemoryGetFolderItems(pB.PrgId, pB.hFolders, ref pB.Folders);
-
-                            // Collect files in folder
-                            if ((pB.OpenFolder != 0) && (TmpResult == lms2012.Result.OK))
-                            {
-                                TmpResult = LmsInstance.Inst.CmemoryClass.cMemoryGetFolderItems(pB.PrgId, pB.hFiles, ref pB.Files);
-                            }
-                        }
-                        break;
-                    case (byte)lms2012.BrowserType.BROWSE_CACHE:
-                        {
-                            pB.Folders = (short)LmsInstance.Inst.CmemoryClass.cMemoryGetCacheFiles();
-                        }
-                        break;
-                    case (byte)lms2012.BrowserType.BROWSE_FILES:
-                        {
-                            TmpResult = LmsInstance.Inst.CmemoryClass.cMemoryGetFolderItems(pB.PrgId, pB.hFiles, ref pB.Files);
-                        }
-                        break;
-
-                }
-
-                if ((pB.OpenFolder != 0) && (pB.OpenFolder == pB.ItemPointer))
-                {
-                    if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
-                    {
-                        // Close folder
-                        LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
-                        if (pB.ItemPointer > pB.OpenFolder)
-                        {
-                            pB.ItemPointer -= pB.Files;
-                        }
-						pB.OpenFolder = 0;
-                        pB.Files = 0;
-                    }
-                }
-
-                // TODO: probably uncomment
-
-                //if (pB.Sdcard == 1)
-                //{
-                //    if (pB.OpenFolder == 0)
-                //    {
-                //        if (cUiGetShortPress(BACK_BUTTON))
-                //        {
-                //            // Collapse sdcard
-                //            if (pB.hFiles)
-                //            {
-                //                cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
-                //            }
-                //            if (pB.hFolders)
-                //            {
-                //                cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
-                //            }
-                //          pB.PrgId = 0;
-                //            pB.ObjId = 0;
-                //            strcpy((char*)pAnswer, vmPRJS_DIR);
-                //            *pType = 0;
-                //            pB.SubFolder[0] = 0;
-                //        }
-                //    }
-                //}
-                //if (pB.Usbstick == 1)
-                //{
-                //    if (pB.OpenFolder == 0)
-                //    {
-                //        if (cUiGetShortPress(BACK_BUTTON))
-                //        {
-                //            // Collapse usbstick
-                //            if (pB.hFiles)
-                //            {
-                //                cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
-                //            }
-                //            if (pB.hFolders)
-                //            {
-                //                cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
-                //            }
-                //          pB.PrgId = 0;
-                //            pB.ObjId = 0;
-                //            strcpy((char*)pAnswer, vmPRJS_DIR);
-                //            *pType = 0;
-                //            pB.SubFolder[0] = 0;
-                //        }
-                //    }
-                //}
-
-
-                if (pB.OldFiles != (pB.Files + pB.Folders))
-                {
-                    pB.OldFiles = (short)(pB.Files + pB.Folders);
-                    pB.NeedUpdate = 1;
-                }
-
-                if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
-                {
-                    pB.OldFiles = 0;
-                    if (pB.OpenFolder != 0)
-                    {
-                        if ((pB.ItemPointer > pB.OpenFolder) && (pB.ItemPointer <= (pB.OpenFolder + pB.Files)))
-                        { // File selected
-
-                            Item = (short)(pB.ItemPointer - pB.OpenFolder);
-                            Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, ref pType);
-
-                            pAnswer.WriteBytes(pB.FullPath);
-                        }
-                        else
-                        { // Folder selected
-                            if (pB.OpenFolder == pB.ItemPointer)
-                            { // Enter on open folder
-
-                                Item = pB.OpenFolder;
-                                Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, Lng, pAnswer, ref pType);
-                            }
-                            else
-                            {
-                                // Close folder
-                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
-                                if (pB.ItemPointer > pB.OpenFolder)
-                                {
-                                    pB.ItemPointer -= pB.Files;
-                                }
-								pB.OpenFolder = 0;
-                                pB.Files = 0;
-                            }
-                        }
-                    }
-                    if (pB.OpenFolder == 0)
-                    { // Open folder
-                        switch (Type)
-                        {
-                            case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
-                                { // Folder
-
-                                    Item = pB.ItemPointer;
-                                    LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
-                                    Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
-
-                                    pAnswer.WriteBytes(pB.FullPath.ConcatArrays(new byte[] { (byte)'/' }).ConcatArrays(pB.Filename));
-                                    pType = (sbyte)lms2012.FileType.TYPE_BYTECODE;
-                                }
-                                break;
-                            case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
-                                { // Folder & File
-
-                                    pB.OpenFolder = pB.ItemPointer;
-                                    LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.SubFolder, ref TmpType);
-                                    if (CommonHelper.Strcmp(pB.SubFolder, lms2012.SDCARD_FOLDER) == 0)
-                                    {
-                                        Item = pB.ItemPointer;
-                                        LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
-                                        Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
-                                        pType = (sbyte)lms2012.FileType.TYPE_SDCARD;
-
-                                        pAnswer.WriteBytes(pB.FullPath);
-                                    }
-                                    else
-                                    {
-                                        if (CommonHelper.Strcmp(pB.SubFolder, lms2012.USBSTICK_FOLDER) == 0)
-                                        {
-                                            Item = pB.ItemPointer;
-                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, lms2012.MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
-                                            Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
-                                            pType = (sbyte)lms2012.FileType.TYPE_USBSTICK;
-
-                                            pAnswer.WriteBytes(pB.FullPath);
-                                        }
-                                        else
-                                        {
-                                            pB.ItemStart = pB.ItemPointer;
-                                            Result = LmsInstance.Inst.CmemoryClass.cMemoryOpenFolder(PrgId, (byte)lms2012.FileType.FILETYPE_UNKNOWN, pB.SubFolder, ref pB.hFiles);
-
-                                            Result = lms2012.Result.BUSY;
-                                        }
-                                    }
-                                }
-                                break;
-                            case (byte)lms2012.BrowserType.BROWSE_CACHE:
-                                { // Cache
-                                    Item = pB.ItemPointer;
-
-                                    pType = LmsInstance.Inst.CmemoryClass.cMemoryGetCacheName((byte)Item, lms2012.FOLDERNAME_SIZE + lms2012.SUBFOLDERNAME_SIZE, pB.FullPath, pB.Filename);
-                                    pAnswer.WriteBytes(pB.FullPath);
-                                    Result = lms2012.Result.OK;
-                                }
-                                break;
-                            case (byte)lms2012.BrowserType.BROWSE_FILES:
-                                { // File
-                                    if ((pB.ItemPointer > pB.OpenFolder) && (pB.ItemPointer <= (pB.OpenFolder + pB.Files)))
-                                    { // File selected
-                                        Item = (short)(pB.ItemPointer - pB.OpenFolder);
-
-                                        Result = LmsInstance.Inst.CmemoryClass.cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, ref pType);
-
-                                        pAnswer.WriteBytes(pB.FullPath);
-                                        Result = lms2012.Result.OK;
-                                    }
-                                }
-                                break;
-                        }
-                    }
-					pB.NeedUpdate = 1;
-                }
-
-                TotalItems = (short)(pB.Folders + pB.Files);
-                if (TmpResult == lms2012.Result.OK)
-                {
-                    if (TotalItems != 0)
-                    {
-                        if (pB.ItemPointer > TotalItems)
-                        {
-                            pB.ItemPointer = TotalItems;
-                            pB.NeedUpdate = 1;
-                        }
-                        if (pB.ItemStart > pB.ItemPointer)
-                        {
-                            pB.ItemStart = pB.ItemPointer;
-                            pB.NeedUpdate = 1;
-                        }
-                    }
-                    else
-                    {
-                        pB.ItemStart = 1;
-                        pB.ItemPointer = 1;
-                    }
-                }
-
-                Tmp = cUiGetVert();
-                if (Tmp != 0)
-                { // up/down arrow pressed
-
-                    pB.NeedUpdate = 1;
-
-                    // Calculate item pointer
-                    pB.ItemPointer += Tmp;
-                    if (pB.ItemPointer < 1)
-                    {
-                        pB.ItemPointer = 1;
-                        pB.NeedUpdate = 0;
-                    }
-                    if (pB.ItemPointer > TotalItems)
-                    {
-                        pB.ItemPointer = TotalItems;
-                        pB.NeedUpdate = 0;
-                    }
-                }
-
-                // Calculate item start
-                if (pB.ItemPointer < pB.ItemStart)
-                {
-                    if (pB.ItemPointer > 0)
-                    {
-                        pB.ItemStart = pB.ItemPointer;
-                    }
-                }
-                if (pB.ItemPointer >= (pB.ItemStart + pB.Lines))
-                {
-                    pB.ItemStart = (short)(pB.ItemPointer - pB.Lines);
-                    pB.ItemStart++;
-                }
-
-                if (pB.NeedUpdate != 0)
-                {
-                    //* UPDATE ***************************************************************************************************
-                    pB.NeedUpdate = 0;
-
-                    //# ifdef DEBUG
-                    //# ifndef DISABLE_SDCARD_SUPPORT
-                    //                    if (pB.Sdcard)
-                    //                    {
-                    //                        printf("SDCARD\r\n");
-                    //                    }
-                    //#endif
-                    //# ifndef DISABLE_USBSTICK_SUPPORT
-                    //                    if (pB.Usbstick)
-                    //                    {
-                    //                        printf("USBSTICK\r\n");
-                    //                    }
-                    //#endif
-                    //                    printf("Folders = %3d, OpenFolder = %3d, Files = %3d, ItemStart = %3d, ItemPointer = %3d, TotalItems = %3d\r\n\n", pB.Folders, pB.OpenFolder, pB.Files, pB.ItemStart, pB.ItemPointer, TotalItems);
-                    //#endif
-
-                    // clear screen
-                    LmsInstance.Inst.DlcdClass.dLcdFillRect(LmsInstance.Inst.UiInstance.Lcd, lms2012.BG_COLOR, pB.ScreenStartX, pB.ScreenStartY, pB.ScreenWidth, pB.ScreenHeight);
-
-                    OldPriority = 0;
-                    for (Tmp = 0; Tmp < pB.Lines; Tmp++)
-                    {
-                        Item = (short)(Tmp + pB.ItemStart);
-                        Folder = 1;
-                        Priority = OldPriority;
-
-                        if (Item <= TotalItems)
-                        {
-                            if (pB.OpenFolder != 0)
-                            {
-                                if ((Item > pB.OpenFolder) && (Item <= (pB.OpenFolder + pB.Files)))
-                                {
-                                    Item -= pB.OpenFolder;
-                                    Folder = 0;
-                                }
-                                else
-                                {
-                                    if (Item > pB.OpenFolder)
-                                    {
-                                        Item -= pB.Files;
-                                    }
-                                }
-                            }
-
-                            //*** Graphics ***********************************************************************************************
-
-                            if (Folder != 0)
-                            { // Show folder
-
-                                switch (Type)
-                                {
-                                    case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
-                                        {
-                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
-                                            if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemIcon(pB.PrgId, pB.hFolders, Item, ref TmpHandle, out Image) == lms2012.Result.OK)
-                                            {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawBitmap(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), Image);
-                                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFile(pB.PrgId, ref TmpHandle);
-                                            }
-                                            else
-                                            {
-												var appp = LmsInstance.Inst.UiBmpHandler.Get(UiBmpHandler.BmpType.App);
-												LmsInstance.Inst.DlcdClass.dLcdDrawPicture(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), appp.Width, appp.Height, appp.Data);
-                                            }
-
-											pB.Text[0] = 0;
-                                            if (CommonHelper.Strcmp(pB.Filename, "Bluetooth") == 0)
-                                            {
-                                                if (LmsInstance.Inst.UiInstance.BtOn != 0)
-                                                {
-                                                    pB.Text[0] = (byte)'+';
-                                                }
-                                                else
-                                                {
-                                                    pB.Text[0] = (byte)'-';
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (CommonHelper.Strcmp(pB.Filename, "WiFi") == 0)
-                                                {
-                                                    if (LmsInstance.Inst.UiInstance.WiFiOn != 0)
-                                                    {
-                                                        pB.Text[0] = (byte)'+';
-                                                    }
-                                                    else
-                                                    {
-                                                        pB.Text[0] = (byte)'-';
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (LmsInstance.Inst.CmemoryClass.cMemoryGetItemText(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Text) != lms2012.Result.OK)
-                                                    {
-                                                        pB.Text[0] = 0;
-                                                    }
-                                                }
-                                            }
-                                            switch (pB.Text[0])
-                                            {
-                                                case 0:
-                                                    {
-                                                    }
-                                                    break;
-
-                                                case (byte)'+':
-                                                    {
-                                                        Indent = (short)((pB.Chars - 1) * pB.CharWidth - LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.MENU_ICON));
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + Indent), (short)((pB.TextStartY - 2) + (Tmp * pB.LineHeight)), lms2012.IconType.MENU_ICON, (int)lms2012.MIcon.ICON_CHECKED);
-                                                    }
-                                                    break;
-
-                                                case (byte)'-':
-                                                    {
-                                                        Indent = (short)((pB.Chars - 1) * pB.CharWidth - LmsInstance.Inst.DlcdClass.dLcdGetIconWidth(lms2012.IconType.MENU_ICON));
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + Indent), (short)((pB.TextStartY - 2) + (Tmp * pB.LineHeight)), lms2012.IconType.MENU_ICON, (int)lms2012.MIcon.ICON_CHECKBOX);
-                                                    }
-                                                    break;
-
-                                                default:
-                                                    {
-                                                        Indent = (short)((pB.Chars - 1) - (pB.Text.Length * pB.CharWidth));
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + Indent), (short)(pB.TextStartY + (Tmp * pB.LineHeight)), lms2012.FontType.NORMAL_FONT, pB.Text);
-                                                    }
-                                                    break;
-
-                                            }
-
-                                        }
-                                        break;
-
-                                    case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
-                                        {
-                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
-                                            LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
-
-                                            if ((Priority == 1) || (Priority == 2))
-                                            {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_FOLDER2);
-                                            }
-                                            else
-                                            {
-                                                if (Priority == 3)
-                                                {
-                                                    LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_SD);
-                                                }
-                                                else
-                                                {
-                                                    if (Priority == 4)
-                                                    {
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_USB);
-                                                    }
-                                                    else
-                                                    {
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
-                                                    }
-                                                }
-                                            }
-                                            if (Priority != OldPriority)
-                                            {
-                                                if ((Priority == 1) || (Priority >= 3))
-                                                {
-                                                    if (Tmp != 0)
-                                                    {
-                                                        LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + ((Tmp - 1) * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        break;
-
-                                    case (byte)lms2012.BrowserType.BROWSE_CACHE:
-                                        {
-                                            TmpType = LmsInstance.Inst.CmemoryClass.cMemoryGetCacheName((byte)Item, (byte)pB.Chars, pB.FullPath, pB.Filename);
-                                            LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
-                                        }
-                                        break;
-
-                                    case (byte)lms2012.BrowserType.BROWSE_FILES:
-                                        {
-                                            LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, (byte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
-                                            LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
-                                        }
-                                        break;
-
-                                }
-                                // Draw folder name
-                                LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pB.TextStartX, (short)(pB.TextStartY + (Tmp * pB.LineHeight)), lms2012.FontType.NORMAL_FONT, pB.Filename);
-
-                                // Draw open folder
-                                if (Item == pB.OpenFolder)
-                                {
-                                    LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, 144, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)lms2012.NIcon.ICON_OPENFOLDER);
-                                }
-
-                                // Draw selection
-                                if (pB.ItemPointer == (Tmp + pB.ItemStart))
-                                {
-                                    LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.SelectWidth + 1), pB.SelectHeight);
-                                }
-
-                                // Draw end line
-                                switch (Type)
-                                {
-                                    case (byte)lms2012.BrowserType.BROWSE_FOLDERS:
-                                    case (byte)lms2012.BrowserType.BROWSE_FOLDS_FILES:
-                                    case (byte)lms2012.BrowserType.BROWSE_FILES:
-                                        {
-                                            if (((Tmp + pB.ItemStart) == TotalItems) && (Tmp < (pB.Lines - 1)))
-                                            {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
-                                            }
-                                        }
-                                        break;
-
-                                    case (byte)lms2012.BrowserType.BROWSE_CACHE:
-                                        {
-                                            if (((Tmp + pB.ItemStart) == 1) && (Tmp < (pB.Lines - 1)))
-                                            {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
-                                            }
-                                            if (((Tmp + pB.ItemStart) == TotalItems) && (Tmp < (pB.Lines - 1)))
-                                            {
-                                                LmsInstance.Inst.DlcdClass.dLcdDrawDotLine(LmsInstance.Inst.UiInstance.Lcd, Color, pB.SelectStartX, (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), (short)(pB.SelectStartX + pB.SelectWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 2), 1, 2);
-                                            }
-                                        }
-                                        break;
-
-                                }
-                            }
-                            else
-                            { // Show file
-
-                                // Get file name and type
-                                LmsInstance.Inst.CmemoryClass.cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, (byte)(pB.Chars - 1), pB.Filename, ref TmpType, ref Priority);
-
-                                // show File icons
-                                LmsInstance.Inst.DlcdClass.dLcdDrawIcon(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth), (short)(pB.IconStartY + (Tmp * pB.LineHeight)), lms2012.IconType.NORMAL_ICON, (int)FiletypeToNormalIcon.First(x => (sbyte)x.Key == TmpType).Value);
-
-                                // Draw file name
-                                LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.TextStartX + pB.CharWidth), (short)(pB.TextStartY + (Tmp * pB.LineHeight)), lms2012.FontType.NORMAL_FONT, pB.Filename);
-
-                                // Draw folder line
-                                if ((Tmp == (pB.Lines - 1)) || (Item == pB.Files))
-                                {
-                                    LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.SelectHeight - 1));
-                                }
-                                else
-                                {
-                                    LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.IconStartX + pB.CharWidth - 3), (short)(pB.SelectStartY + (Tmp * pB.LineHeight) + pB.LineHeight - 1));
-                                }
-
-                                // Draw selection
-                                if (pB.ItemPointer == (Tmp + pB.ItemStart))
-                                {
-                                    LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, (short)(pB.SelectStartX + pB.CharWidth), (short)(pB.SelectStartY + (Tmp * pB.LineHeight)), (short)(pB.SelectWidth + 1 - pB.CharWidth), pB.SelectHeight);
-                                }
-                            }
-
-                            //************************************************************************************************************
-                        }
-
-                        OldPriority = Priority;
-                    }
-
-                    cUiDrawBar(1, pB.ScrollStartX, pB.ScrollStartY, pB.ScrollWidth, pB.ScrollHeight, 0, TotalItems, pB.ItemPointer);
-
-                    // Update
-                    cUiUpdateLcd();
-                    LmsInstance.Inst.UiInstance.ScreenBusy = 0;
-                }
-
-                if (Result != lms2012.Result.OK)
-                {
-                    Tmp = cUiTestHorz();
-                    if (Ignore == Tmp)
-                    {
-                        Tmp = cUiGetHorz();
-                        Tmp = 0;
-                    }
-
-                    if ((Tmp != 0) || (cUiTestShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0) || (cUiTestLongPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0))
-                    {
-                        if (Type != (byte)lms2012.BrowserType.BROWSE_CACHE)
-                        {
-                            if (pB.OpenFolder != 0)
-                            {
-                                if (pB.hFiles != 0)
-                                {
-                                    LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFiles);
-                                }
-                            }
-                            if (pB.hFolders != 0)
-                            {
-                                LmsInstance.Inst.CmemoryClass.cMemoryCloseFolder(pB.PrgId, ref pB.hFolders);
-                            }
-                        }
-                      pB.PrgId = 0;
-                        pB.ObjId = 0;
-                        pB.SubFolder[0] = 0;
-                        pAnswer[0] = 0;
-                        pType = 0;
-                        Result = lms2012.Result.OK;
-                    }
-                }
-                else
-                {
-                    pB.NeedUpdate = 1;
-                }
-            }
-            else
-            {
-                pAnswer[0] = 0;
-                pType = (sbyte)lms2012.FileType.TYPE_RESTART_BROWSER;
-                Result = lms2012.Result.FAIL;
-            }
-
-            if (pType > 0)
-            {
-//# ifndef DISABLE_SDCARD_SUPPORT
-//                if (pB.Sdcard)
-//                {
-//                    *pType |= TYPE_SDCARD;
-//                }
-//#endif
-//# ifndef DISABLE_USBSTICK_SUPPORT
-//                if (pB.Usbstick)
-//                {
-//                    *pType |= TYPE_USBSTICK;
-//                }
-//#endif
-            }
-
-            if (Result != lms2012.Result.BUSY)
-            {
-				//* EXIT *****************************************************************************************************
 			}
+
+			if (Act < Min)
+			{
+				Act = Min;
+			}
+			if (Act > Max)
+			{
+				Act = Max;
+			}
+
+			// Draw scroll bar
+			dLcdRect((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+
+			// Draw nob
+			Tmp = Y;
+			if ((Items > 1) && (Act > 0))
+			{
+				Tmp += (short)((Y1 - KnobHeight) * (Act - 1) / (Items - 1));
+			}
+
+			switch (X1)
+			{
+				case 5:
+					{
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+					}
+					break;
+
+				case 6:
+					{
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 4, Tmp);
+						Tmp++;
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+						Tmp++;
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 4, Tmp);
+						Tmp++;
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+						dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+					}
+					break;
+
+				default:
+					{
+						dLcdFillRect((*Inst.UiInstance.pLcd).Lcd, Color, X, Tmp, X1, KnobHeight);
+					}
+					break;
+
+			}
+
+		}
+
+		RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8 Lng, DATA8* pType, DATA8* pAnswer)
+		{
+			RESULT Result = BUSY;
+			DATA32 Image;
+			BROWSER* pB;
+			PRGID PrgId;
+			OBJID ObjId;
+			DATA16 Tmp;
+			DATA16 Indent;
+			DATA16 Item;
+			DATA16 TotalItems;
+			DATA8 TmpType;
+			DATA8 Folder;
+			DATA8 OldPriority;
+			DATA8 Priority;
+			DATA8 Color;
+			DATA16 Ignore;
+			DATA8 Data8;
+			DATA32 Total;
+			DATA32 Free;
+			RESULT TmpResult;
+			HANDLER TmpHandle;
+
+			PrgId = CurrentProgramId();
+			ObjId = CallingObjectId();
+			pB = &Inst.UiInstance.Browser;
+
+			Color = FG_COLOR;
+
+			// Test ignore horizontal update
+			if ((Type & 0x20) != 0)
+			{
+				Ignore = -1;
+			}
+			else
+			{
+				if ((Type & 0x10) != 0)
+				{
+					Ignore = 1;
+				}
+				else
+				{
+					Ignore = 0;
+				}
+			}
+
+			// Isolate browser type
+			Type &= 0x0F;
+
+			CheckUsbstick(&Data8, &Total, &Free, 0);
+			if (Data8 != 0)
+			{
+				Inst.UiInstance.UiUpdate = 1;
+			}
+			CheckSdcard(&Data8, &Total, &Free, 0);
+			if (Data8 != 0)
+			{
+				Inst.UiInstance.UiUpdate = 1;
+			}
+
+			if (ProgramStatusChange(USER_SLOT) == STOPPED)
+			{
+				if (Type != BROWSE_FILES)
+				{
+					Result = OK;
+					*pType = 0;
+# ifdef DEBUG
+					printf("Browser interrupted\r\n");
+#endif
+				}
+			}
+
+			if ((*pType == TYPE_REFRESH_BROWSER))
+			{
+				Inst.UiInstance.UiUpdate = 1;
+			}
+
+			if ((*pType == TYPE_RESTART_BROWSER))
+			{
+				if ((*pB).hFiles != 0)
+				{
+					cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+				}
+				if ((*pB).hFolders != 0)
+				{
+					cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
+				}
+			  (*pB).PrgId = 0;
+				(*pB).ObjId = 0;
+				//    pAnswer[0]          =  0;
+				*pType = 0;
+# ifdef DEBUG
+				printf("Restarting browser\r\n");
+#endif
+			}
+
+			if (((*pB).PrgId == 0) && ((*pB).ObjId == 0))
+			{
+				//* INIT *****************************************************************************************************
+
+				// Define screen
+				(*pB).ScreenStartX = X;
+				(*pB).ScreenStartY = Y;
+				(*pB).ScreenWidth = X1;
+				(*pB).ScreenHeight = Y1;
+
+				// calculate lines on screen
+				(*pB).LineSpace = 5;
+				(*pB).IconHeight = dLcdGetIconHeight(NORMAL_ICON);
+				(*pB).LineHeight = (*pB).IconHeight + (*pB).LineSpace;
+				(*pB).Lines = ((*pB).ScreenHeight / (*pB).LineHeight);
+
+				// calculate chars and lines on screen
+				(*pB).CharWidth = dLcdGetFontWidth(NORMAL_FONT);
+				(*pB).CharHeight = dLcdGetFontHeight(NORMAL_FONT);
+				(*pB).IconWidth = dLcdGetIconWidth(NORMAL_ICON);
+				(*pB).Chars = (((*pB).ScreenWidth - (*pB).IconWidth) / (*pB).CharWidth);
+
+				// calculate start of icon
+				(*pB).IconStartX = cUiAlignX((*pB).ScreenStartX);
+				(*pB).IconStartY = (*pB).ScreenStartY + (*pB).LineSpace / 2;
+
+				// calculate start of text
+				(*pB).TextStartX = cUiAlignX((*pB).ScreenStartX + (*pB).IconWidth);
+				(*pB).TextStartY = (*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2;
+
+				// Calculate selection barBrowser
+				(*pB).SelectStartX = (*pB).ScreenStartX + 1;
+				(*pB).SelectWidth = (*pB).ScreenWidth - ((*pB).CharWidth + 5);
+				(*pB).SelectStartY = (*pB).IconStartY - 1;
+				(*pB).SelectHeight = (*pB).IconHeight + 2;
+
+				// Calculate scroll bar
+				(*pB).ScrollWidth = 6;
+				(*pB).NobHeight = 9;
+				(*pB).ScrollStartX = (*pB).ScreenStartX + (*pB).ScreenWidth - (*pB).ScrollWidth;
+				(*pB).ScrollStartY = (*pB).ScreenStartY + 1;
+				(*pB).ScrollHeight = (*pB).ScreenHeight - 2;
+				(*pB).ScrollSpan = (*pB).ScrollHeight - (*pB).NobHeight;
+
+				strncpy((char*)(*pB).TopFolder, (char*)pAnswer, MAX_FILENAME_SIZE);
+
+				(*pB).PrgId = PrgId;
+				(*pB).ObjId = ObjId;
+
+				(*pB).OldFiles = 0;
+				(*pB).Folders = 0;
+				(*pB).OpenFolder = 0;
+				(*pB).Files = 0;
+				(*pB).ItemStart = 1;
+				(*pB).ItemPointer = 1;
+				(*pB).NeedUpdate = 1;
+				Inst.UiInstance.UiUpdate = 1;
+			}
+
+			if (((*pB).PrgId == PrgId) && ((*pB).ObjId == ObjId))
+			{
+				//* CTRL *****************************************************************************************************
+
+
+				if (Inst.UiInstance.UiUpdate != 0)
+				{
+					Inst.UiInstance.UiUpdate = 0;
+
+					if ((*pB).hFiles != 0)
+					{
+						cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+					}
+					if ((*pB).hFolders != 0)
+					{
+						cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
+					}
+
+				  (*pB).OpenFolder = 0;
+					(*pB).Files = 0;
+					*pType = 0;
+
+					switch (Type)
+					{
+						case BROWSE_FOLDERS:
+						case BROWSE_FOLDS_FILES:
+							{
+								if (cMemoryOpenFolder(PrgId, TYPE_FOLDER, (*pB).TopFolder, &(*pB).hFolders) == OK)
+								{
+									//******************************************************************************************************
+									if ((*pB).OpenFolder != 0)
+									{
+										cMemoryGetItem((*pB).PrgId, (*pB).hFolders, (*pB).OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).SubFolder, &TmpType);
+										if (strcmp((char*)(*pB).SubFolder, SDCARD_FOLDER) == 0)
+										{
+											Item = (*pB).ItemPointer;
+											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
+											Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
+											*pType = TYPE_SDCARD;
+
+											snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+										}
+										else
+										{
+											if (strcmp((char*)(*pB).SubFolder, USBSTICK_FOLDER) == 0)
+											{
+												Item = (*pB).ItemPointer;
+												cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
+												Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
+												*pType = TYPE_USBSTICK;
+
+												snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+											}
+											else
+											{
+												Result = cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).SubFolder, &(*pB).hFiles);
+												Result = BUSY;
+											}
+										}
+									}
+									//******************************************************************************************************
+								}
+								else
+								{
+									(*pB).PrgId = 0;
+									(*pB).ObjId = 0;
+								}
+							}
+							break;
+
+						case BROWSE_CACHE:
+							{
+							}
+							break;
+
+						case BROWSE_FILES:
+							{
+								if (cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).TopFolder, &(*pB).hFiles) == OK)
+								{
+
+
+								}
+								else
+								{
+									(*pB).PrgId = 0;
+									(*pB).ObjId = 0;
+								}
+							}
+							break;
+
+					}
+				}
+
+				if (strstr((char*)(*pB).SubFolder, SDCARD_FOLDER) != null)
+				{
+					(*pB).Sdcard = 1;
+				}
+				else
+				{
+					(*pB).Sdcard = 0;
+				}
+
+				if (strstr((char*)(*pB).SubFolder, USBSTICK_FOLDER) != null)
+				{
+					(*pB).Usbstick = 1;
+				}
+				else
+				{
+					(*pB).Usbstick = 0;
+				}
+
+				TmpResult = OK;
+				switch (Type)
+				{
+					case BROWSE_FOLDERS:
+					case BROWSE_FOLDS_FILES:
+						{
+							// Collect folders in directory
+							TmpResult = cMemoryGetFolderItems((*pB).PrgId, (*pB).hFolders, &(*pB).Folders);
+
+							// Collect files in folder
+							if (((*pB).OpenFolder) && (TmpResult == OK))
+							{
+								TmpResult = cMemoryGetFolderItems((*pB).PrgId, (*pB).hFiles, &(*pB).Files);
+							}
+						}
+						break;
+
+					case BROWSE_CACHE:
+						{
+							(*pB).Folders = (DATA16)cMemoryGetCacheFiles();
+						}
+						break;
+
+					case BROWSE_FILES:
+						{
+							TmpResult = cMemoryGetFolderItems((*pB).PrgId, (*pB).hFiles, &(*pB).Files);
+						}
+						break;
+
+				}
+
+				if (((*pB).OpenFolder != 0) && ((*pB).OpenFolder == (*pB).ItemPointer))
+				{
+					if (cUiGetShortPress(BACK_BUTTON) != 0)
+					{
+						// Close folder
+						cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+						if ((*pB).ItemPointer > (*pB).OpenFolder)
+						{
+							(*pB).ItemPointer -= (*pB).Files;
+						}
+					  (*pB).OpenFolder = 0;
+						(*pB).Files = 0;
+					}
+				}
+
+				if ((*pB).Sdcard == 1)
+				{
+					if ((*pB).OpenFolder == 0)
+					{
+						if (cUiGetShortPress(BACK_BUTTON) != 0)
+						{
+							// Collapse sdcard
+							if ((*pB).hFiles != 0)
+							{
+								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+							}
+							if ((*pB).hFolders != 0)
+							{
+								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
+							}
+						  (*pB).PrgId = 0;
+							(*pB).ObjId = 0;
+							strcpy((char*)pAnswer, vmPRJS_DIR);
+							*pType = 0;
+							(*pB).SubFolder[0] = 0;
+						}
+					}
+				}
+				if ((*pB).Usbstick == 1)
+				{
+					if ((*pB).OpenFolder == 0)
+					{
+						if (cUiGetShortPress(BACK_BUTTON) != 0)
+						{
+							// Collapse usbstick
+							if ((*pB).hFiles != 0)
+							{
+								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+							}
+							if ((*pB).hFolders != 0)
+							{
+								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
+							}
+						  (*pB).PrgId = 0;
+							(*pB).ObjId = 0;
+							strcpy((char*)pAnswer, vmPRJS_DIR);
+							*pType = 0;
+							(*pB).SubFolder[0] = 0;
+						}
+					}
+				}
+				if ((*pB).OldFiles != ((*pB).Files + (*pB).Folders))
+				{
+					(*pB).OldFiles = (short)((*pB).Files + (*pB).Folders);
+					(*pB).NeedUpdate = 1;
+				}
+
+				if (cUiGetShortPress(ENTER_BUTTON) != 0)
+				{
+					(*pB).OldFiles = 0;
+					if ((*pB).OpenFolder != 0)
+					{
+						if (((*pB).ItemPointer > (*pB).OpenFolder) && ((*pB).ItemPointer <= ((*pB).OpenFolder + (*pB).Files)))
+						{ // File selected
+
+							Item = (*pB).ItemPointer - (*pB).OpenFolder;
+							Result = cMemoryGetItem((*pB).PrgId, (*pB).hFiles, Item, Lng, (*pB).FullPath, pType);
+
+							snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+						}
+						else
+						{ // Folder selected
+
+							if ((*pB).OpenFolder == (*pB).ItemPointer)
+							{ // Enter on open folder
+
+								Item = (*pB).OpenFolder;
+								Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, Lng, pAnswer, pType);
+							}
+							else
+							{ // Close folder
+								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+								if ((*pB).ItemPointer > (*pB).OpenFolder)
+								{
+									(*pB).ItemPointer -= (*pB).Files;
+								}
+							  (*pB).OpenFolder = 0;
+								(*pB).Files = 0;
+							}
+						}
+					}
+					if ((*pB).OpenFolder == 0)
+					{ // Open folder
+
+						switch (Type)
+						{
+							case BROWSE_FOLDERS:
+								{ // Folder
+
+									Item = (*pB).ItemPointer;
+									cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
+									Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
+
+									snprintf((char*)pAnswer, Lng, "%s/%s", (char*)(*pB).FullPath, (char*)(*pB).Filename);
+									*pType = TYPE_BYTECODE;
+								}
+								break;
+
+							case BROWSE_FOLDS_FILES:
+								{ // Folder & File
+
+									(*pB).OpenFolder = (*pB).ItemPointer;
+									cMemoryGetItem((*pB).PrgId, (*pB).hFolders, (*pB).OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).SubFolder, &TmpType);
+									if (strcmp((char*)(*pB).SubFolder, SDCARD_FOLDER) == 0)
+									{
+										Item = (*pB).ItemPointer;
+										cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
+										Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
+										*pType = TYPE_SDCARD;
+
+										snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+									}
+									else
+									{
+										if (strcmp((char*)(*pB).SubFolder, USBSTICK_FOLDER) == 0)
+										{
+											Item = (*pB).ItemPointer;
+											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
+											Result = cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
+											*pType = TYPE_USBSTICK;
+
+											snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+										}
+										else
+										{
+											(*pB).ItemStart = (*pB).ItemPointer;
+											Result = cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).SubFolder, &(*pB).hFiles);
+
+											Result = BUSY;
+										}
+									}
+								}
+								break;
+							case BROWSE_CACHE:
+								{ // Cache
+
+									Item = (*pB).ItemPointer;
+
+									*pType = cMemoryGetCacheName(Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (char*)(*pB).FullPath, (char*)(*pB).Filename);
+									snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+									Result = OK;
+								}
+								break;
+							case BROWSE_FILES:
+								{ // File
+
+									if (((*pB).ItemPointer > (*pB).OpenFolder) && ((*pB).ItemPointer <= ((*pB).OpenFolder + (*pB).Files)))
+									{ // File selected
+
+										Item = (*pB).ItemPointer - (*pB).OpenFolder;
+
+										Result = cMemoryGetItem((*pB).PrgId, (*pB).hFiles, Item, Lng, (*pB).FullPath, pType);
+
+										snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+										Result = OK;
+									}
+								}
+								break;
+
+						}
+					}
+				  (*pB).NeedUpdate = 1;
+				}
+
+				TotalItems = (*pB).Folders + (*pB).Files;
+				if (TmpResult == OK)
+				{
+					if (TotalItems != 0)
+					{
+						if ((*pB).ItemPointer > TotalItems)
+						{
+
+							(*pB).ItemPointer = TotalItems;
+							(*pB).NeedUpdate = 1;
+						}
+						if ((*pB).ItemStart > (*pB).ItemPointer)
+						{
+							(*pB).ItemStart = (*pB).ItemPointer;
+							(*pB).NeedUpdate = 1;
+						}
+					}
+					else
+					{
+						(*pB).ItemStart = 1;
+						(*pB).ItemPointer = 1;
+					}
+				}
+
+				Tmp = cUiGetVert();
+				if (Tmp != 0)
+				{ // up/down arrow pressed
+
+					(*pB).NeedUpdate = 1;
+
+					// Calculate item pointer
+					(*pB).ItemPointer += Tmp;
+					if ((*pB).ItemPointer < 1)
+					{
+						(*pB).ItemPointer = 1;
+						(*pB).NeedUpdate = 0;
+					}
+					if ((*pB).ItemPointer > TotalItems)
+					{
+						(*pB).ItemPointer = TotalItems;
+						(*pB).NeedUpdate = 0;
+					}
+				}
+
+				// Calculate item start
+				if ((*pB).ItemPointer < (*pB).ItemStart)
+				{
+					if ((*pB).ItemPointer > 0)
+					{
+						(*pB).ItemStart = (*pB).ItemPointer;
+					}
+				}
+				if ((*pB).ItemPointer >= ((*pB).ItemStart + (*pB).Lines))
+				{
+					(*pB).ItemStart = (*pB).ItemPointer - (*pB).Lines;
+					(*pB).ItemStart++;
+				}
+
+				if ((*pB).NeedUpdate != 0)
+				{
+					//* UPDATE ***************************************************************************************************
+					(*pB).NeedUpdate = 0;
+
+					// clear screen
+					dLcdFillRect((*Inst.UiInstance.pLcd).Lcd, BG_COLOR, (*pB).ScreenStartX, (*pB).ScreenStartY, (*pB).ScreenWidth, (*pB).ScreenHeight);
+
+					OldPriority = 0;
+					for (Tmp = 0; Tmp < (*pB).Lines; Tmp++)
+					{
+						Item = Tmp + (*pB).ItemStart;
+						Folder = 1;
+						Priority = OldPriority;
+
+						if (Item <= TotalItems)
+						{
+							if ((*pB).OpenFolder != 0)
+							{
+								if ((Item > (*pB).OpenFolder) && (Item <= ((*pB).OpenFolder + (*pB).Files)))
+								{
+									Item -= (*pB).OpenFolder;
+									Folder = 0;
+								}
+								else
+								{
+									if (Item > (*pB).OpenFolder)
+									{
+										Item -= (*pB).Files;
+									}
+								}
+							}
+							//*** Graphics ***********************************************************************************************
+
+							if (Folder != 0)
+							{ // Show folder
+
+								switch (Type)
+								{
+									case BROWSE_FOLDERS:
+										{
+											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
+											if (cMemoryGetItemIcon((*pB).PrgId, (*pB).hFolders, Item, &TmpHandle, &Image) == OK)
+											{
+												dLcdDrawBitmap((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), (IP)Image);
+												cMemoryCloseFile((*pB).PrgId, TmpHandle);
+											}
+											else
+											{
+												dLcdDrawPicture((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), PCApp_width, PCApp_height, (UBYTE*)PCApp_bits);
+											}
+
+									  (*pB).Text[0] = 0;
+											if (strcmp((char*)(*pB).Filename, "Bluetooth") == 0)
+											{
+												if (Inst.UiInstance.BtOn != 0)
+												{
+													(*pB).Text[0] = '+';
+												}
+												else
+												{
+													(*pB).Text[0] = '-';
+												}
+											}
+											else
+											{
+												if (strcmp((char*)(*pB).Filename, "WiFi") == 0)
+												{
+													if (Inst.UiInstance.WiFiOn != 0)
+													{
+														(*pB).Text[0] = '+';
+													}
+													else
+													{
+														(*pB).Text[0] = '-';
+													}
+												}
+												else
+												{
+													if (cMemoryGetItemText((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Text) != OK)
+													{
+														(*pB).Text[0] = 0;
+													}
+												}
+											}
+											switch ((*pB).Text[0])
+											{
+												case 0:
+													{
+													}
+													break;
+
+												case '+':
+													{
+														Indent = ((*pB).Chars - 1) * (*pB).CharWidth - dLcdGetIconWidth(MENU_ICON);
+														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, ((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight), MENU_ICON, ICON_CHECKED);
+													}
+													break;
+
+												case '-':
+													{
+														Indent = ((*pB).Chars - 1) * (*pB).CharWidth - dLcdGetIconWidth(MENU_ICON);
+														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, ((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight), MENU_ICON, ICON_CHECKBOX);
+													}
+													break;
+
+												default:
+													{
+														Indent = (((*pB).Chars - 1) - (DATA16)strlen((char*)(*pB).Text)) * (*pB).CharWidth;
+														dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Text);
+													}
+													break;
+
+											}
+
+										}
+										break;
+
+									case BROWSE_FOLDS_FILES:
+										{
+											cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+
+											if ((Priority == 1) || (Priority == 2))
+											{
+												dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_FOLDER2);
+											}
+											else
+											{
+												if (Priority == 3)
+												{
+													dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_SD);
+												}
+												else
+												{
+													if (Priority == 4)
+													{
+														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_USB);
+													}
+													else
+													{
+														dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+													}
+												}
+											}
+											if (Priority != OldPriority)
+											{
+												if ((Priority == 1) || (Priority >= 3))
+												{
+													if (Tmp != 0)
+													{
+														dLcdDrawDotLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + ((Tmp - 1) * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + ((Tmp - 1) * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+													}
+												}
+											}
+										}
+										break;
+
+									case BROWSE_CACHE:
+										{
+											TmpType = cMemoryGetCacheName(Item, (*pB).Chars, (char*)(*pB).FullPath, (char*)(*pB).Filename);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+										}
+										break;
+
+									case BROWSE_FILES:
+										{
+											cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
+											dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+										}
+										break;
+
+								}
+								// Draw folder name
+								dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Filename);
+
+								// Draw open folder
+								if (Item == (*pB).OpenFolder)
+								{
+									dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, 144, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_OPENFOLDER);
+								}
+
+								// Draw selection
+								if ((*pB).ItemPointer == (Tmp + (*pB).ItemStart))
+								{
+									dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).SelectWidth + 1, (*pB).SelectHeight);
+								}
+
+								// Draw end line
+								switch (Type)
+								{
+									case BROWSE_FOLDERS:
+									case BROWSE_FOLDS_FILES:
+									case BROWSE_FILES:
+										{
+											if (((Tmp + (*pB).ItemStart) == TotalItems) && (Tmp < ((*pB).Lines - 1)))
+											{
+												dLcdDrawDotLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+											}
+										}
+										break;
+
+									case BROWSE_CACHE:
+										{
+											if (((Tmp + (*pB).ItemStart) == 1) && (Tmp < ((*pB).Lines - 1)))
+											{
+												dLcdDrawDotLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+											}
+											if (((Tmp + (*pB).ItemStart) == TotalItems) && (Tmp < ((*pB).Lines - 1)))
+											{
+												dLcdDrawDotLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+											}
+										}
+										break;
+
+								}
+							}
+							else
+							{ // Show file
+
+								// Get file name and type
+								cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (*pB).Chars - 1, (*pB).Filename, &TmpType, &Priority);
+
+								// show File icons
+								dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+
+								// Draw file name
+								dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + (*pB).CharWidth, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Filename);
+
+								// Draw folder line
+								if ((Tmp == ((*pB).Lines - 1)) || (Item == (*pB).Files))
+								{
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).SelectHeight - 1);
+								}
+								else
+								{
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 1);
+								}
+
+								// Draw selection
+								if ((*pB).ItemPointer == (Tmp + (*pB).ItemStart))
+								{
+									dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, (*pB).SelectStartX + (*pB).CharWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).SelectWidth + 1 - (*pB).CharWidth, (*pB).SelectHeight);
+								}
+							}
+
+							//************************************************************************************************************
+						}
+						OldPriority = Priority;
+					}
+
+					cUiDrawBar(1, (*pB).ScrollStartX, (*pB).ScrollStartY, (*pB).ScrollWidth, (*pB).ScrollHeight, 0, TotalItems, (*pB).ItemPointer);
+
+					// Update
+					cUiUpdateLcd();
+					Inst.UiInstance.ScreenBusy = 0;
+				}
+
+				if (Result != OK)
+				{
+					Tmp = cUiTestHorz();
+					if (Ignore == Tmp)
+					{
+						Tmp = cUiGetHorz();
+						Tmp = 0;
+					}
+
+					if ((Tmp != 0) || (cUiTestShortPress(BACK_BUTTON) != 0) || (cUiTestLongPress(BACK_BUTTON) != 0))
+					{
+						if (Type != BROWSE_CACHE)
+						{
+							if ((*pB).OpenFolder != 0)
+							{
+								if ((*pB).hFiles != 0)
+								{
+									cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
+								}
+							}
+							if ((*pB).hFolders != 0)
+							{
+								cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
+							}
+						}
+					  (*pB).PrgId = 0;
+						(*pB).ObjId = 0;
+						(*pB).SubFolder[0] = 0;
+						pAnswer[0] = 0;
+						*pType = 0;
+						Result = OK;
+					}
+				}
+				else
+				{
+					(*pB).NeedUpdate = 1;
+				}
+			}
+			else
+			{
+				pAnswer[0] = 0;
+				*pType = TYPE_RESTART_BROWSER;
+				Result = FAIL;
+			}
+
+			if (*pType > 0)
+			{
+				if ((*pB).Sdcard != 0)
+				{
+					*pType |= TYPE_SDCARD;
+				}
+				if ((*pB).Usbstick != 0)
+				{
+					*pType |= TYPE_USBSTICK;
+				}
+			}
+
+			if (Result != BUSY)
+			{
+				//* EXIT *****************************************************************************************************
+
+			}
+
 			return (Result);
 		}
 
-		short cUiTextboxGetLines(byte[] pText, int Size, byte Del)
+		DATA16 cUiTextboxGetLines(DATA8* pText, DATA32 Size, DATA8 Del)
 		{
-			int Point = 0;
-			short Lines = 0;
-			byte DelPoi;
+			DATA32 Point = 0;
+			DATA16 Lines = 0;
+			DATA8 DelPoi;
 
-			if (Del < (byte)lms2012.Delimeter.DELS)
+			if (Del < DELS)
 			{
 				while (pText[Point] != 0 && (Point < Size))
 				{
 					DelPoi = 0;
-					while ((pText[Point] != 0) && (Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0) && (pText[Point] == Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi]))
+					while ((pText[Point] != 0) && (Point < Size) && (Delimiter[Del][DelPoi]) && (pText[Point] == Delimiter[Del][DelPoi]))
 					{
 						DelPoi++;
 						Point++;
 					}
-					if (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] == 0)
+					if (Delimiter[Del][DelPoi] == 0)
 					{
 						Lines++;
 					}
@@ -2765,15 +3557,17 @@ namespace Ev3EmulatorCore.Lms.Cui
 					}
 				}
 			}
+
 			return (Lines);
 		}
 
-		void cUiTextboxAppendLine(byte[] pText, int Size, byte Del, ref byte pLine, byte Font)
-		{
-			int Point = 0;
-			byte DelPoi = 0;
 
-			if (Del < (byte)lms2012.Delimeter.DELS)
+		void cUiTextboxAppendLine(DATA8* pText, DATA32 Size, DATA8 Del, DATA8* pLine, DATA8 Font)
+		{
+			DATA32 Point = 0;
+			DATA8 DelPoi = 0;
+
+			if (Del < DELS)
 			{
 				while ((pText[Point] != 0) && (Point < Size))
 				{
@@ -2785,15 +3579,15 @@ namespace Ev3EmulatorCore.Lms.Cui
 					Point++;
 				}
 
-				while ((Point < Size) && pLine != 0)
+				while ((Point < Size) && (*pLine != 0))
 				{
-					pText[Point] = pLine;
+					pText[Point] = *pLine;
 					Point++;
 					pLine++;
 				}
-				while ((Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0))
+				while ((Point < Size) && (Delimiter[Del][DelPoi]))
 				{
-					pText[Point] = (byte)Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi];
+					pText[Point] = Delimiter[Del][DelPoi];
 					Point++;
 					DelPoi++;
 				}
@@ -2801,26 +3595,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 		}
 
 
-		int cUiTextboxFindLine(byte[] pText, int Size, byte Del, short Line, ref byte pFont)
+		DATA32 cUiTextboxFindLine(DATA8* pText, DATA32 Size, DATA8 Del, DATA16 Line, DATA8* pFont)
 		{
-			int Result = -1;
-			int Point = 0;
-			byte DelPoi = 0;
+			DATA32 Result = -1;
+			DATA32 Point = 0;
+			DATA8 DelPoi = 0;
 
-			pFont = 0;
-			if (Del < (byte)lms2012.Delimeter.DELS)
+			*pFont = 0;
+			if (Del < DELS)
 			{
 				Result = Point;
-				while ((Line != 0) && (pText[Point] != 0) && (Point < Size))
+				while ((Line != 0) && (pText[Point]) && (Point < Size))
 				{
 
 					DelPoi = 0;
-					while ((pText[Point] != 0) && (Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0) && (pText[Point] == Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi]))
+					while ((pText[Point] != 0) && (Point < Size) && (Delimiter[Del][DelPoi]) && (pText[Point] == Delimiter[Del][DelPoi]))
 					{
 						DelPoi++;
 						Point++;
 					}
-					if (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] == 0)
+					if (Delimiter[Del][DelPoi] == 0)
 					{
 						Line--;
 						if (Line != 0)
@@ -2842,9 +3636,9 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 				if (Result >= 0)
 				{
-					if ((pText[Result] > 0) && (pText[Result] < (byte)lms2012.FontType.FONTTYPES))
+					if ((pText[Result] > 0) && (pText[Result] < FONTTYPES))
 					{
-						pFont = pText[Result];
+						*pFont = pText[Result];
 						Result++;
 					}
 				}
@@ -2853,14 +3647,14 @@ namespace Ev3EmulatorCore.Lms.Cui
 			return (Result);
 		}
 
-		void cUiTextboxReadLine(byte[] pText, int Size, byte Del, byte Lng, short Line, byte[] pLine, ref byte pFont)
+		void cUiTextboxReadLine(DATA8* pText, DATA32 Size, DATA8 Del, DATA8 Lng, DATA16 Line, DATA8* pLine, DATA8* pFont)
 		{
-			int Start;
-			int Point = 0;
-			byte DelPoi = 0;
-			byte Run = 1;
+			DATA32 Start;
+			DATA32 Point = 0;
+			DATA8 DelPoi = 0;
+			DATA8 Run = 1;
 
-			Start = cUiTextboxFindLine(pText, Size, Del, Line, ref pFont);
+			Start = cUiTextboxFindLine(pText, Size, Del, Line, pFont);
 			Point = Start;
 
 			pLine[0] = 0;
@@ -2870,12 +3664,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 				while ((Run != 0) && (pText[Point] != 0) && (Point < Size))
 				{
 					DelPoi = 0;
-					while ((pText[Point] != 0) && (Point < Size) && (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] != 0) && (pText[Point] == Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi]))
+					while ((pText[Point] != 0) && (Point < Size) && (Delimiter[Del][DelPoi]) && (pText[Point] == Delimiter[Del][DelPoi]))
 					{
 						DelPoi++;
 						Point++;
 					}
-					if (Delimiter.GetDicValue((lms2012.Delimeter)Del)[DelPoi] == 0)
+					if (Delimiter[Del][DelPoi] == 0)
 					{
 						Run = 0;
 					}
@@ -2887,536 +3681,547 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 				}
-				Point -= (int)DelPoi;
+				Point -= (DATA32)DelPoi;
 
-				if (((Point - Start) + 1) < (int)Lng)
+				if (((Point - Start) + 1) < (DATA32)Lng)
 				{
-					Lng = (byte)((Point - Start) + 1);
+					Lng = (DATA8)(Point - Start) + 1;
 				}
-				pLine.WriteBytes(pText.SubSet(Start));
+				snprintf((char*)pLine, Lng, "%s", (char*)&pText[Start]);
 			}
 		}
 
 
-		lms2012.Result cUiTextbox(short X, short Y, short X1, short Y1, byte[] pText, int Size, byte Del, ref short pLine)
+		RESULT cUiTextbox(DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8* pText, DATA32 Size, DATA8 Del, DATA16* pLine)
 		{
-			lms2012.Result Result = lms2012.Result.BUSY;
-			TXTBOX pB;
-			short Item;
-			short TotalItems;
-			short Tmp;
-			short Ypos;
-			byte Color;
+			RESULT Result = BUSY;
+			TXTBOX* pB;
+			DATA16 Item;
+			DATA16 TotalItems;
+			DATA16 Tmp;
+			DATA16 Ypos;
+			DATA8 Color;
 
-			pB = LmsInstance.Inst.UiInstance.Txtbox;
-			Color = lms2012.FG_COLOR;
+			pB = &Inst.UiInstance.Txtbox;
+			Color = (sbyte)FG_COLOR;
 
-			if (pLine < 0)
+			if (*pLine < 0)
 			{
 				//* INIT *****************************************************************************************************
 				// Define screen
-				pB.ScreenStartX = X;
-				pB.ScreenStartY = Y;
-				pB.ScreenWidth = X1;
-				pB.ScreenHeight = Y1;
+				(*pB).ScreenStartX = X;
+				(*pB).ScreenStartY = Y;
+				(*pB).ScreenWidth = X1;
+				(*pB).ScreenHeight = Y1;
 
-				pB.Font = LmsInstance.Inst.UiInstance.Font;
+				(*pB).Font = Inst.UiInstance.Font;
 
 				// calculate chars and lines on screen
-				pB.CharWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(pB.Font);
-				pB.CharHeight = LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(pB.Font);
-				pB.Chars = (short)(pB.ScreenWidth / pB.CharWidth);
+				(*pB).CharWidth = dLcdGetFontWidth((*pB).Font);
+				(*pB).CharHeight = dLcdGetFontHeight((*pB).Font);
+				(*pB).Chars = ((short)((*pB).ScreenWidth / (*pB).CharWidth));
 
 				// calculate lines on screen
-				pB.LineSpace = 5;
-				pB.LineHeight = (short)(pB.CharHeight + pB.LineSpace);
-				pB.Lines = (short)(pB.ScreenHeight / pB.LineHeight);
+				(*pB).LineSpace = 5;
+				(*pB).LineHeight = (*pB).CharHeight + (*pB).LineSpace;
+				(*pB).Lines = ((*pB).ScreenHeight / (*pB).LineHeight);
 
 				// calculate start of text
-				pB.TextStartX = cUiAlignX(pB.ScreenStartX);
-				pB.TextStartY = (short)(pB.ScreenStartY + (pB.LineHeight - pB.CharHeight) / 2);
+				(*pB).TextStartX = cUiAlignX((*pB).ScreenStartX);
+				(*pB).TextStartY = (*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2;
 
 				// Calculate selection barBrowser
-				pB.SelectStartX = pB.ScreenStartX;
-				pB.SelectWidth = (short)(pB.ScreenWidth - (pB.CharWidth + 5));
-				pB.SelectStartY = (short)(pB.TextStartY - 1);
-				pB.SelectHeight = (short)(pB.CharHeight + 1);
+				(*pB).SelectStartX = (*pB).ScreenStartX;
+				(*pB).SelectWidth = (*pB).ScreenWidth - ((*pB).CharWidth + 5);
+				(*pB).SelectStartY = (*pB).TextStartY - 1;
+				(*pB).SelectHeight = (*pB).CharHeight + 1;
 
 				// Calculate scroll bar
-				pB.ScrollWidth = 5;
-				pB.NobHeight = 7;
-				pB.ScrollStartX = (short)(pB.ScreenStartX + pB.ScreenWidth - pB.ScrollWidth);
-				pB.ScrollStartY = (short)(pB.ScreenStartY + 1);
-				pB.ScrollHeight = (short)(pB.ScreenHeight - 2);
-				pB.ScrollSpan = (short)(pB.ScrollHeight - pB.NobHeight);
+				(*pB).ScrollWidth = 5;
+				(*pB).NobHeight = 7;
+				(*pB).ScrollStartX = (*pB).ScreenStartX + (*pB).ScreenWidth - (*pB).ScrollWidth;
+				(*pB).ScrollStartY = (*pB).ScreenStartY + 1;
+				(*pB).ScrollHeight = (*pB).ScreenHeight - 2;
+				(*pB).ScrollSpan = (*pB).ScrollHeight - (*pB).NobHeight;
 
-				pB.Items = cUiTextboxGetLines(pText, Size, Del);
-				pB.ItemStart = 1;
-				pB.ItemPointer = 1;
+				(*pB).Items = cUiTextboxGetLines(pText, Size, Del);
+				(*pB).ItemStart = 1;
+				(*pB).ItemPointer = 1;
 
-				pB.NeedUpdate = 1;
+				(*pB).NeedUpdate = 1;
 
-				pLine = 0;
+				*pLine = 0;
 			}
 
-			TotalItems = pB.Items;
+			TotalItems = (*pB).Items;
 
 			Tmp = cUiGetVert();
 			if (Tmp != 0)
 			{ // up/down arrow pressed
 
-				pB.NeedUpdate = 1;
+				(*pB).NeedUpdate = 1;
 
 				// Calculate item pointer
-				pB.ItemPointer += Tmp;
-				if (pB.ItemPointer < 1)
+				(*pB).ItemPointer += Tmp;
+				if ((*pB).ItemPointer < 1)
 				{
-					pB.ItemPointer = 1;
-					pB.NeedUpdate = 0;
+					(*pB).ItemPointer = 1;
+					(*pB).NeedUpdate = 0;
 				}
-				if (pB.ItemPointer > TotalItems)
+				if ((*pB).ItemPointer > TotalItems)
 				{
-					pB.ItemPointer = TotalItems;
-					pB.NeedUpdate = 0;
+					(*pB).ItemPointer = TotalItems;
+					(*pB).NeedUpdate = 0;
 				}
 			}
 
 			// Calculate item start
-			if (pB.ItemPointer < pB.ItemStart)
+			if ((*pB).ItemPointer < (*pB).ItemStart)
 			{
-				if (pB.ItemPointer > 0)
+				if ((*pB).ItemPointer > 0)
 				{
-					pB.ItemStart = pB.ItemPointer;
+					(*pB).ItemStart = (*pB).ItemPointer;
 				}
 			}
-			if (pB.ItemPointer >= (pB.ItemStart + pB.Lines))
+			if ((*pB).ItemPointer >= ((*pB).ItemStart + (*pB).Lines))
 			{
-				pB.ItemStart = (short)(pB.ItemPointer - pB.Lines);
-				pB.ItemStart++;
+				(*pB).ItemStart = (*pB).ItemPointer - (*pB).Lines;
+				(*pB).ItemStart++;
 			}
 
-			if (cUiGetShortPress((byte)lms2012.ButtonType.ENTER_BUTTON) != 0)
+			if (cUiGetShortPress(ENTER_BUTTON) != 0)
 			{
-				pLine = pB.ItemPointer;
+				*pLine = (*pB).ItemPointer;
 
-				Result = lms2012.Result.OK;
+				Result = OK;
 			}
-			if (cUiGetShortPress((byte)lms2012.ButtonType.BACK_BUTTON) != 0)
+			if (cUiGetShortPress(BACK_BUTTON) != 0)
 			{
-				pLine = -1;
+				*pLine = -1;
 
-				Result = lms2012.Result.OK;
+				Result = OK;
 			}
 
 
-			if (pB.NeedUpdate != 0)
+			if ((*pB).NeedUpdate != 0)
 			{
 				//* UPDATE ***************************************************************************************************
-				pB.NeedUpdate = 0;
+				(*pB).NeedUpdate = 0;
 
 				// clear screen
-				LmsInstance.Inst.DlcdClass.dLcdFillRect(LmsInstance.Inst.UiInstance.Lcd, lms2012.BG_COLOR, pB.ScreenStartX, pB.ScreenStartY, pB.ScreenWidth, pB.ScreenHeight);
+				dLcdFillRect((*Inst.UiInstance.pLcd).Lcd, BG_COLOR, (*pB).ScreenStartX, (*pB).ScreenStartY, (*pB).ScreenWidth, (*pB).ScreenHeight);
 
-				Ypos = (short)(pB.TextStartY + 2);
+				Ypos = (*pB).TextStartY + 2;
 
-				for (Tmp = 0; Tmp < pB.Lines; Tmp++)
+				for (Tmp = 0; Tmp < (*pB).Lines; Tmp++)
 				{
-					Item = (short)(Tmp + pB.ItemStart);
+					Item = Tmp + (*pB).ItemStart;
 
 					if (Item <= TotalItems)
 					{
-						byte tmpFont = (byte)pB.Font;
-						cUiTextboxReadLine(pText, Size, Del, lms2012.TEXTSIZE, Item, pB.Text, ref tmpFont);
-						pB.Font = (lms2012.FontType)tmpFont;
+						cUiTextboxReadLine(pText, Size, Del, TEXTSIZE, Item, (*pB).Text, &(*pB).Font);
 
 						// calculate chars and lines on screen
-						pB.CharWidth = LmsInstance.Inst.DlcdClass.dLcdGetFontWidth(pB.Font);
-						pB.CharHeight = LmsInstance.Inst.DlcdClass.dLcdGetFontHeight(pB.Font);
+						(*pB).CharWidth = dLcdGetFontWidth((*pB).Font);
+						(*pB).CharHeight = dLcdGetFontHeight((*pB).Font);
 
 						// calculate lines on screen
-						pB.LineSpace = 2;
-						pB.LineHeight = (short)(pB.CharHeight + pB.LineSpace);
-						pB.Lines = (short)(pB.ScreenHeight / pB.LineHeight);
+						(*pB).LineSpace = 2;
+						(*pB).LineHeight = (*pB).CharHeight + (*pB).LineSpace;
+						(*pB).Lines = ((*pB).ScreenHeight / (*pB).LineHeight);
 
 						// Calculate selection barBrowser
-						pB.SelectStartX = pB.ScreenStartX;
-						pB.SelectWidth = (short)(pB.ScreenWidth - (pB.ScrollWidth + 2));
-						pB.SelectStartY = (short)(pB.TextStartY - 1);
-						pB.SelectHeight = (short)(pB.CharHeight + 1);
+						(*pB).SelectStartX = (*pB).ScreenStartX;
+						(*pB).SelectWidth = (*pB).ScreenWidth - ((*pB).ScrollWidth + 2);
+						(*pB).SelectStartY = (*pB).TextStartY - 1;
+						(*pB).SelectHeight = (*pB).CharHeight + 1;
 
-						pB.Chars = (short)(pB.SelectWidth / pB.CharWidth);
+						(*pB).Chars = ((*pB).SelectWidth / (*pB).CharWidth);
 
-						pB.Text[pB.Chars] = 0;
+						(*pB).Text[(*pB).Chars] = 0;
 
-						if ((Ypos + pB.LineHeight) <= (pB.ScreenStartY + pB.ScreenHeight))
+						if ((Ypos + (*pB).LineHeight) <= ((*pB).ScreenStartY + (*pB).ScreenHeight))
 						{
-							LmsInstance.Inst.DlcdClass.dLcdDrawText(LmsInstance.Inst.UiInstance.Lcd, Color, pB.TextStartX, Ypos, pB.Font, pB.Text);
+							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX, Ypos, (*pB).Font, (*pB).Text);
 						}
 						else
 						{
-							Tmp = pB.Lines;
+							Tmp = (*pB).Lines;
 						}
 					}
 
-					cUiDrawBar(1, pB.ScrollStartX, pB.ScrollStartY, pB.ScrollWidth, pB.ScrollHeight, 0, TotalItems, pB.ItemPointer);
+					cUiDrawBar(1, (*pB).ScrollStartX, (*pB).ScrollStartY, (*pB).ScrollWidth, (*pB).ScrollHeight, 0, TotalItems, (*pB).ItemPointer);
 
-					if ((Ypos + pB.LineHeight) <= (pB.ScreenStartY + pB.ScreenHeight))
+					if ((Ypos + (*pB).LineHeight) <= ((*pB).ScreenStartY + (*pB).ScreenHeight))
 					{
 						// Draw selection
-						if (pB.ItemPointer == (Tmp + pB.ItemStart))
+						if ((*pB).ItemPointer == (Tmp + (*pB).ItemStart))
 						{
-							LmsInstance.Inst.DlcdClass.dLcdInverseRect(LmsInstance.Inst.UiInstance.Lcd, pB.SelectStartX, (short)(Ypos - 1), pB.SelectWidth, pB.LineHeight);
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, (*pB).SelectStartX, Ypos - 1, (*pB).SelectWidth, (*pB).LineHeight);
 						}
 					}
-					Ypos += pB.LineHeight;
+					Ypos += (*pB).LineHeight;
 				}
 
 				// Update
 				cUiUpdateLcd();
-				LmsInstance.Inst.UiInstance.ScreenBusy = 0;
+				Inst.UiInstance.ScreenBusy = 0;
 			}
 
 			return (Result);
 		}
-		void cUiGraphSetup(short StartX, short SizeX, byte Items, short[] pOffset, short[] pSpan, float[] pMin, float[] pMax, float[] pVal)
-		{
-			short Item;
-			short Pointer;
-			LmsInstance.Inst.UiInstance.Graph.Initialized = 0;
 
-			LmsInstance.Inst.UiInstance.Graph.pOffset = pOffset;
-			LmsInstance.Inst.UiInstance.Graph.pSpan = pSpan;
-			LmsInstance.Inst.UiInstance.Graph.pMin = pMin;
-			LmsInstance.Inst.UiInstance.Graph.pMax = pMax;
-			LmsInstance.Inst.UiInstance.Graph.pVal = pVal;
+
+		void cUiGraphSetup(DATA16 StartX, DATA16 SizeX, DATA8 Items, DATA16* pOffset, DATA16* pSpan, DATAF* pMin, DATAF* pMax, DATAF* pVal)
+		{
+			DATA16 Item;
+			DATA16 Pointer;
+
+			Inst.UiInstance.Graph.Initialized = 0;
+
+			Inst.UiInstance.Graph.pOffset = pOffset;
+			Inst.UiInstance.Graph.pSpan = pSpan;
+			Inst.UiInstance.Graph.pMin = pMin;
+			Inst.UiInstance.Graph.pMax = pMax;
+			Inst.UiInstance.Graph.pVal = pVal;
 
 			if (Items < 0)
 			{
 				Items = 0;
 			}
-			if (Items > lms2012.GRAPH_BUFFERS)
+			if (Items > GRAPH_BUFFERS)
 			{
-				Items = lms2012.GRAPH_BUFFERS;
+				Items = GRAPH_BUFFERS;
 			}
 
 
-			LmsInstance.Inst.UiInstance.Graph.GraphStartX = StartX;
-			LmsInstance.Inst.UiInstance.Graph.GraphSizeX = SizeX;
-			LmsInstance.Inst.UiInstance.Graph.Items = Items;
-			LmsInstance.Inst.UiInstance.Graph.Pointer = 0;
+			Inst.UiInstance.Graph.GraphStartX = StartX;
+			Inst.UiInstance.Graph.GraphSizeX = SizeX;
+			Inst.UiInstance.Graph.Items = Items;
+			Inst.UiInstance.Graph.Pointer = 0;
 
-			for (Item = 0; Item < LmsInstance.Inst.UiInstance.Graph.Items; Item++)
+			for (Item = 0; Item < Inst.UiInstance.Graph.Items; Item++)
 			{
-				for (Pointer = 0; Pointer < LmsInstance.Inst.UiInstance.Graph.GraphSizeX; Pointer++)
+				for (Pointer = 0; Pointer < Inst.UiInstance.Graph.GraphSizeX; Pointer++)
 				{
-					LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = float.NaN;
+					Inst.UiInstance.Graph.Buffer[Item][Pointer] = DATAF_NAN;
 				}
 			}
 
-			LmsInstance.Inst.UiInstance.Graph.Initialized = 1;
+			Inst.UiInstance.Graph.Initialized = 1;
 
 			// Simulate graph
-			LmsInstance.Inst.UiInstance.Graph.Value = LmsInstance.Inst.UiInstance.Graph.pMin[0];
-			LmsInstance.Inst.UiInstance.Graph.Down = 0;
-			LmsInstance.Inst.UiInstance.Graph.Inc = (LmsInstance.Inst.UiInstance.Graph.pMax[0] - LmsInstance.Inst.UiInstance.Graph.pMin[0]) / (float)20;
+			Inst.UiInstance.Graph.Value = Inst.UiInstance.Graph.pMin[0];
+			Inst.UiInstance.Graph.Down = 0;
+			Inst.UiInstance.Graph.Inc = (Inst.UiInstance.Graph.pMax[0] - Inst.UiInstance.Graph.pMin[0]) / (DATAF)20;
 		}
+
 
 		void cUiGraphSample()
 		{
-			float Sample;
-			short Item;
-			short Pointer;
+			DATAF Sample;
+			DATA16 Item;
+			DATA16 Pointer;
 
-			if (LmsInstance.Inst.UiInstance.Graph.Initialized != 0)
+			if (Inst.UiInstance.Graph.Initialized != 0)
 			{ // Only if initialized
 
-				if (LmsInstance.Inst.UiInstance.Graph.Pointer < LmsInstance.Inst.UiInstance.Graph.GraphSizeX)
+				if (Inst.UiInstance.Graph.Pointer < Inst.UiInstance.Graph.GraphSizeX)
 				{
-					for (Item = 0; Item < (LmsInstance.Inst.UiInstance.Graph.Items); Item++)
+					for (Item = 0; Item < (Inst.UiInstance.Graph.Items); Item++)
 					{
 						// Insert sample
-						Sample = LmsInstance.Inst.UiInstance.Graph.pVal[Item];
+						Sample = Inst.UiInstance.Graph.pVal[Item];
 
 						if (!(float.IsNaN(Sample)))
 						{
-							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][LmsInstance.Inst.UiInstance.Graph.Pointer] = Sample;
+							Inst.UiInstance.Graph.Buffer[Item][Inst.UiInstance.Graph.Pointer] = Sample;
 						}
 						else
 						{
-							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][LmsInstance.Inst.UiInstance.Graph.Pointer] = float.NaN;
+							Inst.UiInstance.Graph.Buffer[Item][Inst.UiInstance.Graph.Pointer] = DATAF_NAN;
 						}
 					}
-					LmsInstance.Inst.UiInstance.Graph.Pointer++;
+					Inst.UiInstance.Graph.Pointer++;
 				}
 				else
 				{
 					// Scroll buffers
-					for (Item = 0; Item < (LmsInstance.Inst.UiInstance.Graph.Items); Item++)
+					for (Item = 0; Item < (Inst.UiInstance.Graph.Items); Item++)
 					{
-						for (Pointer = 0; Pointer < (LmsInstance.Inst.UiInstance.Graph.GraphSizeX - 1); Pointer++)
+						for (Pointer = 0; Pointer < (Inst.UiInstance.Graph.GraphSizeX - 1); Pointer++)
 						{
-							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer + 1];
+							Inst.UiInstance.Graph.Buffer[Item][Pointer] = Inst.UiInstance.Graph.Buffer[Item][Pointer + 1];
 						}
 
 						// Insert sample
-						Sample = LmsInstance.Inst.UiInstance.Graph.pVal[Item];
+						Sample = Inst.UiInstance.Graph.pVal[Item];
 
 						if (!(float.IsNaN(Sample)))
 						{
-							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = Sample;
+							Inst.UiInstance.Graph.Buffer[Item][Pointer] = Sample;
 						}
 						else
 						{
-							LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer] = float.NaN;
+							Inst.UiInstance.Graph.Buffer[Item][Pointer] = DATAF_NAN;
 						}
 					}
 				}
 			}
 		}
-		void cUiGraphDraw(byte View, ref float pActual, ref float pLowest, ref float pHighest, ref float pAverage)
+
+
+		void cUiGraphDraw(DATA8 View, DATAF* pActual, DATAF* pLowest, DATAF* pHighest, DATAF* pAverage)
 		{
-			float Sample;
-			byte Samples;
-			short Value;
-			short Item;
-			short Pointer;
-			short X;
-			short Y1;
-			short Y2;
-			byte Color = 1;
-			pActual = float.NaN;
-			pLowest = float.NaN;
-			pHighest = float.NaN;
-			pAverage = float.NaN;
+			DATAF Sample;
+			DATA8 Samples;
+			DATA16 Value;
+			DATA16 Item;
+			DATA16 Pointer;
+			DATA16 X;
+			DATA16 Y1;
+			DATA16 Y2;
+			DATA8 Color = 1;
+
+			*pActual = DATAF_NAN;
+			*pLowest = DATAF_NAN;
+			*pHighest = DATAF_NAN;
+			*pAverage = DATAF_NAN;
 			Samples = 0;
 
-			if (LmsInstance.Inst.UiInstance.Graph.Initialized != 0)
-			{ 
-				// Only if initialized
-				if (LmsInstance.Inst.UiInstance.ScreenBlocked == 0)
+			if (Inst.UiInstance.Graph.Initialized != 0)
+			{ // Only if initialized
+
+				if (Inst.UiInstance.ScreenBlocked == 0)
 				{
+
 					// View or all
-					if ((View >= 0) && (View < LmsInstance.Inst.UiInstance.Graph.Items))
+					if ((View >= 0) && (View < Inst.UiInstance.Graph.Items))
 					{
 						Item = View;
 
-						Y1 = (short)(LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]);
+						Y1 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]);
 
 						// Draw buffers
-						X = LmsInstance.Inst.UiInstance.Graph.GraphStartX;
-						for (Pointer = 0; Pointer < LmsInstance.Inst.UiInstance.Graph.Pointer; Pointer++)
+						X = Inst.UiInstance.Graph.GraphStartX;
+						for (Pointer = 0; Pointer < Inst.UiInstance.Graph.Pointer; Pointer++)
 						{
-							Sample = LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer];
+							Sample = Inst.UiInstance.Graph.Buffer[Item][Pointer];
 							if (!(float.IsNaN(Sample)))
 							{
-								pActual = Sample;
-								if (float.IsNaN(pAverage))
+								*pActual = Sample;
+								if (float.IsNaN(*pAverage))
 								{
-									pAverage = (float)0;
-									pLowest = pActual;
-									pHighest = pActual;
+									*pAverage = (DATAF)0;
+									*pLowest = *pActual;
+									*pHighest = *pActual;
 								}
 								else
 								{
-									if (pActual < pLowest)
+									if (*pActual < *pLowest)
 									{
-										pLowest = pActual;
+										*pLowest = *pActual;
 									}
-									if (pActual > pHighest)
+									if (*pActual > *pHighest)
 									{
-										pHighest = pActual;
+										*pHighest = *pActual;
 									}
 								}
-								pAverage += pActual;
+								*pAverage += *pActual;
 								Samples++;
 
 								// Scale Y axis
-								Value = (short)((((Sample - LmsInstance.Inst.UiInstance.Graph.pMin[Item]) * (float)LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) / (LmsInstance.Inst.UiInstance.Graph.pMax[Item] - LmsInstance.Inst.UiInstance.Graph.pMin[Item])));
+								Value = (DATA16)((((Sample - Inst.UiInstance.Graph.pMin[Item]) * (DATAF)Inst.UiInstance.Graph.pSpan[Item]) / (Inst.UiInstance.Graph.pMax[Item] - Inst.UiInstance.Graph.pMin[Item])));
 
 								// Limit Y axis
-								if (Value > LmsInstance.Inst.UiInstance.Graph.pSpan[Item])
+								if (Value > Inst.UiInstance.Graph.pSpan[Item])
 								{
-									Value = LmsInstance.Inst.UiInstance.Graph.pSpan[Item];
+									Value = Inst.UiInstance.Graph.pSpan[Item];
 								}
 								if (Value < 0)
 								{
 									Value = 0;
 								}
 								/*
-											printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,UiInstance.Graph.pMin[Item],UiInstance.Graph.pMax[Item],UiInstance.Graph.pOffset[Item],UiInstance.Graph.pSpan[Item],Value);
+											printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,Inst.UiInstance.Graph.pMin[Item],Inst.UiInstance.Graph.pMax[Item],Inst.UiInstance.Graph.pOffset[Item],Inst.UiInstance.Graph.pSpan[Item],Value);
 								*/
-								Y2 = (short)((LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) - Value);
+								Y2 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]) - Value;
 								if (Pointer > 1)
 								{
 									if (Y2 > Y1)
 									{
-										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
-										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
+										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 2, Y1 - 1, X - 1, Y2 - 1);
+										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y1 + 1, X + 1, Y2 + 1);
 									}
 									else
 									{
 										if (Y2 < Y1)
 										{
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y1 - 1, X + 1, Y2 - 1);
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 2, Y1 + 1, X - 1, Y2 + 1);
 										}
 										else
 										{
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 1, Y1 - 1, X, Y2 - 1);
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 1, Y1 + 1, X, Y2 + 1);
 										}
 									}
-									LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), Y1, X, Y2);
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 1, Y1, X, Y2);
 								}
 								else
 								{
-									LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, X, Y2);
+									dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X, Y2);
 								}
+
 								Y1 = Y2;
 							}
 							X++;
 						}
 						if (Samples != 0)
 						{
-							pAverage = pAverage / (float)Samples;
+							*pAverage = *pAverage / (DATAF)Samples;
 						}
+
 					}
 					else
 					{
 						// Draw buffers
-						for (Item = 0; Item < LmsInstance.Inst.UiInstance.Graph.Items; Item++)
+						for (Item = 0; Item < Inst.UiInstance.Graph.Items; Item++)
 						{
-							Y1 = (short)(LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]);
+							Y1 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]);
 
-							X = (short)(LmsInstance.Inst.UiInstance.Graph.GraphStartX + 1);
-							for (Pointer = 0; Pointer < LmsInstance.Inst.UiInstance.Graph.Pointer; Pointer++)
+							X = Inst.UiInstance.Graph.GraphStartX + 1;
+							for (Pointer = 0; Pointer < Inst.UiInstance.Graph.Pointer; Pointer++)
 							{
-								Sample = LmsInstance.Inst.UiInstance.Graph.Buffer[Item][Pointer];
+								Sample = Inst.UiInstance.Graph.Buffer[Item][Pointer];
 
 								// Scale Y axis
-								Value = (short)((((Sample - LmsInstance.Inst.UiInstance.Graph.pMin[Item]) * (float)LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) / (LmsInstance.Inst.UiInstance.Graph.pMax[Item] - LmsInstance.Inst.UiInstance.Graph.pMin[Item])));
+								Value = (DATA16)((((Sample - Inst.UiInstance.Graph.pMin[Item]) * (DATAF)Inst.UiInstance.Graph.pSpan[Item]) / (Inst.UiInstance.Graph.pMax[Item] - Inst.UiInstance.Graph.pMin[Item])));
 
 								// Limit Y axis
-								if (Value > LmsInstance.Inst.UiInstance.Graph.pSpan[Item])
+								if (Value > Inst.UiInstance.Graph.pSpan[Item])
 								{
-									Value = LmsInstance.Inst.UiInstance.Graph.pSpan[Item];
+									Value = Inst.UiInstance.Graph.pSpan[Item];
 								}
 								if (Value < 0)
 								{
 									Value = 0;
 								}
-								Y2 = (short)((LmsInstance.Inst.UiInstance.Graph.pOffset[Item] + LmsInstance.Inst.UiInstance.Graph.pSpan[Item]) - Value);
+								Y2 = (Inst.UiInstance.Graph.pOffset[Item] + Inst.UiInstance.Graph.pSpan[Item]) - Value;
 								if (Pointer > 1)
 								{
+
 									if (Y2 > Y1)
 									{
-										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
-										LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
+										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 2, Y1 - 1, X - 1, Y2 - 1);
+										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y1 + 1, X + 1, Y2 + 1);
 									}
 									else
 									{
 										if (Y2 < Y1)
 										{
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y1 - 1, X + 1, Y2 - 1);
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 2, Y1 + 1, X - 1, Y2 + 1);
 										}
 										else
 										{
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
-											LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 1, Y1 - 1, X, Y2 - 1);
+											dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 1, Y1 + 1, X, Y2 + 1);
 										}
 									}
-									LmsInstance.Inst.DlcdClass.dLcdDrawLine(LmsInstance.Inst.UiInstance.Lcd, Color, (short)(X - 1), Y1, X, Y2);
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X - 1, Y1, X, Y2);
+
 								}
 								else
 								{
-									LmsInstance.Inst.DlcdClass.dLcdDrawPixel(LmsInstance.Inst.UiInstance.Lcd, Color, X, Y2);
+									dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X, Y2);
 								}
+
 								Y1 = Y2;
 								X++;
 							}
 						}
 					}
-					LmsInstance.Inst.UiInstance.ScreenBusy = 1;
+					Inst.UiInstance.ScreenBusy = 1;
 				}
 			}
 		}
 
-		public unsafe void cUiDraw()
+		void cUiDraw()
 		{
-			ushort TmpPrgId;
-			ushort TmpObjId;
-			byte[] TmpIp;
-			byte[] GBuffer = new byte[25];
-			byte[] pBmp = new byte[lms2012.LCD_BUFFER_SIZE];
-			byte Cmd;
-			byte Color;
-			short X;
-			short Y;
-			short X1;
-			short Y1;
-			short Y2;
-			short Y3;
-			int Size;
-			short R;
-			byte[] pText;
-			byte No;
-			byte DataF;
-			byte Figures;
-			byte Decimals;
-			byte[] pI;
-			byte pState;
-			byte[] pAnswer;
-			byte Lng;
-			byte SelectedChar;
-			sbyte pType;
-			byte Type;
-			short On;
-			short Off;
-			short CharWidth;
-			short CharHeight;
-			byte TmpColor;
-			short Tmp;
-			byte Length;
-			byte[] pUnit;
-			int pIcons;
-			byte Items;
-			byte View;
-			short[] pOffset;
-			short[] pSpan;
-			float[] pMin;
-			float[] pMax;
-			float[] pVal;
-			short Min;
-			short Max;
-			short Act;
-			float Actual;
-			float Lowest;
-			float Highest;
-			float Average;
-			byte Icon1;
-			byte Icon2;
-			byte Icon3;
-			byte Blocked;
-			byte Open;
-			byte Del;
-			byte pCharSet;
-			short pLine;
+			PRGID TmpPrgId;
+			OBJID TmpObjId;
+			IP TmpIp;
+			DATA8 GBuffer[25];
+			UBYTE pBmp[LCD_BUFFER_SIZE];
+			DATA8 Cmd;
+			DATA8 Color;
+			DATA16 X;
+			DATA16 Y;
+			DATA16 X1;
+			DATA16 Y1;
+			DATA16 Y2;
+			DATA16 Y3;
+			DATA32 Size;
+			DATA16 R;
+			DATA8* pText;
+			DATA8 No;
+			DATAF DataF;
+			DATA8 Figures;
+			DATA8 Decimals;
+			IP pI;
+			DATA8* pState;
+			DATA8* pAnswer;
+			DATA8 Lng;
+			DATA8 SelectedChar;
+			DATA8* pType;
+			DATA8 Type;
+			DATA16 On;
+			DATA16 Off;
+			DATA16 CharWidth;
+			DATA16 CharHeight;
+			DATA8 TmpColor;
+			DATA16 Tmp;
+			DATA8 Length;
+			DATA8* pUnit;
+			DATA32* pIcons;
+			DATA8 Items;
+			DATA8 View;
+			DATA16* pOffset;
+			DATA16* pSpan;
+			DATAF* pMin;
+			DATAF* pMax;
+			DATAF* pVal;
+			DATA16 Min;
+			DATA16 Max;
+			DATA16 Act;
+			DATAF Actual;
+			DATAF Lowest;
+			DATAF Highest;
+			DATAF Average;
+			DATA8 Icon1;
+			DATA8 Icon2;
+			DATA8 Icon3;
+			DATA8 Blocked;
+			DATA8 Open;
+			DATA8 Del;
+			DATA8* pCharSet;
+			DATA16* pLine;
 
-			TmpPrgId = LmsInstance.Inst.CurrentProgramId();
+			TmpPrgId = CurrentProgramId();
 
-			if ((TmpPrgId != (short)lms2012.Slot.GUI_SLOT) && (TmpPrgId != (short)lms2012.Slot.DEBUG_SLOT))
+			if ((TmpPrgId != GUI_SLOT) && (TmpPrgId != DEBUG_SLOT))
 			{
-				LmsInstance.Inst.UiInstance.RunScreenEnabled = 0;
+				Inst.UiInstance.RunScreenEnabled = 0;
 			}
-			if (LmsInstance.Inst.UiInstance.ScreenBlocked == 0)
+			if (Inst.UiInstance.ScreenBlocked == 0)
 			{
 				Blocked = 0;
 			}
 			else
 			{
-				TmpObjId = LmsInstance.Inst.CallingObjectId();
-				if ((TmpPrgId == LmsInstance.Inst.UiInstance.ScreenPrgId) && (TmpObjId == LmsInstance.Inst.UiInstance.ScreenObjId))
+				TmpObjId = CallingObjectId();
+				if ((TmpPrgId == Inst.UiInstance.ScreenPrgId) && (TmpObjId == Inst.UiInstance.ScreenObjId))
 				{
 					Blocked = 0;
 				}
@@ -3426,39 +4231,38 @@ namespace Ev3EmulatorCore.Lms.Cui
 				}
 			}
 
-			TmpIp = LmsInstance.Inst.GetObjectIp();
-			Cmd = *(byte*)LmsInstance.Inst.PrimParPointer();
+			TmpIp = GetObjectIp();
+			Cmd = *(DATA8*)PrimParPointer();
 
 			switch (Cmd)
-			{ 
-				// Function
-				case (byte)lms2012.UiDrawSubcode.UPDATE:
+			{ // Function
+				case UPDATE:
 					{
 						if (Blocked == 0)
 						{
 							cUiUpdateLcd();
-							UiInstance.ScreenBusy = 0;
+							Inst.UiInstance.ScreenBusy = 0;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.CLEAN:
+				case CLEAN:
 					{
 						if (Blocked == 0)
 						{
-							UiInstance.Font = NORMAL_FONT;
+							Inst.UiInstance.Font = NORMAL_FONT;
 
 							Color = BG_COLOR;
 							if (Color)
 							{
 								Color = -1;
 							}
-							memset(&((*UiInstance.pLcd).Lcd[0]), Color, LCD_BUFFER_SIZE);
+							memset(&((*Inst.UiInstance.pLcd).Lcd[0]), Color, LCD_BUFFER_SIZE);
 
-							UiInstance.ScreenBusy = 1;
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.TEXTBOX:
+				case TEXTBOX:
 					{
 						X = *(DATA16*)PrimParPointer();  // start x
 						Y = *(DATA16*)PrimParPointer();  // start y
@@ -3484,7 +4288,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.FILLRECT:
+				case FILLRECT:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3493,12 +4297,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Y1 = *(DATA16*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdFillRect((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
-							UiInstance.ScreenBusy = 1;
+							dLcdFillRect((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.INVERSERECT:
+				case INVERSERECT:
 					{
 						X = *(DATA16*)PrimParPointer();
 						Y = *(DATA16*)PrimParPointer();
@@ -3506,12 +4310,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Y1 = *(DATA16*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdInverseRect((*UiInstance.pLcd).Lcd, X, Y, X1, Y1);
-							UiInstance.ScreenBusy = 1;
+							dLcdInverseRect((*Inst.UiInstance.pLcd).Lcd, X, Y, X1, Y1);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.RECT:
+				case RECT:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3520,24 +4324,24 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Y1 = *(DATA16*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdRect((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
-							UiInstance.ScreenBusy = 1;
+							dLcdRect((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.PIXEL:
+				case PIXEL:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
 						Y = *(DATA16*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdDrawPixel((*UiInstance.pLcd).Lcd, Color, X, Y);
-							UiInstance.ScreenBusy = 1;
+							dLcdDrawPixel((*Inst.UiInstance.pLcd).Lcd, Color, X, Y);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.LINE:
+				case LINE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3546,12 +4350,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Y1 = *(DATA16*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdDrawLine((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
-							UiInstance.ScreenBusy = 1;
+							dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.DOTLINE:
+				case DOTLINE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3562,44 +4366,44 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Off = *(DATA16*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdDrawDotLine((*UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1, On, Off);
-							UiInstance.ScreenBusy = 1;
+							dLcdDrawDotLine((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, X1, Y1, On, Off);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.CIRCLE:
+				case CIRCLE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
 						Y = *(DATA16*)PrimParPointer();
 						R = *(DATA16*)PrimParPointer();
-						if (R)
+						if (R != 0)
 						{
 							if (Blocked == 0)
 							{
-								dLcdDrawCircle((*UiInstance.pLcd).Lcd, Color, X, Y, R);
-								UiInstance.ScreenBusy = 1;
+								dLcdDrawCircle((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, R);
+								Inst.UiInstance.ScreenBusy = 1;
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.FILLCIRCLE:
+				case FILLCIRCLE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
 						Y = *(DATA16*)PrimParPointer();
 						R = *(DATA16*)PrimParPointer();
-						if (R)
+						if (R != 0)
 						{
 							if (Blocked == 0)
 							{
-								dLcdDrawFilledCircle((*UiInstance.pLcd).Lcd, Color, X, Y, R);
-								UiInstance.ScreenBusy = 1;
+								dLcdDrawFilledCircle((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, R);
+								Inst.UiInstance.ScreenBusy = 1;
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.TEXT:
+				case TEXT:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3607,12 +4411,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						pText = (DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, UiInstance.Font, pText);
-							UiInstance.ScreenBusy = 1;
+							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, Inst.UiInstance.Font, pText);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.ICON:
+				case ICON:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3621,12 +4425,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						No = *(DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							dLcdDrawIcon((*UiInstance.pLcd).Lcd, Color, X, Y, Type, No);
-							UiInstance.ScreenBusy = 1;
+							dLcdDrawIcon((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, Type, No);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.BMPFILE:
+				case BMPFILE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3637,29 +4441,29 @@ namespace Ev3EmulatorCore.Lms.Cui
 						{
 							if (cMemoryGetImage(pText, LCD_BUFFER_SIZE, pBmp) == OK)
 							{
-								dLcdDrawBitmap((*UiInstance.pLcd).Lcd, Color, X, Y, pBmp);
-								UiInstance.ScreenBusy = 1;
+								dLcdDrawBitmap((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, pBmp);
+								Inst.UiInstance.ScreenBusy = 1;
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.PICTURE:
+				case PICTURE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
 						Y = *(DATA16*)PrimParPointer();
 						pI = *(IP*)PrimParPointer();
-						if (pI != NULL)
+						if (pI != null)
 						{
 							if (Blocked == 0)
 							{
-								dLcdDrawBitmap((*UiInstance.pLcd).Lcd, Color, X, Y, pI);
-								UiInstance.ScreenBusy = 1;
+								dLcdDrawBitmap((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, pI);
+								Inst.UiInstance.ScreenBusy = 1;
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.VALUE:
+				case VALUE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3668,7 +4472,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Figures = *(DATA8*)PrimParPointer();
 						Decimals = *(DATA8*)PrimParPointer();
 
-						if (isnan(DataF))
+						if (float.IsNaN(DataF))
 						{
 							for (Lng = 0; Lng < Figures; Lng++)
 							{
@@ -3696,12 +4500,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 						pText = GBuffer;
 						if (Blocked == 0)
 						{
-							dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, UiInstance.Font, pText);
-							UiInstance.ScreenBusy = 1;
+							dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, Inst.UiInstance.Font, pText);
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.VIEW_VALUE:
+				case VIEW_VALUE:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3711,16 +4515,15 @@ namespace Ev3EmulatorCore.Lms.Cui
 						Decimals = *(DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
-
 							TmpColor = Color;
-							CharWidth = dLcdGetFontWidth(UiInstance.Font);
-							CharHeight = dLcdGetFontHeight(UiInstance.Font);
+							CharWidth = dLcdGetFontWidth(Inst.UiInstance.Font);
+							CharHeight = dLcdGetFontHeight(Inst.UiInstance.Font);
 							X1 = ((CharWidth + 2) / 3) - 1;
 							Y1 = (CharHeight / 2);
 
 							Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
 
-							if (Lng)
+							if (Lng != 0)
 							{
 								if (GBuffer[0] == '-')
 								{ // Negative
@@ -3737,10 +4540,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 								}
 
 								// Make sure negative sign is deleted from last time
-								dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
+								dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
 								if (CharHeight > 12)
 								{
-									dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
 								}
 
 								// Check for "not a number"
@@ -3759,7 +4562,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 									GBuffer[Tmp] = 0;
 
 									// Draw figures
-									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, UiInstance.Font, GBuffer);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, Inst.UiInstance.Font, GBuffer);
 								}
 								else
 								{ // Normal number
@@ -3788,21 +4591,21 @@ namespace Ev3EmulatorCore.Lms.Cui
 									}
 
 									// Draw figures
-									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X + Tmp, Y, UiInstance.Font, pText);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, Inst.UiInstance.Font, pText);
 
 									// Draw negative sign
-									dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
 									if (CharHeight > 12)
 									{
-										dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
+										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
 									}
 								}
 							}
-							UiInstance.ScreenBusy = 1;
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.VIEW_UNIT:
+				case VIEW_UNIT:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();
@@ -3823,7 +4626,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 
 							Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
 
-							if (Lng)
+							if (Lng != 0)
 							{
 								if (GBuffer[0] == '-')
 								{ // Negative
@@ -3840,10 +4643,10 @@ namespace Ev3EmulatorCore.Lms.Cui
 								}
 
 								// Make sure negative sign is deleted from last time
-								dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
+								dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
 								if (CharHeight > 12)
 								{
-									dLcdDrawLine((*UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
 								}
 
 								// Check for "not a number"
@@ -3862,7 +4665,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 									GBuffer[Tmp] = 0;
 
 									// Draw figures
-									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X, Y, LARGE_FONT, GBuffer);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X, Y, LARGE_FONT, GBuffer);
 								}
 								else
 								{ // Normal number
@@ -3892,26 +4695,26 @@ namespace Ev3EmulatorCore.Lms.Cui
 									Tmp = 0;
 
 									// Draw figures
-									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X + Tmp, Y, LARGE_FONT, pText);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, LARGE_FONT, pText);
 
 									// Draw negative sign
-									dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
+									dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
 									if (CharHeight > 12)
 									{
-										dLcdDrawLine((*UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
+										dLcdDrawLine((*Inst.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
 									}
 
 									Tmp = ((((DATA16)Lng))) * CharWidth;
 									snprintf((char*)GBuffer, Length, "%s", pUnit);
-									dLcdDrawText((*UiInstance.pLcd).Lcd, Color, X + Tmp, Y, SMALL_FONT, GBuffer);
+									dLcdDrawText((*Inst.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, SMALL_FONT, GBuffer);
 
 								}
 							}
-							UiInstance.ScreenBusy = 1;
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.NOTIFICATION:
+				case NOTIFICATION:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();  // start x
@@ -3937,7 +4740,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.QUESTION:
+				case QUESTION:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();  // start x
@@ -3963,7 +4766,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.ICON_QUESTION:
+				case ICON_QUESTION:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();  // start x
@@ -3986,7 +4789,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.KEYBOARD:
+				case KEYBOARD:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();  // start x
@@ -4020,7 +4823,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.BROWSE:
+				case BROWSE:
 					{
 						Type = *(DATA8*)PrimParPointer();   // Browser type
 						X = *(DATA16*)PrimParPointer();  // start x
@@ -4051,7 +4854,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.VERTBAR:
+				case VERTBAR:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						X = *(DATA16*)PrimParPointer();  // start x
@@ -4068,35 +4871,35 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.SELECT_FONT:
+				case SELECT_FONT:
 					{
-						UiInstance.Font = *(DATA8*)PrimParPointer();
+						Inst.UiInstance.Font = *(DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							if (UiInstance.Font >= FONTTYPES)
+							if (Inst.UiInstance.Font >= FONTTYPES)
 							{
-								UiInstance.Font = (FONTTYPES - 1);
+								Inst.UiInstance.Font = (FONTTYPES - 1);
 							}
-							if (UiInstance.Font < 0)
+							if (Inst.UiInstance.Font < 0)
 							{
-								UiInstance.Font = 0;
+								Inst.UiInstance.Font = 0;
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.TOPLINE:
+				case TOPLINE:
 					{
-						UiInstance.TopLineEnabled = *(DATA8*)PrimParPointer();
+						Inst.UiInstance.TopLineEnabled = *(DATA8*)PrimParPointer();
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.FILLWINDOW:
+				case FILLWINDOW:
 					{
 						Color = *(DATA8*)PrimParPointer();
 						Y = *(DATA16*)PrimParPointer();  // start y
 						Y1 = *(DATA16*)PrimParPointer();  // size y
 						if (Blocked == 0)
 						{
-							UiInstance.Font = NORMAL_FONT;
+							Inst.UiInstance.Font = NORMAL_FONT;
 
 							if ((Y + Y1) < LCD_HEIGHT)
 							{
@@ -4104,7 +4907,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 								{
 									Y *= ((LCD_WIDTH + 7) / 8);
 
-									if (Y1)
+									if (Y1 != 0)
 									{
 										Y1 *= ((LCD_WIDTH + 7) / 8);
 									}
@@ -4113,11 +4916,11 @@ namespace Ev3EmulatorCore.Lms.Cui
 										Y1 = LCD_BUFFER_SIZE - Y;
 									}
 
-									if (Color)
+									if (Color != 0)
 									{
 										Color = -1;
 									}
-									memset(&((*UiInstance.pLcd).Lcd[Y]), Color, Y1);
+									memset(&((*Inst.UiInstance.pLcd).Lcd[Y]), Color, Y1);
 								}
 								else
 								{
@@ -4129,42 +4932,42 @@ namespace Ev3EmulatorCore.Lms.Cui
 									for (Tmp = Y; Tmp < Y1; Tmp++)
 									{
 										Y3 = Tmp * ((LCD_WIDTH + 7) / 8);
-										memset(&((*UiInstance.pLcd).Lcd[Y3]), Color, Y2);
+										memset(&((*Inst.UiInstance.pLcd).Lcd[Y3]), Color, Y2);
 										Color = ~Color;
 									}
 								}
 							}
 
-							UiInstance.ScreenBusy = 1;
+							Inst.UiInstance.ScreenBusy = 1;
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.STORE:
+				case STORE:
 					{
 						No = *(DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
 							if (No < LCD_STORE_LEVELS)
 							{
-								LCDCopy(&UiInstance.LcdSafe, &UiInstance.LcdPool[No], sizeof(LCD));
+								LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdPool[No], sizeof(LCD));
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.RESTORE:
+				case RESTORE:
 					{
 						No = *(DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
 							if (No < LCD_STORE_LEVELS)
 							{
-								LCDCopy(&UiInstance.LcdPool[No], &UiInstance.LcdSafe, sizeof(LCD));
-								UiInstance.ScreenBusy = 1;
+								LCDCopy(&Inst.UiInstance.LcdPool[No], &Inst.UiInstance.LcdSafe, sizeof(LCD));
+								Inst.UiInstance.ScreenBusy = 1;
 							}
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.GRAPH_SETUP:
+				case GRAPH_SETUP:
 					{
 						X = *(DATA16*)PrimParPointer();  // start x
 						X1 = *(DATA16*)PrimParPointer();  // size y
@@ -4181,7 +4984,7 @@ namespace Ev3EmulatorCore.Lms.Cui
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.GRAPH_DRAW:
+				case GRAPH_DRAW:
 					{
 						View = *(DATA8*)PrimParPointer();   // view
 
@@ -4193,30 +4996,30 @@ namespace Ev3EmulatorCore.Lms.Cui
 						*(DATAF*)PrimParPointer() = Average;
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.SCROLL:
+				case SCROLL:
 					{
 						Y = *(DATA16*)PrimParPointer();
 						if ((Y > 0) && (Y < LCD_HEIGHT))
 						{
-							dLcdScroll((*UiInstance.pLcd).Lcd, Y);
+							dLcdScroll((*Inst.UiInstance.pLcd).Lcd, Y);
 						}
 					}
 					break;
-				case (byte)lms2012.UiDrawSubcode.POPUP:
+				case POPUP:
 					{
 						Open = *(DATA8*)PrimParPointer();
 						if (Blocked == 0)
 						{
-							if (Open)
+							if (Open != 0)
 							{
-								if (!UiInstance.ScreenBusy)
+								if (!Inst.UiInstance.ScreenBusy)
 								{
 									TmpObjId = CallingObjectId();
 
-									LCDCopy(&UiInstance.LcdSafe, &UiInstance.LcdSave, sizeof(UiInstance.LcdSave));
-									UiInstance.ScreenPrgId = TmpPrgId;
-									UiInstance.ScreenObjId = TmpObjId;
-									UiInstance.ScreenBlocked = 1;
+									LCDCopy(&Inst.UiInstance.LcdSafe, &Inst.UiInstance.LcdSave, sizeof(Inst.UiInstance.LcdSave));
+									Inst.UiInstance.ScreenPrgId = TmpPrgId;
+									Inst.UiInstance.ScreenObjId = TmpObjId;
+									Inst.UiInstance.ScreenBlocked = 1;
 								}
 								else
 								{ // Wait on scrreen
@@ -4227,12 +5030,12 @@ namespace Ev3EmulatorCore.Lms.Cui
 							}
 							else
 							{
-								LCDCopy(&UiInstance.LcdSave, &UiInstance.LcdSafe, sizeof(UiInstance.LcdSafe));
-								dLcdUpdate(UiInstance.pLcd);
+								LCDCopy(&Inst.UiInstance.LcdSave, &Inst.UiInstance.LcdSafe, sizeof(Inst.UiInstance.LcdSafe));
+								dLcdUpdate(Inst.UiInstance.pLcd);
 
-								UiInstance.ScreenPrgId = -1;
-								UiInstance.ScreenObjId = -1;
-								UiInstance.ScreenBlocked = 0;
+								Inst.UiInstance.ScreenPrgId = -1;
+								Inst.UiInstance.ScreenObjId = -1;
+								Inst.UiInstance.ScreenBlocked = 0;
 							}
 						}
 						else
@@ -4244,6 +5047,865 @@ namespace Ev3EmulatorCore.Lms.Cui
 					}
 					break;
 			}
+		}
+
+
+		/*! \page cUi
+		 *  <hr size="1"/>
+		 *  <b>     opUI_FLUSH ()  </b>
+		 *
+		 *- User Interface flush buffers\n
+		 *- Dispatch status unchanged
+		 *
+		 */
+		/*! \brief  opUI_FLUSH byte code
+		 *
+		 */
+		void cUiFlush()
+		{
+			cUiFlushBuffer();
+		}
+
+		void cUiRead()
+		{
+			IP TmpIp;
+			DATA8 Cmd;
+			DATA8 Lng;
+			DATA8 Data8;
+			DATA8* pSource;
+			DATA8* pDestination;
+			DATA16 Data16;
+			IMGDATA Tmp;
+			DATA32 pImage;
+			DATA32 Length;
+			DATA32 Total;
+			DATA32 Size;
+			IMGHEAD* pImgHead;
+			OBJHEAD* pObjHead;
+
+
+			TmpIp = GetObjectIp();
+			Cmd = *(DATA8*)PrimParPointer();
+
+			switch (Cmd)
+			{ // Function
+				case GET_STRING:
+					{
+						if (Inst.UiInstance.Keys != 0)
+						{
+							Lng = *(DATA8*)PrimParPointer();
+							pDestination = (DATA8*)PrimParPointer();
+							pSource = (DATA8*)Inst.UiInstance.KeyBuffer;
+
+							while ((Inst.UiInstance.Keys != 0) && (Lng != 0))
+							{
+								*pDestination = *pSource;
+								pDestination++;
+								pSource++;
+								Inst.UiInstance.Keys--;
+								Lng--;
+							}
+							*pDestination = 0;
+							Inst.UiInstance.KeyBufIn = 0;
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case KEY:
+					{
+						if (Inst.UiInstance.KeyBufIn != 0)
+						{
+							*(DATA8*)PrimParPointer() = (DATA8)Inst.UiInstance.KeyBuffer[0];
+							Inst.UiInstance.KeyBufIn--;
+
+							for (Lng = 0; Lng < Inst.UiInstance.KeyBufIn; Lng++)
+							{
+								Inst.UiInstance.KeyBuffer[Lng] = Inst.UiInstance.KeyBuffer[Lng + 1];
+							}
+						}
+						else
+						{
+							*(DATA8*)PrimParPointer() = (DATA8)0;
+						}
+					}
+					break;
+				case GET_SHUTDOWN:
+					{
+						*(DATA8*)PrimParPointer() = Inst.UiInstance.ShutDown;
+						Inst.UiInstance.ShutDown = 0;
+					}
+					break;
+				case GET_WARNING:
+					{
+						*(DATA8*)PrimParPointer() = Inst.UiInstance.Warning;
+					}
+					break;
+				case GET_LBATT:
+					{
+						Data16 = (DATA16)(Inst.UiInstance.Vbatt * 1000.0);
+						Data16 -= Inst.UiInstance.BattIndicatorLow;
+						Data16 = (Data16 * 100) / (Inst.UiInstance.BattIndicatorHigh - Inst.UiInstance.BattIndicatorLow);
+						if (Data16 > 100)
+						{
+							Data16 = 100;
+						}
+						if (Data16 < 0)
+						{
+							Data16 = 0;
+						}
+						*(DATA8*)PrimParPointer() = (DATA8)Data16;
+					}
+					break;
+				case ADDRESS:
+					{
+						if (Inst.UiInstance.Keys != 0)
+						{
+							*(DATA32*)PrimParPointer() = (DATA32)atol((const char*)Inst.UiInstance.KeyBuffer);
+							Inst.UiInstance.Keys = 0;
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case CODE:
+					{
+						if (Inst.UiInstance.Keys != 0)
+						{
+							Length = *(DATA32*)PrimParPointer();
+							pImage = *(DATA32*)PrimParPointer();
+
+							pImgHead = (IMGHEAD*)pImage;
+							pObjHead = (OBJHEAD*)(pImage + sizeof(IMGHEAD));
+							pDestination = (DATA8*)(pImage + sizeof(IMGHEAD) + sizeof(OBJHEAD));
+
+							if (Length > (sizeof(IMGHEAD) + sizeof(OBJHEAD)))
+							{
+
+								(*pImgHead).Sign[0] = 'l';
+								(*pImgHead).Sign[1] = 'e';
+								(*pImgHead).Sign[2] = 'g';
+								(*pImgHead).Sign[3] = 'o';
+								(*pImgHead).ImageSize = 0;
+								(*pImgHead).VersionInfo = (UWORD)(VERS * 100.0);
+								(*pImgHead).NumberOfObjects = 1;
+								(*pImgHead).GlobalBytes = 0;
+
+								(*pObjHead).OffsetToInstructions = (IP)(sizeof(IMGHEAD) + sizeof(OBJHEAD));
+								(*pObjHead).OwnerObjectId = 0;
+								(*pObjHead).TriggerCount = 0;
+								(*pObjHead).LocalBytes = MAX_COMMAND_LOCALS;
+
+								pSource = (DATA8*)Inst.UiInstance.KeyBuffer;
+								Size = sizeof(IMGHEAD) + sizeof(OBJHEAD);
+
+								Length -= sizeof(IMGHEAD) + sizeof(OBJHEAD);
+								Length--;
+								while ((Inst.UiInstance.Keys != 0) && (Length != 0))
+								{
+									Tmp = (IMGDATA)(AtoN(*pSource) << 4);
+									pSource++;
+									Inst.UiInstance.Keys--;
+									if (Inst.UiInstance.Keys != 0)
+									{
+										Tmp += (IMGDATA)(AtoN(*pSource));
+										pSource++;
+										Inst.UiInstance.Keys--;
+									}
+									else
+									{
+										Tmp = 0;
+									}
+									*pDestination = Tmp;
+									pDestination++;
+									Length--;
+									Size++;
+								}
+								*pDestination = opOBJECT_END;
+								Size++;
+								(*pImgHead).ImageSize = Size;
+								memset(Inst.UiInstance.Globals, 0, sizeof(Inst.UiInstance.Globals));
+
+								*(DATA32*)PrimParPointer() = (DATA32)Inst.UiInstance.Globals;
+								*(DATA8*)PrimParPointer() = 1;
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case GET_HW_VERS:
+					{
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)strlen((char*)Inst.UiInstance.HwVers) + 1;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.HwVers);
+						}
+					}
+					break;
+				case GET_FW_VERS:
+					{
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)strlen((char*)Inst.UiInstance.FwVers) + 1;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.FwVers);
+						}
+					}
+					break;
+				case GET_FW_BUILD:
+					{
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)strlen((char*)Inst.UiInstance.FwBuild) + 1;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.FwBuild);
+						}
+					}
+					break;
+				case GET_OS_VERS:
+					{
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)strlen((char*)Inst.UiInstance.OsVers) + 1;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.OsVers);
+						}
+					}
+					break;
+				case GET_OS_BUILD:
+					{
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)strlen((char*)Inst.UiInstance.OsBuild) + 1;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.OsBuild);
+						}
+					}
+					break;
+				case GET_VERSION:
+					{
+						snprintf((char*)Inst.UiInstance.ImageBuffer, IMAGEBUFFER_SIZE, "%s V%4.2f%c(%s %s)", PROJECT, VERS, SPECIALVERS, __DATE__, __TIME__);
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+						pSource = (DATA8*)Inst.UiInstance.ImageBuffer;
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)strlen((char*)Inst.UiInstance.ImageBuffer) + 1;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.ImageBuffer);
+						}
+					}
+					break;
+				case GET_IP:
+					{
+						Lng = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						if (VMInstance.Handle >= 0)
+						{
+							Data8 = IPADDR_SIZE;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, (DATA32)Lng);
+						}
+						if (pDestination != null)
+						{
+							snprintf((char*)pDestination, Lng, "%s", Inst.UiInstance.IpAddr);
+						}
+
+					}
+					break;
+				case GET_POWER:
+					{
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Vbatt;
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Ibatt;
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Iintegrated;
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Imotor;
+					}
+					break;
+				case GET_VBATT:
+					{
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Vbatt;
+					}
+					break;
+				case GET_IBATT:
+					{
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Ibatt;
+					}
+					break;
+				case GET_IINT:
+					{
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Iintegrated;
+					}
+					break;
+				case GET_IMOTOR:
+					{
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Imotor;
+					}
+					break;
+				case GET_EVENT:
+					{
+						*(DATA8*)PrimParPointer() = Inst.UiInstance.Event;
+						Inst.UiInstance.Event = 0;
+					}
+					break;
+				case GET_TBATT:
+					{
+						*(DATAF*)PrimParPointer() = Inst.UiInstance.Tbatt;
+					}
+					break;
+				case TEXTBOX_READ:
+					{
+						pSource = (DATA8*)PrimParPointer();
+						Size = *(DATA32*)PrimParPointer();
+						Data8 = *(DATA8*)PrimParPointer();
+						Lng = *(DATA8*)PrimParPointer();
+						Data16 = *(DATA16*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+
+						cUiTextboxReadLine(pSource, Size, Data8, Lng, Data16, pDestination, &Data8);
+					}
+					break;
+				case GET_SDCARD:
+					{
+						*(DATA8*)PrimParPointer() = CheckSdcard(&Data8, &Total, &Size, 0);
+						*(DATA32*)PrimParPointer() = Total;
+						*(DATA32*)PrimParPointer() = Size;
+					}
+					break;
+				case GET_USBSTICK:
+					{
+						*(DATA8*)PrimParPointer() = CheckUsbstick(&Data8, &Total, &Size, 0);
+						*(DATA32*)PrimParPointer() = Total;
+						*(DATA32*)PrimParPointer() = Size;
+					}
+					break;
+
+			}
+		}
+
+		void cUiWrite()
+		{
+			IP TmpIp;
+			DATA8 Cmd;
+			DATA8* pSource;
+			DSPSTAT DspStat = BUSYBREAK;
+			DATA8 Buffer[50];
+			DATA8 Data8;
+			DATA16 Data16;
+			DATA32 Data32;
+			DATA32 pGlobal;
+			DATA32 Tmp;
+			DATAF DataF;
+			DATA8 Figures;
+			DATA8 Decimals;
+			DATA8 No;
+			DATA8* pText;
+
+
+			TmpIp = GetObjectIp();
+			Cmd = *(DATA8*)PrimParPointer();
+
+			switch (Cmd)
+			{ // Function
+
+				case WRITE_FLUSH:
+					{
+						cUiFlush();
+						DspStat = NOBREAK;
+					}
+					break;
+				case FLOATVALUE:
+					{
+						DataF = *(DATAF*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						Decimals = *(DATA8*)PrimParPointer();
+
+						snprintf((char*)Buffer, 32, "%*.*f", Figures, Decimals, DataF);
+						cUiWriteString(Buffer);
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case STAMP:
+					{ // write time, prgid, objid, ip
+
+						pSource = (DATA8*)PrimParPointer();
+						snprintf((char*)Buffer, 50, "####[ %09u %01u %03u %06u %s]####\r\n", GetTime(), CurrentProgramId(), CallingObjectId(), CurrentObjectIp(), pSource);
+						cUiWriteString(Buffer);
+						cUiFlush();
+						DspStat = NOBREAK;
+					}
+					break;
+				case PUT_STRING:
+					{
+						pSource = (DATA8*)PrimParPointer();
+						cUiWriteString(pSource);
+						DspStat = NOBREAK;
+					}
+					break;
+				case CODE:
+					{
+						pGlobal = *(DATA32*)PrimParPointer();
+						Data32 = *(DATA32*)PrimParPointer();
+
+						pSource = (DATA8*)pGlobal;
+
+						cUiWriteString((DATA8*)"\r\n    ");
+						for (Tmp = 0; Tmp < Data32; Tmp++)
+						{
+							snprintf((char*)Buffer, 7, "%02X ", pSource[Tmp] & 0xFF);
+							cUiWriteString(Buffer);
+							if (((Tmp & 0x3) == 0x3) && ((Tmp & 0xF) != 0xF))
+							{
+								cUiWriteString((DATA8*)" ");
+							}
+							if (((Tmp & 0xF) == 0xF) && (Tmp < (Data32 - 1)))
+							{
+								cUiWriteString((DATA8*)"\r\n    ");
+							}
+						}
+						cUiWriteString((DATA8*)"\r\n");
+						DspStat = NOBREAK;
+					}
+					break;
+				case TEXTBOX_APPEND:
+					{
+						pText = (DATA8*)PrimParPointer();
+						Data32 = *(DATA32*)PrimParPointer();
+						Data8 = *(DATA8*)PrimParPointer();
+						pSource = (DATA8*)PrimParPointer();
+
+						cUiTextboxAppendLine(pText, Data32, Data8, pSource, Inst.UiInstance.Font);
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case SET_BUSY:
+					{
+						Data8 = *(DATA8*)PrimParPointer();
+
+						if (Data8 != 0)
+						{
+							Inst.UiInstance.Warning |= WARNING_BUSY;
+						}
+						else
+						{
+							Inst.UiInstance.Warning &= ~WARNING_BUSY;
+						}
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case VALUE8:
+					{
+						Data8 = *(DATA8*)PrimParPointer();
+						if (Data8 != DATA8_NAN)
+						{
+							snprintf((char*)Buffer, 7, "%d", (int)Data8);
+						}
+						else
+						{
+							snprintf((char*)Buffer, 7, "nan");
+						}
+						cUiWriteString(Buffer);
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case VALUE16:
+					{
+						Data16 = *(DATA16*)PrimParPointer();
+						if (Data16 != DATA16_NAN)
+						{
+							snprintf((char*)Buffer, 9, "%d", Data16 & 0xFFFF);
+						}
+						else
+						{
+							snprintf((char*)Buffer, 7, "nan");
+						}
+						cUiWriteString(Buffer);
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case VALUE32:
+					{
+						Data32 = *(DATA32*)PrimParPointer();
+						if (Data32 != DATA32_NAN)
+						{
+							snprintf((char*)Buffer, 14, "%ld", (long unsigned int)(Data32 & 0xFFFFFFFF));
+						}
+						else
+						{
+							snprintf((char*)Buffer, 7, "nan");
+						}
+
+						cUiWriteString(Buffer);
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case VALUEF:
+					{
+						DataF = *(DATAF*)PrimParPointer();
+						snprintf((char*)Buffer, 24, "%f", DataF);
+						cUiWriteString(Buffer);
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case LED:
+					{
+						Data8 = *(DATA8*)PrimParPointer();
+						if (Data8 < 0)
+						{
+							Data8 = 0;
+						}
+						if (Data8 >= LEDPATTERNS)
+						{
+							Data8 = LEDPATTERNS - 1;
+						}
+						cUiSetLed(Data8);
+						Inst.UiInstance.RunLedEnabled = 0;
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case POWER:
+					{
+						Data8 = *(DATA8*)PrimParPointer();
+
+						if (Inst.UiInstance.PowerFile >= 0)
+						{
+							ioctl(Inst.UiInstance.PowerFile, 0, (size_t) & Data8);
+						}
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case TERMINAL:
+					{
+						No = *(DATA8*)PrimParPointer();
+
+						if (No != 0)
+						{
+							SetTerminalEnable(1);
+						}
+						else
+						{
+							SetTerminalEnable(0);
+						}
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case SET_TESTPIN:
+					{
+						Data8 = *(DATA8*)PrimParPointer();
+						cUiTestpin(Data8);
+						DspStat = NOBREAK;
+					}
+					break;
+				case INIT_RUN:
+					{
+						Inst.UiInstance.RunScreenEnabled = 3;
+
+						DspStat = NOBREAK;
+					}
+					break;
+				case UPDATE_RUN:
+					{
+						DspStat = NOBREAK;
+					}
+					break;
+				case GRAPH_SAMPLE:
+					{
+						cUiGraphSample();
+						DspStat = NOBREAK;
+					}
+					break;
+				case DOWNLOAD_END:
+					{
+						Inst.UiInstance.UiUpdate = 1;
+						cUiDownloadSuccesSound();
+						DspStat = NOBREAK;
+					}
+					break;
+				case SCREEN_BLOCK:
+					{
+						Inst.UiInstance.ScreenBlocked = *(DATA8*)PrimParPointer();
+						DspStat = NOBREAK;
+					}
+					break;
+				default:
+					{
+						DspStat = FAILBREAK;
+					}
+					break;
+			}
+
+			if (DspStat == BUSYBREAK)
+			{ // Rewind IP
+
+				SetObjectIp(TmpIp - 1);
+			}
+			SetDispatchStatus(DspStat);
+		}
+
+		void cUiButton()
+		{
+			PRGID TmpPrgId;
+			OBJID TmpObjId;
+			IP TmpIp;
+			DATA8 Cmd;
+			DATA8 Button;
+			DATA8 State;
+			DATA16 Inc;
+			DATA8 Blocked;
+
+			TmpIp = GetObjectIp();
+			TmpPrgId = CurrentProgramId();
+
+			if (Inst.UiInstance.ScreenBlocked == 0)
+			{
+				Blocked = 0;
+			}
+			else
+			{
+				TmpObjId = CallingObjectId();
+				if ((TmpPrgId == Inst.UiInstance.ScreenPrgId) && (TmpObjId == Inst.UiInstance.ScreenObjId))
+				{
+					Blocked = 0;
+				}
+				else
+				{
+					Blocked = 1;
+				}
+			}
+
+			Cmd = *(DATA8*)PrimParPointer();
+
+			State = 0;
+			Inc = 0;
+
+			switch (Cmd)
+			{ // Function
+				case PRESS:
+					{
+						Button = *(DATA8*)PrimParPointer();
+						cUiSetPress(Button, 1);
+					}
+					break;
+				case RELEASE:
+					{
+						Button = *(DATA8*)PrimParPointer();
+						cUiSetPress(Button, 0);
+					}
+					break;
+				case SHORTPRESS:
+					{
+						Button = *(DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetShortPress(Button);
+						}
+						*(DATA8*)PrimParPointer() = State;
+					}
+					break;
+				case GET_BUMBED:
+					{
+						Button = *(DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetBumbed(Button);
+						}
+						*(DATA8*)PrimParPointer() = State;
+					}
+					break;
+				case PRESSED:
+					{
+						Button = *(DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetPress(Button);
+						}
+						*(DATA8*)PrimParPointer() = State;
+					}
+					break;
+				case LONGPRESS:
+					{
+						Button = *(DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetLongPress(Button);
+						}
+						*(DATA8*)PrimParPointer() = State;
+					}
+					break;
+				case FLUSH:
+					{
+						if (Blocked == 0)
+						{
+							cUiButtonFlush();
+						}
+					}
+					break;
+				case WAIT_FOR_PRESS:
+					{
+						if (Blocked == 0)
+						{
+							if (cUiWaitForPress() == 0)
+							{
+								SetObjectIp(TmpIp - 1);
+								SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							SetObjectIp(TmpIp - 1);
+							SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+				case GET_HORZ:
+					{
+						if (Blocked == 0)
+						{
+							Inc = cUiGetHorz();
+						}
+						*(DATA16*)PrimParPointer() = Inc;
+					}
+					break;
+				case GET_VERT:
+					{
+						if (Blocked == 0)
+						{
+							Inc = cUiGetVert();
+						}
+						*(DATA16*)PrimParPointer() = Inc;
+					}
+					break;
+				case SET_BACK_BLOCK:
+					{
+						Inst.UiInstance.BackButtonBlocked = *(DATA8*)PrimParPointer();
+					}
+					break;
+				case GET_BACK_BLOCK:
+					{
+						*(DATA8*)PrimParPointer() = Inst.UiInstance.BackButtonBlocked;
+					}
+					break;
+				case TESTSHORTPRESS:
+					{
+						Button = *(DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiTestShortPress(Button);
+						}
+						*(DATA8*)PrimParPointer() = State;
+					}
+					break;
+				case TESTLONGPRESS:
+					{
+						Button = *(DATA8*)PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiTestLongPress(Button);
+						}
+						*(DATA8*)PrimParPointer() = State;
+					}
+					break;
+				case GET_CLICK:
+					{
+						*(DATA8*)PrimParPointer() = Inst.UiInstance.Click;
+						Inst.UiInstance.Click = 0;
+					}
+					break;
+			}
+		}
+
+		public unsafe void cUiKeepAlive()
+		{
+			cUiAlive();
+			*(DATA8*)PrimParPointer() = GetSleepMinutes();
 		}
 	}
 }
