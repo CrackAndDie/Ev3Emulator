@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ev3Model", "Ev3Model\Ev3Mod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ev3ConsoleTest", "Ev3ConsoleTest\Ev3ConsoleTest.csproj", "{0758EB9E-C78E-49E3-BA1D-C195C277816F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ev3EmulatorCore", "Ev3EmulatorCore\Ev3EmulatorCore.csproj", "{EA5D5FAC-42D6-43AF-858E-AFB170AAC8A2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{0758EB9E-C78E-49E3-BA1D-C195C277816F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0758EB9E-C78E-49E3-BA1D-C195C277816F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0758EB9E-C78E-49E3-BA1D-C195C277816F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EA5D5FAC-42D6-43AF-858E-AFB170AAC8A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA5D5FAC-42D6-43AF-858E-AFB170AAC8A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA5D5FAC-42D6-43AF-858E-AFB170AAC8A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA5D5FAC-42D6-43AF-858E-AFB170AAC8A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
