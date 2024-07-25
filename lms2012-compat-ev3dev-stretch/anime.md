@@ -6,4 +6,8 @@
 - these files probably should be opened as binary
 - ~1475 line cMemoryGetMediaName commented func because of mounts
 - ~4065 line commented memset - gave error and there was no the line if ev3sources
-- some includes removed
+- some includes removed  
+
+### c_sound  
+
+- removed all pcm shite. it has to be binded with c# shite so c# shite would be playing the sounds
