@@ -56,10 +56,6 @@
 
 #define   vmCHAIN_DEPT                  4                             //!< Number of bricks in the USB daisy chain (master + slaves)
 
-#define   FILEPERMISSIONS               (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
-#define   DIRPERMISSIONS                (S_IRWXU | S_IRWXG | S_IRWXO)
-#define   SYSPERMISSIONS                (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
-
 #define   vmPATHSIZE                    84                            //!< Max path size excluding trailing forward slash including zero termination
 #define   vmNAMESIZE                    32                            //!< Max name size including zero termination (must be divideable by 4)
 #define   vmEXTSIZE                     5                             //!< Max extension size including dot and zero termination
@@ -104,6 +100,55 @@
 #define   vmVOLUME_FILE_NAME            "Volume"                      //!< File used in "Volume" app to save status
 #define   vmWIFI_FILE_NAME              "WiFi"                        //!< File used in "WiFi" app to save status
 #define   vmBLUETOOTH_FILE_NAME         "Bluetooth"                   //!< File used in "Bluetooth" app to save status
+
+// TYPES
+// Reserved device types
+typedef   enum
+{
+    //  TYPE_KEEP                     =   0,  //!< Type value that won't change type in byte codes
+    TYPE_NXT_TOUCH = 1,  //!< Device is NXT touch sensor
+    TYPE_NXT_LIGHT = 2,  //!< Device is NXT light sensor
+    TYPE_NXT_SOUND = 3,  //!< Device is NXT sound sensor
+    TYPE_NXT_COLOR = 4,  //!< Device is NXT color sensor
+
+    TYPE_TACHO = 7,  //!< Device is a tacho motor
+    TYPE_MINITACHO = 8,  //!< Device is a mini tacho motor
+    TYPE_NEWTACHO = 9,  //!< Device is a new tacho motor
+
+    TYPE_THIRD_PARTY_START = 50,
+    TYPE_THIRD_PARTY_END = 99,
+
+    TYPE_IIC_UNKNOWN = 100,
+
+    TYPE_NXT_TEST = 101,  //!< Device is a NXT ADC test sensor
+
+    TYPE_NXT_IIC = 123,  //!< Device is NXT IIC sensor
+    TYPE_TERMINAL = 124,  //!< Port is connected to a terminal
+    TYPE_UNKNOWN = 125,  //!< Port not empty but type has not been determined
+    TYPE_NONE = 126,  //!< Port empty or not available
+    TYPE_ERROR = 127,  //!< Port not empty and type is invalid
+}
+TYPE;
+
+#ifndef O_DSYNC
+#define O_DSYNC		00010000	/* used to be O_SYNC, see below */
+#endif
+#ifndef O_SYNC
+#define __O_SYNC	04000000
+#define O_SYNC		(__O_SYNC|O_DSYNC)
+#endif
+
+/* mmap protections */
+#define PROT_READ	0x1		/* Page can be read */
+#define PROT_WRITE	0x2		/* Page can be written */
+#define PROT_EXEC	0x4		/* Page can be executed */
+#define PROT_NONE	0x0		/* Page can not be accessed */
+
+/* Sharing types (must choose one and only one of these) */
+#define MAP_FILE	0
+#define MAP_SHARED	0x01		/* Share changes */
+#define MAP_PRIVATE	0x02		/* Changes are private */
+#define MAP_FAILED ((void*)-1)
 
 // EXTENSIONS
 
@@ -827,7 +872,7 @@ FILE_SUBCODE;
 
 typedef   enum
 {
-  DELETE              = 0,
+    DESTROY = 0,
   CREATE8             = 1,
   CREATE16            = 2,
   CREATE32            = 3,
@@ -839,7 +884,7 @@ typedef   enum
   INIT16              = 9,
   INIT32              = 10,
   INITF               = 11,
-  SIZE                = 12,
+  SET_SIZE = 12,
   READ_CONTENT        = 13,
   WRITE_CONTENT       = 14,
   READ_SIZE           = 15,
@@ -1481,7 +1526,7 @@ typedef   enum
   WARNING_VOLTAGE   = 0x04,
   WARNING_MEMORY    = 0x08,
   WARNING_DSPSTAT   = 0x10,
-
+  WARNING_RAM = 0x20,
   WARNING_BATTLOW   = 0x40,
   WARNING_BUSY      = 0x80,
 

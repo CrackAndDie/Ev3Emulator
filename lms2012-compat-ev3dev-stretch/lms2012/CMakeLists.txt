@@ -8,6 +8,8 @@ set (SOURCE_FILES
     lms2012.c
     validate.c
     bytecodes.c
+    dirent.c
+    unix_ph.c
 )
 
 set (LMS2012_MODULES

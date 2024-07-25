@@ -36,6 +36,12 @@
 struct tVirtualMachineInfo virtualMachineInfo;
 
 
+// <dlfcn.h> shite
+void* dlopen(const char* path, int mode) { return NULL; }
+char* dlerror(void) { return "anime"; }
+int dlclose(void* handle) { return 1; }
+
+
 /*! \page cDynload Dynload
  *  <hr size="1"/>
  *  <b>     dynloadInit ()  </b>
@@ -188,7 +194,7 @@ void dynloadVMLoad()
 
 	// You can change this to another type of binding.
 	// This one only resolves the required symbols.
-	virtualMachineInfo.soHandle = dlopen(fullVMPath, RTLD_NOW);
+	virtualMachineInfo.soHandle = dlopen(fullVMPath, 0); // RTLD_NOW
 	if (!virtualMachineInfo.soHandle) {
 #ifdef DEBUG_DYNLOAD_DLERRORS
 		fprintf(stderr, "DYNLOAD: %s\n", dlerror());

@@ -153,7 +153,7 @@ static DATA8 DaisyBuf[64];
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
-uint DELAY_COUNTER = 0;
+unsigned int DELAY_COUNTER = 0;
 UBYTE	BusyOnes = 0;
 
 void      OutputReset(void)
@@ -171,7 +171,7 @@ void      OutputReset(void)
   StopArr[2] = 0x00;
   if (OutputInstance.PwmFile >= 0)
   {
-    write(OutputInstance.PwmFile,StopArr,3);
+    fwrite(StopArr, sizeof(DATA8), 3, OutputInstance.PwmFile);
   }
 }
 
@@ -185,13 +185,13 @@ RESULT    cOutputInit(void)
   OutputInstance.pMotor  =  OutputInstance.MotorData;
 
   // Open the handle for writing commands
-  OutputInstance.PwmFile  =  open(PWM_DEVICE_NAME,O_RDWR);
+  OutputInstance.PwmFile  =  fopen(PWM_DEVICE_NAME, "w+");
 
   if (OutputInstance.PwmFile >= 0)
   {
 
     // Open the handle for reading motor values - shared memory
-    OutputInstance.MotorFile  =  open(MOTOR_DEVICE_NAME,O_RDWR | O_SYNC);
+    OutputInstance.MotorFile  =  fopen(MOTOR_DEVICE_NAME, "w+");
     if (OutputInstance.MotorFile >= 0)
     {
       pTmp  =  (MOTORDATA*)mmap(0, sizeof(OutputInstance.MotorData), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, OutputInstance.MotorFile, 0);

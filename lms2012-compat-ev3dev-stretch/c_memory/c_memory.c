@@ -19,56 +19,53 @@
  */
 
 
-/*! \page MemoryLibrary Memory Library
- *
- *- \subpage  MemoryLibraryDescription
- *
- *
- *
- */
+ /*! \page MemoryLibrary Memory Library
+  *
+  *- \subpage  MemoryLibraryDescription
+  *
+  *
+  *
+  */
 
 
-/*! \page MemoryLibraryDescription Description
- *
- *  When "create array" is called - memory is allocated using "malloc" for the descriptor and the array itself. The memory pointer is stored in a
- *  list specific to every program. The returned handle is simply the index in that table.\n
- *  When a program is terminated the memory is automatically freed.
- *
-\verbatim
-                Slot 1        Array 1
-                ---------     ----------
+  /*! \page MemoryLibraryDescription Description
+   *
+   *  When "create array" is called - memory is allocated using "malloc" for the descriptor and the array itself. The memory pointer is stored in a
+   *  list specific to every program. The returned handle is simply the index in that table.\n
+   *  When a program is terminated the memory is automatically freed.
+   *
+  \verbatim
+				  Slot 1        Array 1
+				  ---------     ----------
 
-    HANDLE  ->  pARRAY1   ->  DESCRIPTOR
-                              Element 0
-                              Element 1
-                              - - - - -
-                              Element n
+	  HANDLE  ->  pARRAY1   ->  DESCRIPTOR
+								Element 0
+								Element 1
+								- - - - -
+								Element n
 
 
-    If an array needs to be resized it just uses "realloc".
+	  If an array needs to be resized it just uses "realloc".
 
-\endverbatim
- *
- */
+  \endverbatim
+   *
+   */
 
 
 #include  "lms2012.h"
 #include  "c_memory.h"
 #include  "c_md5.h"
 #include  "c_ui.h"
+#include  "bytecodes.h"
+#include  "unix_ph.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <sys/statvfs.h>
-#include <dirent.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <sys/sysinfo.h>
-#include <mntent.h>
 #include <malloc.h>
 
 MEMORY_GLOBALS MemoryInstance;
@@ -77,1467 +74,1458 @@ MEMORY_GLOBALS MemoryInstance;
 #define   DEBUG
 #endif
 
-void      cMemoryGetUsage(DATA32 *pTotal,DATA32 *pFree,DATA8 Force)
+void      cMemoryGetUsage(DATA32* pTotal, DATA32* pFree, DATA8 Force)
 {
-  ULONG   Time;
-  DATA32  Used = 0;
-  struct  statvfs Status;
+	ULONG   Time;
+	DATA32  Used = 0;
 
-  Time      =  VMInstance.NewTime - VMInstance.MemoryTimer;
+	Time = VMInstance.NewTime - VMInstance.MemoryTimer;
 
-  if ((Time >= UPDATE_MEMORY) || (VMInstance.MemoryTimer == 0) || (Force))
-  { // Update values
+	if ((Time >= UPDATE_MEMORY) || (VMInstance.MemoryTimer == 0) || (Force))
+	{ // Update values
 
-    VMInstance.MemoryTimer +=  Time;
-    if (statvfs(MEMORY_FOLDER,&Status) == 0)
-    {
+		VMInstance.MemoryTimer += Time;
+		VMInstance.MemorySize = INSTALLED_MEMORY;
+		Used = (DATA32)(0);
+		VMInstance.MemoryFree = VMInstance.MemorySize - Used;
+		if (VMInstance.MemoryFree < 0)
+		{
+			VMInstance.MemoryFree = 0;
+		}
+	}
+
+	if (pTotal != NULL)
+	{
+		*pTotal = VMInstance.MemorySize;
+	}
+	if (pFree != NULL)
+	{
+		*pFree = VMInstance.MemoryFree;
+	}
 #ifdef DEBUG_C_MEMORY_LOW
-      if (VMInstance.MemorySize == INSTALLED_MEMORY)
-      {
-        VMInstance.MemorySize  =  (DATA32)(Status.f_blocks * (Status.f_bsize / KB));
-      }
-#endif
-      Used                   =  (DATA32)((Status.f_blocks - Status.f_bavail) * (Status.f_bsize / KB));
-      VMInstance.MemoryFree  =  VMInstance.MemorySize - Used;
-      if (VMInstance.MemoryFree < 0)
-      {
-        VMInstance.MemoryFree  =  0;
-      }
-    }
-  }
-
-  if (pTotal != NULL)
-  {
-    *pTotal   =  VMInstance.MemorySize;
-  }
-  if (pFree != NULL)
-  {
-    *pFree    =  VMInstance.MemoryFree;
-  }
-#ifdef DEBUG_C_MEMORY_LOW
-  if (Force)
-  {
-    printf("  cMemoryGetUsage               T=%10luKB F=%10luKB U=%10luKB\n",(long unsigned int)VMInstance.MemorySize,(long unsigned int)VMInstance.MemoryFree,(long unsigned int)Used);
-  }
+	if (Force)
+	{
+		printf("  cMemoryGetUsage               T=%10luKB F=%10luKB U=%10luKB\n", (long unsigned int)VMInstance.MemorySize, (long unsigned int)VMInstance.MemoryFree, (long unsigned int)Used);
+	}
 #endif
 }
 
 
-RESULT    cMemoryRealloc(void *pOldMemory,void **ppMemory,DATA32 Size)
+RESULT    cMemoryRealloc(void* pOldMemory, void** ppMemory, DATA32 Size)
 {
-  RESULT  Result = FAIL;
+	RESULT  Result = FAIL;
 
-  *ppMemory  =  realloc(pOldMemory,(size_t)Size);
-  if (*ppMemory != NULL)
-  {
-    Result  =  OK;
-  }
+	*ppMemory = realloc(pOldMemory, (size_t)Size);
+	if (*ppMemory != NULL)
+	{
+		Result = OK;
+	}
 #ifdef DEBUG_MEMORY_USAGE
-  if (Result == OK)
-  {
-    printf("  cMemoryRealloc       %-8p S=%8lu\n",*ppMemory,(long unsigned int)Size);
-  }
-  else
-  {
-    printf("  cMemoryRealloc ERROR        - S=%8lu\n",(long unsigned int)Size);
-  }
+	if (Result == OK)
+	{
+		printf("  cMemoryRealloc       %-8p S=%8lu\n", *ppMemory, (long unsigned int)Size);
+	}
+	else
+	{
+		printf("  cMemoryRealloc ERROR        - S=%8lu\n", (long unsigned int)Size);
+	}
 #endif
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    cMemoryFree(void *pMemory)
+RESULT    cMemoryFree(void* pMemory)
 {
-  RESULT  Result = FAIL;
+	RESULT  Result = FAIL;
 
 #ifdef DEBUG_MEMORY_USAGE
-  printf("  cMemoryFree          %-8p\n",pMemory);
+	printf("  cMemoryFree          %-8p\n", pMemory);
 #endif
-  free(pMemory);
-  Result  =  OK;
+	free(pMemory);
+	Result = OK;
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    cMemoryAlloc(PRGID PrgId,DATA8 Type,GBINDEX Size,void **ppMemory,HANDLER *pHandle)
+RESULT    cMemoryAlloc(PRGID PrgId, DATA8 Type, GBINDEX Size, void** ppMemory, HANDLER* pHandle)
 {
-  RESULT  Result = FAIL;
-  HANDLER TmpHandle;
+	RESULT  Result = FAIL;
+	HANDLER TmpHandle;
 
-  *pHandle    =  -1;
+	*pHandle = -1;
 
-  if ((PrgId < MAX_PROGRAMS) && (Size > 0) && (Size <= MAX_ARRAY_SIZE))
-  {
-    TmpHandle   =  0;
+	if ((PrgId < MAX_PROGRAMS) && (Size > 0) && (Size <= MAX_ARRAY_SIZE))
+	{
+		TmpHandle = 0;
 
-    while ((TmpHandle < MAX_HANDLES) && (MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != NULL))
-    {
-      TmpHandle++;
-    }
-    if (TmpHandle < MAX_HANDLES)
-    {
+		while ((TmpHandle < MAX_HANDLES) && (MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != NULL))
+		{
+			TmpHandle++;
+		}
+		if (TmpHandle < MAX_HANDLES)
+		{
 
-      if (cMemoryRealloc(NULL,&MemoryInstance.pPoolList[PrgId][TmpHandle].pPool,(DATA32)Size) == OK)
-      {
-        *ppMemory  =  MemoryInstance.pPoolList[PrgId][TmpHandle].pPool;
-        MemoryInstance.pPoolList[PrgId][TmpHandle].Type   =  Type;
-        MemoryInstance.pPoolList[PrgId][TmpHandle].Size   =  Size;
-        *pHandle  =  TmpHandle;
-        Result    =  OK;
-      }
-    }
-  }
+			if (cMemoryRealloc(NULL, &MemoryInstance.pPoolList[PrgId][TmpHandle].pPool, (DATA32)Size) == OK)
+			{
+				*ppMemory = MemoryInstance.pPoolList[PrgId][TmpHandle].pPool;
+				MemoryInstance.pPoolList[PrgId][TmpHandle].Type = Type;
+				MemoryInstance.pPoolList[PrgId][TmpHandle].Size = Size;
+				*pHandle = TmpHandle;
+				Result = OK;
+			}
+		}
+	}
 #ifdef DEBUG
-  if (Result == OK)
-  {
-    printf("  cMemoryAlloc         %-8p S=%8lu P=%1u H=%1u T=%1u\n",*ppMemory,(long unsigned int)Size,(unsigned int)PrgId,(unsigned int)TmpHandle,(unsigned int)Type);
-  }
-  else
-  {
-    printf("  cMemoryAlloc ERROR          - S=%8lu P=%1u\n",(long unsigned int)Size,(unsigned int)PrgId);
-  }
+	if (Result == OK)
+	{
+		printf("  cMemoryAlloc         %-8p S=%8lu P=%1u H=%1u T=%1u\n", *ppMemory, (long unsigned int)Size, (unsigned int)PrgId, (unsigned int)TmpHandle, (unsigned int)Type);
+	}
+	else
+	{
+		printf("  cMemoryAlloc ERROR          - S=%8lu P=%1u\n", (long unsigned int)Size, (unsigned int)PrgId);
+	}
 #endif
 
-  return (Result);
+	return (Result);
 }
 
 
-void*     cMemoryReallocate(PRGID PrgId,HANDLER Handle,GBINDEX Size)
+void* cMemoryReallocate(PRGID PrgId, HANDLER Handle, GBINDEX Size)
 {
-  void    *pTmp;
+	void* pTmp;
 
-  pTmp  =  NULL;
-  if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
-  {
-    if ((Size > 0) && (Size <= MAX_ARRAY_SIZE))
-    {
-      if (cMemoryRealloc(MemoryInstance.pPoolList[PrgId][Handle].pPool,&pTmp,(DATA32)Size) == OK)
-      {
-        MemoryInstance.pPoolList[PrgId][Handle].Size   =  Size;
-      }
-    }
-    MemoryInstance.pPoolList[PrgId][Handle].pPool  =  pTmp;
-  }
+	pTmp = NULL;
+	if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
+	{
+		if ((Size > 0) && (Size <= MAX_ARRAY_SIZE))
+		{
+			if (cMemoryRealloc(MemoryInstance.pPoolList[PrgId][Handle].pPool, &pTmp, (DATA32)Size) == OK)
+			{
+				MemoryInstance.pPoolList[PrgId][Handle].Size = Size;
+			}
+		}
+		MemoryInstance.pPoolList[PrgId][Handle].pPool = pTmp;
+	}
 #ifdef DEBUG
-  if (pTmp != NULL)
-  {
-    printf("  cMemoryReallocate    %-8p S=%8lu P=%1u H=%1u\n",MemoryInstance.pPoolList[PrgId][Handle].pPool,(long unsigned int)Size,(unsigned int)PrgId,(unsigned int)Handle);
-  }
-  else
-  {
-    printf("  cMemoryReallocate ERROR     - S=%8lu P=%1u H=%1u\n",(long unsigned int)Size,(unsigned int)PrgId,(unsigned int)Handle);
-  }
+	if (pTmp != NULL)
+	{
+		printf("  cMemoryReallocate    %-8p S=%8lu P=%1u H=%1u\n", MemoryInstance.pPoolList[PrgId][Handle].pPool, (long unsigned int)Size, (unsigned int)PrgId, (unsigned int)Handle);
+	}
+	else
+	{
+		printf("  cMemoryReallocate ERROR     - S=%8lu P=%1u H=%1u\n", (long unsigned int)Size, (unsigned int)PrgId, (unsigned int)Handle);
+	}
 #endif
 
-  return (pTmp);
+	return (pTmp);
 }
 
 
-RESULT    cMemoryGetPointer(PRGID PrgId,HANDLER Handle,void **pMemory)
+RESULT    cMemoryGetPointer(PRGID PrgId, HANDLER Handle, void** pMemory)
 {
-  RESULT  Result = FAIL;
+	RESULT  Result = FAIL;
 
-  *pMemory  =  NULL;
+	*pMemory = NULL;
 
-  if ((PrgId >= 0) && (PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
-  {
-    if (MemoryInstance.pPoolList[PrgId][Handle].pPool != NULL)
-    {
-      *pMemory  =  MemoryInstance.pPoolList[PrgId][Handle].pPool;
-      Result    =  OK;
-    }
-  }
+	if ((PrgId >= 0) && (PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
+	{
+		if (MemoryInstance.pPoolList[PrgId][Handle].pPool != NULL)
+		{
+			*pMemory = MemoryInstance.pPoolList[PrgId][Handle].pPool;
+			Result = OK;
+		}
+	}
 #ifdef DEBUG
-  if (Result != OK)
-  {
-    printf("  Get pointer error P=%1u H=%1u\n",(unsigned int)PrgId,(unsigned int)Handle);
-  }
+	if (Result != OK)
+	{
+		printf("  Get pointer error P=%1u H=%1u\n", (unsigned int)PrgId, (unsigned int)Handle);
+	}
 #endif
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    cMemoryArraryPointer(PRGID PrgId,HANDLER Handle,void **pMemory)
+RESULT    cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, void** pMemory)
 {
-  RESULT  Result = FAIL;
-  void    *pTmp;
+	RESULT  Result = FAIL;
+	void* pTmp;
 
-  if (cMemoryGetPointer(PrgId,Handle,&pTmp) == OK)
-  {
-    *pMemory  =  (*(DESCR*)pTmp).pArray;
-    Result    =  OK;
-  }
+	if (cMemoryGetPointer(PrgId, Handle, &pTmp) == OK)
+	{
+		*pMemory = (*(DESCR*)pTmp).pArray;
+		Result = OK;
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DSPSTAT   cMemoryFreeHandle(PRGID PrgId,HANDLER Handle)
+DSPSTAT   cMemoryFreeHandle(PRGID PrgId, HANDLER Handle)
 {
-  DSPSTAT Result = FAILBREAK;
-  FDESCR  *pFDescr;
+	DSPSTAT Result = FAILBREAK;
+	FDESCR* pFDescr;
 
-  if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
-  {
-    if (MemoryInstance.pPoolList[PrgId][Handle].pPool != NULL)
-    {
-      if (MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
-      {
-        pFDescr  =  (FDESCR*)MemoryInstance.pPoolList[PrgId][Handle].pPool;
-        if (((*pFDescr).Access))
-        {
-          (*pFDescr).Access  =  0;
-          close((*pFDescr).hFile);
-          sync();
-          Result  =  NOBREAK;
-        }
+	if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
+	{
+		if (MemoryInstance.pPoolList[PrgId][Handle].pPool != NULL)
+		{
+			if (MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
+			{
+				pFDescr = (FDESCR*)MemoryInstance.pPoolList[PrgId][Handle].pPool;
+				if (((*pFDescr).Access))
+				{
+					(*pFDescr).Access = 0;
+					close((*pFDescr).hFile);
+					sync();
+					Result = NOBREAK;
+				}
 #ifdef DEBUG
-        printf("  Close file %d\n",(*pFDescr).hFile);
+				printf("  Close file %d\n", (*pFDescr).hFile);
 #endif
-      }
-      else
-      {
-        Result  =  NOBREAK;
-      }
+			}
+			else
+			{
+				Result = NOBREAK;
+			}
 
 #ifdef DEBUG
-      printf("  cMemoryFreeHandle    %-8p S=%8lu H=%1u\n",MemoryInstance.pPoolList[PrgId][Handle].pPool,(long unsigned int)MemoryInstance.pPoolList[PrgId][Handle].Size,Handle);
+			printf("  cMemoryFreeHandle    %-8p S=%8lu H=%1u\n", MemoryInstance.pPoolList[PrgId][Handle].pPool, (long unsigned int)MemoryInstance.pPoolList[PrgId][Handle].Size, Handle);
 #endif
-      cMemoryFree(MemoryInstance.pPoolList[PrgId][Handle].pPool);
-      MemoryInstance.pPoolList[PrgId][Handle].pPool  =  NULL;
-      MemoryInstance.pPoolList[PrgId][Handle].Size   =  0;
+			cMemoryFree(MemoryInstance.pPoolList[PrgId][Handle].pPool);
+			MemoryInstance.pPoolList[PrgId][Handle].pPool = NULL;
+			MemoryInstance.pPoolList[PrgId][Handle].Size = 0;
 
-    }
-  }
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-void      cMemoryFreePool(PRGID PrgId,void *pMemory)
+void      cMemoryFreePool(PRGID PrgId, void* pMemory)
 {
-  HANDLER TmpHandle;
+	HANDLER TmpHandle;
 
-  TmpHandle  =  0;
-  while ((TmpHandle < MAX_HANDLES) && (MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != pMemory))
-  {
-    TmpHandle++;
-  }
-  if (TmpHandle < MAX_HANDLES)
-  {
-    cMemoryFreeHandle(PrgId,TmpHandle);
-  }
+	TmpHandle = 0;
+	while ((TmpHandle < MAX_HANDLES) && (MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != pMemory))
+	{
+		TmpHandle++;
+	}
+	if (TmpHandle < MAX_HANDLES)
+	{
+		cMemoryFreeHandle(PrgId, TmpHandle);
+	}
 }
 
 
 void      cMemoryFreeProgram(PRGID PrgId)
 {
-  HANDLER TmpHandle;
+	HANDLER TmpHandle;
 
-  for (TmpHandle = 0;TmpHandle < MAX_HANDLES;TmpHandle++)
-  {
-    cMemoryFreeHandle(PrgId,TmpHandle);
-  }
+	for (TmpHandle = 0; TmpHandle < MAX_HANDLES; TmpHandle++)
+	{
+		cMemoryFreeHandle(PrgId, TmpHandle);
+	}
 
-  // Ensure that path is emptied
-  MemoryInstance.PathList[PrgId][0]  =  0;
+	// Ensure that path is emptied
+	MemoryInstance.PathList[PrgId][0] = 0;
 }
 
 
 void      cMemoryFreeAll(void)
 {
-  PRGID   TmpPrgId;
+	PRGID   TmpPrgId;
 
-  for (TmpPrgId = 0;TmpPrgId < MAX_PROGRAMS;TmpPrgId++)
-  {
-    cMemoryFreeProgram(TmpPrgId);
-  }
+	for (TmpPrgId = 0; TmpPrgId < MAX_PROGRAMS; TmpPrgId++)
+	{
+		cMemoryFreeProgram(TmpPrgId);
+	}
 }
 
 
 RESULT    cMemoryInit(void)
 {
-  RESULT  Result = FAIL;
-  DATA8   Tmp;
-  PRGID   TmpPrgId;
-  HANDLER TmpHandle;
-  int     File;
-  char    PrgNameBuf[vmFILENAMESIZE];
+	RESULT  Result = FAIL;
+	DATA8   Tmp;
+	PRGID   TmpPrgId;
+	HANDLER TmpHandle;
+	FILE* File;
+	char    PrgNameBuf[vmFILENAMESIZE];
 
-  snprintf(PrgNameBuf,vmFILENAMESIZE,"%s/%s%s",vmSETTINGS_DIR,vmLASTRUN_FILE_NAME,vmEXT_CONFIG);
-  File  =  open(PrgNameBuf,O_RDONLY);
-  if (File >= MIN_HANDLE)
-  {
-    if (read(File,MemoryInstance.Cache,sizeof(MemoryInstance.Cache)) != sizeof(MemoryInstance.Cache))
-    {
-      close (File);
-      File  =  -1;
-    }
-    else
-    {
-      close (File);
-    }
-  }
-  if (File < 0)
-  {
-    for (Tmp = 0;Tmp < CACHE_DEEPT;Tmp++)
-    {
-      MemoryInstance.Cache[Tmp][0]  =  0;
-    }
-  }
+	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
+	File = fopen(PrgNameBuf, "r");
+	if (File >= MIN_HANDLE)
+	{
+		if (fread(MemoryInstance.Cache, sizeof(DATA8), sizeof(MemoryInstance.Cache), File) != sizeof(MemoryInstance.Cache))
+		{
+			fclose(File);
+			File = -1;
+		}
+		else
+		{
+			fclose(File);
+		}
+	}
+	if (File < 0)
+	{
+		for (Tmp = 0; Tmp < CACHE_DEEPT; Tmp++)
+		{
+			MemoryInstance.Cache[Tmp][0] = 0;
+		}
+	}
 
-  for (TmpPrgId = 0;TmpPrgId < MAX_PROGRAMS;TmpPrgId++)
-  {
-    for (TmpHandle = 0;TmpHandle < MAX_HANDLES;TmpHandle++)
-    {
-      MemoryInstance.pPoolList[TmpPrgId][TmpHandle].pPool  =  NULL;
-    }
-  }
+	for (TmpPrgId = 0; TmpPrgId < MAX_PROGRAMS; TmpPrgId++)
+	{
+		for (TmpHandle = 0; TmpHandle < MAX_HANDLES; TmpHandle++)
+		{
+			MemoryInstance.pPoolList[TmpPrgId][TmpHandle].pPool = NULL;
+		}
+	}
 
-  VMInstance.MemorySize     =  INSTALLED_MEMORY;
-  VMInstance.MemoryFree     =  INSTALLED_MEMORY;
+	VMInstance.MemorySize = INSTALLED_MEMORY;
+	VMInstance.MemoryFree = INSTALLED_MEMORY;
 
 #ifdef DEBUG_C_MEMORY_LOW
-  DATA32  Total;
-  DATA32  Free;
+	DATA32  Total;
+	DATA32  Free;
 
-  cMemoryGetUsage(&Total,&Free,1);
-  VMInstance.MemorySize  =  (Total - Free) + LOW_MEMORY + 1;
-  VMInstance.MemoryFree  =  LOW_MEMORY + 1;
-  cMemoryGetUsage(&Total,&Free,1);
+	cMemoryGetUsage(&Total, &Free, 1);
+	VMInstance.MemorySize = (Total - Free) + LOW_MEMORY + 1;
+	VMInstance.MemoryFree = LOW_MEMORY + 1;
+	cMemoryGetUsage(&Total, &Free, 1);
 #endif
 
-  MemoryInstance.SyncTime   =  (DATA32)0;
-  MemoryInstance.SyncTick   =  (DATA32)0;
+	MemoryInstance.SyncTime = (DATA32)0;
+	MemoryInstance.SyncTick = (DATA32)0;
 
-  Result  =  OK;
+	Result = OK;
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    cMemoryOpen(PRGID PrgId,GBINDEX Size,void **pMemory)
+RESULT    cMemoryOpen(PRGID PrgId, GBINDEX Size, void** pMemory)
 {
-  RESULT  Result = FAIL;
-  HANDLER TmpHandle;
+	RESULT  Result = FAIL;
+	HANDLER TmpHandle;
 
-  Result  =  cMemoryAlloc(PrgId,POOL_TYPE_MEMORY,Size,pMemory,&TmpHandle);
+	Result = cMemoryAlloc(PrgId, POOL_TYPE_MEMORY, Size, pMemory, &TmpHandle);
 
-  return (Result);
+	return (Result);
 }
 
 
 RESULT    cMemoryClose(PRGID PrgId)
 {
-  RESULT  Result = FAIL;
+	RESULT  Result = FAIL;
 
-  cMemoryFreeProgram(PrgId);
-  Result  =  OK;
+	cMemoryFreeProgram(PrgId);
+	Result = OK;
 
-  return (Result);
+	return (Result);
 }
 
 
 RESULT    cMemoryExit(void)
 {
-  RESULT  Result = FAIL;
-  int     File;
-  char    PrgNameBuf[vmFILENAMESIZE];
+	RESULT  Result = FAIL;
+	int     File;
+	char    PrgNameBuf[vmFILENAMESIZE];
 
-  snprintf(PrgNameBuf,vmFILENAMESIZE,"%s/%s%s",vmSETTINGS_DIR,vmLASTRUN_FILE_NAME,vmEXT_CONFIG);
-  File  =  open(PrgNameBuf,O_CREAT | O_WRONLY | O_TRUNC,FILEPERMISSIONS);
-  if (File >= MIN_HANDLE)
-  {
-    write(File,MemoryInstance.Cache,sizeof(MemoryInstance.Cache));
-    close (File);
-  }
+	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
+	File = fopen(PrgNameBuf, "w+");
+	if (File >= MIN_HANDLE)
+	{
+		fwrite(MemoryInstance.Cache, sizeof(DATA8), sizeof(MemoryInstance.Cache), File);
+		fclose(File);
+	}
 
-  Result  =  OK;
+	Result = OK;
 
-  return (Result);
+	return (Result);
 }
 
 
-void*     cMemoryResize(PRGID PrgId,HANDLER TmpHandle,DATA32 Elements)
+void* cMemoryResize(PRGID PrgId, HANDLER TmpHandle, DATA32 Elements)
 {
-  DATA32  Size;
-  void    *pTmp = NULL;
+	DATA32  Size;
+	void* pTmp = NULL;
 
 
-  if (cMemoryGetPointer(PrgId,TmpHandle,&pTmp) == OK)
-  {
-    Size    =  Elements * (*(DESCR*)pTmp).ElementSize + sizeof(DESCR);
-    pTmp    =  cMemoryReallocate(PrgId,TmpHandle,(GBINDEX)Size);
-    if (pTmp != NULL)
-    {
-      (*(DESCR*)pTmp).Elements  =  Elements;
-    }
+	if (cMemoryGetPointer(PrgId, TmpHandle, &pTmp) == OK)
+	{
+		Size = Elements * (*(DESCR*)pTmp).ElementSize + sizeof(DESCR);
+		pTmp = cMemoryReallocate(PrgId, TmpHandle, (GBINDEX)Size);
+		if (pTmp != NULL)
+		{
+			(*(DESCR*)pTmp).Elements = Elements;
+		}
 
 #ifdef DEBUG
-    printf("  Resize P=%1u H=%1u T=%1u S=%8lu A=%8p\n",(unsigned int)PrgId,(unsigned int)TmpHandle,(unsigned int)MemoryInstance.pPoolList[PrgId][TmpHandle].Type,(unsigned long)MemoryInstance.pPoolList[PrgId][TmpHandle].Size,MemoryInstance.pPoolList[PrgId][TmpHandle].pPool);
+		printf("  Resize P=%1u H=%1u T=%1u S=%8lu A=%8p\n", (unsigned int)PrgId, (unsigned int)TmpHandle, (unsigned int)MemoryInstance.pPoolList[PrgId][TmpHandle].Type, (unsigned long)MemoryInstance.pPoolList[PrgId][TmpHandle].Size, MemoryInstance.pPoolList[PrgId][TmpHandle].pPool);
 #endif
-  }
-  if (pTmp != NULL)
-  {
-    pTmp  =  (*(DESCR*)pTmp).pArray;
-  }
+	}
+	if (pTmp != NULL)
+	{
+		pTmp = (*(DESCR*)pTmp).pArray;
+	}
 
-  return (pTmp);
+	return (pTmp);
 }
 
 
-void      FindName(char *pSource,char *pPath,char *pName,char *pExt)
+void      FindName(char* pSource, char* pPath, char* pName, char* pExt)
 {
-  int     Source      = 0;
-  int     Destination = 0;
+	int     Source = 0;
+	int     Destination = 0;
 
-  while (pSource[Source])
-  {
-    Source++;
-  }
-  while ((Source > 0) && (pSource[Source] != '/'))
-  {
-    Source--;
-  }
-  if (pSource[Source] == '/')
-  {
-    if (pPath != NULL)
-    {
-      for (Destination = 0;Destination <= Source;Destination++)
-      {
-        pPath[Destination]  =  pSource[Destination];
-      }
-    }
-    Source++;
-  }
-  if (pPath != NULL)
-  {
-    pPath[Destination]  =  0;
-  }
-  Destination  =  0;
-  while ((pSource[Source]) && (pSource[Source] != '.'))
-  {
-    if (pName != NULL)
-    {
-      pName[Destination]  =  pSource[Source];
-      Destination++;
-    }
-    Source++;
-  }
-  if (pName != NULL)
-  {
-    pName[Destination]  =  0;
-  }
-  if (pExt != NULL)
-  {
-    Destination         =  0;
-    while (pSource[Source])
-    {
-      pExt[Destination]  =  pSource[Source];
-      Source++;
-      Destination++;
-    }
-    pExt[Destination]  =  0;
-  }
+	while (pSource[Source])
+	{
+		Source++;
+	}
+	while ((Source > 0) && (pSource[Source] != '/'))
+	{
+		Source--;
+	}
+	if (pSource[Source] == '/')
+	{
+		if (pPath != NULL)
+		{
+			for (Destination = 0; Destination <= Source; Destination++)
+			{
+				pPath[Destination] = pSource[Destination];
+			}
+		}
+		Source++;
+	}
+	if (pPath != NULL)
+	{
+		pPath[Destination] = 0;
+	}
+	Destination = 0;
+	while ((pSource[Source]) && (pSource[Source] != '.'))
+	{
+		if (pName != NULL)
+		{
+			pName[Destination] = pSource[Source];
+			Destination++;
+		}
+		Source++;
+	}
+	if (pName != NULL)
+	{
+		pName[Destination] = 0;
+	}
+	if (pExt != NULL)
+	{
+		Destination = 0;
+		while (pSource[Source])
+		{
+			pExt[Destination] = pSource[Source];
+			Source++;
+			Destination++;
+		}
+		pExt[Destination] = 0;
+	}
 }
 
 
-RESULT    cMemoryCheckFilename(char *pFilename,char *pPath,char *pName,char *pExt)
+RESULT    cMemoryCheckFilename(char* pFilename, char* pPath, char* pName, char* pExt)
 {
-  RESULT  Result = FAIL;
-  char    Path[vmFILENAMESIZE];
-  char    Name[vmFILENAMESIZE];
-  char    Ext[vmFILENAMESIZE];
+	RESULT  Result = FAIL;
+	char    Path[vmFILENAMESIZE];
+	char    Name[vmFILENAMESIZE];
+	char    Ext[vmFILENAMESIZE];
 
 #ifndef DISABLE_FILENAME_CHECK
 
-  if (strlen(pFilename) < vmFILENAMESIZE)
-  {
-    FindName(pFilename,Path,Name,Ext);
-    if (strlen(Path) < vmPATHSIZE)
-    {
-      if (pPath != NULL)
-      {
-        strcpy(pPath,Path);
-      }
-      if (strlen(Name) < vmNAMESIZE)
-      {
-        if (pName != NULL)
-        {
-          strcpy(pName,Name);
-        }
-        if (strlen(Ext) < vmEXTSIZE)
-        {
-          if (pExt != NULL)
-          {
-            strcpy(pExt,Ext);
-          }
-          Result  =  ValidateString((DATA8*)pFilename,vmCHARSET_FILENAME);
-        }
-      }
-    }
-  }
+	if (strlen(pFilename) < vmFILENAMESIZE)
+	{
+		FindName(pFilename, Path, Name, Ext);
+		if (strlen(Path) < vmPATHSIZE)
+		{
+			if (pPath != NULL)
+			{
+				strcpy(pPath, Path);
+			}
+			if (strlen(Name) < vmNAMESIZE)
+			{
+				if (pName != NULL)
+				{
+					strcpy(pName, Name);
+				}
+				if (strlen(Ext) < vmEXTSIZE)
+				{
+					if (pExt != NULL)
+					{
+						strcpy(pExt, Ext);
+					}
+					Result = ValidateString((DATA8*)pFilename, vmCHARSET_FILENAME);
+				}
+			}
+		}
+	}
 #else
-  if (strlen(pFilename) < vmFILENAMESIZE)
-  {
-    FindName(pFilename,Path,Name,Ext);
-    if (strlen(Path) < vmPATHSIZE)
-    {
-      if (pPath != NULL)
-      {
-        strcpy(pPath,Path);
-      }
-      if (strlen(Name) < vmNAMESIZE)
-      {
-        if (pName != NULL)
-        {
-          strcpy(pName,Name);
-        }
-        if (strlen(Ext) < vmEXTSIZE)
-        {
-          if (pExt != NULL)
-          {
-            strcpy(pExt,Ext);
-          }
-          Result  =  OK;
-        }
-      }
-    }
-  }
+	if (strlen(pFilename) < vmFILENAMESIZE)
+	{
+		FindName(pFilename, Path, Name, Ext);
+		if (strlen(Path) < vmPATHSIZE)
+		{
+			if (pPath != NULL)
+			{
+				strcpy(pPath, Path);
+			}
+			if (strlen(Name) < vmNAMESIZE)
+			{
+				if (pName != NULL)
+				{
+					strcpy(pName, Name);
+				}
+				if (strlen(Ext) < vmEXTSIZE)
+				{
+					if (pExt != NULL)
+					{
+						strcpy(pExt, Ext);
+					}
+					Result = OK;
+				}
+			}
+		}
+	}
 #endif
-  if (Result != OK)
-  {
+	if (Result != OK)
+	{
 #ifdef DEBUG_TRACE_FILENAME
-    printf("Filename error in [%s]\n",pFilename);
+		printf("Filename error in [%s]\n", pFilename);
 #endif
-    if (!LogErrorNumberExists(FILE_NAME_ERROR))
-    {
-      LogErrorNumber(FILE_NAME_ERROR);
-    }
-  }
+		if (!LogErrorNumberExists(FILE_NAME_ERROR))
+		{
+			LogErrorNumber(FILE_NAME_ERROR);
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    ConstructFilename(PRGID PrgId,char *pFilename,char *pName,const char *pDefaultExt)
+RESULT    ConstructFilename(PRGID PrgId, char* pFilename, char* pName, const char* pDefaultExt)
 {
-  RESULT  Result = FAIL;
-  char    Path[vmPATHSIZE];
-  char    Name[vmNAMESIZE];
-  char    Ext[vmEXTSIZE];
+	RESULT  Result = FAIL;
+	char    Path[vmPATHSIZE];
+	char    Name[vmNAMESIZE];
+	char    Ext[vmEXTSIZE];
 
-  Result  =  cMemoryCheckFilename(pFilename,Path,Name,Ext);
+	Result = cMemoryCheckFilename(pFilename, Path, Name, Ext);
 
-  if (Result == OK)
-  { // Filename OK
+	if (Result == OK)
+	{ // Filename OK
 
-    if (Path[0] == 0)
-    { // Default path
+		if (Path[0] == 0)
+		{ // Default path
 
-      snprintf(Path,vmPATHSIZE,"%s",(char*)MemoryInstance.PathList[PrgId]);
-    }
+			snprintf(Path, vmPATHSIZE, "%s", (char*)MemoryInstance.PathList[PrgId]);
+		}
 
-    if (Ext[0] == 0)
-    { // Default extension
+		if (Ext[0] == 0)
+		{ // Default extension
 
-      snprintf(Ext,vmEXTSIZE,"%s",pDefaultExt);
-    }
+			snprintf(Ext, vmEXTSIZE, "%s", pDefaultExt);
+		}
 
-    // Construct filename for open
-    snprintf(pName,MAX_FILENAME_SIZE,"%s%s%s",Path,Name,Ext);
+		// Construct filename for open
+		snprintf(pName, MAX_FILENAME_SIZE, "%s%s%s", Path, Name, Ext);
 
 #ifdef DEBUG_TRACE_FILENAME
-    printf("c_memory  ConstructFilename:       [%s]\n",pName);
+		printf("c_memory  ConstructFilename:       [%s]\n", pName);
 #endif
 
-  }
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-int       FindDot(char *pString)
+int       FindDot(char* pString)
 {
-  int     Result = -1;
-  int     Pointer = 0;
+	int     Result = -1;
+	int     Pointer = 0;
 
-  while (pString[Pointer])
-  {
-    if (pString[Pointer] == '.')
-    {
-      Result  =  Pointer;
-    }
-    Pointer++;
-  }
+	while (pString[Pointer])
+	{
+		if (pString[Pointer] == '.')
+		{
+			Result = Pointer;
+		}
+		Pointer++;
+	}
 
-  return (Result);
+	return (Result);
 }
 
-void      cMemoryDeleteCacheFile(char *pFileName)
+void      cMemoryDeleteCacheFile(char* pFileName)
 {
-  DATA8   Item;
-  DATA8   Tmp;
+	DATA8   Item;
+	DATA8   Tmp;
 
 #ifdef DEBUG
-  printf("DEL_CACHE_FILE %s\n",(char*)pFileName);
+	printf("DEL_CACHE_FILE %s\n", (char*)pFileName);
 #endif
 
-  Item  =  0;
-  Tmp   =  0;
+	Item = 0;
+	Tmp = 0;
 
-  while ((Item < CACHE_DEEPT) && (Tmp == 0))
-  {
-    if (strcmp((char*)MemoryInstance.Cache[Item],(char*)pFileName) == 0)
-    {
-      Tmp  =  1;
-    }
-    else
-    {
-      Item++;
-    }
-  }
-  while (Item < (CACHE_DEEPT - 1))
-  {
-    strcpy((char*)MemoryInstance.Cache[Item],(char*)MemoryInstance.Cache[Item + 1]);
-    Item++;
-  }
-  MemoryInstance.Cache[Item][0]   =  0;
+	while ((Item < CACHE_DEEPT) && (Tmp == 0))
+	{
+		if (strcmp((char*)MemoryInstance.Cache[Item], (char*)pFileName) == 0)
+		{
+			Tmp = 1;
+		}
+		else
+		{
+			Item++;
+		}
+	}
+	while (Item < (CACHE_DEEPT - 1))
+	{
+		strcpy((char*)MemoryInstance.Cache[Item], (char*)MemoryInstance.Cache[Item + 1]);
+		Item++;
+	}
+	MemoryInstance.Cache[Item][0] = 0;
 }
 
 
-int       cMemorySort(void *ppFirst,void *ppSecond)
+int       cMemorySort(void* ppFirst, void* ppSecond)
 {
-  int     Result;
-  int     First,Second;
-  char    *pFirst;
-  char    *pSecond;
+	int     Result;
+	int     First, Second;
+	char* pFirst;
+	char* pSecond;
 
-  pFirst    =  (char*)(*(const struct dirent **)ppFirst)->d_name;
-  pSecond   =  (char*)(*(const struct dirent **)ppSecond)->d_name;
+	pFirst = (char*)(*(const struct dirent**)ppFirst)->d_name;
+	pSecond = (char*)(*(const struct dirent**)ppSecond)->d_name;
 
-  First     =  FindDot(pFirst);
-  Second    =  FindDot(pSecond);
+	First = FindDot(pFirst);
+	Second = FindDot(pSecond);
 
-  if ((First >= 0) && (Second >= 0))
-  {
-    Result  =  strcmp(&pFirst[First],&pSecond[Second]);
-    if (Result == 0)
-    {
-      Result  =  strcmp(pFirst,pSecond);
-    }
-  }
-  else
-  {
-    if ((First < 0) && (Second < 0))
-    {
-      Result  =  strcmp(pFirst,pSecond);
-    }
-    else
-    {
-      if (First < 0)
-      {
-        Result  =  1;
-      }
-      else
-      {
-        Result  = -1;
-      }
-    }
-  }
+	if ((First >= 0) && (Second >= 0))
+	{
+		Result = strcmp(&pFirst[First], &pSecond[Second]);
+		if (Result == 0)
+		{
+			Result = strcmp(pFirst, pSecond);
+		}
+	}
+	else
+	{
+		if ((First < 0) && (Second < 0))
+		{
+			Result = strcmp(pFirst, pSecond);
+		}
+		else
+		{
+			if (First < 0)
+			{
+				Result = 1;
+			}
+			else
+			{
+				Result = -1;
+			}
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DATA8     cMemoryFindSubFolders(char *pFolderName)
+DATA8     cMemoryFindSubFolders(char* pFolderName)
 {
-  struct  dirent **NameList;
-  int     Items;
-  DATA8   Folders = 0;
+	struct  dirent** NameList;
+	int     Items;
+	DATA8   Folders = 0;
 
-  Items     =  scandir(pFolderName,&NameList,0,(int (*)(const struct dirent **,const struct dirent **))cMemorySort);
-  if (Items >= 0)
-  {
-    while (Items--)
-    {
-      if ((*NameList[Items]).d_name[0] != '.')
-      {
-        if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
-        {
-          Folders++;
-        }
-      }
-      free(NameList[Items]);
-    }
-    free(NameList);
-  }
+	Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
+	if (Items >= 0)
+	{
+		while (Items--)
+		{
+			if ((*NameList[Items]).d_name[0] != '.')
+			{
+				if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
+				{
+					Folders++;
+				}
+			}
+			free(NameList[Items]);
+		}
+		free(NameList);
+	}
 
-  return (Folders);
+	return (Folders);
 }
 
 
-DATA8     cMemoryFindType(char *pExt)
+DATA8     cMemoryFindType(char* pExt)
 {
-  DATA8   Result = 0;
+	DATA8   Result = 0;
 
-  if (pExt[0])
-  {
-    if (strcmp(pExt,EXT_SOUND) == 0)
-    {
-      Result  =  TYPE_SOUND;
-    }
-    else
-    {
-      if (strcmp(pExt,EXT_GRAPHICS) == 0)
-      {
-        Result  =  TYPE_GRAPHICS;
-      }
-      else
-      {
-        if (strcmp(pExt,EXT_BYTECODE) == 0)
-        {
-          Result  =  TYPE_BYTECODE;
-        }
-        else
-        {
-          if (strcmp(pExt,EXT_DATALOG) == 0)
-          {
-            Result  =  TYPE_DATALOG;
-          }
-          else
-          {
-            if (strcmp(pExt,EXT_PROGRAM) == 0)
-            {
-              Result  =  TYPE_PROGRAM;
-            }
-            else
-            {
-              if (strcmp(pExt,EXT_TEXT) == 0)
-              {
-                Result  =  TYPE_TEXT;
-              }
-              else
-              {
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  else
-  {
-    Result  =  TYPE_FOLDER;
-  }
+	if (pExt[0])
+	{
+		if (strcmp(pExt, EXT_SOUND) == 0)
+		{
+			Result = TYPE_SOUND;
+		}
+		else
+		{
+			if (strcmp(pExt, EXT_GRAPHICS) == 0)
+			{
+				Result = TYPE_GRAPHICS;
+			}
+			else
+			{
+				if (strcmp(pExt, EXT_BYTECODE) == 0)
+				{
+					Result = TYPE_BYTECODE;
+				}
+				else
+				{
+					if (strcmp(pExt, EXT_DATALOG) == 0)
+					{
+						Result = TYPE_DATALOG;
+					}
+					else
+					{
+						if (strcmp(pExt, EXT_PROGRAM) == 0)
+						{
+							Result = TYPE_PROGRAM;
+						}
+						else
+						{
+							if (strcmp(pExt, EXT_TEXT) == 0)
+							{
+								Result = TYPE_TEXT;
+							}
+							else
+							{
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		Result = TYPE_FOLDER;
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DATA8     cMemoryGetSubFolderName(DATA8 Item,DATA8 MaxLength,char *pFolderName,char *pSubFolderName)
+DATA8     cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, char* pFolderName, char* pSubFolderName)
 {
-  DATA8   Filetype = 0;
-  struct  dirent **NameList;
-  int     Items;
-  int     Tmp;
-  DATA8   Char;
-  DATA8   Folders = 0;
+	DATA8   Filetype = 0;
+	struct  dirent** NameList;
+	int     Items;
+	int     Tmp;
+	DATA8   Char;
+	DATA8   Folders = 0;
 
-  pSubFolderName[0]  =  0;
-  Items     =  scandir(pFolderName,&NameList,0,(int (*)(const struct dirent **,const struct dirent **))cMemorySort);
-  Tmp       =  0;
+	pSubFolderName[0] = 0;
+	Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
+	Tmp = 0;
 
-  if (Items >= 0)
-  {
-    while (Tmp < Items)
-    {
-      if ((*NameList[Tmp]).d_name[0] != '.')
-      {
-        if (((*NameList[Tmp]).d_name[0] != 'C') || ((*NameList[Tmp]).d_name[1] != 'V') || ((*NameList[Tmp]).d_name[2] != 'S'))
-        {
-          Folders++;
-          if (Item == Folders)
-          {
-            Char  =  0;
-            while (((*NameList[Tmp]).d_name[Char]) && ((*NameList[Tmp]).d_name[Char] != '.'))
-            {
-              Char++;
-            }
-            if ((*NameList[Tmp]).d_name[Char] == '.')
-            {
-              Filetype  =  cMemoryFindType(&(*NameList[Tmp]).d_name[Char]);
+	if (Items >= 0)
+	{
+		while (Tmp < Items)
+		{
+			if ((*NameList[Tmp]).d_name[0] != '.')
+			{
+				if (((*NameList[Tmp]).d_name[0] != 'C') || ((*NameList[Tmp]).d_name[1] != 'V') || ((*NameList[Tmp]).d_name[2] != 'S'))
+				{
+					Folders++;
+					if (Item == Folders)
+					{
+						Char = 0;
+						while (((*NameList[Tmp]).d_name[Char]) && ((*NameList[Tmp]).d_name[Char] != '.'))
+						{
+							Char++;
+						}
+						if ((*NameList[Tmp]).d_name[Char] == '.')
+						{
+							Filetype = cMemoryFindType(&(*NameList[Tmp]).d_name[Char]);
 
-              // delete extension
-              (*NameList[Tmp]).d_name[Char]  =  0;
-              snprintf((char*)pSubFolderName,(int)MaxLength,"%s",(*NameList[Tmp]).d_name);
-            }
-            else
-            { // must be a folder or file without extension
-              snprintf((char*)pSubFolderName,(int)MaxLength,"%s",(*NameList[Tmp]).d_name);
-              Filetype  =  TYPE_FOLDER;
-            }
-          }
-        }
-      }
-      free(NameList[Tmp]);
-      Tmp++;
-    }
-    free(NameList);
-  }
+							// delete extension
+							(*NameList[Tmp]).d_name[Char] = 0;
+							snprintf((char*)pSubFolderName, (int)MaxLength, "%s", (*NameList[Tmp]).d_name);
+						}
+						else
+						{ // must be a folder or file without extension
+							snprintf((char*)pSubFolderName, (int)MaxLength, "%s", (*NameList[Tmp]).d_name);
+							Filetype = TYPE_FOLDER;
+						}
+					}
+				}
+			}
+			free(NameList[Tmp]);
+			Tmp++;
+		}
+		free(NameList);
+	}
 
-  return (Filetype);
+	return (Filetype);
 }
 
 
-void      cMemoryDeleteSubFolders(char *pFolderName)
+void      cMemoryDeleteSubFolders(char* pFolderName)
 {
-  struct  dirent *d;
-  DIR     *dir;
-  char    buf[256];
-  DATA8   DeleteOk = 1;
+	struct  dirent* d;
+	DIR* dir;
+	char    buf[256];
+	DATA8   DeleteOk = 1;
 
-  if (strcmp(pFolderName,DEMO_FILE_NAME) == 0)
-  {
-    DeleteOk  =  0;
-  }
+	if (strcmp(pFolderName, DEMO_FILE_NAME) == 0)
+	{
+		DeleteOk = 0;
+	}
 
-  if (DeleteOk)
-  {
-    dir = opendir(pFolderName);
+	if (DeleteOk)
+	{
+		dir = opendir(pFolderName);
 
-    if (dir != NULL)
-    {
-      while((d = readdir(dir)))
-      {
+		if (dir != NULL)
+		{
+			while ((d = readdir(dir)))
+			{
 #ifdef DEBUG
-        printf("%s\n",d->d_name);
+				printf("%s\n", d->d_name);
 #endif
 
-        sprintf(buf, "%s/%s", pFolderName, d->d_name);
-        remove(buf);
-        cMemoryDeleteCacheFile(buf);
-      }
-      closedir(dir);
-      remove(pFolderName);
-    }
-    else
-    {
-      cMemoryDeleteCacheFile(pFolderName);
-      remove(pFolderName);
-    }
-  }
+				sprintf(buf, "%s/%s", pFolderName, d->d_name);
+				remove(buf);
+				cMemoryDeleteCacheFile(buf);
+			}
+			closedir(dir);
+			remove(pFolderName);
+		}
+		else
+		{
+			cMemoryDeleteCacheFile(pFolderName);
+			remove(pFolderName);
+		}
+	}
 }
 
 
-DATA32    cMemoryFindSize(char *pFolderName,DATA32 *pFiles)
+DATA32    cMemoryFindSize(char* pFolderName, DATA32* pFiles)
 {
-  struct  dirent **NameList;
-  struct  stat Status;
-  int     Items;
-  DATA32  Size = 0;
+	struct  dirent** NameList;
+	struct  stat Status;
+	int     Items;
+	DATA32  Size = 0;
 
-  *pFiles  =  0;
-  if (stat(pFolderName,&Status) == 0)
-  {
-    Size +=  (DATA32)Status.st_size;
-    Items     =  scandir(pFolderName,&NameList,0,(int (*)(const struct dirent **,const struct dirent **))cMemorySort);
-    if (Items >= 0)
-    {
-      *pFiles  =  (DATA32)Items;
+	*pFiles = 0;
+	if (stat(pFolderName, &Status) == 0)
+	{
+		Size += (DATA32)Status.st_size;
+		Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
+		if (Items >= 0)
+		{
+			*pFiles = (DATA32)Items;
 
-      while (Items--)
-      {
-        stat((*NameList[Items]).d_name,&Status);
-        Size +=  (DATA32)Status.st_size;
-        free(NameList[Items]);
-      }
-      free(NameList);
-    }
-  }
-  Size  =  (Size + (KB - 1)) / KB;
+			while (Items--)
+			{
+				stat((*NameList[Items]).d_name, &Status);
+				Size += (DATA32)Status.st_size;
+				free(NameList[Items]);
+			}
+			free(NameList);
+		}
+	}
+	Size = (Size + (KB - 1)) / KB;
 
-  return (Size);
+	return (Size);
 }
 
 
-RESULT    cMemoryGetCacheName(DATA8 Item,DATA8 MaxLength,char *pFileName,char *pName,DATA8 *pType)
+RESULT    cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, char* pFileName, char* pName, DATA8* pType)
 {
-  RESULT  Result = FAIL;
-  char    Path[vmPATHSIZE];
-  char    Name[vmNAMESIZE];
-  char    Ext[vmEXTSIZE];
-  char    Filename[vmFILENAMESIZE];
+	RESULT  Result = FAIL;
+	char    Path[vmPATHSIZE];
+	char    Name[vmNAMESIZE];
+	char    Ext[vmEXTSIZE];
+	char    Filename[vmFILENAMESIZE];
 
-  *pFileName  =  0;
-  *pName      =  0;
-  *pType      =  0;
+	*pFileName = 0;
+	*pName = 0;
+	*pType = 0;
 
-  if ((Item > 0) && (Item <= CACHE_DEEPT))
-  {
-    if (MemoryInstance.Cache[Item - 1])
-    {
-      snprintf(Filename,vmFILENAMESIZE,"%s",MemoryInstance.Cache[Item - 1]);
-      if (cMemoryCheckFilename(Filename,Path,Name,Ext) == OK)
-      {
-        snprintf((char*)pFileName,MaxLength,"%s",Filename);
-        if (MaxLength >= 2)
-        {
-          if (strlen(Name) >= MaxLength)
-          {
-            Name[MaxLength - 1]  =  0;
-            Name[MaxLength - 2]  =  0x7F;
-          }
-          snprintf((char*)pName,MaxLength,"%s",Name);
-          *pType  =  cMemoryFindType(Ext);
-          Result  =  OK;
-        }
-      }
-    }
-  }
+	if ((Item > 0) && (Item <= CACHE_DEEPT))
+	{
+		if (MemoryInstance.Cache[Item - 1])
+		{
+			snprintf(Filename, vmFILENAMESIZE, "%s", MemoryInstance.Cache[Item - 1]);
+			if (cMemoryCheckFilename(Filename, Path, Name, Ext) == OK)
+			{
+				snprintf((char*)pFileName, MaxLength, "%s", Filename);
+				if (MaxLength >= 2)
+				{
+					if (strlen(Name) >= MaxLength)
+					{
+						Name[MaxLength - 1] = 0;
+						Name[MaxLength - 2] = 0x7F;
+					}
+					snprintf((char*)pName, MaxLength, "%s", Name);
+					*pType = cMemoryFindType(Ext);
+					Result = OK;
+				}
+			}
+		}
+	}
 
-  return(Result);
+	return(Result);
 }
 
 
 DATA8     cMemoryGetCacheFiles(void)
 {
-  DATA8   Result = 0;
-  DATA8   Tmp;
+	DATA8   Result = 0;
+	DATA8   Tmp;
 
-  for (Tmp = 0;Tmp < CACHE_DEEPT;Tmp++)
-  {
-    if (MemoryInstance.Cache[Tmp][0])
-    {
-      Result++;
-    }
-  }
+	for (Tmp = 0; Tmp < CACHE_DEEPT; Tmp++)
+	{
+		if (MemoryInstance.Cache[Tmp][0])
+		{
+			Result++;
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DATA8     cMemoryFindFiles(char *pFolderName)
+DATA8     cMemoryFindFiles(char* pFolderName)
 {
-  struct  dirent **NameList;
-  int     Items;
-  DATA8   Files = 0;
+	struct  dirent** NameList;
+	int     Items;
+	DATA8   Files = 0;
 
-  Items     =  scandir(pFolderName,&NameList,0,alphasort);
-  if (Items >= 0)
-  {
-    while (Items--)
-    {
-      if ((*NameList[Items]).d_name[0] != '.')
-      {
-        if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
-        {
-          Files++;
-        }
-      }
-      free(NameList[Items]);
-    }
-    free(NameList);
-  }
+	Items = scandir(pFolderName, &NameList, 0, alphasort);
+	if (Items >= 0)
+	{
+		while (Items--)
+		{
+			if ((*NameList[Items]).d_name[0] != '.')
+			{
+				if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
+				{
+					Files++;
+				}
+			}
+			free(NameList[Items]);
+		}
+		free(NameList);
+	}
 
-  return (Files);
+	return (Files);
 }
 
 
-void      cMemoryGetResourcePath(PRGID PrgId,char *pString,DATA8 MaxLength)
+void      cMemoryGetResourcePath(PRGID PrgId, char* pString, DATA8 MaxLength)
 {
-  snprintf(pString,MaxLength,"%s",MemoryInstance.PathList[PrgId]);
+	snprintf(pString, MaxLength, "%s", MemoryInstance.PathList[PrgId]);
 }
 
 
-RESULT    cMemoryGetIcon(DATA8 *pFolderName,DATA8 Item,DATA32 *pImagePointer)
+RESULT    cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, DATA32* pImagePointer)
 {
-  RESULT  Result = FAIL;
+	RESULT  Result = FAIL;
 
-  DATA32  ISize;
-  IP      pImage;
-  HANDLER TmpHandle;
-  PRGID   TmpPrgId;
-  char    PrgNamePath[SUBFOLDERNAME_SIZE];
-  char    PrgNameBuf[MAX_FILENAME_SIZE];
-  LFILE    *pFile;
+	DATA32  ISize;
+	IP      pImage;
+	HANDLER TmpHandle;
+	PRGID   TmpPrgId;
+	char    PrgNamePath[SUBFOLDERNAME_SIZE];
+	char    PrgNameBuf[MAX_FILENAME_SIZE];
+	LFILE* pFile;
 
-  TmpPrgId      =  CurrentProgramId();
+	TmpPrgId = CurrentProgramId();
 
-  cMemoryGetSubFolderName(Item,SUBFOLDERNAME_SIZE,(char*)pFolderName,PrgNamePath);
+	cMemoryGetSubFolderName(Item, SUBFOLDERNAME_SIZE, (char*)pFolderName, PrgNamePath);
 
-  if (PrgNamePath[0])
-  {
-    snprintf(PrgNameBuf,MAX_FILENAME_SIZE,"%s%s/icon%s",(char*)pFolderName,PrgNamePath,EXT_GRAPHICS);
+	if (PrgNamePath[0])
+	{
+		snprintf(PrgNameBuf, MAX_FILENAME_SIZE, "%s%s/icon%s", (char*)pFolderName, PrgNamePath, EXT_GRAPHICS);
 
-    pFile = fopen (PrgNameBuf, "rb");
-    if (NULL != pFile)
-    {
-      fseek (pFile , 0 , SEEK_END);
-      ISize = ftell (pFile);
-      rewind (pFile);
+		pFile = fopen(PrgNameBuf, "rb");
+		if (NULL != pFile)
+		{
+			fseek(pFile, 0, SEEK_END);
+			ISize = ftell(pFile);
+			rewind(pFile);
 
-      // allocate memory to contain the whole file:
-      if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pImage,&TmpHandle) == OK)
-      {
-        if (ISize == fread(pImage,1,ISize,pFile))
-        {
-          *pImagePointer  =  (DATA32)pImage;
-          Result  =  OK;
-        }
-      }
-      fclose (pFile);
-    }
-  }
+			// allocate memory to contain the whole file:
+			if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
+			{
+				if (ISize == fread(pImage, 1, ISize, pFile))
+				{
+					*pImagePointer = (DATA32)pImage;
+					Result = OK;
+				}
+			}
+			fclose(pFile);
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-void      cMemoryFilename(PRGID PrgId,char *pName,char *pExt,DATA8 Length,char *pResult)
+void      cMemoryFilename(PRGID PrgId, char* pName, char* pExt, DATA8 Length, char* pResult)
 {
-  if ((pName[0] == '.') || (pName[0] == '/') || (pName[0] == '~') || (pName[0] == '\"'))
-  { // Path to file
+	if ((pName[0] == '.') || (pName[0] == '/') || (pName[0] == '~') || (pName[0] == '\"'))
+	{ // Path to file
 
-    snprintf(pResult,Length,"%s%s",pName,pExt);
-  }
-  else
-  { // Local file
+		snprintf(pResult, Length, "%s%s", pName, pExt);
+	}
+	else
+	{ // Local file
 
-    snprintf(pResult,Length,"%s%s%s",(char*)MemoryInstance.PathList[PrgId],pName,pExt);
-  }
+		snprintf(pResult, Length, "%s%s%s", (char*)MemoryInstance.PathList[PrgId], pName, pExt);
+	}
 #ifdef DEBUG
-  printf("Filename = [%s]\n",pResult);
+	printf("Filename = [%s]\n", pResult);
 #endif
 }
 
 
 static char Delimiter[][3] =
 {
-  [DEL_NONE]      = "",
-  [DEL_TAB]       = "\t",
-  [DEL_SPACE]     = " ",
-  [DEL_RETURN]    = "\r",
-  [DEL_COLON]     = ":",
-  [DEL_COMMA]     = ",",
-  [DEL_LINEFEED]  = "\n",
-  [DEL_CRLF]      = "\r\n",
+  [DEL_NONE] = "",
+  [DEL_TAB] = "\t",
+  [DEL_SPACE] = " ",
+  [DEL_RETURN] = "\r",
+  [DEL_COLON] = ":",
+  [DEL_COMMA] = ",",
+  [DEL_LINEFEED] = "\n",
+  [DEL_CRLF] = "\r\n",
 };
 
 
-DSPSTAT   cMemoryGetFileHandle(PRGID PrgId,char *pFileName,HANDLER *pHandle,DATA8 *pOpenForWrite)
+DSPSTAT   cMemoryGetFileHandle(PRGID PrgId, char* pFileName, HANDLER* pHandle, DATA8* pOpenForWrite)
 {
-  DSPSTAT Result = FAILBREAK;
-  FDESCR  *pFDescr;
-  HANDLER TmpHandle;
+	DSPSTAT Result = FAILBREAK;
+	FDESCR* pFDescr;
+	HANDLER TmpHandle;
 
-  *pHandle        = -1;
-  *pOpenForWrite  =  0;
+	*pHandle = -1;
+	*pOpenForWrite = 0;
 
-  TmpHandle  =  0;
-  while ((TmpHandle < MAX_HANDLES) && (*pHandle == -1))
-  {
-    if (MemoryInstance.pPoolList[PrgId][TmpHandle].Type == POOL_TYPE_FILE)
-    {
-      if (cMemoryGetPointer(PrgId,TmpHandle,(void**)&pFDescr) == OK)
-      {
-        if ((*pFDescr).Access)
-        {
-          if (strcmp(pFileName,(*pFDescr).Filename) == 0)
-          {
-            *pHandle  =  TmpHandle;
-            if (((*pFDescr).Access == OPEN_FOR_WRITE) || ((*pFDescr).Access == OPEN_FOR_APPEND) || ((*pFDescr).Access == OPEN_FOR_LOG))
-            {
-              *pOpenForWrite  =  1;
-            }
+	TmpHandle = 0;
+	while ((TmpHandle < MAX_HANDLES) && (*pHandle == -1))
+	{
+		if (MemoryInstance.pPoolList[PrgId][TmpHandle].Type == POOL_TYPE_FILE)
+		{
+			if (cMemoryGetPointer(PrgId, TmpHandle, (void**)&pFDescr) == OK)
+			{
+				if ((*pFDescr).Access)
+				{
+					if (strcmp(pFileName, (*pFDescr).Filename) == 0)
+					{
+						*pHandle = TmpHandle;
+						if (((*pFDescr).Access == OPEN_FOR_WRITE) || ((*pFDescr).Access == OPEN_FOR_APPEND) || ((*pFDescr).Access == OPEN_FOR_LOG))
+						{
+							*pOpenForWrite = 1;
+						}
 
-            Result    =  NOBREAK;
+						Result = NOBREAK;
 
-          }
-        }
-      }
-    }
-    TmpHandle++;
-  }
+					}
+				}
+			}
+		}
+		TmpHandle++;
+	}
 
 #ifdef DEBUG_C_MEMORY_FILE
-  printf("Handle for file %5d %s\n",*pHandle,pFileName);
+	printf("Handle for file %5d %s\n", *pHandle, pFileName);
 #endif
-  Result  =  NOBREAK;
+	Result = NOBREAK;
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    cMemoryCheckOpenWrite(char *pFileName)
+RESULT    cMemoryCheckOpenWrite(char* pFileName)
 {
-  RESULT  Result = FAIL;
-  HANDLER Handle;
-  DATA8   OpenForWrite;
-  char    FilenameBuf[vmFILENAMESIZE];
+	RESULT  Result = FAIL;
+	HANDLER Handle;
+	DATA8   OpenForWrite;
+	char    FilenameBuf[vmFILENAMESIZE];
 
-  if (ConstructFilename(USER_SLOT,(char*)pFileName,FilenameBuf,"") == OK)
-  {
-    cMemoryGetFileHandle(USER_SLOT,FilenameBuf,&Handle,&OpenForWrite);
-    if (OpenForWrite)
-    {
-      Result  =  OK;
-    }
-  }
+	if (ConstructFilename(USER_SLOT, (char*)pFileName, FilenameBuf, "") == OK)
+	{
+		cMemoryGetFileHandle(USER_SLOT, FilenameBuf, &Handle, &OpenForWrite);
+		if (OpenForWrite)
+		{
+			Result = OK;
+		}
+	}
 
-  return(Result);
+	return(Result);
 }
 
 
-DSPSTAT   cMemoryOpenFile(PRGID PrgId,DATA8 Access,char *pFileName,HANDLER *pHandle,DATA32 *pSize)
+DSPSTAT   cMemoryOpenFile(PRGID PrgId, DATA8 Access, char* pFileName, HANDLER* pHandle, DATA32* pSize)
 {
-  DSPSTAT Result = FAILBREAK;
-  FDESCR  *pFDescr;
-  struct  stat FileStatus;
-  int     hFile  = -1;
+	DSPSTAT Result = FAILBREAK;
+	FDESCR* pFDescr;
+	struct  stat FileStatus;
+	FILE*     hFile = -1;
 
-  *pHandle  =  0;
-  *pSize    =  0;
+	*pHandle = 0;
+	*pSize = 0;
 
-  switch (Access)
-  {
-    case OPEN_FOR_WRITE :
-    {
-      hFile  =  open(pFileName,O_CREAT | O_WRONLY | O_TRUNC,FILEPERMISSIONS);
-      chmod(pFileName,FILEPERMISSIONS);
+	switch (Access)
+	{
+	case OPEN_FOR_WRITE:
+	{
+		hFile = fopen(pFileName, "w+");
+		chmod(pFileName, FILEPERMISSIONS);
 #ifdef DEBUG_C_MEMORY_FILE
-      printf("Open for write  %5d %s\n",hFile,pFileName);
+		printf("Open for write  %5d %s\n", hFile, pFileName);
 #endif
-    }
-    break;
+	}
+	break;
 
-    case OPEN_FOR_APPEND :
-    {
-      hFile  =  open(pFileName,O_CREAT | O_WRONLY | O_APPEND,FILEPERMISSIONS);
-      chmod(pFileName,FILEPERMISSIONS);
+	case OPEN_FOR_APPEND:
+	{
+		hFile = fopen(pFileName, "a+");
+		chmod(pFileName, FILEPERMISSIONS);
 #ifdef DEBUG_C_MEMORY_FILE
-      printf("Open for append %5d %s\n",hFile,pFileName);
+		printf("Open for append %5d %s\n", hFile, pFileName);
 #endif
-    }
-    break;
+	}
+	break;
 
-    case OPEN_FOR_READ :
-    {
-      hFile  =  open(pFileName,O_RDONLY);
-      Result  =  NOBREAK;
+	case OPEN_FOR_READ:
+	{
+		hFile = fopen(pFileName, "r");
+		Result = NOBREAK;
 #ifdef DEBUG_C_MEMORY_FILE
-      printf("Open for read   %5d %s\n",hFile,pFileName);
+		printf("Open for read   %5d %s\n", hFile, pFileName);
 #endif
-    }
-    break;
+	}
+	break;
 
-    case OPEN_FOR_LOG :
-    {
-      hFile  =  open(pFileName,O_CREAT | O_WRONLY | O_APPEND,FILEPERMISSIONS);
-      chmod(pFileName,FILEPERMISSIONS);
+	case OPEN_FOR_LOG:
+	{
+		hFile = fopen(pFileName, "a+");
+		chmod(pFileName, FILEPERMISSIONS);
 #ifdef DEBUG_C_MEMORY_FILE
-      printf("Open for append %5d %s\n",hFile,pFileName);
+		printf("Open for append %5d %s\n", hFile, pFileName);
 #endif
-    }
-    break;
+	}
+	break;
 
-  }
+	}
 
-  if (hFile >= MIN_HANDLE)
-  {
-    if (cMemoryAlloc(PrgId,POOL_TYPE_FILE,(GBINDEX)sizeof(FDESCR),(void**)&pFDescr,pHandle) == OK)
-    {
-      (*pFDescr).hFile    =  hFile;
-      (*pFDescr).Access   =  Access;
-      snprintf((*pFDescr).Filename,MAX_FILENAME_SIZE,"%s",pFileName);
+	if (hFile >= MIN_HANDLE)
+	{
+		if (cMemoryAlloc(PrgId, POOL_TYPE_FILE, (GBINDEX)sizeof(FDESCR), (void**)&pFDescr, pHandle) == OK)
+		{
+			(*pFDescr).hFile = hFile;
+			(*pFDescr).Access = Access;
+			snprintf((*pFDescr).Filename, MAX_FILENAME_SIZE, "%s", pFileName);
 
-      stat(pFileName,&FileStatus);
-      *pSize  =  FileStatus.st_size;
+			stat(pFileName, &FileStatus);
+			*pSize = FileStatus.st_size;
 
-      Result  =  NOBREAK;
-    }
-    else
-    {
-      close(hFile);
-    }
-  }
+			Result = NOBREAK;
+		}
+		else
+		{
+			fclose(hFile);
+		}
+	}
 
-  if (Result == FAILBREAK)
-  {
-    LogErrorNumber(FILE_OPEN_ERROR);
-  }
+	if (Result == FAILBREAK)
+	{
+		LogErrorNumber(FILE_OPEN_ERROR);
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DSPSTAT   cMemoryWriteFile(PRGID PrgId,HANDLER Handle,DATA32 Size,DATA8 Del,DATA8 *pSource)
+DSPSTAT   cMemoryWriteFile(PRGID PrgId, HANDLER Handle, DATA32 Size, DATA8 Del, DATA8* pSource)
 {
-  DSPSTAT Result = FAILBREAK;
-  FDESCR  *pFDescr;
-  DATA32  Free;
+	DSPSTAT Result = FAILBREAK;
+	FDESCR* pFDescr;
+	DATA32  Free;
 
-  if (cMemoryGetPointer(PrgId,Handle,(void**)&pFDescr) == OK)
-  {
-    if (((*pFDescr).Access == OPEN_FOR_WRITE) || ((*pFDescr).Access == OPEN_FOR_APPEND) || ((*pFDescr).Access == OPEN_FOR_LOG))
-    {
-      cMemoryGetUsage(NULL,&Free,1);
-      if (((Size + (KB - 1)) / KB) <= Free)
-      {
-        if (write((*pFDescr).hFile,pSource,Size) == Size)
-        {
-  #ifdef DEBUG_C_MEMORY_FILE
-          printf("Write to  %-2d    %5d %s [%d]\n",Handle,(*pFDescr).hFile,(*pFDescr).Filename,Size);
-  #endif
-          if (Del < DELS)
-          {
-            if (Del != DEL_NONE)
-            {
-              Size  =  strlen(Delimiter[Del]);
-              if (write((*pFDescr).hFile,Delimiter[Del],Size) == Size)
-              {
-                Result  =  NOBREAK;
-              }
-            }
-            else
-            {
-              Result  =  NOBREAK;
-            }
-          }
-        }
-      }
-    }
-  }
+	if (cMemoryGetPointer(PrgId, Handle, (void**)&pFDescr) == OK)
+	{
+		if (((*pFDescr).Access == OPEN_FOR_WRITE) || ((*pFDescr).Access == OPEN_FOR_APPEND) || ((*pFDescr).Access == OPEN_FOR_LOG))
+		{
+			cMemoryGetUsage(NULL, &Free, 1);
+			if (((Size + (KB - 1)) / KB) <= Free)
+			{
+				if (fwrite(pSource, sizeof(DATA8), Size, (*pFDescr).hFile) == Size)
+				{
+#ifdef DEBUG_C_MEMORY_FILE
+					printf("Write to  %-2d    %5d %s [%d]\n", Handle, (*pFDescr).hFile, (*pFDescr).Filename, Size);
+#endif
+					if (Del < DELS)
+					{
+						if (Del != DEL_NONE)
+						{
+							Size = strlen(Delimiter[Del]);
+							if (fwrite(Delimiter[Del], sizeof(char), Size, (*pFDescr).hFile) == Size)
+							{
+								Result = NOBREAK;
+							}
+						}
+						else
+						{
+							Result = NOBREAK;
+						}
+					}
+				}
+			}
+		}
+	}
 
-  if (Result == FAILBREAK)
-  {
-    LogErrorNumber(FILE_WRITE_ERROR);
-  }
+	if (Result == FAILBREAK)
+	{
+		LogErrorNumber(FILE_WRITE_ERROR);
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DSPSTAT   cMemoryReadFile(PRGID PrgId,HANDLER Handle,DATA32 Size,DATA8 Del,DATA8 *pDestination)
+DSPSTAT   cMemoryReadFile(PRGID PrgId, HANDLER Handle, DATA32 Size, DATA8 Del, DATA8* pDestination)
 {
-  DSPSTAT Result = FAILBREAK;
-  FDESCR  *pFDescr;
-  DATA8   No;
-  DATA8   Tmp;
-  DATA8   Last;
+	DSPSTAT Result = FAILBREAK;
+	FDESCR* pFDescr;
+	DATA8   No;
+	DATA8   Tmp;
+	DATA8   Last;
 
-  if (cMemoryGetPointer(PrgId,Handle,(void**)&pFDescr) == OK)
-  {
-    if ((*pFDescr).hFile > MIN_HANDLE)
-    {
-      if (((*pFDescr).Access == OPEN_FOR_READ))
-      {
-  #ifdef DEBUG_C_MEMORY_FILE
-        printf("Read from %-2d    %5d %s [%d]\n",Handle,(*pFDescr).hFile,(*pFDescr).Filename,Size);
-  #endif
-        if (VMInstance.Handle >= 0)
-        {
-          if (Size > MIN_ARRAY_ELEMENTS)
-          {
-            pDestination  =  (DATA8*)VmMemoryResize(VMInstance.Handle,Size);
-          }
-        }
-        No    =  1;
-        Last  =  0;
-        while ((No == 1) && (Size > 0))
-        {
-          No  =  (DATA8)read((*pFDescr).hFile,&Tmp,1);
+	if (cMemoryGetPointer(PrgId, Handle, (void**)&pFDescr) == OK)
+	{
+		if ((*pFDescr).hFile > MIN_HANDLE)
+		{
+			if (((*pFDescr).Access == OPEN_FOR_READ))
+			{
+#ifdef DEBUG_C_MEMORY_FILE
+				printf("Read from %-2d    %5d %s [%d]\n", Handle, (*pFDescr).hFile, (*pFDescr).Filename, Size);
+#endif
+				if (VMInstance.Handle >= 0)
+				{
+					if (Size > MIN_ARRAY_ELEMENTS)
+					{
+						pDestination = (DATA8*)VmMemoryResize(VMInstance.Handle, Size);
+					}
+				}
+				No = 1;
+				Last = 0;
+				while ((No == 1) && (Size > 0))
+				{
+					No = (DATA8)fread(&Tmp, sizeof(DATA8), 1, (*pFDescr).hFile);
 
-          if (Del < DELS)
-          {
-            if (Del != DEL_NONE)
-            {
-              if (Del != DEL_CRLF)
-              {
-                if (Tmp == Delimiter[Del][0])
-                {
-                  No  =  0;
-                }
-              }
-              else
-              {
-                if ((Tmp == Delimiter[Del][1]) && (Last == Delimiter[Del][0]))
-                {
-                  No  =  0;
-                }
-                Last  =  Tmp;
-              }
-            }
-          }
+					if (Del < DELS)
+					{
+						if (Del != DEL_NONE)
+						{
+							if (Del != DEL_CRLF)
+							{
+								if (Tmp == Delimiter[Del][0])
+								{
+									No = 0;
+								}
+							}
+							else
+							{
+								if ((Tmp == Delimiter[Del][1]) && (Last == Delimiter[Del][0]))
+								{
+									No = 0;
+								}
+								Last = Tmp;
+							}
+						}
+					}
 
-          if (No)
-          {
-            *pDestination  =  Tmp;
-            pDestination++;
-            Size--;
-          }
-        }
-        if (Size)
-        {
-          *pDestination  =  0;
-        }
+					if (No)
+					{
+						*pDestination = Tmp;
+						pDestination++;
+						Size--;
+					}
+				}
+				if (Size)
+				{
+					*pDestination = 0;
+				}
 
-        Result  =  NOBREAK;
-      }
-    }
-  }
+				Result = NOBREAK;
+			}
+		}
+	}
 
-  if (Result == FAILBREAK)
-  {
-    LogErrorNumber(FILE_READ_ERROR);
-  }
+	if (Result == FAILBREAK)
+	{
+		LogErrorNumber(FILE_READ_ERROR);
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-DSPSTAT   cMemoryCloseFile(PRGID PrgId,HANDLER Handle)
+DSPSTAT   cMemoryCloseFile(PRGID PrgId, HANDLER Handle)
 {
-  DSPSTAT Result = FAILBREAK;
+	DSPSTAT Result = FAILBREAK;
 
 #ifdef DEBUG_C_MEMORY_FILE
-  FDESCR  *pFDescr;
+	FDESCR* pFDescr;
 
-  if (MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
-  {
-    if (cMemoryGetPointer(PrgId,Handle,(void**)&pFDescr) == OK)
-    {
-      printf("Close file %-2d    %5d %s\n",Handle,(*pFDescr).hFile,(*pFDescr).Filename);
-    }
-  }
-  else
-  {
-    printf("Close pool %-2d\n",Handle);
-  }
+	if (MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
+	{
+		if (cMemoryGetPointer(PrgId, Handle, (void**)&pFDescr) == OK)
+		{
+			printf("Close file %-2d    %5d %s\n", Handle, (*pFDescr).hFile, (*pFDescr).Filename);
+		}
+	}
+	else
+	{
+		printf("Close pool %-2d\n", Handle);
+	}
 #endif
 
-  Result  =  cMemoryFreeHandle(PrgId,Handle);
+	Result = cMemoryFreeHandle(PrgId, Handle);
 
-  if (Result == FAILBREAK)
-  {
-    LogErrorNumber(FILE_CLOSE_ERROR);
-  }
+	if (Result == FAILBREAK)
+	{
+		LogErrorNumber(FILE_CLOSE_ERROR);
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-void      cMemoryFindLogName(PRGID PrgId,char* pName)
+void      cMemoryFindLogName(PRGID PrgId, char* pName)
 {
-  HANDLER TmpHandle;
-  FDESCR  *pFDescr;
+	HANDLER TmpHandle;
+	FDESCR* pFDescr;
 
-  pName[0]  =  0;
+	pName[0] = 0;
 
-  if ((PrgId >= 0) && (PrgId < MAX_PROGRAMS))
-  {
-    for (TmpHandle = 0;TmpHandle < MAX_HANDLES;TmpHandle++)
-    {
-      if (MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != NULL)
-      {
-        if (MemoryInstance.pPoolList[PrgId][TmpHandle].Type == POOL_TYPE_FILE)
-        {
-          pFDescr  =  (FDESCR*)MemoryInstance.pPoolList[PrgId][TmpHandle].pPool;
-          if ((*pFDescr).Access == OPEN_FOR_LOG)
-          {
-            snprintf(pName,MAX_FILENAME_SIZE,"%s",(*pFDescr).Filename);
-            TmpHandle  =  MAX_HANDLES;
-          }
-        }
-      }
-    }
-  }
+	if ((PrgId >= 0) && (PrgId < MAX_PROGRAMS))
+	{
+		for (TmpHandle = 0; TmpHandle < MAX_HANDLES; TmpHandle++)
+		{
+			if (MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != NULL)
+			{
+				if (MemoryInstance.pPoolList[PrgId][TmpHandle].Type == POOL_TYPE_FILE)
+				{
+					pFDescr = (FDESCR*)MemoryInstance.pPoolList[PrgId][TmpHandle].pPool;
+					if ((*pFDescr).Access == OPEN_FOR_LOG)
+					{
+						snprintf(pName, MAX_FILENAME_SIZE, "%s", (*pFDescr).Filename);
+						TmpHandle = MAX_HANDLES;
+					}
+				}
+			}
+		}
+	}
 }
 
 
-RESULT    cMemoryGetImage(DATA8 *pFileName,DATA16 Size,UBYTE *pBmp)
+RESULT    cMemoryGetImage(DATA8* pFileName, DATA16 Size, UBYTE* pBmp)
 {
-  RESULT  Result = FAIL;
-  PRGID   TmpPrgId;
-  int     File;
-  char    FilenameBuf[MAX_FILENAME_SIZE];
+	RESULT  Result = FAIL;
+	PRGID   TmpPrgId;
+	FILE*     File;
+	char    FilenameBuf[MAX_FILENAME_SIZE];
 
-  TmpPrgId  =  CurrentProgramId();
+	TmpPrgId = CurrentProgramId();
 
-  if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,EXT_GRAPHICS) == OK)
-  {
-    File      =  open(FilenameBuf,O_RDONLY);
-    if (File >= MIN_HANDLE)
-    {
-      read(File,pBmp,(size_t)Size);
-      close(File);
-      Result  =  OK;
-    }
-  }
+	if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, EXT_GRAPHICS) == OK)
+	{
+		File = fopen(FilenameBuf, "r");
+		if (File >= MIN_HANDLE)
+		{
+			fread(pBmp, sizeof(UBYTE), (size_t)Size, File);
+			fclose(File);
+			Result = OK;
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
-RESULT    cMemoryGetMediaName(char *pChar,char *pName)
+RESULT    cMemoryGetMediaName(char* pChar, char* pName)
 {
-  RESULT  Result = FAIL;
-  FILE    *pFile;
-  struct mntent *mountEntry;
+	RESULT  Result = FAIL;
+	FILE* pFile;
+	//struct mntent* mountEntry;
 
-  pFile = setmntent("/proc/mounts","r");
+	//pFile = setmntent("/proc/mounts", "r");
 
-  while ((mountEntry = getmntent(pFile)) != NULL)
-  {
-   if(pChar[0] == 'm') // MMCCard detection
-   {
+	//while ((mountEntry = getmntent(pFile)) != NULL)
+	//{
+	//	if (pChar[0] == 'm') // MMCCard detection
+	//	{
 
-     if(!strcmp(mountEntry->mnt_dir, "/media/card"))
-     {
-       pName = "card";
-       Result = OK;
-     }
+	//		if (!strcmp(mountEntry->mnt_dir, "/media/card"))
+	//		{
+	//			pName = "card";
+	//			Result = OK;
+	//		}
 
-   }
-   if(pChar[0] == 's') // MassStorage detection
-   {
-     if(!strcmp(mountEntry->mnt_dir, "/media/usb"))
-     {
-       pName = "usb";
-       Result = OK;
-     }
-   }
-  }
+	//	}
+	//	if (pChar[0] == 's') // MassStorage detection
+	//	{
+	//		if (!strcmp(mountEntry->mnt_dir, "/media/usb"))
+	//		{
+	//			pName = "usb";
+	//			Result = OK;
+	//		}
+	//	}
+	//}
 
-  endmntent(pFile);
-  return (Result);
+	//endmntent(pFile);
+	return (Result);
 }
 
 
 typedef   struct
 {
-  DIR     *pDir;
-  DATA16  Entries;
-  DATA8   Type;
-  DATA8   Sort;
-  DATA8   Folder[MAX_FILENAME_SIZE];
-  DATA8   Entry[DIR_DEEPT][FILENAME_SIZE];
-  DATA8   Priority[DIR_DEEPT];
+	DIR* pDir;
+	DATA16  Entries;
+	DATA8   Type;
+	DATA8   Sort;
+	DATA8   Folder[MAX_FILENAME_SIZE];
+	DATA8   Entry[DIR_DEEPT][FILENAME_SIZE];
+	DATA8   Priority[DIR_DEEPT];
 }
 FOLDER;
 
 
 enum
 {
-  SORT_NONE,
-  SORT_PRJS,
-  SORT_APPS,
-  SORT_TOOLS,
+	SORT_NONE,
+	SORT_PRJS,
+	SORT_APPS,
+	SORT_TOOLS,
 
-  SORT_TYPES
+	SORT_TYPES
 };
 
 DATA8     NoOfFavourites[SORT_TYPES] =
@@ -1551,114 +1539,114 @@ DATA8     NoOfFavourites[SORT_TYPES] =
 DATA8     FavouriteExts[FILETYPES] =
 {
   [TYPE_BYTECODE] = 1,
-  [TYPE_SOUND]    = 2,
+  [TYPE_SOUND] = 2,
   [TYPE_GRAPHICS] = 3,
-  [TYPE_TEXT]     = 4,
+  [TYPE_TEXT] = 4,
 };
 
-char      *pFavourites[SORT_TYPES][8] =
+char* pFavourites[SORT_TYPES][8] =
 { // Priority
   //  0             1                 2                 3                 4
-  { },
+  { "", },
   { "",           "BrkProg_SAVE",   "BrkDL_SAVE",     "SD_Card",        "USB_Stick",          "TEST"   },
   { "Port View",  "Motor Control",  "IR Control",     "Brick Program",  "Brick Datalog" },
   { "Volume",     "Sleep",          "Bluetooth",      "WiFi",           "Brick Name",         "Brick Info",         "Test",       "Debug" }
 };
 
 
-void      cMemorySortEntry(FOLDER *pMemory,UBYTE Type,char *pName)
+void      cMemorySortEntry(FOLDER* pMemory, UBYTE Type, char* pName)
 {
-  DATA8   Sort;
-  DATA8   Sort1;
-  DATA8   Sort2;
-  DATA8   Pointer;
-  DATA8   Priority;
-  DATA8   TmpPriority;
-  DATA8   Favourites;
-  char    TmpEntry[FILENAME_SIZE];
+	DATA8   Sort;
+	DATA8   Sort1;
+	DATA8   Sort2;
+	DATA8   Pointer;
+	DATA8   Priority;
+	DATA8   TmpPriority;
+	DATA8   Favourites;
+	char    TmpEntry[FILENAME_SIZE];
 
-  Sort        =  (*pMemory).Sort;
-  Favourites  =  NoOfFavourites[Sort];
-  Priority    =  Favourites;
+	Sort = (*pMemory).Sort;
+	Favourites = NoOfFavourites[Sort];
+	Priority = Favourites;
 
-  if ((Type != DT_DIR) && (Type != DT_LNK))
-  { // Files
+	if ((Type != DT_DIR) && (Type != DT_LNK))
+	{ // Files
 
-    // Get extension
-    Pointer  =  0;
-    while ((pName[Pointer]) && (pName[Pointer] != '.'))
-    {
-      Pointer++;
-    }
+	  // Get extension
+		Pointer = 0;
+		while ((pName[Pointer]) && (pName[Pointer] != '.'))
+		{
+			Pointer++;
+		}
 
-    // Priorities
-    Priority    =  FavouriteExts[cMemoryFindType(&pName[Pointer])];
-    if (Priority == 0)
-    {
-      Priority  =  FILETYPES;
-    }
-    Favourites  =  FILETYPES;
-  }
-  else
-  { // Folders
+		// Priorities
+		Priority = FavouriteExts[cMemoryFindType(&pName[Pointer])];
+		if (Priority == 0)
+		{
+			Priority = FILETYPES;
+		}
+		Favourites = FILETYPES;
+	}
+	else
+	{ // Folders
 
-    if (Sort == SORT_PRJS)
-    {
-      Priority  =  0;
+		if (Sort == SORT_PRJS)
+		{
+			Priority = 0;
 
-      for (Pointer = 1;Pointer < NoOfFavourites[Sort];Pointer++)
-      {
-        if (strcmp(pName,pFavourites[Sort][Pointer]) == 0)
-        {
-          Priority  =  Pointer;
-        }
-      }
-    }
-    else
-    {
-      for (Pointer = 0;Pointer < NoOfFavourites[Sort];Pointer++)
-      {
-        if (strcmp(pName,pFavourites[Sort][Pointer]) == 0)
-        {
-          Priority  =  Pointer;
-        }
-      }
-    }
-  }
-  snprintf((char*)(*pMemory).Entry[(*pMemory).Entries],FILENAME_SIZE,"%s",pName);
-  (*pMemory).Priority[(*pMemory).Entries]  =  Priority;
-  ((*pMemory).Entries)++;
-  if (Priority < Favourites)
-  {
-    for (Sort1 = 0;Sort1 < ((*pMemory).Entries - 1);Sort1++)
-    {
-      for (Sort2 = 0;Sort2 < ((*pMemory).Entries - 1);Sort2++)
-      {
-        if ((*pMemory).Priority[Sort2 + 1] < (*pMemory).Priority[Sort2])
-        {
-          TmpPriority  =  (*pMemory).Priority[Sort2];
-          strcpy(TmpEntry,(char*)(*pMemory).Entry[Sort2]);
-          (*pMemory).Priority[Sort2]  =  (*pMemory).Priority[Sort2 + 1];
-          strcpy((char*)(*pMemory).Entry[Sort2],(char*)(*pMemory).Entry[Sort2 + 1]);
-          (*pMemory).Priority[Sort2 + 1]  =  TmpPriority;
-          strcpy((char*)(*pMemory).Entry[Sort2 + 1],(char*)TmpEntry);
-        }
-      }
-    }
-  }
+			for (Pointer = 1; Pointer < NoOfFavourites[Sort]; Pointer++)
+			{
+				if (strcmp(pName, pFavourites[Sort][Pointer]) == 0)
+				{
+					Priority = Pointer;
+				}
+			}
+		}
+		else
+		{
+			for (Pointer = 0; Pointer < NoOfFavourites[Sort]; Pointer++)
+			{
+				if (strcmp(pName, pFavourites[Sort][Pointer]) == 0)
+				{
+					Priority = Pointer;
+				}
+			}
+		}
+	}
+	snprintf((char*)(*pMemory).Entry[(*pMemory).Entries], FILENAME_SIZE, "%s", pName);
+	(*pMemory).Priority[(*pMemory).Entries] = Priority;
+	((*pMemory).Entries)++;
+	if (Priority < Favourites)
+	{
+		for (Sort1 = 0; Sort1 < ((*pMemory).Entries - 1); Sort1++)
+		{
+			for (Sort2 = 0; Sort2 < ((*pMemory).Entries - 1); Sort2++)
+			{
+				if ((*pMemory).Priority[Sort2 + 1] < (*pMemory).Priority[Sort2])
+				{
+					TmpPriority = (*pMemory).Priority[Sort2];
+					strcpy(TmpEntry, (char*)(*pMemory).Entry[Sort2]);
+					(*pMemory).Priority[Sort2] = (*pMemory).Priority[Sort2 + 1];
+					strcpy((char*)(*pMemory).Entry[Sort2], (char*)(*pMemory).Entry[Sort2 + 1]);
+					(*pMemory).Priority[Sort2 + 1] = TmpPriority;
+					strcpy((char*)(*pMemory).Entry[Sort2 + 1], (char*)TmpEntry);
+				}
+			}
+		}
+	}
 }
 
 
-void      cMemorySortList(FOLDER *pMemory)
+void      cMemorySortList(FOLDER* pMemory)
 {
-  DATA16  Pointer;
+	DATA16  Pointer;
 
-  for (Pointer = 0;Pointer < (*pMemory).Entries;Pointer++)
-  {
+	for (Pointer = 0; Pointer < (*pMemory).Entries; Pointer++)
+	{
 #ifdef DEBUG
-    printf("[%s](%d)(%d) %s\n",(char*)(*pMemory).Folder,(*pMemory).Sort,(*pMemory).Priority[Pointer],(char*)(*pMemory).Entry[Pointer]);
+		printf("[%s](%d)(%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pMemory).Priority[Pointer], (char*)(*pMemory).Entry[Pointer]);
 #endif
-  }
+	}
 }
 
 
@@ -1668,51 +1656,51 @@ void      cMemorySortList(FOLDER *pMemory)
  *
  */
 
-RESULT    cMemoryOpenFolder(PRGID PrgId,DATA8 Type,DATA8 *pFolderName,HANDLER *pHandle)
+RESULT    cMemoryOpenFolder(PRGID PrgId, DATA8 Type, DATA8* pFolderName, HANDLER* pHandle)
 {
-  RESULT  Result;
-  FOLDER  *pMemory;
+	RESULT  Result;
+	FOLDER* pMemory;
 
-  Result  =  cMemoryAlloc(PrgId,POOL_TYPE_MEMORY,(GBINDEX)sizeof(FOLDER),((void**)&pMemory),pHandle);
-  if (Result == OK)
-  {
-    (*pMemory).pDir     =  NULL;
-    (*pMemory).Entries  =  0;
-    (*pMemory).Type     = Type;
-    snprintf((char*)(*pMemory).Folder,MAX_FILENAME_SIZE,"%s",(char*)pFolderName);
-    (*pMemory).pDir  =  opendir((char*)(*pMemory).Folder);
-    if ((*pMemory).pDir == NULL)
-    {
-      Result  =  FAIL;
-    }
-    else
-    {
-      if (strcmp((char*)pFolderName,vmPRJS_DIR) == 0)
-      {
-        (*pMemory).Sort  =  SORT_PRJS;
-      }
-      else
-      {
-        if (strcmp((char*)pFolderName,vmAPPS_DIR) == 0)
-        {
-          (*pMemory).Sort  =  SORT_APPS;
-        }
-        else
-        {
-          if (strcmp((char*)pFolderName,vmTOOLS_DIR) == 0)
-          {
-            (*pMemory).Sort  =  SORT_TOOLS;
-          }
-          else
-          {
-            (*pMemory).Sort  =  SORT_NONE;
-          }
-        }
-      }
-    }
-  }
+	Result = cMemoryAlloc(PrgId, POOL_TYPE_MEMORY, (GBINDEX)sizeof(FOLDER), ((void**)&pMemory), pHandle);
+	if (Result == OK)
+	{
+		(*pMemory).pDir = NULL;
+		(*pMemory).Entries = 0;
+		(*pMemory).Type = Type;
+		snprintf((char*)(*pMemory).Folder, MAX_FILENAME_SIZE, "%s", (char*)pFolderName);
+		(*pMemory).pDir = opendir((char*)(*pMemory).Folder);
+		if ((*pMemory).pDir == NULL)
+		{
+			Result = FAIL;
+		}
+		else
+		{
+			if (strcmp((char*)pFolderName, vmPRJS_DIR) == 0)
+			{
+				(*pMemory).Sort = SORT_PRJS;
+			}
+			else
+			{
+				if (strcmp((char*)pFolderName, vmAPPS_DIR) == 0)
+				{
+					(*pMemory).Sort = SORT_APPS;
+				}
+				else
+				{
+					if (strcmp((char*)pFolderName, vmTOOLS_DIR) == 0)
+					{
+						(*pMemory).Sort = SORT_TOOLS;
+					}
+					else
+					{
+						(*pMemory).Sort = SORT_NONE;
+					}
+				}
+			}
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
@@ -1720,348 +1708,348 @@ RESULT    cMemoryOpenFolder(PRGID PrgId,DATA8 Type,DATA8 *pFolderName,HANDLER *p
  *  Count and sort items - one for each call
  *  Return total count
  */
-RESULT    cMemoryGetFolderItems(PRGID PrgId,HANDLER Handle,DATA16 *pItems)
+RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 {
-  RESULT  Result;
-  FOLDER  *pMemory;
-  char    Ext[vmEXTSIZE];
-  struct  dirent *pEntry;
+	RESULT  Result;
+	FOLDER* pMemory;
+	char    Ext[vmEXTSIZE];
+	struct  dirent* pEntry;
 
-  Result    =  cMemoryGetPointer(PrgId,Handle,((void**)&pMemory));
-  *pItems   =  0;
+	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
+	*pItems = 0;
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    if ((*pMemory).pDir != NULL)
-    {
-      pEntry  =  readdir((*pMemory).pDir);
-      if (pEntry != NULL)
-      { // More entries
+		if ((*pMemory).pDir != NULL)
+		{
+			pEntry = readdir((*pMemory).pDir);
+			if (pEntry != NULL)
+			{ // More entries
 
-        if ((*pMemory).Entries < DIR_DEEPT)
-        {
-          if ((*pEntry).d_name[0] != '.')
-          {
-            if (strcmp((*pEntry).d_name,"CVS") != 0)
-            {
-              if ((*pMemory).Type == TYPE_FOLDER)
-              {
-                if (((*pEntry).d_type == DT_DIR) || ((*pEntry).d_type == DT_LNK))
-                { // Folders
+				if ((*pMemory).Entries < DIR_DEEPT)
+				{
+					if ((*pEntry).d_name[0] != '.')
+					{
+						if (strcmp((*pEntry).d_name, "CVS") != 0)
+						{
+							if ((*pMemory).Type == TYPE_FOLDER)
+							{
+								if (((*pEntry).d_type == DT_DIR) || ((*pEntry).d_type == DT_LNK))
+								{ // Folders
 
-                  cMemorySortEntry(pMemory,(*pEntry).d_type,(*pEntry).d_name);
+									cMemorySortEntry(pMemory, (*pEntry).d_type, (*pEntry).d_name);
 #ifdef DEBUG
-                  printf("[%s](%d) %s\n",(char*)(*pMemory).Folder,(*pMemory).Sort,(*pEntry).d_name);
+									printf("[%s](%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pEntry).d_name);
 #endif
-                }
-              }
-              else
-              {
-                if ((*pEntry).d_type == DT_REG)
-                { // Files
+								}
+							}
+							else
+							{
+								if ((*pEntry).d_type == DT_REG)
+								{ // Files
 
-                  FindName((*pEntry).d_name,NULL,NULL,Ext);
-                  if (cMemoryFindType(Ext))
-                  {
-                    cMemorySortEntry(pMemory,(*pEntry).d_type,(*pEntry).d_name);
+									FindName((*pEntry).d_name, NULL, NULL, Ext);
+									if (cMemoryFindType(Ext))
+									{
+										cMemorySortEntry(pMemory, (*pEntry).d_type, (*pEntry).d_name);
 #ifdef DEBUG
-                    printf("[%s](%d) %s\n",(char*)(*pMemory).Folder,(*pMemory).Sort,(*pEntry).d_name);
+										printf("[%s](%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pEntry).d_name);
 #endif
-                  }
-                }
-              }
-            }
-          }
-        }
-        Result  =  BUSY;
-      }
-      else
-      { // No more entries
+									}
+								}
+							}
+						}
+					}
+				}
+				Result = BUSY;
+			}
+			else
+			{ // No more entries
 
-        cMemorySortList(pMemory);
-        closedir((*pMemory).pDir);
-        (*pMemory).pDir  =  NULL;
-      }
-    }
-    *pItems  =  ((*pMemory).Entries);
-  }
+				cMemorySortList(pMemory);
+				closedir((*pMemory).pDir);
+				(*pMemory).pDir = NULL;
+			}
+		}
+		*pItems = ((*pMemory).Entries);
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
 /*
  *  Get display-able name - only name not path and extension
  */
-RESULT    cMemoryGetItemName(PRGID PrgId,HANDLER Handle,DATA16 Item,DATA8 Length,DATA8 *pName,DATA8 *pType,DATA8 *pPriority)
+RESULT    cMemoryGetItemName(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8* pName, DATA8* pType, DATA8* pPriority)
 {
-  RESULT  Result = FAIL;
-  FOLDER  *pMemory;
-  char    Name[vmNAMESIZE];
-  char    Ext[vmEXTSIZE];
+	RESULT  Result = FAIL;
+	FOLDER* pMemory;
+	char    Name[vmNAMESIZE];
+	char    Ext[vmEXTSIZE];
 
-  Result      =  cMemoryGetPointer(PrgId,Handle,((void**)&pMemory));
-  *pType      =  0;
-  *pPriority  =  127;
-  *pName      =  0;
+	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
+	*pType = 0;
+	*pPriority = 127;
+	*pName = 0;
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    if ((Item > 0) && (Item <= (*pMemory).Entries))
-    { // Item ok
+		if ((Item > 0) && (Item <= (*pMemory).Entries))
+		{ // Item ok
 
-      if (Length >= 2)
-      {
-        if (cMemoryCheckFilename((char*)(*pMemory).Entry[Item - 1],NULL,Name,Ext) == OK)
-        {
-          *pType  =  cMemoryFindType(Ext);
-          if (strlen(Name) >= Length)
-          {
-            Name[Length - 1]  =  0;
-            Name[Length - 2]  =  0x7F;
-          }
+			if (Length >= 2)
+			{
+				if (cMemoryCheckFilename((char*)(*pMemory).Entry[Item - 1], NULL, Name, Ext) == OK)
+				{
+					*pType = cMemoryFindType(Ext);
+					if (strlen(Name) >= Length)
+					{
+						Name[Length - 1] = 0;
+						Name[Length - 2] = 0x7F;
+					}
 
-          snprintf((char*)pName,(int)Length,"%s",Name);
-          *pPriority  =  (*pMemory).Priority[Item - 1];
-        }
-        else
-        {
-          Result  =  FAIL;
-        }
-      }
-      else
-      {
-        Result  =  FAIL;
-      }
-    }
-    else
-    {
-      Result  =  FAIL;
-    }
+					snprintf((char*)pName, (int)Length, "%s", Name);
+					*pPriority = (*pMemory).Priority[Item - 1];
+				}
+				else
+				{
+					Result = FAIL;
+				}
+			}
+			else
+			{
+				Result = FAIL;
+			}
+		}
+		else
+		{
+			Result = FAIL;
+		}
 
-  }
-  return (Result);
+	}
+	return (Result);
 }
 
 
 /*
  *  Get icon image
  */
-RESULT    cMemoryGetItemIcon(PRGID PrgId,HANDLER Handle,DATA16 Item,HANDLER *pHandle,DATA32 *pImagePointer)
+RESULT    cMemoryGetItemIcon(PRGID PrgId, HANDLER Handle, DATA16 Item, HANDLER* pHandle, DATA32* pImagePointer)
 {
-  RESULT  Result = FAIL;
-  FOLDER  *pMemory;
-  char    Filename[MAX_FILENAME_SIZE];
-  DATA32  ISize;
-  IP      pImage;
-  struct  stat FileStatus;
-  int     hFile;
+	RESULT  Result = FAIL;
+	FOLDER* pMemory;
+	char    Filename[MAX_FILENAME_SIZE];
+	DATA32  ISize;
+	IP      pImage;
+	struct  stat FileStatus;
+	FILE*     hFile;
 
-  Result  =  cMemoryGetPointer(PrgId,Handle,((void**)&pMemory));
+	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    Result  =  FAIL;
-    if ((Item > 0) && (Item <= (*pMemory).Entries))
-    { // Item ok
+		Result = FAIL;
+		if ((Item > 0) && (Item <= (*pMemory).Entries))
+		{ // Item ok
 
-      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s/%s%s",(char*)(*pMemory).Folder,(char*)(*pMemory).Entry[Item - 1],ICON_FILE_NAME,EXT_GRAPHICS);
+			snprintf(Filename, MAX_FILENAME_SIZE, "%s/%s/%s%s", (char*)(*pMemory).Folder, (char*)(*pMemory).Entry[Item - 1], ICON_FILE_NAME, EXT_GRAPHICS);
 
-      hFile  =  open(Filename,O_RDONLY);
+			hFile = fopen(Filename, "r");
 
-      if (hFile >= MIN_HANDLE)
-      {
+			if (hFile >= MIN_HANDLE)
+			{
 
-        stat(Filename,&FileStatus);
-        ISize  =  FileStatus.st_size;
+				stat(Filename, &FileStatus);
+				ISize = FileStatus.st_size;
 
-        // allocate memory to contain the whole file:
-        if (cMemoryAlloc(PrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pImage,pHandle) == OK)
-        {
+				// allocate memory to contain the whole file:
+				if (cMemoryAlloc(PrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, pHandle) == OK)
+				{
 
-          if ((DATA32)read(hFile,pImage,ISize) == ISize)
-          {
-            *pImagePointer  =  (DATA32)pImage;
-            Result  =  OK;
-          }
-        }
+					if ((DATA32)fread(pImage, sizeof(IMGDATA), ISize, hFile) == ISize)
+					{
+						*pImagePointer = (DATA32)pImage;
+						Result = OK;
+					}
+				}
 
-        close(hFile);
-      }
-    }
-  }
+				fclose(hFile);
+			}
+		}
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
 /*
  *  Get text
  */
-RESULT    cMemoryGetItemText(PRGID PrgId,HANDLER Handle,DATA16 Item,DATA8 Length,DATA8 *pText)
+RESULT    cMemoryGetItemText(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8* pText)
 {
-  RESULT  Result = FAIL;
-  FOLDER  *pMemory;
-  char    Filename[MAX_FILENAME_SIZE];
-  int     hFile;
-  DATA8   Tmp;
-  char    Termination[2] = "\t";
-  ssize_t No;
+	RESULT  Result = FAIL;
+	FOLDER* pMemory;
+	char    Filename[MAX_FILENAME_SIZE];
+	FILE*     hFile;
+	DATA8   Tmp;
+	char    Termination[2] = "\t";
+	size_t No;
 
-  for (Tmp = 0;Tmp < Length;Tmp++)
-  {
-    pText[Tmp]  =  0;
-  }
-  Result  =  cMemoryGetPointer(PrgId,Handle,((void**)&pMemory));
+	for (Tmp = 0; Tmp < Length; Tmp++)
+	{
+		pText[Tmp] = 0;
+	}
+	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    if ((Item > 0) && (Item <= (*pMemory).Entries) && Length)
-    { // Item ok
+		if ((Item > 0) && (Item <= (*pMemory).Entries) && Length)
+		{ // Item ok
 
-//      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s/%s%s",(char*)(*pMemory).Folder,(char*)(*pMemory).Entry[Item - 1],TEXT_FILE_NAME,EXT_TEXT);
-      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s%s",vmSETTINGS_DIR,(char*)(*pMemory).Entry[Item - 1],EXT_TEXT);
-      hFile   =  open(Filename,O_RDONLY);
-      if (hFile >= MIN_HANDLE)
-      {
-        Result  =  OK;
-        No  =  1;
-        while ((No == 1) && (Length > 1))
-        {
-          No  =  read(hFile,&Tmp,1);
-          if ((Tmp == Termination[0]) || (Tmp == '\r') || (Tmp == '\n'))
-          {
-            No  =  0;
-          }
-          if (No)
-          {
-            *pText  =  Tmp;
-            pText++;
-            *pText  =  0;
-            Length--;
-          }
-        }
-        close(hFile);
-      }
-    }
-    else
-    {
-      Result  =  FAIL;
-    }
+	//      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s/%s%s",(char*)(*pMemory).Folder,(char*)(*pMemory).Entry[Item - 1],TEXT_FILE_NAME,EXT_TEXT);
+			snprintf(Filename, MAX_FILENAME_SIZE, "%s/%s%s", vmSETTINGS_DIR, (char*)(*pMemory).Entry[Item - 1], EXT_TEXT);
+			hFile = fopen(Filename, "r");
+			if (hFile >= MIN_HANDLE)
+			{
+				Result = OK;
+				No = 1;
+				while ((No == 1) && (Length > 1))
+				{
+					No = fread(&Tmp, sizeof(DATA8), 1, hFile);
+					if ((Tmp == Termination[0]) || (Tmp == '\r') || (Tmp == '\n'))
+					{
+						No = 0;
+					}
+					if (No)
+					{
+						*pText = Tmp;
+						pText++;
+						*pText = 0;
+						Length--;
+					}
+				}
+				fclose(hFile);
+			}
+		}
+		else
+		{
+			Result = FAIL;
+		}
 
-  }
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
 /*
  *  Get text
  */
-RESULT    cMemorySetItemText(PRGID PrgId,HANDLER Handle,DATA16 Item,DATA8 *pText)
+RESULT    cMemorySetItemText(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8* pText)
 {
-  RESULT  Result = FAIL;
-  FOLDER  *pMemory;
-  char    Filename[MAX_FILENAME_SIZE];
-  LFILE    *pFile;
-  DATA8   Length;
+	RESULT  Result = FAIL;
+	FOLDER* pMemory;
+	char    Filename[MAX_FILENAME_SIZE];
+	LFILE* pFile;
+	DATA8   Length;
 
-  Length    =  (DATA8)strlen((char*)pText);
-  Result    =  cMemoryGetPointer(PrgId,Handle,((void**)&pMemory));
+	Length = (DATA8)strlen((char*)pText);
+	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    if ((Item > 0) && (Item <= (*pMemory).Entries) && Length)
-    { // Item ok
+		if ((Item > 0) && (Item <= (*pMemory).Entries) && Length)
+		{ // Item ok
 
-      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s/%s%s",(char*)(*pMemory).Folder,(char*)(*pMemory).Entry[Item - 1],TEXT_FILE_NAME,EXT_TEXT);
+			snprintf(Filename, MAX_FILENAME_SIZE, "%s/%s/%s%s", (char*)(*pMemory).Folder, (char*)(*pMemory).Entry[Item - 1], TEXT_FILE_NAME, EXT_TEXT);
 
-      pFile = fopen (Filename, "wb");
-      if (NULL != pFile)
-      {
-        fwrite(pText,1,Length,pFile);
-        Result  =  OK;
-        fclose (pFile);
-      }
-    }
-    else
-    {
-      Result  =  FAIL;
-    }
+			pFile = fopen(Filename, "wb");
+			if (NULL != pFile)
+			{
+				fwrite(pText, 1, Length, pFile);
+				Result = OK;
+				fclose(pFile);
+			}
+		}
+		else
+		{
+			Result = FAIL;
+		}
 
-  }
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
 /*
  *  Get full name including path and extension
  */
-RESULT    cMemoryGetItem(PRGID PrgId,HANDLER Handle,DATA16 Item,DATA8 Length,DATA8 *pName,DATA8 *pType)
+RESULT    cMemoryGetItem(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8* pName, DATA8* pType)
 {
-  RESULT  Result = FAIL;
-  FOLDER  *pMemory;
-  char    Folder[vmPATHSIZE];
-  char    Name[vmNAMESIZE];
-  char    Ext[vmEXTSIZE];
+	RESULT  Result = FAIL;
+	FOLDER* pMemory;
+	char    Folder[vmPATHSIZE];
+	char    Name[vmNAMESIZE];
+	char    Ext[vmEXTSIZE];
 
-  Result  =  cMemoryGetPointer(PrgId,Handle,((void**)&pMemory));
-  *pType  =  0;
-  *pName  =  0;
+	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
+	*pType = 0;
+	*pName = 0;
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    if ((Item > 0) && (Item <= (*pMemory).Entries))
-    { // Item ok
+		if ((Item > 0) && (Item <= (*pMemory).Entries))
+		{ // Item ok
 
-      if (cMemoryCheckFilename((char*)(*pMemory).Entry[Item - 1],Folder,Name,Ext) == OK)
-      {
-        *pType  =  cMemoryFindType(Ext);
-        snprintf((char*)pName,(int)Length,"%s%s/%s",(char*)(*pMemory).Folder,Folder,Name);
-      }
-      else
-      {
-        Result  =  FAIL;
-      }
-    }
-    else
-    {
-      Result  =  FAIL;
-    }
+			if (cMemoryCheckFilename((char*)(*pMemory).Entry[Item - 1], Folder, Name, Ext) == OK)
+			{
+				*pType = cMemoryFindType(Ext);
+				snprintf((char*)pName, (int)Length, "%s%s/%s", (char*)(*pMemory).Folder, Folder, Name);
+			}
+			else
+			{
+				Result = FAIL;
+			}
+		}
+		else
+		{
+			Result = FAIL;
+		}
 
-  }
+	}
 
-  return (Result);
+	return (Result);
 }
 
 
 /*
  *  Close directory stream and free memory handle
  */
-void      cMemoryCloseFolder(PRGID PrgId,HANDLER *pHandle)
+void      cMemoryCloseFolder(PRGID PrgId, HANDLER* pHandle)
 {
-  RESULT  Result;
-  FOLDER  *pMemory;
+	RESULT  Result;
+	FOLDER* pMemory;
 
-  Result  =  cMemoryGetPointer(PrgId,*pHandle,((void**)&pMemory));
+	Result = cMemoryGetPointer(PrgId, *pHandle, ((void**)&pMemory));
 
-  if (Result == OK)
-  { // Handle ok
+	if (Result == OK)
+	{ // Handle ok
 
-    if ((*pMemory).pDir != NULL)
-    {
-      closedir((*pMemory).pDir);
-    }
-    cMemoryFreePool(PrgId,(void*)pMemory);
-  }
-  *pHandle  =  0;
+		if ((*pMemory).pDir != NULL)
+		{
+			closedir((*pMemory).pDir);
+		}
+		cMemoryFreePool(PrgId, (void*)pMemory);
+	}
+	*pHandle = 0;
 }
 
 
@@ -2281,1021 +2269,1021 @@ void      cMemoryCloseFolder(PRGID PrgId,HANDLER *pHandle)
  *\n
  *
  */
-/*! \brief  opFILE byte code
- *
- */
+ /*! \brief  opFILE byte code
+  *
+  */
 void      cMemoryFile(void)
 {
 
-  IP      TmpIp;
-  DSPSTAT DspStat = BUSYBREAK;
-  DATA8   Cmd;
-  DATA32  ImagePointer;
-  DATA32  ISize;
-  IP      pImage;
-  HANDLER TmpHandle;
-  PRGID   TmpPrgId;
-  DATA32  Data32;
+	IP      TmpIp;
+	DSPSTAT DspStat = BUSYBREAK;
+	DATA8   Cmd;
+	DATA32  ImagePointer;
+	DATA32  ISize;
+	IP      pImage;
+	HANDLER TmpHandle;
+	PRGID   TmpPrgId;
+	DATA32  Data32;
 
-  DATA8   *pFileName;
-  char    FilenameBuf[vmFILENAMESIZE];
-  char    PathBuf[vmPATHSIZE];
-  char    NameBuf[vmNAMESIZE];
-  char    ExtBuf[vmEXTSIZE];
+	DATA8* pFileName;
+	char    FilenameBuf[vmFILENAMESIZE];
+	char    PathBuf[vmPATHSIZE];
+	char    NameBuf[vmNAMESIZE];
+	char    ExtBuf[vmEXTSIZE];
 
-  char    SourceBuf[vmFILENAMESIZE];
-  char    DestinationBuf[vmFILENAMESIZE];
+	char    SourceBuf[vmFILENAMESIZE];
+	char    DestinationBuf[vmFILENAMESIZE];
 
-  DATA8   *pSource;
-  DATA8   *pDestination;
+	DATA8* pSource;
+	DATA8* pDestination;
 
-  char    PrgNamePath[SUBFOLDERNAME_SIZE];
-  char    PrgNameBuf[MAX_FILENAME_SIZE];
-  char    DestinationName[MAX_FILENAME_SIZE];
-  DATA16  PrgNo;
-  DATA8   Item;
-  DATA8   Items;
-  DATA8   Lng;
-  DATA8   Tmp;
-  DATA8   Del;
-  DATA8   *pFolderName;
-  int     hFile;
-  char    Buffer[LOGBUFFER_SIZE];
-  DATAF   DataF;
-  DATA16  Bytes;
-  DATA8   Figures;
-  DATA8   Decimals;
-  struct  stat FileStatus;
-  DATAF   *pValue;
-  DATA32  Time;
-  DESCR   *pDescr;
-  DATA32  UsedElements;
-  DATA32  Elements;
-  DATA32  ElementSize;
+	char    PrgNamePath[SUBFOLDERNAME_SIZE];
+	char    PrgNameBuf[MAX_FILENAME_SIZE];
+	char    DestinationName[MAX_FILENAME_SIZE];
+	DATA16  PrgNo;
+	DATA8   Item;
+	DATA8   Items;
+	DATA8   Lng;
+	DATA8   Tmp;
+	DATA8   Del;
+	DATA8* pFolderName;
+	FILE*     hFile;
+	char    Buffer[LOGBUFFER_SIZE];
+	DATAF   DataF;
+	DATA16  Bytes;
+	DATA8   Figures;
+	DATA8   Decimals;
+	struct  stat FileStatus;
+	DATAF* pValue;
+	DATA32  Time;
+	DESCR* pDescr;
+	DATA32  UsedElements;
+	DATA32  Elements;
+	DATA32  ElementSize;
 
-  DATA32  STime;
-  DATA32  STick;
-  DATA32  NTick;
-  DATA32  SIIM;
-  DATA32  DIM;
-  DATA8   *pSData;
-  DATA8   Error = 0;
-  DATA32  FreeRam;
+	DATA32  STime;
+	DATA32  STick;
+	DATA32  NTick;
+	DATA32  SIIM;
+	DATA32  DIM;
+	DATA8* pSData;
+	DATA8   Error = 0;
+	DATA32  FreeRam;
 
-  void    *pTmp;
-  HANDLER TmpHandle2;
+	void* pTmp;
+	HANDLER TmpHandle2;
 
-  DATA32  Size;
-  DATA32  Files;
+	DATA32  Size;
+	DATA32  Files;
 
-  TmpPrgId      =  CurrentProgramId();
-  TmpIp         =  GetObjectIp();
-  Cmd           =  *(DATA8*)PrimParPointer();
-  ImagePointer  =  (DATA32)NULL;
-  ISize         =  (DATA32)0;
+	TmpPrgId = CurrentProgramId();
+	TmpIp = GetObjectIp();
+	Cmd = *(DATA8*)PrimParPointer();
+	ImagePointer = (DATA32)NULL;
+	ISize = (DATA32)0;
 
-  switch (Cmd)
-  { // Function
+	switch (Cmd)
+	{ // Function
 
-    case scOPEN_APPEND:
-    {
-      pFileName     =  (DATA8*)PrimParPointer();
+	case OPEN_APPEND:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,"") == OK)
-      {
-
-#ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: OPEN_APPEND [%s]\n",FilenameBuf);
-#endif
-        DspStat       =   cMemoryOpenFile(TmpPrgId,OPEN_FOR_APPEND,(char*)FilenameBuf,&TmpHandle,&ISize);
-      }
-
-      *(DATA16*)PrimParPointer()  =  TmpHandle;
-    }
-    break;
-
-    case scOPEN_READ:
-    {
-      pFileName     =  (DATA8*)PrimParPointer();
-
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,"") == OK)
-      {
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, "") == OK)
+		{
 
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: OPEN_READ   [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: OPEN_APPEND [%s]\n", FilenameBuf);
 #endif
-        DspStat       =  cMemoryOpenFile(TmpPrgId,OPEN_FOR_READ,FilenameBuf,&TmpHandle,&ISize);
-      }
+			DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_APPEND, (char*)FilenameBuf, &TmpHandle, &ISize);
+		}
 
-      *(DATA16*)PrimParPointer()  =  TmpHandle;
-      *(DATA32*)PrimParPointer()  =  ISize;
-    }
-    break;
+		*(DATA16*)PrimParPointer() = TmpHandle;
+	}
+	break;
 
-    case scOPEN_WRITE:
-    {
-      pFileName     =  (DATA8*)PrimParPointer();
+	case OPEN_READ:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,"") == OK)
-      {
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, "") == OK)
+		{
 
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: OPEN_WRITE  [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: OPEN_READ   [%s]\n", FilenameBuf);
 #endif
-        DspStat       =  cMemoryOpenFile(TmpPrgId,OPEN_FOR_WRITE,FilenameBuf,&TmpHandle,&ISize);
+			DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_READ, FilenameBuf, &TmpHandle, &ISize);
+		}
 
-      }
+		*(DATA16*)PrimParPointer() = TmpHandle;
+		*(DATA32*)PrimParPointer() = ISize;
+	}
+	break;
 
-      *(DATA16*)PrimParPointer()  =  TmpHandle;
-    }
-    break;
+	case OPEN_WRITE:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
-    case scCLOSE:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-
-      DspStat       =  cMemoryCloseFile(TmpPrgId,TmpHandle);
-    }
-    break;
-
-    case scWRITE_TEXT:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Del           =  *(DATA8*)PrimParPointer();
-      pSource       =  (DATA8*)PrimParPointer();
-
-      DspStat       =  cMemoryWriteFile(TmpPrgId,TmpHandle,(DATA32)strlen((char*)pSource),Del,pSource);
-    }
-    break;
-
-    case scREAD_TEXT:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Del           =  *(DATA8*)PrimParPointer();
-      Lng           =  (DATA8)(*(DATA16*)PrimParPointer());
-      pDestination  =  (DATA8*)PrimParPointer();
-
-      DspStat       =  cMemoryReadFile(TmpPrgId,TmpHandle,(DATA32)Lng,Del,pDestination);
-    }
-    break;
-
-    case scWRITE_VALUE:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Del           =  *(DATA8*)PrimParPointer();
-      DataF         =  *(DATAF*)PrimParPointer();
-      Figures       =  *(DATA8*)PrimParPointer();
-      Decimals      =  *(DATA8*)PrimParPointer();
-
-      snprintf(Buffer,LOGBUFFER_SIZE,"%*.*f",Figures,Decimals,DataF);
-      DspStat       =  cMemoryWriteFile(TmpPrgId,TmpHandle,(DATA32)strlen((char*)Buffer),Del,(DATA8*)Buffer);
-    }
-    break;
-
-    case scREAD_VALUE:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Del           =  *(DATA8*)PrimParPointer();
-
-      Lng           =  64;
-      Buffer[0]     =  0;
-      pDestination  =  (DATA8*)Buffer;
-      DataF         =  (DATAF)0;
-      DspStat       =  cMemoryReadFile(TmpPrgId,TmpHandle,(DATA32)Lng,Del,pDestination);
-      sscanf(Buffer,"%f",&DataF);
-
-      *(DATAF*)PrimParPointer()  =  DataF;
-    }
-    break;
-
-    case scWRITE_BYTES:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Bytes         =  *(DATA16*)PrimParPointer();
-      pSource       =  (DATA8*)PrimParPointer();
-
-      DspStat       =  cMemoryWriteFile(TmpPrgId,TmpHandle,(DATA32)Bytes,DEL_NONE,pSource);
-    }
-    break;
-
-    case scREAD_BYTES:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Bytes         =  *(DATA16*)PrimParPointer();
-      pDestination  =  (DATA8*)PrimParPointer();
-
-      DspStat       =  cMemoryReadFile(TmpPrgId,TmpHandle,(DATA32)Bytes,DEL_NONE,pDestination);
-    }
-    break;
-
-    case scOPEN_LOG:
-    {
-      pFileName     =  (DATA8*)PrimParPointer();
-
-      STime         =  *(DATA32*)PrimParPointer();
-      STick         =  *(DATA32*)PrimParPointer();
-      NTick         =  *(DATA32*)PrimParPointer();
-      SIIM          =  *(DATA32*)PrimParPointer();
-      DIM           =  *(DATA32*)PrimParPointer();
-
-      pSData        =  (DATA8*)PrimParPointer();
-
-      TmpHandle     =  0;
-
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,vmEXT_DATALOG) == OK)
-      {
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, "") == OK)
+		{
 
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: OPEN_LOG    [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: OPEN_WRITE  [%s]\n", FilenameBuf);
 #endif
-        Bytes         =  snprintf(Buffer,LOGBUFFER_SIZE,"Sync data\t%d\t%d\t%d\t%d\t%d\r\n%s",STime,STick,NTick,SIIM,DIM,pSData);
+			DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_WRITE, FilenameBuf, &TmpHandle, &ISize);
 
-        DspStat       =  NOBREAK;
+		}
 
-        if ((SIIM < MIN_LIVE_UPDATE_TIME) || (FilenameBuf[0] == 0))
-        { // Log in ram
+		*(DATA16*)PrimParPointer() = TmpHandle;
+	}
+	break;
 
-          if (FilenameBuf[0])
-          {
-            DspStat   =  cMemoryOpenFile(TmpPrgId,OPEN_FOR_LOG,FilenameBuf,&TmpHandle,&ISize);
-          }
-          if (DspStat == NOBREAK)
-          {
-            Elements      =  LOGBUFFER_SIZE;
+	case CLOSE:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
 
-            ElementSize   =  sizeof(DATA8);
-            ISize         =  Elements * ElementSize + sizeof(DESCR);
+		DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle);
+	}
+	break;
 
-            if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pTmp,&TmpHandle) == OK)
-            {
-              (*(DESCR*)pTmp).Type          =  DATA_8;
-              (*(DESCR*)pTmp).ElementSize   =  (DATA8)ElementSize;
-              (*(DESCR*)pTmp).Elements      =  Elements;
-              (*(DESCR*)pTmp).UsedElements  =  0;
+	case WRITE_TEXT:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Del = *(DATA8*)PrimParPointer();
+		pSource = (DATA8*)PrimParPointer();
 
-  #ifdef DEBUG_C_MEMORY_LOG
-              if (pFileName[0])
-              {
-                printf("LOG_OPEN  %d into ram file %s\n",TmpHandle,FilenameBuf);
-                printf("  header  %d into ram file %d bytes\n",TmpHandle,Bytes);
-              }
-              else
-              {
-                printf("LOG_OPEN  %d into ram\n",TmpHandle);
-                printf("  header  %d into ram %d bytes\n",TmpHandle,Bytes);
-              }
-  #endif
-              pDescr        =  (DESCR*)pTmp;
+		DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)strlen((char*)pSource), Del, pSource);
+	}
+	break;
 
-              pDestination  =  (DATA8*)(*pDescr).pArray;
-              UsedElements  =  (*pDescr).UsedElements;
+	case READ_TEXT:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Del = *(DATA8*)PrimParPointer();
+		Lng = (DATA8)(*(DATA16*)PrimParPointer());
+		pDestination = (DATA8*)PrimParPointer();
 
-              Elements      =  0;
-              while (Bytes)
-              {
-                pDestination[UsedElements]  =  Buffer[Elements];
-                UsedElements++;
-                Elements++;
-                Bytes--;
-              }
-              (*pDescr).UsedElements  =  UsedElements;
-            }
-            else
-            {
-              DspStat   =  FAILBREAK;
-            }
-          }
-        }
-        else
-        { // Log in file
+		DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Lng, Del, pDestination);
+	}
+	break;
 
-          DspStat   =  cMemoryOpenFile(TmpPrgId,OPEN_FOR_LOG,FilenameBuf,&TmpHandle,&ISize);
-          if (DspStat == NOBREAK)
-          {
-            DspStat =  cMemoryWriteFile(TmpPrgId,TmpHandle,(DATA32)Bytes,DEL_NONE,(DATA8*)Buffer);
-  #ifdef DEBUG_C_MEMORY_LOG
-            printf("LOG_OPEN  %d into file %s\n",TmpHandle,(char*)pFileName);
-            printf("  header  %d file %d bytes\n",TmpHandle,Bytes);
-  #endif
-          }
-        }
-      }
-      *(HANDLER*)PrimParPointer()     =  (HANDLER)TmpHandle;
-    }
-    break;
+	case WRITE_VALUE:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Del = *(DATA8*)PrimParPointer();
+		DataF = *(DATAF*)PrimParPointer();
+		Figures = *(DATA8*)PrimParPointer();
+		Decimals = *(DATA8*)PrimParPointer();
 
-    case scWRITE_LOG:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      Time          =  *(DATA32*)PrimParPointer();
-      Items         =  *(DATA8*)PrimParPointer();
-      pValue        =  (DATAF*)PrimParPointer();
+		snprintf(Buffer, LOGBUFFER_SIZE, "%*.*f", Figures, Decimals, DataF);
+		DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)strlen((char*)Buffer), Del, (DATA8*)Buffer);
+	}
+	break;
 
-      DspStat       =  FAILBREAK;
+	case READ_VALUE:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Del = *(DATA8*)PrimParPointer();
 
-      if (Items)
-      {
+		Lng = 64;
+		Buffer[0] = 0;
+		pDestination = (DATA8*)Buffer;
+		DataF = (DATAF)0;
+		DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Lng, Del, pDestination);
+		sscanf(Buffer, "%f", &DataF);
+
+		*(DATAF*)PrimParPointer() = DataF;
+	}
+	break;
+
+	case WRITE_BYTES:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Bytes = *(DATA16*)PrimParPointer();
+		pSource = (DATA8*)PrimParPointer();
+
+		DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, pSource);
+	}
+	break;
+
+	case READ_BYTES:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Bytes = *(DATA16*)PrimParPointer();
+		pDestination = (DATA8*)PrimParPointer();
+
+		DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, pDestination);
+	}
+	break;
+
+	case OPEN_LOG:
+	{
+		pFileName = (DATA8*)PrimParPointer();
+
+		STime = *(DATA32*)PrimParPointer();
+		STick = *(DATA32*)PrimParPointer();
+		NTick = *(DATA32*)PrimParPointer();
+		SIIM = *(DATA32*)PrimParPointer();
+		DIM = *(DATA32*)PrimParPointer();
+
+		pSData = (DATA8*)PrimParPointer();
+
+		TmpHandle = 0;
+
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, vmEXT_DATALOG) == OK)
+		{
+
+#ifdef DEBUG_TRACE_FILENAME
+			printf("c_memory  cMemoryFile: OPEN_LOG    [%s]\n", FilenameBuf);
+#endif
+			Bytes = snprintf(Buffer, LOGBUFFER_SIZE, "Sync data\t%d\t%d\t%d\t%d\t%d\r\n%s", STime, STick, NTick, SIIM, DIM, pSData);
+
+			DspStat = NOBREAK;
+
+			if ((SIIM < MIN_LIVE_UPDATE_TIME) || (FilenameBuf[0] == 0))
+			{ // Log in ram
+
+				if (FilenameBuf[0])
+				{
+					DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_LOG, FilenameBuf, &TmpHandle, &ISize);
+				}
+				if (DspStat == NOBREAK)
+				{
+					Elements = LOGBUFFER_SIZE;
+
+					ElementSize = sizeof(DATA8);
+					ISize = Elements * ElementSize + sizeof(DESCR);
+
+					if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, &TmpHandle) == OK)
+					{
+						(*(DESCR*)pTmp).Type = DATA_8;
+						(*(DESCR*)pTmp).ElementSize = (DATA8)ElementSize;
+						(*(DESCR*)pTmp).Elements = Elements;
+						(*(DESCR*)pTmp).UsedElements = 0;
+
+#ifdef DEBUG_C_MEMORY_LOG
+						if (pFileName[0])
+						{
+							printf("LOG_OPEN  %d into ram file %s\n", TmpHandle, FilenameBuf);
+							printf("  header  %d into ram file %d bytes\n", TmpHandle, Bytes);
+						}
+						else
+						{
+							printf("LOG_OPEN  %d into ram\n", TmpHandle);
+							printf("  header  %d into ram %d bytes\n", TmpHandle, Bytes);
+						}
+#endif
+						pDescr = (DESCR*)pTmp;
+
+						pDestination = (DATA8*)(*pDescr).pArray;
+						UsedElements = (*pDescr).UsedElements;
+
+						Elements = 0;
+						while (Bytes)
+						{
+							pDestination[UsedElements] = Buffer[Elements];
+							UsedElements++;
+							Elements++;
+							Bytes--;
+						}
+						(*pDescr).UsedElements = UsedElements;
+					}
+					else
+					{
+						DspStat = FAILBREAK;
+					}
+				}
+			}
+			else
+			{ // Log in file
+
+				DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_LOG, FilenameBuf, &TmpHandle, &ISize);
+				if (DspStat == NOBREAK)
+				{
+					DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
+#ifdef DEBUG_C_MEMORY_LOG
+					printf("LOG_OPEN  %d into file %s\n", TmpHandle, (char*)pFileName);
+					printf("  header  %d file %d bytes\n", TmpHandle, Bytes);
+#endif
+				}
+			}
+		}
+		*(HANDLER*)PrimParPointer() = (HANDLER)TmpHandle;
+	}
+	break;
+
+	case WRITE_LOG:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Time = *(DATA32*)PrimParPointer();
+		Items = *(DATA8*)PrimParPointer();
+		pValue = (DATAF*)PrimParPointer();
+
+		DspStat = FAILBREAK;
+
+		if (Items)
+		{
 #ifndef ENABLE_LOG_ASCII
 
-        DataF     =  (DATAF)Time;
-        Bytes     =  0;
+			DataF = (DATAF)Time;
+			Bytes = 0;
 
-        memcpy((void*)&Buffer[Bytes],(void*)&DataF,sizeof(DATAF));
-        Bytes    +=  sizeof(DATAF);
+			memcpy((void*)&Buffer[Bytes], (void*)&DataF, sizeof(DATAF));
+			Bytes += sizeof(DATAF);
 
-        for (Item = 0;Item < Items;Item++)
-        {
-          memcpy((void*)&Buffer[Bytes],(void*)&pValue[Item],sizeof(DATAF));
-          Bytes  +=  sizeof(DATAF);
-        }
+			for (Item = 0; Item < Items; Item++)
+			{
+				memcpy((void*)&Buffer[Bytes], (void*)&pValue[Item], sizeof(DATAF));
+				Bytes += sizeof(DATAF);
+			}
 
 #else
-        Bytes  =  (DATA16)snprintf(Buffer,LOGBUFFER_SIZE,"%08d\t",Time);
-        for (Item = 0;Item < Items;Item++)
-        {
+			Bytes = (DATA16)snprintf(Buffer, LOGBUFFER_SIZE, "%08d\t", Time);
+			for (Item = 0; Item < Items; Item++)
+			{
 
-          if (Item != (Items - 1))
-          {
-            Bytes +=  snprintf(&Buffer[Bytes],LOGBUFFER_SIZE - Bytes,"%.1f\t",pValue[Item]);
-          }
-          else
-          {
-            Bytes +=  snprintf(&Buffer[Bytes],LOGBUFFER_SIZE - Bytes,"%.1f\r\n",pValue[Item]);
-          }
-        }
+				if (Item != (Items - 1))
+				{
+					Bytes += snprintf(&Buffer[Bytes], LOGBUFFER_SIZE - Bytes, "%.1f\t", pValue[Item]);
+				}
+				else
+				{
+					Bytes += snprintf(&Buffer[Bytes], LOGBUFFER_SIZE - Bytes, "%.1f\r\n", pValue[Item]);
+				}
+			}
 #endif
 
-        if (MemoryInstance.pPoolList[TmpPrgId][TmpHandle].Type == POOL_TYPE_MEMORY)
-        { // Log to memory
+			if (MemoryInstance.pPoolList[TmpPrgId][TmpHandle].Type == POOL_TYPE_MEMORY)
+			{ // Log to memory
 
-          if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-          {
-            pDescr        =  (DESCR*)pTmp;
+				if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+				{
+					pDescr = (DESCR*)pTmp;
 
-            UsedElements  =  (DATA32)Bytes + (*pDescr).UsedElements;
-            Elements      =  (*pDescr).Elements;
+					UsedElements = (DATA32)Bytes + (*pDescr).UsedElements;
+					Elements = (*pDescr).Elements;
 
-            if (UsedElements > Elements)
-            {
-              Elements +=  LOGBUFFER_SIZE;
-              cMemoryGetUsage(NULL,&FreeRam,0);
+					if (UsedElements > Elements)
+					{
+						Elements += LOGBUFFER_SIZE;
+						cMemoryGetUsage(NULL, &FreeRam, 0);
 
-              if (FreeRam > (((Elements + (KB - 1)) / KB) + LOW_MEMORY))
-              {
-                if (cMemoryResize(TmpPrgId,TmpHandle,Elements) == NULL)
-                {
-                  Error  =  OUT_OF_MEMORY;
-                }
-              }
-              else
-              {
-                DspStat             =  NOBREAK;
-                Error               =  OUT_OF_MEMORY;
-              }
-            }
+						if (FreeRam > (((Elements + (KB - 1)) / KB) + LOW_MEMORY))
+						{
+							if (cMemoryResize(TmpPrgId, TmpHandle, Elements) == NULL)
+							{
+								Error = OUT_OF_MEMORY;
+							}
+						}
+						else
+						{
+							DspStat = NOBREAK;
+							Error = OUT_OF_MEMORY;
+						}
+					}
 
-            if (!Error)
-            {
-              if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-              {
-                pDescr        =  (DESCR*)pTmp;
+					if (!Error)
+					{
+						if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+						{
+							pDescr = (DESCR*)pTmp;
 
-                pDestination  =  (DATA8*)(*pDescr).pArray;
-                UsedElements  =  (*pDescr).UsedElements;
-
-  #ifdef DEBUG_C_MEMORY_LOG
-                printf("LOG_WRITE %d ram %d bytes\n",TmpHandle,Bytes);
-  #endif
-                memcpy((void*)&pDestination[UsedElements],Buffer,(size_t)Bytes);
-                (*pDescr).UsedElements  =  UsedElements + (DATA32)Bytes;
-
-                DspStat     =  NOBREAK;
-
-              }
-              else
-              {
-                Error  =  OUT_OF_MEMORY;
-              }
-            }
-          }
-        }
-        else
-        { // Log to file
+							pDestination = (DATA8*)(*pDescr).pArray;
+							UsedElements = (*pDescr).UsedElements;
 
 #ifdef DEBUG_C_MEMORY_LOG
-          printf("LOG_WRITE %d file %d bytes\n",TmpHandle,Bytes);
+							printf("LOG_WRITE %d ram %d bytes\n", TmpHandle, Bytes);
 #endif
-          DspStat       =  cMemoryWriteFile(TmpPrgId,TmpHandle,(DATA32)Bytes,DEL_NONE,(DATA8*)Buffer);
-        }
-      }
-      if (Error == OUT_OF_MEMORY)
-      {
-        UiInstance.Warning |=  WARNING_RAM;
-      }
-      else
-      {
-        UiInstance.Warning &= ~WARNING_RAM;
-      }
-      DspStat     =  NOBREAK;
-    }
-    break;
+							memcpy((void*)&pDestination[UsedElements], Buffer, (size_t)Bytes);
+							(*pDescr).UsedElements = UsedElements + (DATA32)Bytes;
 
-    case scCLOSE_LOG:
-    {
-      TmpHandle     =  *(DATA16*)PrimParPointer();
-      pFileName     =  (DATA8*)PrimParPointer();
+							DspStat = NOBREAK;
 
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,vmEXT_DATALOG) == OK)
-      {
-        DspStat     =  cMemoryGetFileHandle(TmpPrgId,FilenameBuf,&TmpHandle2,&Tmp);
+						}
+						else
+						{
+							Error = OUT_OF_MEMORY;
+						}
+					}
+				}
+			}
+			else
+			{ // Log to file
+
+#ifdef DEBUG_C_MEMORY_LOG
+				printf("LOG_WRITE %d file %d bytes\n", TmpHandle, Bytes);
+#endif
+				DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
+			}
+		}
+		if (Error == OUT_OF_MEMORY)
+		{
+			UiInstance.Warning |= WARNING_RAM;
+		}
+		else
+		{
+			UiInstance.Warning &= ~WARNING_RAM;
+		}
+		DspStat = NOBREAK;
+	}
+	break;
+
+	case CLOSE_LOG:
+	{
+		TmpHandle = *(DATA16*)PrimParPointer();
+		pFileName = (DATA8*)PrimParPointer();
+
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, vmEXT_DATALOG) == OK)
+		{
+			DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, &TmpHandle2, &Tmp);
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: CLOSE_LOG   [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: CLOSE_LOG   [%s]\n", FilenameBuf);
 #endif
 
-        if (MemoryInstance.pPoolList[TmpPrgId][TmpHandle].Type == POOL_TYPE_MEMORY)
-        { // Log to memory
+			if (MemoryInstance.pPoolList[TmpPrgId][TmpHandle].Type == POOL_TYPE_MEMORY)
+			{ // Log to memory
 
-          if (FilenameBuf[0])
-          {
-            if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-            {
-              pDescr      =  (DESCR*)pTmp;
+				if (FilenameBuf[0])
+				{
+					if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+					{
+						pDescr = (DESCR*)pTmp;
 
-              if (DspStat == NOBREAK)
-              {
-                pSource       =  (DATA8*)(*pDescr).pArray;
+						if (DspStat == NOBREAK)
+						{
+							pSource = (DATA8*)(*pDescr).pArray;
 
 #ifndef ENABLE_LOG_ASCII
-                Buffer[0]  =  0xFF;
-                Buffer[1]  =  0xFF;
-                Buffer[2]  =  0xFF;
-                Buffer[3]  =  0xFF;
-                Buffer[4]  =  0xFF;
-                Buffer[5]  =  0xFF;
-                Buffer[6]  =  0xFF;
-                Buffer[7]  =  0xFF;
+							Buffer[0] = 0xFF;
+							Buffer[1] = 0xFF;
+							Buffer[2] = 0xFF;
+							Buffer[3] = 0xFF;
+							Buffer[4] = 0xFF;
+							Buffer[5] = 0xFF;
+							Buffer[6] = 0xFF;
+							Buffer[7] = 0xFF;
 
-                Bytes      =  8;
+							Bytes = 8;
 #else
-                Buffer[0]  =  'F';
-                Buffer[1]  =  'F';
-                Buffer[2]  =  'F';
-                Buffer[3]  =  'F';
-                Buffer[4]  =  'F';
-                Buffer[5]  =  'F';
-                Buffer[6]  =  'F';
-                Buffer[7]  =  'F';
-                Buffer[8]  =  '\r';
-                Buffer[9]  =  '\n';
+							Buffer[0] = 'F';
+							Buffer[1] = 'F';
+							Buffer[2] = 'F';
+							Buffer[3] = 'F';
+							Buffer[4] = 'F';
+							Buffer[5] = 'F';
+							Buffer[6] = 'F';
+							Buffer[7] = 'F';
+							Buffer[8] = '\r';
+							Buffer[9] = '\n';
 
-                Bytes      =  10;
+							Bytes = 10;
 #endif
 
-                UsedElements  =  (DATA32)Bytes + (*pDescr).UsedElements;
-                Elements      =  (*pDescr).Elements;
+							UsedElements = (DATA32)Bytes + (*pDescr).UsedElements;
+							Elements = (*pDescr).Elements;
 
-                cMemoryGetUsage(NULL,&FreeRam,0);
+							cMemoryGetUsage(NULL, &FreeRam, 0);
 
-                if (UsedElements > Elements)
-                {
-                  Elements +=  LOGBUFFER_SIZE;
+							if (UsedElements > Elements)
+							{
+								Elements += LOGBUFFER_SIZE;
 
-                  if (FreeRam > (((Elements + (KB - 1)) / KB) + LOW_MEMORY))
-                  {
-                    if (cMemoryResize(TmpPrgId,TmpHandle,Elements) == NULL)
-                    {
-                      Error  =  OUT_OF_MEMORY;
-                    }
-                  }
-                  else
-                  {
-                    Error               =  OUT_OF_MEMORY;
-                  }
-                }
+								if (FreeRam > (((Elements + (KB - 1)) / KB) + LOW_MEMORY))
+								{
+									if (cMemoryResize(TmpPrgId, TmpHandle, Elements) == NULL)
+									{
+										Error = OUT_OF_MEMORY;
+									}
+								}
+								else
+								{
+									Error = OUT_OF_MEMORY;
+								}
+							}
 
-                if (!Error)
-                {
+							if (!Error)
+							{
 #ifdef DEBUG_C_MEMORY_LOG
-                  printf("LOG_WRITE %d ram %d log end signature\n",TmpHandle,Bytes);
+								printf("LOG_WRITE %d ram %d log end signature\n", TmpHandle, Bytes);
 #endif
-                  memcpy((void*)&pSource[(*pDescr).UsedElements],Buffer,(size_t)Bytes);
-                }
+								memcpy((void*)&pSource[(*pDescr).UsedElements], Buffer, (size_t)Bytes);
+							}
 
-                if (UsedElements > (FreeRam * KB))
-                {
-                  UsedElements  =  FreeRam * KB;
-                }
+							if (UsedElements > (FreeRam * KB))
+							{
+								UsedElements = FreeRam * KB;
+							}
 
-  #ifdef DEBUG_C_MEMORY_LOG
-                printf("LOG_CLOSE %d ram and save %d bytes to %s\n",TmpHandle,UsedElements,(char*)pFileName);
-  #endif
-                DspStat   =  cMemoryWriteFile(TmpPrgId,TmpHandle2,(DATA32)UsedElements,DEL_NONE,pSource);
-              }
-              if (DspStat == NOBREAK)
-              {
-                DspStat   =  cMemoryCloseFile(TmpPrgId,TmpHandle2);
-                sync();
-              }
-            }
-          }
-          else
-          {
-            DspStat       =  NOBREAK;
-          }
 #ifdef DEBUG_C_MEMORY_LOG
-          printf("LOG_CLOSE %d pool\n",TmpHandle);
+							printf("LOG_CLOSE %d ram and save %d bytes to %s\n", TmpHandle, UsedElements, (char*)pFileName);
 #endif
-          cMemoryFreeHandle(TmpPrgId,TmpHandle);
+							DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle2, (DATA32)UsedElements, DEL_NONE, pSource);
+						}
+						if (DspStat == NOBREAK)
+						{
+							DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle2);
+							sync();
+						}
+					}
+				}
+				else
+				{
+					DspStat = NOBREAK;
+				}
+#ifdef DEBUG_C_MEMORY_LOG
+				printf("LOG_CLOSE %d pool\n", TmpHandle);
+#endif
+				cMemoryFreeHandle(TmpPrgId, TmpHandle);
 
-          UiInstance.Warning &= ~WARNING_RAM;
-        }
-        else
-        {
+				UiInstance.Warning &= ~WARNING_RAM;
+			}
+			else
+			{
 #ifndef ENABLE_LOG_ASCII
-          Buffer[0]  =  0xFF;
-          Buffer[1]  =  0xFF;
-          Buffer[2]  =  0xFF;
-          Buffer[3]  =  0xFF;
-          Buffer[4]  =  0xFF;
-          Buffer[5]  =  0xFF;
-          Buffer[6]  =  0xFF;
-          Buffer[7]  =  0xFF;
+				Buffer[0] = 0xFF;
+				Buffer[1] = 0xFF;
+				Buffer[2] = 0xFF;
+				Buffer[3] = 0xFF;
+				Buffer[4] = 0xFF;
+				Buffer[5] = 0xFF;
+				Buffer[6] = 0xFF;
+				Buffer[7] = 0xFF;
 
-          Bytes      =  8;
+				Bytes = 8;
 #else
-          Buffer[0]  =  'F';
-          Buffer[1]  =  'F';
-          Buffer[2]  =  'F';
-          Buffer[3]  =  'F';
-          Buffer[4]  =  'F';
-          Buffer[5]  =  'F';
-          Buffer[6]  =  'F';
-          Buffer[7]  =  'F';
-          Buffer[8]  =  '\r';
-          Buffer[9]  =  '\n';
+				Buffer[0] = 'F';
+				Buffer[1] = 'F';
+				Buffer[2] = 'F';
+				Buffer[3] = 'F';
+				Buffer[4] = 'F';
+				Buffer[5] = 'F';
+				Buffer[6] = 'F';
+				Buffer[7] = 'F';
+				Buffer[8] = '\r';
+				Buffer[9] = '\n';
 
-          Bytes      =  10;
+				Bytes = 10;
 #endif
 
 #ifdef DEBUG_C_MEMORY_LOG
-          printf("LOG_WRITE %d file %d 0xFF\n",TmpHandle,Bytes);
+				printf("LOG_WRITE %d file %d 0xFF\n", TmpHandle, Bytes);
 #endif
-          DspStat       =  cMemoryWriteFile(TmpPrgId,TmpHandle,(DATA32)Bytes,DEL_NONE,(DATA8*)Buffer);
+				DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
 
 #ifdef DEBUG_C_MEMORY_LOG
-          printf("LOG_CLOSE %d file\n",TmpHandle);
+				printf("LOG_CLOSE %d file\n", TmpHandle);
 #endif
-          DspStat       =  cMemoryCloseFile(TmpPrgId,TmpHandle);
+				DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle);
 
-          sync();
-        }
-      }
-      DspStat       =  NOBREAK;
-    }
-    break;
+				sync();
+			}
+		}
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scGET_LOG_NAME:
-    {
-      Lng           = *(DATA8*)PrimParPointer();
-      pFileName     =  (DATA8*)PrimParPointer();
+	case GET_LOG_NAME:
+	{
+		Lng = *(DATA8*)PrimParPointer();
+		pFileName = (DATA8*)PrimParPointer();
 
-      cMemoryFindLogName(TmpPrgId,DestinationName);
+		cMemoryFindLogName(TmpPrgId, DestinationName);
 
-      if (VMInstance.Handle >= 0)
-      {
-        Data32        =  (DATA32)strlen(DestinationName);
-        Data32       +=  1;
-        if (Data32 > MIN_ARRAY_ELEMENTS)
-        {
-          pFileName   =  (DATA8*)VmMemoryResize(VMInstance.Handle,Data32);
-        }
-        Lng  =  (DATA8)Data32;
-      }
-      if (pFileName != NULL)
-      {
-        snprintf((char*)pFileName,(int)Lng,"%s",DestinationName);
-      }
-      DspStat       =  NOBREAK;
-    }
-    break;
+		if (VMInstance.Handle >= 0)
+		{
+			Data32 = (DATA32)strlen(DestinationName);
+			Data32 += 1;
+			if (Data32 > MIN_ARRAY_ELEMENTS)
+			{
+				pFileName = (DATA8*)VmMemoryResize(VMInstance.Handle, Data32);
+			}
+			Lng = (DATA8)Data32;
+		}
+		if (pFileName != NULL)
+		{
+			snprintf((char*)pFileName, (int)Lng, "%s", DestinationName);
+		}
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scGET_HANDLE:
-    {
-      pFileName     =  (DATA8*)PrimParPointer();
+	case GET_HANDLE:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
-      TmpHandle     =  0;
-      Tmp           =  0;
+		TmpHandle = 0;
+		Tmp = 0;
 
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,"") == OK)
-      {
-        DspStat     =  cMemoryGetFileHandle(TmpPrgId,FilenameBuf,&TmpHandle,&Tmp);
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, "") == OK)
+		{
+			DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, &TmpHandle, &Tmp);
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: GET_HANDLE  [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: GET_HANDLE  [%s]\n", FilenameBuf);
 #endif
-      }
+		}
 
-      *(DATA16*)PrimParPointer()  =  TmpHandle;
-      *(DATA8*)PrimParPointer()   =  Tmp;
-    }
-    break;
+		*(DATA16*)PrimParPointer() = TmpHandle;
+		*(DATA8*)PrimParPointer() = Tmp;
+	}
+	break;
 
-    case scREMOVE:
-    {
-      pFileName     =  (DATA8*)PrimParPointer();
+	case REMOVE:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
-      if (ConstructFilename(TmpPrgId,(char*)pFileName,FilenameBuf,"") == OK)
-      {
-        cMemoryDeleteSubFolders(FilenameBuf);
+		if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, "") == OK)
+		{
+			cMemoryDeleteSubFolders(FilenameBuf);
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: REMOVE      [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: REMOVE      [%s]\n", FilenameBuf);
 #endif
-        SetUiUpdate();
-      }
-      DspStat       =  NOBREAK;
-    }
-    break;
+			SetUiUpdate();
+		}
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scMAKE_FOLDER:
-    {
-      pDestination  =  (DATA8*)PrimParPointer();
+	case MAKE_FOLDER:
+	{
+		pDestination = (DATA8*)PrimParPointer();
 
-      snprintf(PathBuf,vmPATHSIZE,"%s",pDestination);
+		snprintf(PathBuf, vmPATHSIZE, "%s", pDestination);
 
-      Data32  =  (DATA32)strlen(PathBuf);
-      if (Data32)
-      {
-        if (PathBuf[Data32 - 1] == '/')
-        {
-          PathBuf[Data32 - 1]  =  0;
-        }
-      }
+		Data32 = (DATA32)strlen(PathBuf);
+		if (Data32)
+		{
+			if (PathBuf[Data32 - 1] == '/')
+			{
+				PathBuf[Data32 - 1] = 0;
+			}
+		}
 
-      Tmp        =  0;
-      if (stat((char*)PathBuf,&FileStatus) == 0)
-      {
-        Tmp      =  1;
+		Tmp = 0;
+		if (stat((char*)PathBuf, &FileStatus) == 0)
+		{
+			Tmp = 1;
 #ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: MAKE_FOLDER [%s] already present\n",PathBuf);
+			printf("c_memory  cMemoryFile: MAKE_FOLDER [%s] already present\n", PathBuf);
 #endif
-      }
-      else
-      {
-        mkdir((char*)PathBuf,DIRPERMISSIONS);
-        chmod((char*)PathBuf,DIRPERMISSIONS);
-        sync();
-
-#ifdef DEBUG_TRACE_FILENAME
-        printf("c_memory  cMemoryFile: MAKE_FOLDER [%s]\n",PathBuf);
-#endif
-
-        if (stat((char*)PathBuf,&FileStatus) == 0)
-        {
-          Tmp      =  1;
-        }
-      }
-      *(DATA8*)PrimParPointer()  =  Tmp;
-
-      DspStat       =  NOBREAK;
-    }
-    break;
-
-    case scMOVE:
-    {
-      pSource         =  (DATA8*)PrimParPointer();
-      pDestination    =  (DATA8*)PrimParPointer();
-
-      DspStat         =  NOBREAK;
-
-      if (ConstructFilename(TmpPrgId,(char*)pSource,SourceBuf,"") == OK)
-      {
-        if (ConstructFilename(TmpPrgId,(char*)pDestination,DestinationBuf,"") == OK)
-        {
-
-          snprintf(Buffer,LOGBUFFER_SIZE,"cp -r \"%s\" \"%s\"",SourceBuf,DestinationBuf);
-#ifdef DEBUG_TRACE_FILENAME
-          printf("c_memory  cMemoryFile: MOVE        [%s]\n",Buffer);
-#endif
-
-          if (stat(DestinationBuf,&FileStatus) == 0)
-          { // Exist
-
-            cMemoryDeleteSubFolders(DestinationBuf);
-#ifdef DEBUG_TRACE_FILENAME
-            printf("  c_memory  cMemoryFile: remove    [%s]\n",DestinationBuf);
-#endif
-            sync();
-          }
-
-          Size  =  cMemoryFindSize((char*)SourceBuf,&Files);
-
-          cMemoryGetUsage(NULL,&FreeRam,1);
-          if (((Size + (KB - 1)) / KB) < FreeRam)
-          {
-            system(Buffer);
-          }
-          else
-          {
-            DspStat   =  FAILBREAK;
-          }
-
-          sync();
-          SetUiUpdate();
-        }
-      }
-
-    }
-    break;
-
-    case scLOAD_IMAGE:
-    {
-      PrgNo         =  *(DATA16*)PrimParPointer();
-      pFileName     =   (DATA8*)PrimParPointer();
-      DspStat       =  FAILBREAK;
-      ISize         =  0;
-      ImagePointer  =  0;
-
-      if (ProgramStatus(PrgNo) == STOPPED)
-      {
-        if (cMemoryCheckFilename((char*)pFileName,PathBuf,NameBuf,ExtBuf) == OK)
-        { // Filename OK
-
-          if (PathBuf[0] == 0)
-          { // Default path
-
-            snprintf(PathBuf,vmPATHSIZE,"%s/",DEFAULT_FOLDER);
-          }
-
-          if (ExtBuf[0] == 0)
-          { // Default extension
-
-            snprintf(ExtBuf,vmEXTSIZE,"%s",EXT_BYTECODE);
-          }
-
-          // Save path
-          snprintf((char*)MemoryInstance.PathList[PrgNo],vmPATHSIZE,"%s",PathBuf);
-
-          // Save name for run screen
-          snprintf((char*)VMInstance.Program[PrgNo].Name,vmNAMESIZE,"%s",NameBuf);
-
-          // Construct filename for open
-          snprintf(FilenameBuf,vmFILENAMESIZE,"%s%s%s",PathBuf,NameBuf,ExtBuf);
+		}
+		else
+		{
+			mkdir_cst((char*)PathBuf, DIRPERMISSIONS);
+			chmod((char*)PathBuf, DIRPERMISSIONS);
+			sync();
 
 #ifdef DEBUG_TRACE_FILENAME
-          printf("c_memory  cMemoryFile: LOAD_IMAGE  [%s]\n",FilenameBuf);
+			printf("c_memory  cMemoryFile: MAKE_FOLDER [%s]\n", PathBuf);
 #endif
-          hFile         =  open(FilenameBuf,O_RDONLY);
 
-          if (hFile >= MIN_HANDLE)
-          {
-            stat(FilenameBuf,&FileStatus);
-            ISize  =  FileStatus.st_size;
+			if (stat((char*)PathBuf, &FileStatus) == 0)
+			{
+				Tmp = 1;
+			}
+		}
+		*(DATA8*)PrimParPointer() = Tmp;
 
-            // allocate memory to contain the whole file:
-            if (cMemoryAlloc(PrgNo,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pImage,&TmpHandle) == OK)
-            {
-              if (ISize == read(hFile,pImage,ISize))
-              {
-                ImagePointer  =  (DATA32)pImage;
-                DspStat       =  NOBREAK;
-              }
-            }
+		DspStat = NOBREAK;
+	}
+	break;
 
-            close(hFile);
-          }
-          *(DATA32*)PrimParPointer()  =  ISize;
-          *(DATA32*)PrimParPointer()  =  ImagePointer;
-        }
-        else
-        {
-          PrimParPointer();
-          PrimParPointer();
-        }
-      }
-      else
-      {
-        PrimParPointer();
-        PrimParPointer();
-      }
-      DspStat       =  NOBREAK;
-    }
-    break;
+	case MOVE:
+	{
+		pSource = (DATA8*)PrimParPointer();
+		pDestination = (DATA8*)PrimParPointer();
 
-    case scGET_POOL:
-    {
-      ISize       =  *(DATA32*)PrimParPointer();
-      DspStat     =  FAILBREAK;
-      TmpHandle   = -1;
+		DspStat = NOBREAK;
 
-      if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pImage,&TmpHandle) == OK)
-      {
-        ImagePointer  =  (DATA32)pImage;
-        DspStat       =  NOBREAK;
-      }
+		if (ConstructFilename(TmpPrgId, (char*)pSource, SourceBuf, "") == OK)
+		{
+			if (ConstructFilename(TmpPrgId, (char*)pDestination, DestinationBuf, "") == OK)
+			{
 
-      *(DATA16*)PrimParPointer()  =  TmpHandle;
-      *(DATA32*)PrimParPointer()  =  ImagePointer;
-    }
-    break;
+				snprintf(Buffer, LOGBUFFER_SIZE, "cp -r \"%s\" \"%s\"", SourceBuf, DestinationBuf);
+#ifdef DEBUG_TRACE_FILENAME
+				printf("c_memory  cMemoryFile: MOVE        [%s]\n", Buffer);
+#endif
 
-    case scGET_FOLDERS:
-    {
-      pFolderName  =  (DATA8*)PrimParPointer();
-      *(DATA8*)PrimParPointer()  =  cMemoryFindSubFolders((char*)pFolderName);
+				if (stat(DestinationBuf, &FileStatus) == 0)
+				{ // Exist
 
-      DspStat  =  NOBREAK;
-    }
-    break;
+					cMemoryDeleteSubFolders(DestinationBuf);
+#ifdef DEBUG_TRACE_FILENAME
+					printf("  c_memory  cMemoryFile: remove    [%s]\n", DestinationBuf);
+#endif
+					sync();
+				}
 
-    case scGET_SUBFOLDER_NAME:
-    {
-      pFolderName   =  (DATA8*)PrimParPointer();
-      Item          = *(DATA8*)PrimParPointer();
-      Lng           = *(DATA8*)PrimParPointer();
-      pDestination  =  (DATA8*)PrimParPointer();
+				Size = cMemoryFindSize((char*)SourceBuf, &Files);
 
-      cMemoryGetSubFolderName(Item,Lng,(char*)pFolderName,(char*)pDestination);
+				cMemoryGetUsage(NULL, &FreeRam, 1);
+				if (((Size + (KB - 1)) / KB) < FreeRam)
+				{
+					system(Buffer);
+				}
+				else
+				{
+					DspStat = FAILBREAK;
+				}
 
-      DspStat  =  NOBREAK;
-    }
-    break;
+				sync();
+				SetUiUpdate();
+			}
+		}
 
-    case scDEL_SUBFOLDER:
-    {
-      pFolderName   =  (DATA8*)PrimParPointer();
-      Item          = *(DATA8*)PrimParPointer();
-      cMemoryGetSubFolderName(Item,SUBFOLDERNAME_SIZE,(char*)pFolderName,PrgNamePath);
+	}
+	break;
 
-      snprintf(PrgNameBuf,MAX_FILENAME_SIZE,"%s%s",(char*)pFolderName,PrgNamePath);
+	case LOAD_IMAGE:
+	{
+		PrgNo = *(DATA16*)PrimParPointer();
+		pFileName = (DATA8*)PrimParPointer();
+		DspStat = FAILBREAK;
+		ISize = 0;
+		ImagePointer = 0;
+
+		if (ProgramStatus(PrgNo) == STOPPED)
+		{
+			if (cMemoryCheckFilename((char*)pFileName, PathBuf, NameBuf, ExtBuf) == OK)
+			{ // Filename OK
+
+				if (PathBuf[0] == 0)
+				{ // Default path
+
+					snprintf(PathBuf, vmPATHSIZE, "%s/", DEFAULT_FOLDER);
+				}
+
+				if (ExtBuf[0] == 0)
+				{ // Default extension
+
+					snprintf(ExtBuf, vmEXTSIZE, "%s", EXT_BYTECODE);
+				}
+
+				// Save path
+				snprintf((char*)MemoryInstance.PathList[PrgNo], vmPATHSIZE, "%s", PathBuf);
+
+				// Save name for run screen
+				snprintf((char*)VMInstance.Program[PrgNo].Name, vmNAMESIZE, "%s", NameBuf);
+
+				// Construct filename for open
+				snprintf(FilenameBuf, vmFILENAMESIZE, "%s%s%s", PathBuf, NameBuf, ExtBuf);
+
+#ifdef DEBUG_TRACE_FILENAME
+				printf("c_memory  cMemoryFile: LOAD_IMAGE  [%s]\n", FilenameBuf);
+#endif
+				hFile = fopen(FilenameBuf, "r");
+
+				if (hFile >= MIN_HANDLE)
+				{
+					stat(FilenameBuf, &FileStatus);
+					ISize = FileStatus.st_size;
+
+					// allocate memory to contain the whole file:
+					if (cMemoryAlloc(PrgNo, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
+					{
+						if (ISize == fread(pImage, sizeof(IMGDATA), ISize, hFile))
+						{
+							ImagePointer = (DATA32)pImage;
+							DspStat = NOBREAK;
+						}
+					}
+
+					fclose(hFile);
+				}
+				*(DATA32*)PrimParPointer() = ISize;
+				*(DATA32*)PrimParPointer() = ImagePointer;
+			}
+			else
+			{
+				PrimParPointer();
+				PrimParPointer();
+			}
+		}
+		else
+		{
+			PrimParPointer();
+			PrimParPointer();
+		}
+		DspStat = NOBREAK;
+	}
+	break;
+
+	case GET_POOL:
+	{
+		ISize = *(DATA32*)PrimParPointer();
+		DspStat = FAILBREAK;
+		TmpHandle = -1;
+
+		if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
+		{
+			ImagePointer = (DATA32)pImage;
+			DspStat = NOBREAK;
+		}
+
+		*(DATA16*)PrimParPointer() = TmpHandle;
+		*(DATA32*)PrimParPointer() = ImagePointer;
+	}
+	break;
+
+	case GET_FOLDERS:
+	{
+		pFolderName = (DATA8*)PrimParPointer();
+		*(DATA8*)PrimParPointer() = cMemoryFindSubFolders((char*)pFolderName);
+
+		DspStat = NOBREAK;
+	}
+	break;
+
+	case GET_SUBFOLDER_NAME:
+	{
+		pFolderName = (DATA8*)PrimParPointer();
+		Item = *(DATA8*)PrimParPointer();
+		Lng = *(DATA8*)PrimParPointer();
+		pDestination = (DATA8*)PrimParPointer();
+
+		cMemoryGetSubFolderName(Item, Lng, (char*)pFolderName, (char*)pDestination);
+
+		DspStat = NOBREAK;
+	}
+	break;
+
+	case DEL_SUBFOLDER:
+	{
+		pFolderName = (DATA8*)PrimParPointer();
+		Item = *(DATA8*)PrimParPointer();
+		cMemoryGetSubFolderName(Item, SUBFOLDERNAME_SIZE, (char*)pFolderName, PrgNamePath);
+
+		snprintf(PrgNameBuf, MAX_FILENAME_SIZE, "%s%s", (char*)pFolderName, PrgNamePath);
 #ifdef DEBUG
-      printf("Trying to delete %s\n",PrgNameBuf);
+		printf("Trying to delete %s\n", PrgNameBuf);
 #endif
-      cMemoryDeleteSubFolders(PrgNameBuf);
+		cMemoryDeleteSubFolders(PrgNameBuf);
 
-      DspStat  =  NOBREAK;
-    }
-    break;
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scSET_LOG_SYNC_TIME:
-    {
-      MemoryInstance.SyncTime   =  *(DATA32*)PrimParPointer();
-      MemoryInstance.SyncTick   =  *(DATA32*)PrimParPointer();
+	case SET_LOG_SYNC_TIME:
+	{
+		MemoryInstance.SyncTime = *(DATA32*)PrimParPointer();
+		MemoryInstance.SyncTick = *(DATA32*)PrimParPointer();
 
-      DspStat  =  NOBREAK;
-    }
-    break;
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scGET_LOG_SYNC_TIME:
-    {
-      *(DATA32*)PrimParPointer()  =  MemoryInstance.SyncTime;
-      *(DATA32*)PrimParPointer()  =  MemoryInstance.SyncTick;
+	case GET_LOG_SYNC_TIME:
+	{
+		*(DATA32*)PrimParPointer() = MemoryInstance.SyncTime;
+		*(DATA32*)PrimParPointer() = MemoryInstance.SyncTick;
 
-      DspStat  =  NOBREAK;
-    }
-    break;
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scGET_ITEM:
-    {
-      pFolderName   =  (DATA8*)PrimParPointer();
-      pFileName     =  (DATA8*)PrimParPointer();
-      DspStat       =  NOBREAK;
+	case GET_ITEM:
+	{
+		pFolderName = (DATA8*)PrimParPointer();
+		pFileName = (DATA8*)PrimParPointer();
+		DspStat = NOBREAK;
 
-      Items   =  cMemoryFindSubFolders((char*)pFolderName);
-      Tmp     =  0;
-      Item    =  0;
+		Items = cMemoryFindSubFolders((char*)pFolderName);
+		Tmp = 0;
+		Item = 0;
 
-      while ((Items > 0) && (Item == 0))
-      {
-        Tmp++;
-        cMemoryGetSubFolderName(Tmp,SUBFOLDERNAME_SIZE,(char*)pFolderName,(char*)PrgNamePath);
+		while ((Items > 0) && (Item == 0))
+		{
+			Tmp++;
+			cMemoryGetSubFolderName(Tmp, SUBFOLDERNAME_SIZE, (char*)pFolderName, (char*)PrgNamePath);
 #ifdef DEBUG
-        printf("%s %s\n",(char*)pFileName,PrgNamePath);
+			printf("%s %s\n", (char*)pFileName, PrgNamePath);
 #endif
-        if (strcmp((char*)pFileName,PrgNamePath) == 0)
-        {
-          Item  =  Tmp;
+			if (strcmp((char*)pFileName, PrgNamePath) == 0)
+			{
+				Item = Tmp;
 #ifdef DEBUG
-          printf("Found %i\n",Item);
+				printf("Found %i\n", Item);
 #endif
-        }
-        Items--;
-      }
-      *(DATA8*)PrimParPointer()  =  Item;
+			}
+			Items--;
+		}
+		*(DATA8*)PrimParPointer() = Item;
 
-    }
-    break;
+	}
+	break;
 
-    case scGET_CACHE_FILES:
-    {
-      Items  =  0;
-      for (Tmp = 0;Tmp < CACHE_DEEPT;Tmp++)
-      {
-        if (MemoryInstance.Cache[Tmp][0])
-        {
-          Items++;
-        }
-      }
-      *(DATA8*)PrimParPointer()  =  Items;
+	case GET_CACHE_FILES:
+	{
+		Items = 0;
+		for (Tmp = 0; Tmp < CACHE_DEEPT; Tmp++)
+		{
+			if (MemoryInstance.Cache[Tmp][0])
+			{
+				Items++;
+			}
+		}
+		*(DATA8*)PrimParPointer() = Items;
 #ifdef DEBUG
-      printf("GET_CACHE_FILES %d\n",Items);
+		printf("GET_CACHE_FILES %d\n", Items);
 #endif
-      DspStat  =  NOBREAK;
-    }
-    break;
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scPUT_CACHE_FILE:
-    {
-      pFileName       =   (DATA8*)PrimParPointer();
+	case PUT_CACHE_FILE:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
 #ifdef DEBUG
-      printf("PUT_CACHE_FILE %s\n",(char*)pFileName);
+		printf("PUT_CACHE_FILE %s\n", (char*)pFileName);
 #endif
-      DspStat                     =  NOBREAK;
+		DspStat = NOBREAK;
 
-      if (cMemoryCheckFilename((char*)pFileName,PathBuf,NameBuf,ExtBuf) == OK)
-      { // Filename OK
+		if (cMemoryCheckFilename((char*)pFileName, PathBuf, NameBuf, ExtBuf) == OK)
+		{ // Filename OK
 
-        Item  =  0;
-        Tmp   =  0;
-        while ((Item < CACHE_DEEPT) && (Tmp == 0))
-        {
-          if (strcmp((char*)MemoryInstance.Cache[Item],(char*)pFileName) == 0)
-          {
-            Tmp  =  1;
-          }
-          else
-          {
-            Item++;
-          }
-        }
-        while (Item < (CACHE_DEEPT - 1))
-        {
-          strcpy((char*)MemoryInstance.Cache[Item],(char*)MemoryInstance.Cache[Item + 1]);
-          Item++;
-        }
-        MemoryInstance.Cache[Item][0]   =  0;
+			Item = 0;
+			Tmp = 0;
+			while ((Item < CACHE_DEEPT) && (Tmp == 0))
+			{
+				if (strcmp((char*)MemoryInstance.Cache[Item], (char*)pFileName) == 0)
+				{
+					Tmp = 1;
+				}
+				else
+				{
+					Item++;
+				}
+			}
+			while (Item < (CACHE_DEEPT - 1))
+			{
+				strcpy((char*)MemoryInstance.Cache[Item], (char*)MemoryInstance.Cache[Item + 1]);
+				Item++;
+			}
+			MemoryInstance.Cache[Item][0] = 0;
 
-        for (Item = (CACHE_DEEPT - 1);Item > 0;Item--)
-        {
-          strcpy((char*)MemoryInstance.Cache[Item],(char*)MemoryInstance.Cache[Item - 1]);
-        }
-        strcpy((char*)MemoryInstance.Cache[Item],(char*)pFileName);
-      }
-    }
-    break;
+			for (Item = (CACHE_DEEPT - 1); Item > 0; Item--)
+			{
+				strcpy((char*)MemoryInstance.Cache[Item], (char*)MemoryInstance.Cache[Item - 1]);
+			}
+			strcpy((char*)MemoryInstance.Cache[Item], (char*)pFileName);
+		}
+	}
+	break;
 
-    case scDEL_CACHE_FILE:
-    {
-      pFileName   =   (DATA8*)PrimParPointer();
+	case DEL_CACHE_FILE:
+	{
+		pFileName = (DATA8*)PrimParPointer();
 
-      cMemoryDeleteCacheFile((char*)pFileName);
+		cMemoryDeleteCacheFile((char*)pFileName);
 
-      DspStat     =  NOBREAK;
-    }
-    break;
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scGET_CACHE_FILE:
-    {
-      Item              = *(DATA8*)PrimParPointer();
-      Lng               = *(DATA8*)PrimParPointer();
-      pDestination      =  (DATA8*)PrimParPointer();
+	case GET_CACHE_FILE:
+	{
+		Item = *(DATA8*)PrimParPointer();
+		Lng = *(DATA8*)PrimParPointer();
+		pDestination = (DATA8*)PrimParPointer();
 
-      DspStat  =  FAILBREAK;
-      if ((Item > 0) && (Item <= CACHE_DEEPT))
-      {
-        if (MemoryInstance.Cache[Item - 1])
-        {
-          snprintf((char*)pDestination,Lng,"%s",MemoryInstance.Cache[Item - 1]);
-          DspStat  =  NOBREAK;
-        }
-      }
-    }
-    break;
+		DspStat = FAILBREAK;
+		if ((Item > 0) && (Item <= CACHE_DEEPT))
+		{
+			if (MemoryInstance.Cache[Item - 1])
+			{
+				snprintf((char*)pDestination, Lng, "%s", MemoryInstance.Cache[Item - 1]);
+				DspStat = NOBREAK;
+			}
+		}
+	}
+	break;
 
-    default :
-    {
-      DspStat  =  FAILBREAK;
-    }
-    break;
+	default:
+	{
+		DspStat = FAILBREAK;
+	}
+	break;
 
-  }
+	}
 
-  if (Error)
-  {
+	if (Error)
+	{
 #ifdef DEBUG_TRACE_FILENAME
-    printf("c_memory  ERROR                    [%u]\n",Error);
+		printf("c_memory  ERROR                    [%u]\n", Error);
 #endif
-    if (!LogErrorNumberExists(Error))
-    {
-      LogErrorNumber(Error);
-    }
-  }
+		if (!LogErrorNumberExists(Error))
+		{
+			LogErrorNumber(Error);
+		}
+	}
 
-  if (DspStat == BUSYBREAK)
-  { // Rewind IP
+	if (DspStat == BUSYBREAK)
+	{ // Rewind IP
 
-    SetObjectIp(TmpIp - 1);
-  }
-  SetDispatchStatus(DspStat);
+		SetObjectIp(TmpIp - 1);
+	}
+	SetDispatchStatus(DspStat);
 }
 
 
@@ -3415,585 +3403,585 @@ void      cMemoryFile(void)
  */
 
 
-/*! \brief  opARRAY byte code
- *
- */
+ /*! \brief  opARRAY byte code
+  *
+  */
 void      cMemoryArray(void)
 {
-  DSPSTAT DspStat = BUSYBREAK;
-  PRGID   TmpPrgId;
-  PRGID   PrgId;
-  IP      TmpIp;
-  DATA8   Cmd;
-  HANDLER TmpHandle;
-  HANDLER hSource;
-  HANDLER hDest;
-  void    *pTmp;
-  void    *pSource;
-  void    *pDest;
-  DATA32  Elements;
-  DATA32  Index;
-  DATA32  ISize;
-  DATA32  ElementSize;
-  DATA8   *pData8;
-  DATA16  *pData16;
-  DATA32  *pData32;
-  DATAF   *pDataF;
-  DATA8   *pDData8;
-  DATA8   Data8;
-  DATA16  Data16;
-  DATA32  Data32;
-  DATAF   DataF;
-  DATA32  Bytes;
-  void    *pArray;
+	DSPSTAT DspStat = BUSYBREAK;
+	PRGID   TmpPrgId;
+	PRGID   PrgId;
+	IP      TmpIp;
+	DATA8   Cmd;
+	HANDLER TmpHandle;
+	HANDLER hSource;
+	HANDLER hDest;
+	void* pTmp;
+	void* pSource;
+	void* pDest;
+	DATA32  Elements;
+	DATA32  Index;
+	DATA32  ISize;
+	DATA32  ElementSize;
+	DATA8* pData8;
+	DATA16* pData16;
+	DATA32* pData32;
+	DATAF* pDataF;
+	DATA8* pDData8;
+	DATA8   Data8;
+	DATA16  Data16;
+	DATA32  Data32;
+	DATAF   DataF;
+	DATA32  Bytes;
+	void* pArray;
 
-  TmpPrgId        =  CurrentProgramId();
-  TmpIp           =  GetObjectIp();
+	TmpPrgId = CurrentProgramId();
+	TmpIp = GetObjectIp();
 
-  Cmd             =  *(DATA8*)PrimParPointer();
+	Cmd = *(DATA8*)PrimParPointer();
 
-  switch (Cmd)
-  { // Function
+	switch (Cmd)
+	{ // Function
 
-    case scCREATE8:
-    {
-      Elements    =  *(DATA32*)PrimParPointer();
+	case CREATE8:
+	{
+		Elements = *(DATA32*)PrimParPointer();
 
-      if (Elements < MIN_ARRAY_ELEMENTS)
-      {
-        Elements  =  MIN_ARRAY_ELEMENTS;
-      }
+		if (Elements < MIN_ARRAY_ELEMENTS)
+		{
+			Elements = MIN_ARRAY_ELEMENTS;
+		}
 
-      ElementSize =  sizeof(DATA8);
-      ISize       =  Elements * ElementSize + sizeof(DESCR);
+		ElementSize = sizeof(DATA8);
+		ISize = Elements * ElementSize + sizeof(DESCR);
 
-      if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pTmp,&TmpHandle) == OK)
-      {
-        (*(DESCR*)pTmp).Type          =  DATA_8;
-        (*(DESCR*)pTmp).ElementSize   =  (DATA8)ElementSize;
-        (*(DESCR*)pTmp).Elements      =  Elements;
+		if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, &TmpHandle) == OK)
+		{
+			(*(DESCR*)pTmp).Type = DATA_8;
+			(*(DESCR*)pTmp).ElementSize = (DATA8)ElementSize;
+			(*(DESCR*)pTmp).Elements = Elements;
 
-        DspStat   =  NOBREAK;
+			DspStat = NOBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATE8       H=%1u A=%8p t=%d s=%d\n",TmpHandle,pTmp,(*(DESCR*)pTmp).Type,ISize);
+			printf("ARRAY CREATE8       H=%1u A=%8p t=%d s=%d\n", TmpHandle, pTmp, (*(DESCR*)pTmp).Type, ISize);
 #endif
-      }
-      else
-      {
-        DspStat   =  FAILBREAK;
+		}
+		else
+		{
+			DspStat = FAILBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATE8        error\n");
+			printf("ARRAY CREATE8        error\n");
 #endif
-      }
+		}
 
-      *(HANDLER*)PrimParPointer()     =  (HANDLER)TmpHandle;
-    }
-    break;
+		*(HANDLER*)PrimParPointer() = (HANDLER)TmpHandle;
+	}
+	break;
 
-    case scCREATE16:
-    {
-      Elements    =  *(DATA32*)PrimParPointer();
-      ElementSize =  sizeof(DATA16);
-      ISize       =  Elements * ElementSize + sizeof(DESCR);
+	case CREATE16:
+	{
+		Elements = *(DATA32*)PrimParPointer();
+		ElementSize = sizeof(DATA16);
+		ISize = Elements * ElementSize + sizeof(DESCR);
 
-      if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pTmp,&TmpHandle) == OK)
-      {
-        (*(DESCR*)pTmp).Type          =  DATA_16;
-        (*(DESCR*)pTmp).ElementSize   =  (DATA8)ElementSize;
-        (*(DESCR*)pTmp).Elements      =  Elements;
+		if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, &TmpHandle) == OK)
+		{
+			(*(DESCR*)pTmp).Type = DATA_16;
+			(*(DESCR*)pTmp).ElementSize = (DATA8)ElementSize;
+			(*(DESCR*)pTmp).Elements = Elements;
 
-        DspStat   =  NOBREAK;
+			DspStat = NOBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATE16      H=%1u A=%8p t=%d s=%d\n",TmpHandle,pTmp,(*(DESCR*)pTmp).Type,ISize);
+			printf("ARRAY CREATE16      H=%1u A=%8p t=%d s=%d\n", TmpHandle, pTmp, (*(DESCR*)pTmp).Type, ISize);
 #endif
-      }
-      else
-      {
-        DspStat   =  FAILBREAK;
+		}
+		else
+		{
+			DspStat = FAILBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATE16       error\n");
+			printf("ARRAY CREATE16       error\n");
 #endif
-      }
+		}
 
-      *(HANDLER*)PrimParPointer()     =  (HANDLER)TmpHandle;
-    }
-    break;
+		*(HANDLER*)PrimParPointer() = (HANDLER)TmpHandle;
+	}
+	break;
 
-    case scCREATE32:
-    {
-      Elements    =  *(DATA32*)PrimParPointer();
-      ElementSize =  sizeof(DATA32);
-      ISize       =  Elements * ElementSize + sizeof(DESCR);
+	case CREATE32:
+	{
+		Elements = *(DATA32*)PrimParPointer();
+		ElementSize = sizeof(DATA32);
+		ISize = Elements * ElementSize + sizeof(DESCR);
 
-      if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pTmp,&TmpHandle) == OK)
-      {
-        (*(DESCR*)pTmp).Type          =  DATA_32;
-        (*(DESCR*)pTmp).ElementSize   =  (DATA8)ElementSize;
-        (*(DESCR*)pTmp).Elements      =  Elements;
+		if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, &TmpHandle) == OK)
+		{
+			(*(DESCR*)pTmp).Type = DATA_32;
+			(*(DESCR*)pTmp).ElementSize = (DATA8)ElementSize;
+			(*(DESCR*)pTmp).Elements = Elements;
 
-        DspStat   =  NOBREAK;
+			DspStat = NOBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATE32      H=%1u A=%8p t=%d s=%d\n",TmpHandle,pTmp,(*(DESCR*)pTmp).Type,ISize);
+			printf("ARRAY CREATE32      H=%1u A=%8p t=%d s=%d\n", TmpHandle, pTmp, (*(DESCR*)pTmp).Type, ISize);
 #endif
-      }
-      else
-      {
-        DspStat   =  FAILBREAK;
+		}
+		else
+		{
+			DspStat = FAILBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATE32       error\n");
+			printf("ARRAY CREATE32       error\n");
 #endif
-      }
+		}
 
-      *(HANDLER*)PrimParPointer()     =  (HANDLER)TmpHandle;
-    }
-    break;
+		*(HANDLER*)PrimParPointer() = (HANDLER)TmpHandle;
+	}
+	break;
 
-    case scCREATEF:
-    {
-      Elements    =  *(DATA32*)PrimParPointer();
-      ElementSize =  sizeof(DATAF);
-      ISize       =  Elements * ElementSize + sizeof(DESCR);
+	case CREATEF:
+	{
+		Elements = *(DATA32*)PrimParPointer();
+		ElementSize = sizeof(DATAF);
+		ISize = Elements * ElementSize + sizeof(DESCR);
 
-      if (cMemoryAlloc(TmpPrgId,POOL_TYPE_MEMORY,(GBINDEX)ISize,(void**)&pTmp,&TmpHandle) == OK)
-      {
-        (*(DESCR*)pTmp).Type          =  DATA_F;
-        (*(DESCR*)pTmp).ElementSize   =  (DATA8)ElementSize;
-        (*(DESCR*)pTmp).Elements      =  Elements;
+		if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, &TmpHandle) == OK)
+		{
+			(*(DESCR*)pTmp).Type = DATA_F;
+			(*(DESCR*)pTmp).ElementSize = (DATA8)ElementSize;
+			(*(DESCR*)pTmp).Elements = Elements;
 
-        DspStat   =  NOBREAK;
+			DspStat = NOBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATEF       H=%1u A=%8p t=%d s=%d\n",TmpHandle,pTmp,(*(DESCR*)pTmp).Type,ISize);
+			printf("ARRAY CREATEF       H=%1u A=%8p t=%d s=%d\n", TmpHandle, pTmp, (*(DESCR*)pTmp).Type, ISize);
 #endif
-      }
-      else
-      {
-        DspStat   =  FAILBREAK;
+		}
+		else
+		{
+			DspStat = FAILBREAK;
 #ifdef DEBUG
-        printf("ARRAY CREATEF        error\n");
+			printf("ARRAY CREATEF        error\n");
 #endif
-      }
+		}
 
-      *(HANDLER*)PrimParPointer()     =  (HANDLER)TmpHandle;
-    }
-    break;
+		*(HANDLER*)PrimParPointer() = (HANDLER)TmpHandle;
+	}
+	break;
 
-    case scSET_SIZE:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      Elements    =  0;
-      TmpPrgId    =  CurrentProgramId();
+	case SET_SIZE:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		Elements = 0;
+		TmpPrgId = CurrentProgramId();
 
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        Elements    =  (*(DESCR*)pTmp).Elements;
-      }
+		if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+		{
+			Elements = (*(DESCR*)pTmp).Elements;
+		}
 
-      *(DATA32*)PrimParPointer()  =  Elements;
-      DspStat     =  NOBREAK;
-    }
-    break;
+		*(DATA32*)PrimParPointer() = Elements;
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scRESIZE:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      Elements    =  *(DATA32*)PrimParPointer();
+	case RESIZE:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		Elements = *(DATA32*)PrimParPointer();
 
-      if (cMemoryResize(TmpPrgId,TmpHandle,Elements) != NULL)
-      {
-        DspStat     =  NOBREAK;
-      }
-      else
-      {
-        DspStat     =  FAILBREAK;
-      }
-    }
-    break;
+		if (cMemoryResize(TmpPrgId, TmpHandle, Elements) != NULL)
+		{
+			DspStat = NOBREAK;
+		}
+		else
+		{
+			DspStat = FAILBREAK;
+		}
+	}
+	break;
 
-    case scDESTROY:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      cMemoryFreeHandle(TmpPrgId,TmpHandle);
-      DspStat     =  NOBREAK;
-    }
-    break;
+	case DESTROY:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		cMemoryFreeHandle(TmpPrgId, TmpHandle);
+		DspStat = NOBREAK;
+	}
+	break;
 
-    case scFILL:
-    {
-      TmpPrgId        =  CurrentProgramId();
-      TmpHandle       =  *(HANDLER*)PrimParPointer();
+	case FILL:
+	{
+		TmpPrgId = CurrentProgramId();
+		TmpHandle = *(HANDLER*)PrimParPointer();
 
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        pArray      =  (*(DESCR*)pTmp).pArray;
-        Elements    =  (*(DESCR*)pTmp).Elements;
-        Index       =  0;
-        switch ((*(DESCR*)pTmp).Type)
-        {
-          case DATA_8 :
-          {
-            Data8                       =  *(DATA8*)PrimParPointer();
-            pData8                      =  (DATA8*)pArray;
+		if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+		{
+			pArray = (*(DESCR*)pTmp).pArray;
+			Elements = (*(DESCR*)pTmp).Elements;
+			Index = 0;
+			switch ((*(DESCR*)pTmp).Type)
+			{
+			case DATA_8:
+			{
+				Data8 = *(DATA8*)PrimParPointer();
+				pData8 = (DATA8*)pArray;
 
-            while (Index < Elements)
-            {
-              pData8[Index]             =  Data8;
-              Index++;
-            }
-            DspStat                     =  NOBREAK;
-          }
-          break;
+				while (Index < Elements)
+				{
+					pData8[Index] = Data8;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+			break;
 
-          case DATA_16 :
-          {
-            Data16                      =  *(DATA16*)PrimParPointer();
-            pData16                     =  (DATA16*)pArray;
+			case DATA_16:
+			{
+				Data16 = *(DATA16*)PrimParPointer();
+				pData16 = (DATA16*)pArray;
 
-            while (Index < Elements)
-            {
-              pData16[Index]            =  Data16;
-              Index++;
-            }
-            DspStat                     =  NOBREAK;
-          }
-          break;
+				while (Index < Elements)
+				{
+					pData16[Index] = Data16;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+			break;
 
-          case DATA_32 :
-          {
-            Data32                      =  *(DATA32*)PrimParPointer();
-            pData32                     =  (DATA32*)pArray;
+			case DATA_32:
+			{
+				Data32 = *(DATA32*)PrimParPointer();
+				pData32 = (DATA32*)pArray;
 
-            while (Index < Elements)
-            {
-              pData32[Index]            =  Data32;
-              Index++;
-            }
-            DspStat                     =  NOBREAK;
-          }
-          break;
+				while (Index < Elements)
+				{
+					pData32[Index] = Data32;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+			break;
 
-          case DATA_F :
-          {
-            DataF                       =  *(DATAF*)PrimParPointer();
-            pDataF                      =  (DATAF*)pArray;
+			case DATA_F:
+			{
+				DataF = *(DATAF*)PrimParPointer();
+				pDataF = (DATAF*)pArray;
 
-            while (Index < Elements)
-            {
-              pDataF[Index]             =  DataF;
-              Index++;
-            }
-            DspStat                     =  NOBREAK;
-          }
-          break;
+				while (Index < Elements)
+				{
+					pDataF[Index] = DataF;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+			break;
 
-        }
-      }
-    }
-    break;
+			}
+		}
+	}
+	break;
 
-    case scCOPY:
-    {
-      hSource     =  *(HANDLER*)PrimParPointer();
-      hDest       =  *(HANDLER*)PrimParPointer();
+	case COPY:
+	{
+		hSource = *(HANDLER*)PrimParPointer();
+		hDest = *(HANDLER*)PrimParPointer();
 
-      DspStat     =  FAILBREAK;
-      if (cMemoryGetPointer(TmpPrgId,hSource,&pSource) == OK)
-      {
-        if (cMemoryGetPointer(TmpPrgId,hDest,&pDest) == OK)
-        {
-          if ((*(DESCR*)pSource).Type == (*(DESCR*)pDest).Type)
-          {
-            Elements  =  (*(DESCR*)pSource).Elements;
-            DspStat   =  NOBREAK;
+		DspStat = FAILBREAK;
+		if (cMemoryGetPointer(TmpPrgId, hSource, &pSource) == OK)
+		{
+			if (cMemoryGetPointer(TmpPrgId, hDest, &pDest) == OK)
+			{
+				if ((*(DESCR*)pSource).Type == (*(DESCR*)pDest).Type)
+				{
+					Elements = (*(DESCR*)pSource).Elements;
+					DspStat = NOBREAK;
 
-            if (cMemoryResize(TmpPrgId,hDest,Elements) == NULL)
-            {
-              DspStat   =  FAILBREAK;
-            }
-            if (DspStat == NOBREAK)
-            {
-              if (cMemoryGetPointer(TmpPrgId,hDest,&pDest) == OK)
-              {
-                ISize   =  Elements * (*(DESCR*)pSource).ElementSize;
-                memcpy((*(DESCR*)pDest).pArray,(*(DESCR*)pSource).pArray,ISize);
+					if (cMemoryResize(TmpPrgId, hDest, Elements) == NULL)
+					{
+						DspStat = FAILBREAK;
+					}
+					if (DspStat == NOBREAK)
+					{
+						if (cMemoryGetPointer(TmpPrgId, hDest, &pDest) == OK)
+						{
+							ISize = Elements * (*(DESCR*)pSource).ElementSize;
+							memcpy((*(DESCR*)pDest).pArray, (*(DESCR*)pSource).pArray, ISize);
 #ifdef DEBUG
-                printf("ARRAY COPY          sh=%d st=%d dh=%d dt=%d s=%d\n",hSource,(*(DESCR*)pSource).Type,hDest,(*(DESCR*)pDest).Type,ISize);
+							printf("ARRAY COPY          sh=%d st=%d dh=%d dt=%d s=%d\n", hSource, (*(DESCR*)pSource).Type, hDest, (*(DESCR*)pDest).Type, ISize);
 #endif
-              }
-              else
-              {
+						}
+						else
+						{
 #ifdef DEBUG
-                printf("ARRAY COPY          cMemoryGetPointer error\n");
+							printf("ARRAY COPY          cMemoryGetPointer error\n");
 #endif
-                DspStat   =  FAILBREAK;
-              }
-            }
-            else
-            {
+							DspStat = FAILBREAK;
+						}
+					}
+					else
+					{
 #ifdef DEBUG
-              printf("ARRAY COPY          cMemoryResize error\n");
+						printf("ARRAY COPY          cMemoryResize error\n");
 #endif
-            }
-          }
-          else
-          {
+					}
+				}
+				else
+				{
 #ifdef DEBUG
-            printf("ARRAY COPY          type error %d=%d != %d=%d\n",hSource,(*(DESCR*)pSource).Type,hDest,(*(DESCR*)pDest).Type);
+					printf("ARRAY COPY          type error %d=%d != %d=%d\n", hSource, (*(DESCR*)pSource).Type, hDest, (*(DESCR*)pDest).Type);
 #endif
-          }
-        }
-        else
-        {
+				}
+			}
+			else
+			{
 #ifdef DEBUG
-          printf("ARRAY COPY          cMemoryGetPointer destination error\n");
+				printf("ARRAY COPY          cMemoryGetPointer destination error\n");
 #endif
-        }
-      }
-      else
-      {
+			}
+		}
+		else
+		{
 #ifdef DEBUG
-        printf("ARRAY COPY          cMemoryGetPointer source error\n");
+			printf("ARRAY COPY          cMemoryGetPointer source error\n");
 #endif
-      }
-    }
-    break;
+		}
+	}
+	break;
 
-    case scINIT8:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      Index       =  *(DATA32*)PrimParPointer();
-      Elements    =  *(DATA32*)PrimParPointer();
+	case INIT8:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		Index = *(DATA32*)PrimParPointer();
+		Elements = *(DATA32*)PrimParPointer();
 
-      DspStat     =  FAILBREAK;
+		DspStat = FAILBREAK;
 
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
-        {
-          pArray      =  (*(DESCR*)pTmp).pArray;
-          pData8      =  (DATA8*)pArray;
+		if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+		{
+			if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
+			{
+				pArray = (*(DESCR*)pTmp).pArray;
+				pData8 = (DATA8*)pArray;
 
-          while (Elements)
-          {
-            pData8[Index]  =  *(DATA8*)PrimParPointer();
-            Elements--;
-            Index++;
-          }
-          DspStat     =  NOBREAK;
-        }
-      }
-    }
-    break;
+				while (Elements)
+				{
+					pData8[Index] = *(DATA8*)PrimParPointer();
+					Elements--;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+		}
+	}
+	break;
 
-    case scINIT16:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      Index       =  *(DATA32*)PrimParPointer();
-      Elements    =  *(DATA32*)PrimParPointer();
+	case INIT16:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		Index = *(DATA32*)PrimParPointer();
+		Elements = *(DATA32*)PrimParPointer();
 
-      DspStat     =  FAILBREAK;
+		DspStat = FAILBREAK;
 
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
-        {
-          pArray      =  (*(DESCR*)pTmp).pArray;
-          pData16     =  (DATA16*)pArray;
+		if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+		{
+			if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
+			{
+				pArray = (*(DESCR*)pTmp).pArray;
+				pData16 = (DATA16*)pArray;
 
-          while (Elements)
-          {
-            pData16[Index]  =  *(DATA16*)PrimParPointer();
-            Elements--;
-            Index++;
-          }
-          DspStat     =  NOBREAK;
-        }
-      }
-    }
-    break;
+				while (Elements)
+				{
+					pData16[Index] = *(DATA16*)PrimParPointer();
+					Elements--;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+		}
+	}
+	break;
 
-    case scINIT32:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      Index       =  *(DATA32*)PrimParPointer();
-      Elements    =  *(DATA32*)PrimParPointer();
+	case INIT32:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		Index = *(DATA32*)PrimParPointer();
+		Elements = *(DATA32*)PrimParPointer();
 
-      DspStat     =  FAILBREAK;
+		DspStat = FAILBREAK;
 
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
-        {
-          pArray      =  (*(DESCR*)pTmp).pArray;
-          pData32     =  (DATA32*)pArray;
+		if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+		{
+			if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
+			{
+				pArray = (*(DESCR*)pTmp).pArray;
+				pData32 = (DATA32*)pArray;
 
-          while (Elements)
-          {
-            pData32[Index]  =  *(DATA32*)PrimParPointer();
-            Elements--;
-            Index++;
-          }
-          DspStat     =  NOBREAK;
-        }
-      }
-    }
-    break;
+				while (Elements)
+				{
+					pData32[Index] = *(DATA32*)PrimParPointer();
+					Elements--;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+		}
+	}
+	break;
 
-    case scINITF:
-    {
-      TmpHandle   =  *(HANDLER*)PrimParPointer();
-      Index       =  *(DATA32*)PrimParPointer();
-      Elements    =  *(DATA32*)PrimParPointer();
+	case INITF:
+	{
+		TmpHandle = *(HANDLER*)PrimParPointer();
+		Index = *(DATA32*)PrimParPointer();
+		Elements = *(DATA32*)PrimParPointer();
 
-      DspStat     =  FAILBREAK;
+		DspStat = FAILBREAK;
 
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
-        {
-          pArray      =  (*(DESCR*)pTmp).pArray;
-          pDataF      =  (DATAF*)pArray;
+		if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+		{
+			if ((Index >= 0) && ((Index + Elements) <= (*(DESCR*)pTmp).Elements))
+			{
+				pArray = (*(DESCR*)pTmp).pArray;
+				pDataF = (DATAF*)pArray;
 
-          while (Elements)
-          {
-            pDataF[Index]  =  *(DATAF*)PrimParPointer();
-            Elements--;
-            Index++;
-          }
-          DspStat     =  NOBREAK;
-        }
-      }
-    }
-    break;
+				while (Elements)
+				{
+					pDataF[Index] = *(DATAF*)PrimParPointer();
+					Elements--;
+					Index++;
+				}
+				DspStat = NOBREAK;
+			}
+		}
+	}
+	break;
 
-    case scREAD_CONTENT:
-    {
-      PrgId           =  *(DATA16*)PrimParPointer();
-      TmpHandle       =  *(DATA16*)PrimParPointer();
-      Index           =  *(DATA32*)PrimParPointer();
-      Bytes           =  *(DATA32*)PrimParPointer();
-      pDData8         =  (DATA8*)PrimParPointer();
+	case READ_CONTENT:
+	{
+		PrgId = *(DATA16*)PrimParPointer();
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Index = *(DATA32*)PrimParPointer();
+		Bytes = *(DATA32*)PrimParPointer();
+		pDData8 = (DATA8*)PrimParPointer();
 
-      DspStat         =  FAILBREAK;
+		DspStat = FAILBREAK;
 
-      if (PrgId == (PRGID)CURRENT_SLOT)
-      {
-        PrgId         =  TmpPrgId;
-      }
+		if (PrgId == (PRGID)CURRENT_SLOT)
+		{
+			PrgId = TmpPrgId;
+		}
 
-      if (cMemoryGetPointer(PrgId,TmpHandle,&pTmp) == OK)
-      {
-        if (VMInstance.Handle >= 0)
-        {
-          pDData8   =  (DATA8*)VmMemoryResize(VMInstance.Handle,Bytes);
-        }
+		if (cMemoryGetPointer(PrgId, TmpHandle, &pTmp) == OK)
+		{
+			if (VMInstance.Handle >= 0)
+			{
+				pDData8 = (DATA8*)VmMemoryResize(VMInstance.Handle, Bytes);
+			}
 
-        ISize         =  (*(DESCR*)pTmp).Elements * (DATA32)((*(DESCR*)pTmp).ElementSize);
+			ISize = (*(DESCR*)pTmp).Elements * (DATA32)((*(DESCR*)pTmp).ElementSize);
 
-        if ((Index >= 0) && (pDData8 != NULL))
-        {
-          pArray      =  (*(DESCR*)pTmp).pArray;
+			if ((Index >= 0) && (pDData8 != NULL))
+			{
+				pArray = (*(DESCR*)pTmp).pArray;
 
-          pData8      =  (DATA8*)pArray;
-          Data32      =  0;
+				pData8 = (DATA8*)pArray;
+				Data32 = 0;
 
-          while ((Data32 < Bytes) && (Index < ISize))
-          {
-            pDData8[Data32]           =  pData8[Index];
-            Data32++;
-            Index++;
-          }
-          while (Data32 < Bytes)
-          {
-            pDData8[Data32]           =  0;
-            Data32++;
-          }
-          DspStat     =  NOBREAK;
-        }
-      }
-    }
-    break;
+				while ((Data32 < Bytes) && (Index < ISize))
+				{
+					pDData8[Data32] = pData8[Index];
+					Data32++;
+					Index++;
+				}
+				while (Data32 < Bytes)
+				{
+					pDData8[Data32] = 0;
+					Data32++;
+				}
+				DspStat = NOBREAK;
+			}
+		}
+	}
+	break;
 
-    case scWRITE_CONTENT:
-    {
-      PrgId           =  *(DATA16*)PrimParPointer();
-      TmpHandle       =  *(DATA16*)PrimParPointer();
-      Index           =  *(DATA32*)PrimParPointer();
-      Bytes           =  *(DATA32*)PrimParPointer();
-      pDData8         =  (DATA8*)PrimParPointer();
+	case WRITE_CONTENT:
+	{
+		PrgId = *(DATA16*)PrimParPointer();
+		TmpHandle = *(DATA16*)PrimParPointer();
+		Index = *(DATA32*)PrimParPointer();
+		Bytes = *(DATA32*)PrimParPointer();
+		pDData8 = (DATA8*)PrimParPointer();
 
-      DspStat         =  FAILBREAK;
+		DspStat = FAILBREAK;
 
 #ifdef DEBUG
-      printf("ARRAY WRITE_CONTENT CP=%d PP=%d\n",TmpPrgId,PrgId);
+		printf("ARRAY WRITE_CONTENT CP=%d PP=%d\n", TmpPrgId, PrgId);
 #endif
 
-      if (PrgId == (PRGID)CURRENT_SLOT)
-      {
-        PrgId         =  TmpPrgId;
-      }
+		if (PrgId == (PRGID)CURRENT_SLOT)
+		{
+			PrgId = TmpPrgId;
+		}
 
-      if (cMemoryGetPointer(PrgId,TmpHandle,&pTmp) == OK)
-      {
-        ElementSize   =  (DATA32)(*(DESCR*)pTmp).ElementSize;
-        if (ElementSize)
-        {
-          Elements      =  (Index + Bytes + (ElementSize - 1)) / ElementSize;
-          ISize         =  Elements * ElementSize;
+		if (cMemoryGetPointer(PrgId, TmpHandle, &pTmp) == OK)
+		{
+			ElementSize = (DATA32)(*(DESCR*)pTmp).ElementSize;
+			if (ElementSize)
+			{
+				Elements = (Index + Bytes + (ElementSize - 1)) / ElementSize;
+				ISize = Elements * ElementSize;
 
-          pTmp          =  cMemoryResize(PrgId,TmpHandle,Elements);
-          if (pTmp != NULL)
-          {
-            if ((Index >= 0) && (pDData8 != NULL))
-            {
-              pData8      =  (DATA8*)pTmp;
-              Data32      =  0;
+				pTmp = cMemoryResize(PrgId, TmpHandle, Elements);
+				if (pTmp != NULL)
+				{
+					if ((Index >= 0) && (pDData8 != NULL))
+					{
+						pData8 = (DATA8*)pTmp;
+						Data32 = 0;
 
-              while ((Data32 < Bytes) && (Index < ISize))
-              {
-                pData8[Index]   =  pDData8[Data32];
-                Data32++;
-                Index++;
-              }
-              DspStat     =  NOBREAK;
-            }
-          }
-        }
-      }
-    }
-    break;
+						while ((Data32 < Bytes) && (Index < ISize))
+						{
+							pData8[Index] = pDData8[Data32];
+							Data32++;
+							Index++;
+						}
+						DspStat = NOBREAK;
+					}
+				}
+			}
+		}
+	}
+	break;
 
-    case scREAD_SIZE:
-    {
-      PrgId           =  *(DATA16*)PrimParPointer();
-      TmpHandle       =  *(DATA16*)PrimParPointer();
+	case READ_SIZE:
+	{
+		PrgId = *(DATA16*)PrimParPointer();
+		TmpHandle = *(DATA16*)PrimParPointer();
 
-      Bytes           =  0;
-      DspStat         =  FAILBREAK;
+		Bytes = 0;
+		DspStat = FAILBREAK;
 
-      if (PrgId == (PRGID)CURRENT_SLOT)
-      {
-        PrgId         =  TmpPrgId;
-      }
+		if (PrgId == (PRGID)CURRENT_SLOT)
+		{
+			PrgId = TmpPrgId;
+		}
 
-      if (cMemoryGetPointer(PrgId,TmpHandle,&pTmp) == OK)
-      {
-        Bytes         =  (*(DESCR*)pTmp).Elements * (DATA32)((*(DESCR*)pTmp).ElementSize);
-      }
+		if (cMemoryGetPointer(PrgId, TmpHandle, &pTmp) == OK)
+		{
+			Bytes = (*(DESCR*)pTmp).Elements * (DATA32)((*(DESCR*)pTmp).ElementSize);
+		}
 
-      *(DATA32*)PrimParPointer()  =  Bytes;
-      DspStat                     =  NOBREAK;
-    }
-    break;
+		*(DATA32*)PrimParPointer() = Bytes;
+		DspStat = NOBREAK;
+	}
+	break;
 
-  }
+	}
 
 
-  if (DspStat == BUSYBREAK)
-  { // Rewind IP
+	if (DspStat == BUSYBREAK)
+	{ // Rewind IP
 
-    SetObjectIp(TmpIp - 1);
-  }
-  SetDispatchStatus(DspStat);
+		SetObjectIp(TmpIp - 1);
+	}
+	SetDispatchStatus(DspStat);
 }
 
 
@@ -4012,120 +4000,120 @@ void      cMemoryArray(void)
  *\n
  *
  */
-/*! \brief  opARRAY_WRITE byte code
- *
- */
+ /*! \brief  opARRAY_WRITE byte code
+  *
+  */
 void      cMemoryArrayWrite(void)
 {
-  DSPSTAT DspStat = FAILBREAK;
-  PRGID   TmpPrgId;
-  HANDLER TmpHandle;
-  void    *pTmp;
-  void    *pValue;
-  DESCR   *pDescr;
-  DATA32  Elements;
-  DATA32  Index;
-  void    *pArray;
-  DATA8   *pData8;
-  DATA16  *pData16;
-  DATA32  *pData32;
-  DATAF   *pDataF;
+	DSPSTAT DspStat = FAILBREAK;
+	PRGID   TmpPrgId;
+	HANDLER TmpHandle;
+	void* pTmp;
+	void* pValue;
+	DESCR* pDescr;
+	DATA32  Elements;
+	DATA32  Index;
+	void* pArray;
+	DATA8* pData8;
+	DATA16* pData16;
+	DATA32* pData32;
+	DATAF* pDataF;
 
-  DATA32  Size;
-  DATA32  Offset;
-  DATA32  Length;
+	DATA32  Size;
+	DATA32  Offset;
+	DATA32  Length;
 
-  TmpPrgId        =  CurrentProgramId();
-  TmpHandle       =  *(HANDLER*)PrimParPointer();
-  Index           =  *(DATA32*)PrimParPointer();
-  pValue          =  PrimParPointer();
+	TmpPrgId = CurrentProgramId();
+	TmpHandle = *(HANDLER*)PrimParPointer();
+	Index = *(DATA32*)PrimParPointer();
+	pValue = PrimParPointer();
 
-  if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-  {
-    pDescr        =  (DESCR*)pTmp;
+	if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+	{
+		pDescr = (DESCR*)pTmp;
 #ifdef DEBUG
-    printf("  Write  P=%1u H=%1u     I=%8lu A=%8p T=%d\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index,(*pDescr).pArray,(*pDescr).Type);
+		printf("  Write  P=%1u H=%1u     I=%8lu A=%8p T=%d\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index, (*pDescr).pArray, (*pDescr).Type);
 #endif
-    if (Index >= 0)
-    {
-      Elements  =  Index + 1;
-      Length    =  0;
-      DspStat   =  NOBREAK;
-      if (Elements > (*pDescr).Elements)
-      {
-        Offset  =  (DATA32)(*pDescr).ElementSize * (*pDescr).Elements;
-        Size    =  (DATA32)(*pDescr).ElementSize * Index;
-        Length  =  Size - Offset;
+		if (Index >= 0)
+		{
+			Elements = Index + 1;
+			Length = 0;
+			DspStat = NOBREAK;
+			if (Elements > (*pDescr).Elements)
+			{
+				Offset = (DATA32)(*pDescr).ElementSize * (*pDescr).Elements;
+				Size = (DATA32)(*pDescr).ElementSize * Index;
+				Length = Size - Offset;
 
-        if (cMemoryResize(TmpPrgId,TmpHandle,Elements) == NULL)
-        {
-          DspStat   =  FAILBREAK;
-        }
-      }
-      if (DspStat == NOBREAK)
-      {
-        if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-        {
-          pDescr      =  (DESCR*)pTmp;
-          pArray      =  (*pDescr).pArray;
+				if (cMemoryResize(TmpPrgId, TmpHandle, Elements) == NULL)
+				{
+					DspStat = FAILBREAK;
+				}
+			}
+			if (DspStat == NOBREAK)
+			{
+				if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+				{
+					pDescr = (DESCR*)pTmp;
+					pArray = (*pDescr).pArray;
 
-          if (Length > 0)
-          {
-            memset((pArray + Offset),0,Length);
+					if (Length > 0)
+					{
+						// memset((pArray + Offset), 0, Length);
 #ifdef DEBUG
-            printf("  Write  P=%1u H=%1u     I=%8lu A=%8p T=%d Zeroing from %8p (%d)\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index,pArray,(*pDescr).Type,(pArray + Offset),Length);
-          }
-          else
-          {
-            printf("  Write  P=%1u H=%1u     I=%8lu A=%8p T=%d\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index,pArray,(*pDescr).Type);
+						printf("  Write  P=%1u H=%1u     I=%8lu A=%8p T=%d Zeroing from %8p (%d)\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index, pArray, (*pDescr).Type, (pArray + Offset), Length);
+					}
+					else
+					{
+						printf("  Write  P=%1u H=%1u     I=%8lu A=%8p T=%d\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index, pArray, (*pDescr).Type);
 #endif
-          }
-          switch ((*pDescr).Type)
-          {
-            case DATA_8 :
-            {
-              pData8          =  (DATA8*)pArray;
-              pData8[Index]   =  *(DATA8*)pValue;
-              DspStat         =  NOBREAK;
-            }
-            break;
+					}
+					switch ((*pDescr).Type)
+					{
+					case DATA_8:
+					{
+						pData8 = (DATA8*)pArray;
+						pData8[Index] = *(DATA8*)pValue;
+						DspStat = NOBREAK;
+					}
+					break;
 
-            case DATA_16 :
-            {
-              pData16         =  (DATA16*)pArray;
-              pData16[Index]  =  *(DATA16*)pValue;
-              DspStat         =  NOBREAK;
-            }
-            break;
+					case DATA_16:
+					{
+						pData16 = (DATA16*)pArray;
+						pData16[Index] = *(DATA16*)pValue;
+						DspStat = NOBREAK;
+					}
+					break;
 
-            case DATA_32 :
-            {
-              pData32         =  (DATA32*)pArray;
-              pData32[Index]  =  *(DATA32*)pValue;
-              DspStat         =  NOBREAK;
-            }
-            break;
+					case DATA_32:
+					{
+						pData32 = (DATA32*)pArray;
+						pData32[Index] = *(DATA32*)pValue;
+						DspStat = NOBREAK;
+					}
+					break;
 
-            case DATA_F :
-            {
-              pDataF          =  (DATAF*)pArray;
-              pDataF[Index]   =  *(DATAF*)pValue;
-              DspStat         =  NOBREAK;
-            }
-            break;
+					case DATA_F:
+					{
+						pDataF = (DATAF*)pArray;
+						pDataF[Index] = *(DATAF*)pValue;
+						DspStat = NOBREAK;
+					}
+					break;
 
-          }
-        }
-      }
-    }
-  }
-  if (DspStat != NOBREAK)
-  {
+					}
+				}
+			}
+		}
+	}
+	if (DspStat != NOBREAK)
+	{
 #ifdef DEBUG
-    printf("  WR ERR P=%1u H=%1u     I=%8lu\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index);
+		printf("  WR ERR P=%1u H=%1u     I=%8lu\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index);
 #endif
-    SetDispatchStatus(DspStat);
-  }
+		SetDispatchStatus(DspStat);
+	}
 }
 
 
@@ -4144,79 +4132,79 @@ void      cMemoryArrayWrite(void)
  *\n
  *
  */
-/*! \brief  opARRAY_READ byte code
- *
- */
+ /*! \brief  opARRAY_READ byte code
+  *
+  */
 void      cMemoryArrayRead(void)
 {
-  DSPSTAT DspStat = FAILBREAK;
-  PRGID   TmpPrgId;
-  HANDLER TmpHandle;
-  void    *pTmp;
-  DATA32  Index;
-  void    *pArray;
-  DATA8   *pData8;
-  DATA16  *pData16;
-  DATA32  *pData32;
-  DATAF   *pDataF;
+	DSPSTAT DspStat = FAILBREAK;
+	PRGID   TmpPrgId;
+	HANDLER TmpHandle;
+	void* pTmp;
+	DATA32  Index;
+	void* pArray;
+	DATA8* pData8;
+	DATA16* pData16;
+	DATA32* pData32;
+	DATAF* pDataF;
 
-  TmpPrgId        =  CurrentProgramId();
-  TmpHandle       =  *(HANDLER*)PrimParPointer();
-  Index           =  *(DATA32*)PrimParPointer();
+	TmpPrgId = CurrentProgramId();
+	TmpHandle = *(HANDLER*)PrimParPointer();
+	Index = *(DATA32*)PrimParPointer();
 
-  if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-  {
-    if ((Index >= 0) && (Index < (*(DESCR*)pTmp).Elements))
-    {
-      pArray      =  (*(DESCR*)pTmp).pArray;
+	if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+	{
+		if ((Index >= 0) && (Index < (*(DESCR*)pTmp).Elements))
+		{
+			pArray = (*(DESCR*)pTmp).pArray;
 #ifdef DEBUG
-      printf("  Read   P=%1u H=%1u     I=%8lu A=%8p T=%d\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index,pArray,(*(DESCR*)pTmp).Type);
+			printf("  Read   P=%1u H=%1u     I=%8lu A=%8p T=%d\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index, pArray, (*(DESCR*)pTmp).Type);
 #endif
-      switch ((*(DESCR*)pTmp).Type)
-      {
-        case DATA_8 :
-        {
-          pData8                      =  (DATA8*)pArray;
-          *(DATA8*)PrimParPointer()   =  pData8[Index];
-          DspStat                     =  NOBREAK;
-        }
-        break;
+			switch ((*(DESCR*)pTmp).Type)
+			{
+			case DATA_8:
+			{
+				pData8 = (DATA8*)pArray;
+				*(DATA8*)PrimParPointer() = pData8[Index];
+				DspStat = NOBREAK;
+			}
+			break;
 
-        case DATA_16 :
-        {
-          pData16                     =  (DATA16*)pArray;
-          *(DATA16*)PrimParPointer()  =  pData16[Index];
-          DspStat                     =  NOBREAK;
-        }
-        break;
+			case DATA_16:
+			{
+				pData16 = (DATA16*)pArray;
+				*(DATA16*)PrimParPointer() = pData16[Index];
+				DspStat = NOBREAK;
+			}
+			break;
 
-        case DATA_32 :
-        {
-          pData32                     =  (DATA32*)pArray;
-          *(DATA32*)PrimParPointer()  =  pData32[Index];
-          DspStat                     =  NOBREAK;
-        }
-        break;
+			case DATA_32:
+			{
+				pData32 = (DATA32*)pArray;
+				*(DATA32*)PrimParPointer() = pData32[Index];
+				DspStat = NOBREAK;
+			}
+			break;
 
-        case DATA_F :
-        {
-          pDataF                      =  (DATAF*)pArray;
-          *(DATAF*)PrimParPointer()   =  pDataF[Index];
-          DspStat                     =  NOBREAK;
-        }
-        break;
+			case DATA_F:
+			{
+				pDataF = (DATAF*)pArray;
+				*(DATAF*)PrimParPointer() = pDataF[Index];
+				DspStat = NOBREAK;
+			}
+			break;
 
-      }
-    }
-  }
-  if (DspStat != NOBREAK)
-  {
+			}
+		}
+	}
+	if (DspStat != NOBREAK)
+	{
 #ifdef DEBUG
-    printf("  RD ERR P=%1u H=%1u     I=%8lu\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index);
+		printf("  RD ERR P=%1u H=%1u     I=%8lu\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index);
 #endif
-    PrimParAdvance();
-    SetDispatchStatus(DspStat);
-  }
+		PrimParAdvance();
+		SetDispatchStatus(DspStat);
+	}
 }
 
 
@@ -4234,112 +4222,112 @@ void      cMemoryArrayRead(void)
  *\n
  *
  */
-/*! \brief  opARRAY_APPEND byte code
- *
- */
+ /*! \brief  opARRAY_APPEND byte code
+  *
+  */
 void      cMemoryArrayAppend(void)
 {
-  DSPSTAT DspStat = FAILBREAK;
-  PRGID   TmpPrgId;
-  HANDLER TmpHandle;
-  void    *pTmp;
-  void    *pValue;
-  DESCR   *pDescr;
-  DATA32  Elements;
-  DATA32  Index;
-  void    *pArray;
-  DATA8   *pData8;
-  DATA16  *pData16;
-  DATA32  *pData32;
-  DATAF   *pDataF;
+	DSPSTAT DspStat = FAILBREAK;
+	PRGID   TmpPrgId;
+	HANDLER TmpHandle;
+	void* pTmp;
+	void* pValue;
+	DESCR* pDescr;
+	DATA32  Elements;
+	DATA32  Index;
+	void* pArray;
+	DATA8* pData8;
+	DATA16* pData16;
+	DATA32* pData32;
+	DATAF* pDataF;
 
-  TmpPrgId        =  CurrentProgramId();
-  TmpHandle       =  *(HANDLER*)PrimParPointer();
-  pValue          =  PrimParPointer();
+	TmpPrgId = CurrentProgramId();
+	TmpHandle = *(HANDLER*)PrimParPointer();
+	pValue = PrimParPointer();
 
-  if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-  {
-    pDescr        =  (DESCR*)pTmp;
-    Index         =  (*pDescr).Elements;
-    Elements      =  Index + 1;
+	if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+	{
+		pDescr = (DESCR*)pTmp;
+		Index = (*pDescr).Elements;
+		Elements = Index + 1;
 
-    DspStat       =  NOBREAK;
-    if (Elements > (*pDescr).Elements)
-    {
-      if (cMemoryResize(TmpPrgId,TmpHandle,Elements) == NULL)
-      {
-        DspStat   =  FAILBREAK;
-      }
-    }
-    if (DspStat == NOBREAK)
-    {
-      if (cMemoryGetPointer(TmpPrgId,TmpHandle,&pTmp) == OK)
-      {
-        pDescr      =  (DESCR*)pTmp;
-        pArray      =  (*pDescr).pArray;
+		DspStat = NOBREAK;
+		if (Elements > (*pDescr).Elements)
+		{
+			if (cMemoryResize(TmpPrgId, TmpHandle, Elements) == NULL)
+			{
+				DspStat = FAILBREAK;
+			}
+		}
+		if (DspStat == NOBREAK)
+		{
+			if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+			{
+				pDescr = (DESCR*)pTmp;
+				pArray = (*pDescr).pArray;
 #ifdef DEBUG
-        printf("  Append P=%1u H=%1u     I=%8lu A=%8p",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index,pArray);
+				printf("  Append P=%1u H=%1u     I=%8lu A=%8p", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index, pArray);
 #endif
-        switch ((*pDescr).Type)
-        {
-          case DATA_8 :
-          {
+				switch ((*pDescr).Type)
+				{
+				case DATA_8:
+				{
 #ifdef DEBUG
-            printf(" V=%d",(int)*(DATA8*)pValue);
+					printf(" V=%d", (int)*(DATA8*)pValue);
 #endif
-            pData8          =  (DATA8*)pArray;
-            pData8[Index]   =  *(DATA8*)pValue;
-            DspStat         =  NOBREAK;
-          }
-          break;
+					pData8 = (DATA8*)pArray;
+					pData8[Index] = *(DATA8*)pValue;
+					DspStat = NOBREAK;
+				}
+				break;
 
-          case DATA_16 :
-          {
+				case DATA_16:
+				{
 #ifdef DEBUG
-            printf(" V=%d",(int)*(DATA16*)pValue);
+					printf(" V=%d", (int)*(DATA16*)pValue);
 #endif
-            pData16         =  (DATA16*)pArray;
-            pData16[Index]  =  *(DATA16*)pValue;
-            DspStat         =  NOBREAK;
-          }
-          break;
+					pData16 = (DATA16*)pArray;
+					pData16[Index] = *(DATA16*)pValue;
+					DspStat = NOBREAK;
+				}
+				break;
 
-          case DATA_32 :
-          {
+				case DATA_32:
+				{
 #ifdef DEBUG
-            printf(" V=%d",(int)*(DATA32*)pValue);
+					printf(" V=%d", (int)*(DATA32*)pValue);
 #endif
-            pData32         =  (DATA32*)pArray;
-            pData32[Index]  =  *(DATA32*)pValue;
-            DspStat         =  NOBREAK;
-          }
-          break;
+					pData32 = (DATA32*)pArray;
+					pData32[Index] = *(DATA32*)pValue;
+					DspStat = NOBREAK;
+				}
+				break;
 
-          case DATA_F :
-          {
+				case DATA_F:
+				{
 #ifdef DEBUG
-            printf(" V=%f",*(DATAF*)pValue);
+					printf(" V=%f", *(DATAF*)pValue);
 #endif
-            pDataF          =  (DATAF*)pArray;
-            pDataF[Index]   =  *(DATAF*)pValue;
-            DspStat         =  NOBREAK;
-          }
-          break;
+					pDataF = (DATAF*)pArray;
+					pDataF[Index] = *(DATAF*)pValue;
+					DspStat = NOBREAK;
+				}
+				break;
 
-        }
+				}
 #ifdef DEBUG
-        printf("\n");
+				printf("\n");
 #endif
-      }
-    }
-  }
-  if (DspStat != NOBREAK)
-  {
+			}
+		}
+	}
+	if (DspStat != NOBREAK)
+	{
 #ifdef DEBUG
-    printf("  WR ERR P=%1u H=%1u     I=%8lu\n",(unsigned int)TmpPrgId,(unsigned int)TmpHandle,(unsigned long)Index);
+		printf("  WR ERR P=%1u H=%1u     I=%8lu\n", (unsigned int)TmpPrgId, (unsigned int)TmpHandle, (unsigned long)Index);
 #endif
-    SetDispatchStatus(DspStat);
-  }
+		SetDispatchStatus(DspStat);
+	}
 }
 
 
@@ -4357,18 +4345,18 @@ void      cMemoryArrayAppend(void)
  *\n
  *
  */
-/*! \brief  opMEMORY_USAGE byte code
- *
- */
+ /*! \brief  opMEMORY_USAGE byte code
+  *
+  */
 void      cMemoryUsage(void)
 {
-  DATA32  Total;
-  DATA32  Free;
+	DATA32  Total;
+	DATA32  Free;
 
-  cMemoryGetUsage(&Total,&Free,1);
+	cMemoryGetUsage(&Total, &Free, 1);
 
-  *(DATA32*)PrimParPointer()  =  Total;
-  *(DATA32*)PrimParPointer()  =  Free;
+	*(DATA32*)PrimParPointer() = Total;
+	*(DATA32*)PrimParPointer() = Free;
 
 }
 
@@ -4438,227 +4426,227 @@ void      cMemoryUsage(void)
  *\n
  *
  */
-/*! \brief  opFILENAME byte code
- *
- */
+ /*! \brief  opFILENAME byte code
+  *
+  */
 void      cMemoryFileName(void)
 {
-  PRGID   TmpPrgId;
-  DATA8   Cmd;
-  DATA8   Tmp;
-  struct  stat FileStatus;
-  char    Filename[MAX_FILENAME_SIZE];
-  char    Folder[MAX_FILENAME_SIZE];
-  char    Name[MAX_FILENAME_SIZE];
-  char    Ext[MAX_FILENAME_SIZE];
-  char    Buffer[2 * MAX_FILENAME_SIZE + 32];
-  DATA8   Length;
-  DATA8   *pFilename;
-  DATA8   *pFolder;
-  DATA8   *pName;
-  DATA8   *pExt;
-  HANDLER hFilename;
-  HANDLER hFolder;
-  HANDLER hName;
-  HANDLER hExt;
-  DATA32  Lng;
-  DATA32  Size;
-  DATA32  Files;
+	PRGID   TmpPrgId;
+	DATA8   Cmd;
+	DATA8   Tmp;
+	struct  stat FileStatus;
+	char    Filename[MAX_FILENAME_SIZE];
+	char    Folder[MAX_FILENAME_SIZE];
+	char    Name[MAX_FILENAME_SIZE];
+	char    Ext[MAX_FILENAME_SIZE];
+	char    Buffer[2 * MAX_FILENAME_SIZE + 32];
+	DATA8   Length;
+	DATA8* pFilename;
+	DATA8* pFolder;
+	DATA8* pName;
+	DATA8* pExt;
+	HANDLER hFilename;
+	HANDLER hFolder;
+	HANDLER hName;
+	HANDLER hExt;
+	DATA32  Lng;
+	DATA32  Size;
+	DATA32  Files;
 
-  TmpPrgId      =  CurrentProgramId();
-  Cmd           =  *(DATA8*)PrimParPointer();
+	TmpPrgId = CurrentProgramId();
+	Cmd = *(DATA8*)PrimParPointer();
 
-  switch (Cmd)
-  { // Function
+	switch (Cmd)
+	{ // Function
 
-    case scEXIST:
-    {
-      pFilename  =  (DATA8*)PrimParPointer();
-      cMemoryFilename(TmpPrgId,(char*)pFilename,"",MAX_FILENAME_SIZE,Filename);
+	case EXIST:
+	{
+		pFilename = (DATA8*)PrimParPointer();
+		cMemoryFilename(TmpPrgId, (char*)pFilename, "", MAX_FILENAME_SIZE, Filename);
 
-      Tmp        =  0;
-      if (stat(Filename,&FileStatus) == 0)
-      {
-        Tmp      =  1;
-      }
+		Tmp = 0;
+		if (stat(Filename, &FileStatus) == 0)
+		{
+			Tmp = 1;
+		}
 #ifdef DEBUG_TRACE_FILENAME
-      printf("c_memory  cMemoryFileName: EXIST   [%s] = %d\n",Filename,Tmp);
+		printf("c_memory  cMemoryFileName: EXIST   [%s] = %d\n", Filename, Tmp);
 #endif
-      *(DATA8*)PrimParPointer()  =  Tmp;
-    }
-    break;
+		* (DATA8*)PrimParPointer() = Tmp;
+	}
+	break;
 
-    case scTOTALSIZE:
-    {
-      pFilename  =  (DATA8*)PrimParPointer();
-      cMemoryFilename(TmpPrgId,(char*)pFilename,"",MAX_FILENAME_SIZE,Filename);
-      Size  =  cMemoryFindSize((char*)Filename,&Files);
+	case TOTALSIZE:
+	{
+		pFilename = (DATA8*)PrimParPointer();
+		cMemoryFilename(TmpPrgId, (char*)pFilename, "", MAX_FILENAME_SIZE, Filename);
+		Size = cMemoryFindSize((char*)Filename, &Files);
 
-      *(DATA32*)PrimParPointer()  =  Files;
-      *(DATA32*)PrimParPointer()  =  Size;
-    }
-    break;
+		*(DATA32*)PrimParPointer() = Files;
+		*(DATA32*)PrimParPointer() = Size;
+	}
+	break;
 
-    case scSPLIT:
-    {
-      pFilename   =  (DATA8*)PrimParPointer();
-      Length      =  *(DATA8*)PrimParPointer();
-      pFolder     =  (DATA8*)PrimParPointer();
-      hFolder     =  VMInstance.Handle;
-      pName       =  (DATA8*)PrimParPointer();
-      hName       =  VMInstance.Handle;
-      pExt        =  (DATA8*)PrimParPointer();
-      hExt        =  VMInstance.Handle;
+	case SPLIT:
+	{
+		pFilename = (DATA8*)PrimParPointer();
+		Length = *(DATA8*)PrimParPointer();
+		pFolder = (DATA8*)PrimParPointer();
+		hFolder = VMInstance.Handle;
+		pName = (DATA8*)PrimParPointer();
+		hName = VMInstance.Handle;
+		pExt = (DATA8*)PrimParPointer();
+		hExt = VMInstance.Handle;
 
-      Tmp         =  Length;
+		Tmp = Length;
 
-      // Split pFilename
-      FindName((char*)pFilename,Folder,Name,Ext);
+		// Split pFilename
+		FindName((char*)pFilename, Folder, Name, Ext);
 
-      // Make pFolder
-      Length      =  Tmp;
-      if (hFolder >= 0)
-      {
-        Lng       =  strlen(Folder) + 1;
-        if (Lng > MIN_ARRAY_ELEMENTS)
-        {
-          pFolder    =  (DATA8*)VmMemoryResize(hFolder,Lng);
-        }
-        Length       =  (DATA8)Lng;
-      }
-      snprintf((char*)pFolder,(int)Length,"%s",Folder);
+		// Make pFolder
+		Length = Tmp;
+		if (hFolder >= 0)
+		{
+			Lng = strlen(Folder) + 1;
+			if (Lng > MIN_ARRAY_ELEMENTS)
+			{
+				pFolder = (DATA8*)VmMemoryResize(hFolder, Lng);
+			}
+			Length = (DATA8)Lng;
+		}
+		snprintf((char*)pFolder, (int)Length, "%s", Folder);
 
-      // Make pName
-      Length      =  Tmp;
-      if (hName >= 0)
-      {
-        Lng       =  strlen(Name) + 1;
-        if (Lng > MIN_ARRAY_ELEMENTS)
-        {
-          pName      =  (DATA8*)VmMemoryResize(hName,Lng);
-        }
-        Length       =  (DATA8)Lng;
-      }
-      snprintf((char*)pName,(int)Length,"%s",Name);
+		// Make pName
+		Length = Tmp;
+		if (hName >= 0)
+		{
+			Lng = strlen(Name) + 1;
+			if (Lng > MIN_ARRAY_ELEMENTS)
+			{
+				pName = (DATA8*)VmMemoryResize(hName, Lng);
+			}
+			Length = (DATA8)Lng;
+		}
+		snprintf((char*)pName, (int)Length, "%s", Name);
 
-      // Make pExt
-      Length      =  Tmp;
-      if (hExt >= 0)
-      {
-        Lng       =  strlen(Ext) + 1;
-        if (Lng > MIN_ARRAY_ELEMENTS)
-        {
-          pExt       =  (DATA8*)VmMemoryResize(hExt,Lng);
-        }
-        Length       =  (DATA8)Lng;
-      }
-      snprintf((char*)pExt,(int)Length,"%s",Ext);
+		// Make pExt
+		Length = Tmp;
+		if (hExt >= 0)
+		{
+			Lng = strlen(Ext) + 1;
+			if (Lng > MIN_ARRAY_ELEMENTS)
+			{
+				pExt = (DATA8*)VmMemoryResize(hExt, Lng);
+			}
+			Length = (DATA8)Lng;
+		}
+		snprintf((char*)pExt, (int)Length, "%s", Ext);
 
-    }
-    break;
+	}
+	break;
 
-    case scMERGE:
-    {
-      pFolder     =  (DATA8*)PrimParPointer();
-      pName       =  (DATA8*)PrimParPointer();
-      pExt        =  (DATA8*)PrimParPointer();
-      Length      =  *(DATA8*)PrimParPointer();
-      pFilename   =  (DATA8*)PrimParPointer();
-      hFilename   =  VMInstance.Handle;
+	case MERGE:
+	{
+		pFolder = (DATA8*)PrimParPointer();
+		pName = (DATA8*)PrimParPointer();
+		pExt = (DATA8*)PrimParPointer();
+		Length = *(DATA8*)PrimParPointer();
+		pFilename = (DATA8*)PrimParPointer();
+		hFilename = VMInstance.Handle;
 
-      // Merge pFolder, pName and pExt
-      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s%s",pFolder,pName,pExt);
+		// Merge pFolder, pName and pExt
+		snprintf(Filename, MAX_FILENAME_SIZE, "%s/%s%s", pFolder, pName, pExt);
 
-      // Make pFilename
-      if (hFilename >= 0)
-      {
-        Lng       =  strlen(Filename) + 1;
-        if (Lng > MIN_ARRAY_ELEMENTS)
-        {
-          pFilename  =  (DATA8*)VmMemoryResize(hFilename,Lng);
-        }
-        Length       =  (DATA8)Lng;
-      }
-      snprintf((char*)pFilename,(int)Length,"%s",Filename);
-    }
-    break;
+		// Make pFilename
+		if (hFilename >= 0)
+		{
+			Lng = strlen(Filename) + 1;
+			if (Lng > MIN_ARRAY_ELEMENTS)
+			{
+				pFilename = (DATA8*)VmMemoryResize(hFilename, Lng);
+			}
+			Length = (DATA8)Lng;
+		}
+		snprintf((char*)pFilename, (int)Length, "%s", Filename);
+	}
+	break;
 
-    case scCHECK:
-    {
-      Tmp         =  0;
-      pFilename   =  (DATA8*)PrimParPointer();
-      if (cMemoryCheckFilename((char*)pFilename,NULL,NULL,NULL) == OK)
-      {
-        Tmp       =  1;
-      }
+	case CHECK:
+	{
+		Tmp = 0;
+		pFilename = (DATA8*)PrimParPointer();
+		if (cMemoryCheckFilename((char*)pFilename, NULL, NULL, NULL) == OK)
+		{
+			Tmp = 1;
+		}
 
-      *(DATA8*)PrimParPointer()  =  Tmp;
-    }
-    break;
+		*(DATA8*)PrimParPointer() = Tmp;
+	}
+	break;
 
-    case scPACK:
-    {
-      pName       =  (DATA8*)PrimParPointer();
+	case PACK:
+	{
+		pName = (DATA8*)PrimParPointer();
 
-      // Split pFilename
-      FindName((char*)pName,Folder,Name,Ext);
+		// Split pFilename
+		FindName((char*)pName, Folder, Name, Ext);
 
-      snprintf(Buffer,2 * MAX_FILENAME_SIZE + 32,"tar -cz -f %s%s%s -C %s %s%s &> /dev/null",Folder,Name,vmEXT_ARCHIVE,Folder,Name,Ext);
-      system(Buffer);
-      sync();
-    }
-    break;
+		snprintf(Buffer, 2 * MAX_FILENAME_SIZE + 32, "tar -cz -f %s%s%s -C %s %s%s &> /dev/null", Folder, Name, vmEXT_ARCHIVE, Folder, Name, Ext);
+		system(Buffer);
+		sync();
+	}
+	break;
 
-    case scUNPACK:
-    {
-      pName       =  (DATA8*)PrimParPointer();
+	case UNPACK:
+	{
+		pName = (DATA8*)PrimParPointer();
 
-      // Split pFilename
-      FindName((char*)pName,Folder,Name,Ext);
+		// Split pFilename
+		FindName((char*)pName, Folder, Name, Ext);
 
-      snprintf(Buffer,2 * MAX_FILENAME_SIZE + 32,"tar -xz -f %s%s%s -C %s &> /dev/null",Folder,Name,vmEXT_ARCHIVE,Folder);
-      system(Buffer);
-      sync();
-    }
-    break;
+		snprintf(Buffer, 2 * MAX_FILENAME_SIZE + 32, "tar -xz -f %s%s%s -C %s &> /dev/null", Folder, Name, vmEXT_ARCHIVE, Folder);
+		system(Buffer);
+		sync();
+	}
+	break;
 
-    case scGET_FOLDERNAME:
-    {
-      Length      =  *(DATA8*)PrimParPointer();
-      pFilename   =  (DATA8*)PrimParPointer();
-      hFilename   =  VMInstance.Handle;
+	case GET_FOLDERNAME:
+	{
+		Length = *(DATA8*)PrimParPointer();
+		pFilename = (DATA8*)PrimParPointer();
+		hFilename = VMInstance.Handle;
 
-      cMemoryGetResourcePath(TmpPrgId,(char*)Filename,MAX_FILENAME_SIZE);
-      Lng         =  strlen(Filename);
+		cMemoryGetResourcePath(TmpPrgId, (char*)Filename, MAX_FILENAME_SIZE);
+		Lng = strlen(Filename);
 
 
-      if (Lng > 0)
-      {
-        if (Filename[Lng - 1] == '/')
-        {
-          Lng--;
-          Filename[Lng]  =  0;
-        }
-      }
+		if (Lng > 0)
+		{
+			if (Filename[Lng - 1] == '/')
+			{
+				Lng--;
+				Filename[Lng] = 0;
+			}
+		}
 
-      // Make pFilename
-      if (hFilename >= 0)
-      {
-        Lng++;
-        if (Lng > MIN_ARRAY_ELEMENTS)
-        {
-          pFilename  =  (DATA8*)VmMemoryResize(hFilename,Lng);
-        }
-        Length       =  (DATA8)Lng;
-      }
-      if (pFilename != NULL)
-      {
-        snprintf((char*)pFilename,(int)Length,"%s",Filename);
-      }
-    }
-    break;
+		// Make pFilename
+		if (hFilename >= 0)
+		{
+			Lng++;
+			if (Lng > MIN_ARRAY_ELEMENTS)
+			{
+				pFilename = (DATA8*)VmMemoryResize(hFilename, Lng);
+			}
+			Length = (DATA8)Lng;
+		}
+		if (pFilename != NULL)
+		{
+			snprintf((char*)pFilename, (int)Length, "%s", Filename);
+		}
+	}
+	break;
 
-  }
+	}
 }
 
 /*! \page cMemory
@@ -4676,22 +4664,22 @@ void      cMemoryFileName(void)
  *\n
  *
  */
-/*! \brief  opFILE_MD5SUM byte code
- *
- */
+ /*! \brief  opFILE_MD5SUM byte code
+  *
+  */
 void      cMemoryFileMd5Sum(void)
 {
-  DATA8   *pFileName;
-  DATA8   *pMd5Sum;
-  DATA8   *pSuccess;
+	DATA8* pFileName;
+	DATA8* pMd5Sum;
+	DATA8* pSuccess;
 
-  pFileName =  (DATA8*)PrimParPointer();
-  pMd5Sum   =  (DATA8*)PrimParPointer();
-  pSuccess  =  (DATA8*)PrimParPointer();
+	pFileName = (DATA8*)PrimParPointer();
+	pMd5Sum = (DATA8*)PrimParPointer();
+	pSuccess = (DATA8*)PrimParPointer();
 
-  memset(pMd5Sum, 0, 16);
+	memset(pMd5Sum, 0, 16);
 
-  *pSuccess = md5_file((char*)pFileName, 0, (unsigned char *) pMd5Sum);
+	*pSuccess = md5_file((char*)pFileName, 0, (unsigned char*)pMd5Sum);
 }
 
 

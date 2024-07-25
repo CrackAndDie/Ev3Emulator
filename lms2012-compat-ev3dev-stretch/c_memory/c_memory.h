@@ -146,7 +146,7 @@ DESCR;
 
 typedef   struct
 {
-  int     hFile;
+  FILE*     hFile;
   DATA8   Access;
   char    Filename[vmFILENAMESIZE];
 }

@@ -28,7 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <dlfcn.h>
+// #include <dlfcn.h>
 
 #define DYNLOAD_MAX_VM_FILENAME      64
 #define DYNLOAD_MAX_ENTRYPOINT_NAME  64

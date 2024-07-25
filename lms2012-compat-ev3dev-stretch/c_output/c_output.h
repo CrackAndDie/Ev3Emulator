@@ -67,7 +67,7 @@ typedef struct
   DATA8       OutputType[OUTPUTS];
   OBJID       Owner[OUTPUTS];
 
-  int         PwmFile;
+  FILE*         PwmFile;
   int         MotorFile;
 
   MOTORDATA   MotorData[OUTPUTS];

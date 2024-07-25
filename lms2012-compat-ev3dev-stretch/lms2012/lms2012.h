@@ -29,7 +29,7 @@
 #ifndef   LMS2012_H_
 #define   LMS2012_H_
 
-#include <libudev.h>
+// #include <libudev.h>
 
 #include  "lmstypes.h"
 #include  "bytecodes.h"
@@ -81,6 +81,33 @@ typedef enum {
 #define   EXT_CONFIG                    vmEXT_CONFIG                  //!< rudolf configuration file
 
 // Permissions
+
+#define S_IFMT	00170000	/* type of file */
+#define S_IFSOCK 0140000	/* named socket */
+#define S_IFLNK	 0120000	/* symbolic link */
+#define S_IFREG  0100000	/* regular */
+#define S_IFBLK  0060000	/* block special */
+#define S_IFDIR  0040000	/* directory */
+#define S_IFCHR  0020000	/* character special */
+#define S_IFIFO  0010000	/* fifo */
+#define S_ISUID  0004000	/* set user id on execution */
+#define S_ISGID  0002000	/* set group id on execution */
+#define S_ISVTX  0001000	/* save swapped text even after use */
+
+#define S_IRWXU 00700		/* rwx for owner */
+#define S_IRUSR 00400		/* read permission for owner */
+#define S_IWUSR 00200		/* write permission for owner */
+#define S_IXUSR 00100		/* execute/search permission for owner */
+
+#define S_IRWXG 00070		/* rwx for group */
+#define S_IRGRP 00040		/* read permission for group */
+#define S_IWGRP 00020		/* write permission for group */
+#define S_IXGRP 00010		/* execute/search permission for group */
+
+#define S_IRWXO 00007		/* rwx for other */
+#define S_IROTH 00004		/* read permission for other */
+#define S_IWOTH 00002		/* read permission for other */
+#define S_IXOTH 00001		/* execute/search permission for other */
 
 #define   FILEPERMISSIONS               (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define   DIRPERMISSIONS                (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)

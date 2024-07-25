@@ -168,7 +168,7 @@ endforeach ()
 # global compiler options
 
 add_definitions("-DPROJECT=\"${PROJECT_NAME}\"" "-DVERS=${PROJECT_VERSION}")
-add_compile_options (-Wall -Werror -Wno-unused-result)
+add_compile_options (-Wall)
 
 
 # global dependencies
