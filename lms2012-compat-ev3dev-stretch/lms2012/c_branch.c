@@ -23,25 +23,25 @@
 #include  "c_branch.h"
 
 
-//******* BYTE CODE SNIPPETS **************************************************
+ //******* BYTE CODE SNIPPETS **************************************************
 
 
-/*! \page cBranch Branch
- *  <hr size="1"/>
- *  <b>     opJR (OFFSET)  </b>
- *
- *- Branch unconditionally relative\n
- *- Dispatch status unchanged
- *
- *  \param  (DATA32)  OFFSET
- */
-/*! \brief  opJR byte code
- *
- *
- */
+ /*! \page cBranch Branch
+  *  <hr size="1"/>
+  *  <b>     opJR (OFFSET)  </b>
+  *
+  *- Branch unconditionally relative\n
+  *- Dispatch status unchanged
+  *
+  *  \param  (DATA32)  OFFSET
+  */
+  /*! \brief  opJR byte code
+   *
+   *
+   */
 void      cBranchJr(void)
 {
-  AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	AdjustObjectIp(*(IMOFFS*)PrimParPointer());
 }
 
 #include  <stdio.h>
@@ -55,20 +55,20 @@ void      cBranchJr(void)
  *  \param  (DATA8)   FLAG
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_FALSE byte code
- *
- *
- */
+ /*! \brief  opJR_FALSE byte code
+  *
+  *
+  */
 void      cBranchJrFalse(void)
 {
-  if (*(DATA8*)PrimParPointer() == (DATA8)0)
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	if (*(DATA8*)PrimParPointer() == (DATA8)0)
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -82,20 +82,20 @@ void      cBranchJrFalse(void)
  *  \param  (DATA8)   FLAG
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_TRUE byte code
- *
- *
- */
+ /*! \brief  opJR_TRUE byte code
+  *
+  *
+  */
 void      cBranchJrTrue(void)
 {
-  if (*(DATA8*)PrimParPointer() != (DATA8)0)
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	if (*(DATA8*)PrimParPointer() != (DATA8)0)
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -110,24 +110,24 @@ void      cBranchJrTrue(void)
  *  \param  (DATAF)   VALUE
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_NAN byte code
- *
- *
- */
+ /*! \brief  opJR_NAN byte code
+  *
+  *
+  */
 void      cBranchJrNan(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp  =  *(DATAF*)PrimParPointer();
+	Tmp = *(DATAF*)PrimParPointer();
 
-  if (isnan(Tmp))
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	if (isnan(Tmp))
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -142,23 +142,23 @@ void      cBranchJrNan(void)
  *  \param  (DATA8)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LT8 byte code
- *
- *
- */
+ /*! \brief  opJR_LT8 byte code
+  *
+  *
+  */
 void      cBranchJrLt8(void)
 {
-  DATA8   Tmp;
+	DATA8   Tmp;
 
-  Tmp      =  *(DATA8*)PrimParPointer();
-  if (Tmp  <  *(DATA8*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA8*)PrimParPointer();
+	if (Tmp < *(DATA8*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -173,23 +173,23 @@ void      cBranchJrLt8(void)
  *  \param  (DATA16)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LT16 byte code
- *
- *
- */
+ /*! \brief  opJR_LT16 byte code
+  *
+  *
+  */
 void      cBranchJrLt16(void)
 {
-  DATA16  Tmp;
+	DATA16  Tmp;
 
-  Tmp      =  *(DATA16*)PrimParPointer();
-  if (Tmp  <  *(DATA16*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA16*)PrimParPointer();
+	if (Tmp < *(DATA16*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -204,23 +204,23 @@ void      cBranchJrLt16(void)
  *  \param  (DATA32)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LT16 byte code
- *
- *
- */
+ /*! \brief  opJR_LT16 byte code
+  *
+  *
+  */
 void      cBranchJrLt32(void)
 {
-  DATA32  Tmp;
+	DATA32  Tmp;
 
-  Tmp      =  *(DATA32*)PrimParPointer();
-  if (Tmp  <  *(DATA32*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA32*)PrimParPointer();
+	if (Tmp < *(DATA32*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -235,23 +235,23 @@ void      cBranchJrLt32(void)
  *  \param  (DATAF)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LTF byte code
- *
- *
- */
+ /*! \brief  opJR_LTF byte code
+  *
+  *
+  */
 void      cBranchJrLtF(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp      =  *(DATAF*)PrimParPointer();
-  if (Tmp  <  *(DATAF*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATAF*)PrimParPointer();
+	if (Tmp < *(DATAF*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -266,23 +266,23 @@ void      cBranchJrLtF(void)
  *  \param  (DATA8)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GT8 byte code
- *
- *
- */
+ /*! \brief  opJR_GT8 byte code
+  *
+  *
+  */
 void      cBranchJrGt8(void)
 {
-  DATA8   Tmp;
+	DATA8   Tmp;
 
-  Tmp      =  *(DATA8*)PrimParPointer();
-  if (Tmp  >  *(DATA8*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA8*)PrimParPointer();
+	if (Tmp > *(DATA8*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -297,23 +297,23 @@ void      cBranchJrGt8(void)
  *  \param  (DATA16)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GT16 byte code
- *
- *
- */
+ /*! \brief  opJR_GT16 byte code
+  *
+  *
+  */
 void      cBranchJrGt16(void)
 {
-  DATA16  Tmp;
+	DATA16  Tmp;
 
-  Tmp      =  *(DATA16*)PrimParPointer();
-  if (Tmp  >  *(DATA16*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA16*)PrimParPointer();
+	if (Tmp > *(DATA16*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -328,23 +328,23 @@ void      cBranchJrGt16(void)
  *  \param  (DATA32)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GT32 byte code
- *
- *
- */
+ /*! \brief  opJR_GT32 byte code
+  *
+  *
+  */
 void      cBranchJrGt32(void)
 {
-  DATA32  Tmp;
+	DATA32  Tmp;
 
-  Tmp      =  *(DATA32*)PrimParPointer();
-  if (Tmp  >  *(DATA32*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA32*)PrimParPointer();
+	if (Tmp > *(DATA32*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -359,23 +359,23 @@ void      cBranchJrGt32(void)
  *  \param  (DATAF)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GTF byte code
- *
- *
- */
+ /*! \brief  opJR_GTF byte code
+  *
+  *
+  */
 void      cBranchJrGtF(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp      =  *(DATAF*)PrimParPointer();
-  if (Tmp  >  *(DATAF*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATAF*)PrimParPointer();
+	if (Tmp > *(DATAF*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -390,23 +390,23 @@ void      cBranchJrGtF(void)
  *  \param  (DATA8)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_EQ8 byte code
- *
- *
- */
+ /*! \brief  opJR_EQ8 byte code
+  *
+  *
+  */
 void      cBranchJrEq8(void)
 {
-  DATA8   Tmp;
+	DATA8   Tmp;
 
-  Tmp      =  *(DATA8*)PrimParPointer();
-  if (Tmp ==  *(DATA8*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA8*)PrimParPointer();
+	if (Tmp == *(DATA8*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -421,23 +421,23 @@ void      cBranchJrEq8(void)
  *  \param  (DATA16)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_EQ16 byte code
- *
- *
- */
+ /*! \brief  opJR_EQ16 byte code
+  *
+  *
+  */
 void      cBranchJrEq16(void)
 {
-  DATA16  Tmp;
+	DATA16  Tmp;
 
-  Tmp      =  *(DATA16*)PrimParPointer();
-  if (Tmp ==  *(DATA16*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA16*)PrimParPointer();
+	if (Tmp == *(DATA16*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -452,23 +452,23 @@ void      cBranchJrEq16(void)
  *  \param  (DATA32)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_EQ32 byte code
- *
- *
- */
+ /*! \brief  opJR_EQ32 byte code
+  *
+  *
+  */
 void      cBranchJrEq32(void)
 {
-  DATA32  Tmp;
+	DATA32  Tmp;
 
-  Tmp      =  *(DATA32*)PrimParPointer();
-  if (Tmp ==  *(DATA32*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA32*)PrimParPointer();
+	if (Tmp == *(DATA32*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -483,23 +483,23 @@ void      cBranchJrEq32(void)
  *  \param  (DATAF)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_EQF byte code
- *
- *
- */
+ /*! \brief  opJR_EQF byte code
+  *
+  *
+  */
 void      cBranchJrEqF(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp      =  *(DATAF*)PrimParPointer();
-  if (Tmp ==  *(DATAF*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATAF*)PrimParPointer();
+	if (Tmp == *(DATAF*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -514,23 +514,23 @@ void      cBranchJrEqF(void)
  *  \param  (DATA8)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_NEQ8 byte code
- *
- *
- */
+ /*! \brief  opJR_NEQ8 byte code
+  *
+  *
+  */
 void      cBranchJrNEq8(void)
 {
-  DATA8   Tmp;
+	DATA8   Tmp;
 
-  Tmp      =  *(DATA8*)PrimParPointer();
-  if (Tmp !=  *(DATA8*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA8*)PrimParPointer();
+	if (Tmp != *(DATA8*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -545,23 +545,23 @@ void      cBranchJrNEq8(void)
  *  \param  (DATA16)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_NEQ16 byte code
- *
- *
- */
+ /*! \brief  opJR_NEQ16 byte code
+  *
+  *
+  */
 void      cBranchJrNEq16(void)
 {
-  DATA16  Tmp;
+	DATA16  Tmp;
 
-  Tmp      =  *(DATA16*)PrimParPointer();
-  if (Tmp !=  *(DATA16*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA16*)PrimParPointer();
+	if (Tmp != *(DATA16*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -576,23 +576,23 @@ void      cBranchJrNEq16(void)
  *  \param  (DATA32)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_NEQ32 byte code
- *
- *
- */
+ /*! \brief  opJR_NEQ32 byte code
+  *
+  *
+  */
 void      cBranchJrNEq32(void)
 {
-  DATA32  Tmp;
+	DATA32  Tmp;
 
-  Tmp      =  *(DATA32*)PrimParPointer();
-  if (Tmp !=  *(DATA32*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA32*)PrimParPointer();
+	if (Tmp != *(DATA32*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -607,23 +607,23 @@ void      cBranchJrNEq32(void)
  *  \param  (DATAF)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_NEQF byte code
- *
- *
- */
+ /*! \brief  opJR_NEQF byte code
+  *
+  *
+  */
 void      cBranchJrNEqF(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp      =  *(DATAF*)PrimParPointer();
-  if (Tmp !=  *(DATAF*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATAF*)PrimParPointer();
+	if (Tmp != *(DATAF*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -638,23 +638,23 @@ void      cBranchJrNEqF(void)
  *  \param  (DATA8)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LTEQ8 byte code
- *
- *
- */
+ /*! \brief  opJR_LTEQ8 byte code
+  *
+  *
+  */
 void      cBranchJrLtEq8(void)
 {
-  DATA8   Tmp;
+	DATA8   Tmp;
 
-  Tmp      =  *(DATA8*)PrimParPointer();
-  if (Tmp <=  *(DATA8*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA8*)PrimParPointer();
+	if (Tmp <= *(DATA8*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -669,23 +669,23 @@ void      cBranchJrLtEq8(void)
  *  \param  (DATA16)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LTEQ16 byte code
- *
- *
- */
+ /*! \brief  opJR_LTEQ16 byte code
+  *
+  *
+  */
 void      cBranchJrLtEq16(void)
 {
-  DATA16  Tmp;
+	DATA16  Tmp;
 
-  Tmp      =  *(DATA16*)PrimParPointer();
-  if (Tmp  <= *(DATA16*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA16*)PrimParPointer();
+	if (Tmp <= *(DATA16*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -700,23 +700,23 @@ void      cBranchJrLtEq16(void)
  *  \param  (DATA32)  RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LTEQ32 byte code
- *
- *
- */
+ /*! \brief  opJR_LTEQ32 byte code
+  *
+  *
+  */
 void      cBranchJrLtEq32(void)
 {
-  DATA32  Tmp;
+	DATA32  Tmp;
 
-  Tmp      =  *(DATA32*)PrimParPointer();
-  if (Tmp <=  *(DATA32*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA32*)PrimParPointer();
+	if (Tmp <= *(DATA32*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -731,23 +731,23 @@ void      cBranchJrLtEq32(void)
  *  \param  (DATAF)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_LTEQF byte code
- *
- *
- */
+ /*! \brief  opJR_LTEQF byte code
+  *
+  *
+  */
 void      cBranchJrLtEqF(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp      =  *(DATAF*)PrimParPointer();
-  if (Tmp <=  *(DATAF*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATAF*)PrimParPointer();
+	if (Tmp <= *(DATAF*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -762,23 +762,23 @@ void      cBranchJrLtEqF(void)
  *  \param  (DATA8)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GTEQ8 byte code
- *
- *
- */
+ /*! \brief  opJR_GTEQ8 byte code
+  *
+  *
+  */
 void      cBranchJrGtEq8(void)
 {
-  DATA8   Tmp;
+	DATA8   Tmp;
 
-  Tmp      =  *(DATA8*)PrimParPointer();
-  if (Tmp >=  *(DATA8*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA8*)PrimParPointer();
+	if (Tmp >= *(DATA8*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -793,23 +793,23 @@ void      cBranchJrGtEq8(void)
  *  \param  (DATA16)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GTEQ16 byte code
- *
- *
- */
+ /*! \brief  opJR_GTEQ16 byte code
+  *
+  *
+  */
 void      cBranchJrGtEq16(void)
 {
-  DATA16  Tmp;
+	DATA16  Tmp;
 
-  Tmp      =  *(DATA16*)PrimParPointer();
-  if (Tmp >=  *(DATA16*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA16*)PrimParPointer();
+	if (Tmp >= *(DATA16*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -824,23 +824,23 @@ void      cBranchJrGtEq16(void)
  *  \param  (DATA32)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GTEQ32 byte code
- *
- *
- */
+ /*! \brief  opJR_GTEQ32 byte code
+  *
+  *
+  */
 void      cBranchJrGtEq32(void)
 {
-  DATA32  Tmp;
+	DATA32  Tmp;
 
-  Tmp      =  *(DATA32*)PrimParPointer();
-  if (Tmp >=  *(DATA32*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATA32*)PrimParPointer();
+	if (Tmp >= *(DATA32*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 
@@ -855,23 +855,23 @@ void      cBranchJrGtEq32(void)
  *  \param  (DATAF)   RIGHT
  *  \param  (DATA32)  OFFSET
  */
-/*! \brief  opJR_GTEQF byte code
- *
- *
- */
+ /*! \brief  opJR_GTEQF byte code
+  *
+  *
+  */
 void      cBranchJrGtEqF(void)
 {
-  DATAF   Tmp;
+	DATAF   Tmp;
 
-  Tmp      =  *(DATAF*)PrimParPointer();
-  if (Tmp >=  *(DATAF*)PrimParPointer())
-  {
-    AdjustObjectIp(*(IMOFFS*)PrimParPointer());
-  }
-  else
-  {
-    PrimParAdvance();
-  }
+	Tmp = *(DATAF*)PrimParPointer();
+	if (Tmp >= *(DATAF*)PrimParPointer())
+	{
+		AdjustObjectIp(*(IMOFFS*)PrimParPointer());
+	}
+	else
+	{
+		PrimParAdvance();
+	}
 }
 
 

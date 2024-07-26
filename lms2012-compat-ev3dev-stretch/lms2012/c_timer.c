@@ -21,33 +21,28 @@
 
 #include "lms2012.h"
 #include "c_timer.h"
+#include "unix_ph.h"
 
 #include <time.h>
-#include <sys/time.h>
 
 
 ULONG     cTimerGetmS(void)
 {
-  ULONG   Result;
-  struct  timeval tv;
+	ULONG   Result;
 
-  gettimeofday(&tv,NULL);
-  Result  =  (ULONG)tv.tv_sec * 1000;
-  Result +=  (ULONG)tv.tv_usec / 1000;
+	Result = (ULONG)getTimeSec() * 1000;
+	Result += (ULONG)getTimeUsec() / 1000;
 
-  return(Result);
+	return(Result);
 }
 
 
 ULONG     cTimerGetuS(void)
 {
-  struct  timeval tv;
+	VMInstance.TimeuS = (ULONG)getTimeSec() * 1000000;
+	VMInstance.TimeuS += (ULONG)getTimeUsec();
 
-  gettimeofday(&tv,NULL);
-  VMInstance.TimeuS  =  (ULONG)tv.tv_sec * 1000000;
-  VMInstance.TimeuS +=  (ULONG)tv.tv_usec;
-
-  return(VMInstance.TimeuS);
+	return(VMInstance.TimeuS);
 }
 
 
@@ -65,16 +60,16 @@ ULONG     cTimerGetuS(void)
  *  \param  (DATA32)  TIME    - Time to wait [mS]
  *  \param  (DATA32)  TIMER   - Variable used for timing
  */
-/*! \brief  opTIMER_WAIT byte code
- *
- */
+ /*! \brief  opTIMER_WAIT byte code
+  *
+  */
 void      cTimerWait(void)
 {
-  ULONG   Time;
+	ULONG   Time;
 
-  Time  =  *(ULONG*)PrimParPointer();
+	Time = *(ULONG*)PrimParPointer();
 
-  *(ULONG*)PrimParPointer()  =  cTimerGetmS() + Time;
+	*(ULONG*)PrimParPointer() = cTimerGetmS() + Time;
 }
 
 
@@ -87,26 +82,26 @@ void      cTimerWait(void)
  *
  *  \param  (DATA32)  TIMER   - Variable used for timing
  */
-/*! \brief  opTIMER_READY byte code
- *
- */
+ /*! \brief  opTIMER_READY byte code
+  *
+  */
 void      cTimerReady(void)
 {
-  IP      TmpIp;
-  DSPSTAT DspStat = BUSYBREAK;
+	IP      TmpIp;
+	DSPSTAT DspStat = BUSYBREAK;
 
-  TmpIp   =  GetObjectIp();
+	TmpIp = GetObjectIp();
 
-  if (*(ULONG*)PrimParPointer() <= cTimerGetmS())
-  {
-    DspStat  =  NOBREAK;
-  }
-  if (DspStat == BUSYBREAK)
-  { // Rewind IP
+	if (*(ULONG*)PrimParPointer() <= cTimerGetmS())
+	{
+		DspStat = NOBREAK;
+	}
+	if (DspStat == BUSYBREAK)
+	{ // Rewind IP
 
-    SetObjectIp(TmpIp - 1);
-  }
-  SetDispatchStatus(DspStat);
+		SetObjectIp(TmpIp - 1);
+	}
+	SetDispatchStatus(DspStat);
 
 }
 
@@ -120,12 +115,12 @@ void      cTimerReady(void)
  *
  *  \return (DATA32)  TIME    - Value
  */
-/*! \brief  opTIMER_READ byte code
- *
- */
+ /*! \brief  opTIMER_READ byte code
+  *
+  */
 void      cTimerRead(void)
 {
-  *(DATA32*)PrimParPointer()  =  (DATA32)(cTimerGetmS() - VMInstance.Program[CurrentProgramId()].StartTime);
+	*(DATA32*)PrimParPointer() = (DATA32)(cTimerGetmS() - VMInstance.Program[CurrentProgramId()].StartTime);
 }
 
 
@@ -138,12 +133,12 @@ void      cTimerRead(void)
  *
  *  \return (DATA32)  TIME    - Value
  */
-/*! \brief  opTIMER_READ_US byte code
- *
- */
+ /*! \brief  opTIMER_READ_US byte code
+  *
+  */
 void      cTimerReaduS(void)
 {
-  *(DATA32*)PrimParPointer()  =  (DATA32)cTimerGetuS();
+	*(DATA32*)PrimParPointer() = (DATA32)cTimerGetuS();
 }
 
 

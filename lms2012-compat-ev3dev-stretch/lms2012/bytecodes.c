@@ -18,6 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "lmstypes.h"
+#include "bytecodes.h"
+
 
 #define   MAX_SUBCODES        33                //!< Max number of sub codes
 #define   OPCODE_NAMESIZE     20                //!< Opcode and sub code name length
@@ -422,14 +425,14 @@ static  SUBCODE SubCodes[SUBPS][MAX_SUBCODES] =
   SC(   ARRAY_SUBP,             CREATE32,               PAR32,PAR16,                                    0,0,0,0,0,0           ),
   SC(   ARRAY_SUBP,             CREATEF,                PAR32,PAR16,                                    0,0,0,0,0,0           ),
   SC(   ARRAY_SUBP,             RESIZE,                 PAR16,PAR32,                                    0,0,0,0,0,0           ),
-  SC(   ARRAY_SUBP,             DELETE,                 PAR16,                                          0,0,0,0,0,0,0         ),
+  SC(   ARRAY_SUBP,             DESTROY,                 PAR16,                                          0,0,0,0,0,0,0         ),
   SC(   ARRAY_SUBP,             FILL,                   PAR16,PARV,                                     0,0,0,0,0,0           ),
   SC(   ARRAY_SUBP,             COPY,                   PAR16,PAR16,                                    0,0,0,0,0,0           ),
   SC(   ARRAY_SUBP,             INIT8,                  PAR16,PAR32,PAR32,PARVALUES,PAR8,               0,0,0                 ),
   SC(   ARRAY_SUBP,             INIT16,                 PAR16,PAR32,PAR32,PARVALUES,PAR16,              0,0,0                 ),
   SC(   ARRAY_SUBP,             INIT32,                 PAR16,PAR32,PAR32,PARVALUES,PAR32,              0,0,0                 ),
   SC(   ARRAY_SUBP,             INITF,                  PAR16,PAR32,PAR32,PARVALUES,PARF,               0,0,0                 ),
-  SC(   ARRAY_SUBP,             SIZE,                   PAR16,PAR32,                                    0,0,0,0,0,0           ),
+  SC(   ARRAY_SUBP,             SET_SIZE,                   PAR16,PAR32,                                    0,0,0,0,0,0           ),
   SC(   ARRAY_SUBP,             READ_CONTENT,           PAR16,PAR16,PAR32,PAR32,PAR8,                   0,0,0                 ),
   SC(   ARRAY_SUBP,             WRITE_CONTENT,          PAR16,PAR16,PAR32,PAR32,PAR8,                   0,0,0                 ),
   SC(   ARRAY_SUBP,             READ_SIZE,              PAR16,PAR16,PAR32,                              0,0,0,0,0             ),

@@ -74,6 +74,8 @@ option (LMS2012_ENABLE_VIRTUAL_BATT_TEMP "Enable guessing of battery temperature
 
 # translate options into defines
 
+# add_definitions("-DEV3RCV_INSTALL_DATADIR=\"./install_datadir\"")
+
 add_definitions("-D${LMS2012_SPECIALVERS}VERS")
 if (LMS2012_ENABLE_TERMINAL)
     add_definitions ("-DTERMINAL_ENABLED=1")
@@ -196,4 +198,4 @@ add_subdirectory (c_ui)
 add_subdirectory (data)
 add_subdirectory (doc)
 add_subdirectory (lms2012)
-# add_subdirectory (lmssrc)
+add_subdirectory (lmssrc)

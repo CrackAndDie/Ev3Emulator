@@ -25,7 +25,7 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #	define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
+#include "windows_wrapper.h"
 
 #include <stdio.h>
 #include <stdarg.h>

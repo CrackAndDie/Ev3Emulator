@@ -4,6 +4,8 @@ find_program (IMAGEMAGICK_CONVERT convert)
 find_program (SOUND_EXCHANGE sox)
 
 set (RAW2RSF ${CMAKE_SOURCE_DIR}/lmssrc/raw2rsf.sh)
+set (EV3RCV_INSTALL_DATADIR ${CMAKE_SOURCE_DIR}/build/install_datadir)
+message(${EV3RCV_INSTALL_DATADIR})
 
 macro (add_lms_app TARGET)
     set (options)
@@ -97,7 +99,7 @@ macro (add_lms_app TARGET)
 
         add_custom_target (${TARGET} ALL DEPENDS ${raf})
         install (FILES ${raf}
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/${LMSSRC_INSTALL_PATH})
+            DESTINATION ${EV3RCV_INSTALL_DATADIR}/${PROJECT_NAME}/${LMSSRC_INSTALL_PATH})
     else ()
         add_custom_target (${TARGET} ALL
             DEPENDS
@@ -106,7 +108,7 @@ macro (add_lms_app TARGET)
                 ${LMSSRC_RSF_LIST}
         )
         install (FILES ${LMSSRC_RBF_LIST} ${LMSSRC_RGF_LIST} ${LMSSRC_RSF_LIST}
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/${LMSSRC_INSTALL_PATH})
+            DESTINATION ${EV3RCV_INSTALL_DATADIR}/${PROJECT_NAME}/${LMSSRC_INSTALL_PATH})
     endif ()
 
 endmacro ()
@@ -116,7 +118,6 @@ add_subdirectory ("Brick Datalog")
 add_subdirectory ("Brick Info")
 add_subdirectory ("Brick Name")
 add_subdirectory ("Brick Program")
-add_subdirectory (Debug)
 add_subdirectory (Demo)
 add_subdirectory ("IR Control")
 add_subdirectory ("Motor Control")
@@ -124,7 +125,6 @@ add_subdirectory ("Port View")
 add_subdirectory (SelfTest)
 add_subdirectory (Sleep)
 add_subdirectory (TEST)
-add_subdirectory (Test)
 add_subdirectory (Volume)
 add_subdirectory (WiFi)
 add_subdirectory (tst)
