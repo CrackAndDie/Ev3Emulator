@@ -11,3 +11,20 @@
 ### c_sound  
 
 - removed all pcm shite. it has to be binded with c# shite so c# shite would be playing the sounds
+
+### c_timer  
+
+- removed unix timer. added win
+
+### c_bt  
+
+- removed almost everything
+
+
+### c_daisy  
+
+- removed some shite of usblib impls. should be checked via DIFF if you want it to restore
+
+### c_i2c  
+
+- removed almost everything. should be checked via DIFF if you want it to restore

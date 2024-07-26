@@ -21,9 +21,8 @@
 #ifndef C_DAISY_H_
 #define C_DAISY_H_
 
-#include <libusb.h>
-
 #include "lms2012.h"
+#include "libusb.h"
 
 #include "c_com.h"
 
@@ -257,7 +256,7 @@ RESULT	cDaisyGetDeviceInfo(DATA8 Length,UBYTE *pInfo); // Get Device Info for up
 RESULT	cDaisySetDeviceType(DATA8 Layer,DATA8 Port,DATA8 Type,DATA8 Mode);
 UWORD 	cDaisyData(UBYTE **pData);	                    // Separate buffered DaisyData - NOT conflicting with normal transfer e.g. answers, errors etc.
 void	  cDaisyStuffTxed(void);	                        // Tell when bits'n'bytes has left first (our) BUFFER
-uint    GetDaisyPushCounter(void);
+UINT    GetDaisyPushCounter(void);
 void    ResetDaisyPushCounter(void);
 RESULT  cDaisyChained(void);
 void 	  DecrementDaisyPushCounter(void);

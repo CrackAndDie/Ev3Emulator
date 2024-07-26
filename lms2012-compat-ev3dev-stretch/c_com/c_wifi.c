@@ -37,32 +37,14 @@
  *
  */
 
-#include <gio/gio.h>
-
 #include "c_wifi.h"
-#include "connman.h"
+#include "ext_wifi.h"
 
 #ifdef DEBUG_WIFI
 #define pr_dbg(f, ...) printf(f, ##__VA_ARGS__)
 #else
 #define pr_dbg(f, ...) while (0) { }
 #endif
-
-#define C_WIFI_HIDDEN_NAME "[HIDDEN]"
-#define C_WIFI_CONNMAN_AGENT_DBUS_PATH "/org/ev3dev/lms2012/connman/agent"
-
-#define C_WIFI_SERVICE_SSID_QUARK c_wifi_service_ssid_quark()
-#define C_WIFI_SERVICE_PASSPHRASE_QUARK c_wifi_service_passphrase_quark()
-#define C_WIFI_SERVICE_CONNECT_RESULT_QUARK c_wifi_service_connect_result_quark()
-
-typedef struct {
-    ConnmanService *proxy;
-    GSocket *broadcast;
-    GSocketAddress *broadcast_address;
-    guint broadcast_source_id;
-    GSocketService *service;
-    GSocketConnection *connection;
-} ConnectionData;
 
 // States the TCP connection can be in (READ)
 typedef enum {
@@ -82,22 +64,7 @@ static RESULT WiFiStatus = OK;
 static UWORD TcpTotalLength = 0;
 static UWORD TcpRestLen = 0;
 static TCP_READ_STATE TcpReadState = TCP_IDLE;
-static uint TcpReadBufPointer = 0;
-
-static ConnectionData *connection_data = NULL;
-static ConnmanManager *connman_manager = NULL;
-static ConnmanTechnology *ethernet_technology = NULL;
-static ConnmanTechnology *wifi_technology = NULL;
-static GList *service_list = NULL;
-static DATA16 service_list_state = 1;
-static GList *removed_list = NULL;
-static ConnmanAgent *connman_agent = NULL;
-
-// ******************************************************************************
-
-static G_DEFINE_QUARK(cWifiServiceSsidQuark, c_wifi_service_ssid)
-static G_DEFINE_QUARK(cWifiServicePassphraseQuark, c_wifi_service_passphrase)
-static G_DEFINE_QUARK(cWifiServiceConnectResultQuark, c_wifi_service_connect_result)
+static UWORD TcpReadBufPointer = 0;
 
 /**
  * @brief           Move a service up in the service list.
@@ -106,25 +73,6 @@ static G_DEFINE_QUARK(cWifiServiceConnectResultQuark, c_wifi_service_connect_res
  */
 void cWiFiMoveUpInList(int Index)
 {
-    ConnmanService *service;
-    GDBusProxy *previous;
-    GError *error = NULL;
-
-    service = g_list_nth_data(service_list, Index);
-    previous = G_DBUS_PROXY(g_list_nth_data(service_list, Index - 1));
-
-    g_return_if_fail(service != NULL);
-    g_return_if_fail(previous != NULL);
-
-    if (!connman_service_call_move_before_sync(service,
-        g_dbus_proxy_get_object_path(previous), NULL, &error))
-    {
-        g_printerr("Failed to move up: %s\n", error->message);
-        g_error_free(error);
-    }
-
-    service_list = g_list_remove(service_list, service);
-    service_list = g_list_insert(service_list, service, Index - 1);
 }
 
 /**
@@ -134,25 +82,6 @@ void cWiFiMoveUpInList(int Index)
  */
 void cWiFiMoveDownInList(int Index)
 {
-    ConnmanService *service;
-    GDBusProxy *next;
-    GError *error = NULL;
-
-    service = g_list_nth_data(service_list, Index);
-    next = G_DBUS_PROXY(g_list_nth_data(service_list, Index + 1));
-
-    g_return_if_fail(service != NULL);
-    g_return_if_fail(next != NULL);
-
-    if (!connman_service_call_move_after_sync(service,
-        g_dbus_proxy_get_object_path(next), NULL, &error))
-    {
-        g_printerr("Failed to move down: %s\n", error->message);
-        g_error_free(error);
-    }
-
-    service_list = g_list_remove(service_list, service);
-    service_list = g_list_insert(service_list, service, Index + 1);
 }
 
 void cWiFiSetEncryptToWpa2(int Index)
@@ -176,18 +105,6 @@ void cWiFiSetEncryptToNone(int Index)
  */
 ENCRYPT cWifiGetEncrypt(int Index)
 {
-    ConnmanService *service = g_list_nth_data(service_list, Index);
-
-    if (service) {
-        const gchar *const *security;
-        security = connman_service_get_security (service);
-        for (; *security; security++) {
-            if (g_strcmp0(*security, "psk") == 0) {
-                return ENCRYPT_WPA2;
-            }
-        }
-    }
-
     return ENCRYPT_NONE;
 }
 
@@ -198,13 +115,6 @@ ENCRYPT cWifiGetEncrypt(int Index)
  */
 void cWiFiDeleteAsKnown(int Index)
 {
-    ConnmanService *service = g_list_nth_data(service_list, Index);
-    GError *error = NULL;
-
-    if (service && !connman_service_call_remove_sync(service, NULL, &error)) {
-        g_printerr("Failed to remove service: %s\n", error->message);
-        g_error_free(error);
-    }
 }
 
 /**
@@ -217,25 +127,9 @@ void cWiFiDeleteAsKnown(int Index)
  */
 RESULT cWiFiGetIpAddr(char* IpAddress)
 {
-    ConnmanService *service;
-    RESULT Result = FAIL;
+    RESULT Result = OK;
 
-    service = g_list_nth_data(service_list, 0);
-    if (service) {
-        GVariant *ipv4;
-        GVariant *address;
-
-        ipv4 = connman_service_get_ipv4(service);
-        address = g_variant_lookup_value(ipv4, "Address", NULL);
-
-        sprintf(IpAddress, "%s", g_variant_get_string(address, NULL));
-        Result = OK;
-
-        g_variant_unref(address);
-        // ipv4 does not need to be unrefed
-    } else {
-        strcpy(IpAddress, "??");
-    }
+    ext_getIpAddr(IpAddress);
 
     return Result;
 }
@@ -251,25 +145,9 @@ RESULT cWiFiGetIpAddr(char* IpAddress)
  */
 RESULT cWiFiGetMyMacAddr(char* MacAddress)
 {
-    ConnmanService *service;
-    RESULT Result = FAIL;
+    RESULT Result = OK;
 
-    service = g_list_nth_data(service_list, 0);
-    if (service) {
-        GVariant *enet;
-        GVariant *address;
-
-        enet = connman_service_get_ethernet(service);
-        address = g_variant_lookup_value(enet, "Address", NULL);
-
-        sprintf(MacAddress, "%s", g_variant_get_string(address, NULL));
-        Result = OK;
-
-        g_variant_unref(address);
-        // enet does not need to be unrefed
-    } else {
-        strcpy(MacAddress, "??");
-    }
+    ext_getMacAddr(MacAddress);
 
     return Result;
 }
@@ -283,7 +161,7 @@ RESULT cWiFiGetMyMacAddr(char* MacAddress)
  */
 RESULT cWiFiTechnologyPresent(void)
 {
-    return (wifi_technology || ethernet_technology) ? OK : FAIL;
+    return OK;
 }
 
 /**
@@ -298,30 +176,10 @@ RESULT cWiFiTechnologyPresent(void)
  */
 RESULT cWiFiGetName(char *ApName, int Index, char Length)
 {
-    ConnmanService *service;
     RESULT Result = FAIL;
 
-    // Apparently the EV3 desktop software doesn't know (much) about null
-    // terminators. If we don't zero the entire array, there will be junk
-    // displayed after the name when editing the name in the Wireless Setup
-    // dialog in the desktop software.
-    memset(ApName, 0, Length);
-
-    service = g_list_nth_data(service_list, Index);
-    if (service) {
-        const gchar *name;
-
-        // hidden WiFi SSIDs will return NULL
-        name = connman_service_get_name(service);
-        if (name) {
-            snprintf(ApName, Length, "%s", name);
-        } else {
-            snprintf(ApName, Length, "%s", C_WIFI_HIDDEN_NAME);
-        }
-        Result = OK;
-    } else {
-        strncpy(ApName, "None", Length);
-    }
+    Result = OK;
+    strncpy(ApName, "None", Length);
 
     return Result;
 }
@@ -343,48 +201,9 @@ RESULT cWiFiSetName(char *ApName, int Index)
  */
 WIFI_STATE_FLAGS cWiFiGetFlags(int Index)
 {
-    ConnmanService *service;
     WIFI_STATE_FLAGS flags = VISIBLE; // ConnMan does list services that are not visible
 
-    service = g_list_nth_data(service_list, Index);
-    if (service) {
-        const gchar *state;
-        const gchar *const *security;
-
-        state = connman_service_get_state(service);
-        if (g_strcmp0(state, "ready") == 0 || g_strcmp0(state, "online") == 0) {
-            flags |= CONNECTED;
-        }
-        security = connman_service_get_security(service);
-        for (; *security; security++) {
-            if (g_strcmp0(*security, "psk") == 0) {
-                flags |= WPA2;
-            }
-        }
-        if (connman_service_get_favorite(service)) {
-            flags |= KNOWN;
-        }
-    }
-
     return flags;
-}
-
-static void cWifiConnectToApFinish(GObject *source_object,
-                                   GAsyncResult *res,
-                                   gpointer user_data)
-{
-    ConnmanService *proxy = CONNMAN_SERVICE(source_object);
-    GError *error = NULL;
-
-    if (connman_service_call_connect_finish(proxy, res, &error)) {
-        g_object_set_qdata(source_object, C_WIFI_SERVICE_CONNECT_RESULT_QUARK,
-                           GINT_TO_POINTER(START));
-    } else {
-        g_object_set_qdata(source_object, C_WIFI_SERVICE_CONNECT_RESULT_QUARK,
-                           GINT_TO_POINTER(FAIL));
-        g_printerr("Connect failed: %s\n", error->message);
-        g_error_free(error);
-    }
 }
 
 /**
@@ -397,38 +216,12 @@ static void cWifiConnectToApFinish(GObject *source_object,
  */
 RESULT cWiFiConnectToAp(int Index)
 {
-    ConnmanService *proxy;
     RESULT Result;
 
     pr_dbg("cWiFiConnectToAp(int Index = %d)\n", Index);
 
-    proxy = g_list_nth_data(service_list, Index);
-    g_return_val_if_fail(proxy != NULL, FAIL);
-
-    Result = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(proxy),
-                             C_WIFI_SERVICE_CONNECT_RESULT_QUARK));
-    if (Result == OK) {
-        // if we are not already trying to connect, start a connection request
-        connman_service_call_connect(proxy, NULL, cWifiConnectToApFinish, NULL);
-        g_object_set_qdata(G_OBJECT(proxy), C_WIFI_SERVICE_CONNECT_RESULT_QUARK,
-                           GINT_TO_POINTER(BUSY));
-        WiFiStatus = BUSY;
-        Result = BUSY;
-    }
-    else if (Result == START) {
-        // the service was successfully connected
-        g_object_set_qdata(G_OBJECT(proxy), C_WIFI_SERVICE_CONNECT_RESULT_QUARK,
-                           GINT_TO_POINTER(OK));
-        WiFiStatus = OK;
-        Result = OK;
-    }
-    else if (Result == FAIL) {
-        // connection failed - pass error to caller and reset connection state (quark)
-        g_object_set_qdata(G_OBJECT(proxy), C_WIFI_SERVICE_CONNECT_RESULT_QUARK,
-                           GINT_TO_POINTER(OK));
-        WiFiStatus = FAIL;
-    }
-    // implicit else if (Result == BUSY) { // do nothing }
+    WiFiStatus = OK;
+    Result = OK;
 
     return Result;
 }
@@ -438,19 +231,7 @@ RESULT cWiFiConnectToAp(int Index)
 // And store it in ApTable[Index]
 RESULT cWiFiMakePsk(char *ApSsid, char *PassPhrase, int Index)
 {
-    GObject *service;
-    RESULT Result = FAIL;
-
-    WiFiStatus = BUSY;
-
-    service = g_list_nth_data(service_list, Index);
-    if (service) {
-        g_free(g_object_get_qdata(service, C_WIFI_SERVICE_SSID_QUARK));
-        g_object_set_qdata(service, C_WIFI_SERVICE_SSID_QUARK, g_strdup(ApSsid));
-        g_free(g_object_get_qdata(service, C_WIFI_SERVICE_PASSPHRASE_QUARK));
-        g_object_set_qdata(service, C_WIFI_SERVICE_PASSPHRASE_QUARK, g_strdup(PassPhrase));
-        Result = OK;
-    }
+    RESULT Result = OK;
 
     WiFiStatus = OK;
 
@@ -466,26 +247,9 @@ RESULT cWiFiMakePsk(char *ApSsid, char *PassPhrase, int Index)
  */
 RESULT cWiFiGetIndexFromName(const char *Name, UBYTE *Index)
 {
-    GList *item;
     RESULT Result = FAIL;
 
-    // Publicly, hidden APs are listed as C_WIFI_HIDDEN_NAME, but in connman,
-    // they are NULL.
-    if (g_strcmp0(Name, C_WIFI_HIDDEN_NAME) == 0) {
-        Name = NULL;
-    }
-
     *Index = 0;
-    for (item = service_list; item; item = g_list_next(item)) {
-        ConnmanService *service = item->data;
-        const char *service_name = connman_service_get_name(service);
-
-        if (g_strcmp0(service_name, Name) == 0) {
-            Result = OK;
-            break;
-        }
-        (*Index)++;
-    }
 
     return Result;
 }
@@ -504,22 +268,7 @@ RESULT cWiFiScanForAPs()
 
     pr_dbg("cWiFiScanForAPs\n");
 
-    WiFiStatus = BUSY;
-
-    // if there are any removals pending, we can remove them from service_list
-    // safely now.
-    while (removed_list) {
-        ConnmanService *service = g_list_nth_data(removed_list, 0);
-
-        service_list = g_list_remove(service_list, service);
-        removed_list = g_list_remove(removed_list, service);
-        g_object_unref(service);
-    }
-
-    if (wifi_technology && connman_technology_get_powered(wifi_technology)) {
-        connman_technology_call_scan(wifi_technology, NULL, NULL, NULL);
-        Result = OK;
-    }
+    Result = OK;
 
     WiFiStatus = OK;
 
@@ -533,7 +282,7 @@ RESULT cWiFiScanForAPs()
  */
 DATA16 cWifiGetListState(void)
 {
-    return service_list_state;
+    return 0;
 }
 
 /**
@@ -543,7 +292,7 @@ DATA16 cWifiGetListState(void)
  */
 int cWiFiGetApListSize(void)
 {
-    return g_list_length(service_list);
+    return 0;
 }
 
 RESULT cWiFiGetStatus(void)
@@ -551,96 +300,6 @@ RESULT cWiFiGetStatus(void)
     pr_dbg("WiFiStatus => GetResult = %d\n", WiFiStatus);
 
     return WiFiStatus;
-}
-
-/**
- * @brief               Read the serial number from file
- */
-static void cWiFiSetBtSerialNo(void)
-{
-    FILE *File;
-
-    // Get the file-based BT SerialNo
-    File = fopen("./settings/BTser", "r");
-    if (File) {
-        fgets(BtSerialNo, BLUETOOTH_SER_LENGTH, File);
-        fclose(File);
-    }
-}
-
-/**
- * @brief               Read the brick name from file
- */
-static void cWiFiSetBrickName(void)
-{
-    FILE *File;
-
-    // Get the file-based BrickName
-    File = fopen("./settings/BrickName", "r");
-    if (File) {
-        fgets(BrickName, BRICK_HOSTNAME_LENGTH, File);
-        fclose(File);
-    }
-}
-
-/**
- * @brief               Broadcast advertisement that we are here.
- *
- * This sends a UDP broadcast message to let other programs know that this is
- * an "EV3" and we are listening for connections.
- *
- * @param user_data     A ConnectionData struct.
- * @return              G_SOURCE_CONTINUE if the broadcast was successful,
- *                      otherwise G_SOURCE_REMOVE.
- */
-static gboolean broadcast_udp(gpointer user_data)
-{
-    ConnectionData *data = user_data;
-    GError *error = NULL;
-    gchar message[128];
-
-    cWiFiSetBtSerialNo(); // Be sure to have updated data :-)
-    cWiFiSetBrickName();  // -
-    g_snprintf(message, 128,
-               "Serial-Number: %s\r\nPort: %d\r\nName: %s\r\nProtocol: EV3\r\n",
-               BtSerialNo, TCP_PORT, BrickName);
-
-    if (g_socket_send_to(data->broadcast, G_SOCKET_ADDRESS(data->broadcast_address),
-                         message, strlen(message), NULL, &error) < 0)
-    {
-        g_printerr("Failed to send UDP broadcast: %s\n", error->message);
-        g_error_free(error);
-
-        return G_SOURCE_REMOVE;
-    }
-
-    return G_SOURCE_CONTINUE;
-}
-
-/**
- * @brief               Start broadcasting the UDP beacon.
- *
- * @param data          The connection data.
- */
-static void cWiFiStartBroadcast(ConnectionData *data)
-{
-    if (data->broadcast_source_id == 0) {
-        data->broadcast_source_id = g_timeout_add_seconds(BEACON_TIME,
-                                                          broadcast_udp, data);
-    }
-}
-
-/**
- * @brief               Stop broadcasting the UDP beacon.
- *
- * @param data          The connection data.
- */
-static void cWiFiStopBroadcast(ConnectionData *data)
-{
-    if (data->broadcast_source_id != 0) {
-        g_source_remove(data->broadcast_source_id);
-        data->broadcast_source_id = 0;
-    }
 }
 
 /**
