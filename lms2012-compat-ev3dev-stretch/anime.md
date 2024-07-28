@@ -20,11 +20,14 @@
 
 - removed almost everything
 
-
 ### c_daisy  
 
 - removed some shite of usblib impls. should be checked via DIFF if you want it to restore
 
 ### c_i2c  
 
-- removed almost everything. should be checked via DIFF if you want it to restore
+- removed almost everything. should be checked via DIFF if you want it to restore  
+
+### c_com
+
+- many shite removed. search for TODOs

@@ -1472,7 +1472,7 @@ typedef   struct
   char    Name[vmFILENAMESIZE];         //!< File name
   struct  dirent   **namelist;
   ULONG   Size;                         //!< File size
-  int     File;
+  FILE*     File;
 
   ULONG   Length;                       //!< Total download length
   ULONG   Pointer;                      //!<

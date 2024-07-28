@@ -38,7 +38,7 @@
  */
 
 #include "c_wifi.h"
-#include "ext_wifi.h"
+#include "emulator.h"
 
 #ifdef DEBUG_WIFI
 #define pr_dbg(f, ...) printf(f, ##__VA_ARGS__)
@@ -314,8 +314,6 @@ RESULT cWiFiGetStatus(void)
  */
 UWORD cWiFiWriteTcp(UBYTE* Buffer, UWORD Length)
 {
-    gssize DataWritten = 0;                 // Nothing written (BUSY)
-
     if (Length > 0) {
 #if 0 // this makes lots of noise
         printf("\ncWiFiWriteTcp Length: %d\n", Length);
@@ -331,22 +329,10 @@ UWORD cWiFiWriteTcp(UBYTE* Buffer, UWORD Length)
         }
 #endif
 
-        if (connection_data && connection_data->connection) {
-            GSocket *socket = g_socket_connection_get_socket(connection_data->connection);
-            GError *error = NULL;
-
-            DataWritten = g_socket_send(socket, (gchar *)Buffer, Length, NULL, &error);
-            if (DataWritten == -1) {
-                if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
-                    g_printerr("Failed to write data: %s\n", error->message);
-                }
-                g_error_free(error);
-                DataWritten = 0;
-            }
-        }
+        ext_wifiDataFromBrickCallback(Buffer, Length);
     }
 
-    return DataWritten;
+    return Length;
 }
 
 /**
@@ -355,20 +341,11 @@ UWORD cWiFiWriteTcp(UBYTE* Buffer, UWORD Length)
  * @param data      The connection data.
  * @return          OK if closing succeeded, otherwise FAIL.
  */
-static RESULT cWiFiTcpClose(ConnectionData *data)
+static RESULT cWiFiTcpClose()
 {
-    GIOStream *connection = G_IO_STREAM(data->connection);
-    GError *error = NULL;
-    RESULT Result = FAIL;
+    RESULT Result = OK;
 
-    data->connection = NULL;
-    if (g_io_stream_close(connection, NULL, &error)) {
-        Result = OK;
-    } else {
-        g_printerr("Failed to close connection: %s\n", error->message);
-        g_error_free(error);
-    }
-    g_object_unref(connection);
+    ext_closeTcpFromBrickCallback();
 
     return Result;
 }
@@ -386,8 +363,8 @@ static RESULT cWiFiResetTcp(void)
     pr_dbg("\nRESET - client disconnected!\n");
 
     TcpReadState = TCP_IDLE;
-    Result = cWiFiTcpClose(connection_data);
-    cWiFiStartBroadcast(connection_data);
+    Result = cWiFiTcpClose();
+    ext_startTcpFromBrickCallback();
 
     return Result;
 }
@@ -404,12 +381,10 @@ static RESULT cWiFiResetTcp(void)
  */
 UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
 {
-    gssize DataRead = 0;
+    size_t DataRead = 0;
 
-    if (connection_data && connection_data->connection) {
-        GSocket *socket = g_socket_connection_get_socket(connection_data->connection);
-        GError *error = NULL;
-        gsize read_length;
+    if (1) {
+        size_t read_length;
 
         // setup for read
 
@@ -453,14 +428,9 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
         }
 
         // do the actual read
+        DataRead = ext_wifiDataToBrickCallback(Buffer + TcpReadBufPointer, read_length);
 
-        DataRead = g_socket_receive(socket, (gchar *)Buffer + TcpReadBufPointer,
-                                    read_length, NULL, &error);
         if (DataRead == -1) {
-            if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
-                g_printerr("Failed to read data: %s\n", error->message);
-            }
-            g_error_free(error);
             DataRead = 0;
         } else {
             // handle the read data
@@ -614,44 +584,41 @@ RESULT cWiFiGetOnStatus(void)
 {
     RESULT Result = FAIL;
 
-    if (wifi_technology && connman_technology_get_powered(wifi_technology)) {
-        Result = OK;
-    }
+    Result = OK;
 
     return Result;
 }
 
 /**
- * @brief Turn WiFi on or off
- *
- * @param powered TRUE to turn on or FALSE to turn off
- * @return OK on success or FAIL if WiFi is not present or changing the power
- *         state failed
+ * @brief               Read the serial number from file
  */
-static RESULT wifi_technology_set_powered(gboolean powered)
+static void cWiFiSetBtSerialNo(void)
 {
-    RESULT Result = FAIL;
+    FILE* File;
 
-    if (wifi_technology) {
-        GError *error = NULL;
-
-        WiFiStatus = BUSY;
-
-        if (connman_technology_call_set_property_sync(wifi_technology,
-            "Powered", g_variant_new_variant(g_variant_new_boolean(powered)),
-            NULL, &error))
-        {
-            Result = OK;
-        } else {
-            g_printerr("Failed to power %s wifi: %s\n", powered ? "on" : "off",
-                       error->message);
-            g_error_free(error);
-        }
-
-        WiFiStatus = OK;
+    // TODO probably
+    // Get the file-based BT SerialNo
+    File = fopen("./settings/BTser", "r");
+    if (File) {
+        fgets(BtSerialNo, BLUETOOTH_SER_LENGTH, File);
+        fclose(File);
     }
+}
 
-    return Result;
+/**
+ * @brief               Read the brick name from file
+ */
+static void cWiFiSetBrickName(void)
+{
+    FILE* File;
+
+    // TODO probably
+    // Get the file-based BrickName
+    File = fopen("./settings/BrickName", "r");
+    if (File) {
+        fgets(BrickName, BRICK_HOSTNAME_LENGTH, File);
+        fclose(File);
+    }
 }
 
 /**
@@ -663,8 +630,8 @@ static RESULT wifi_technology_set_powered(gboolean powered)
 RESULT cWiFiTurnOn(void)
 {
     pr_dbg("cWiFiTurnOn\n");
-
-    return wifi_technology_set_powered(TRUE);
+    // TODO probably callback hooks to c#
+    return OK;
 }
 
 /**
@@ -676,708 +643,23 @@ RESULT cWiFiTurnOn(void)
 RESULT cWiFiTurnOff(void)
 {
     pr_dbg("cWiFiTurnOff\n");
-
-    return wifi_technology_set_powered(FALSE);
-}
-
-/**
- * @brief           Handle a change in the wifi technology power property
- */
-static void on_wifi_powered_changed(void)
-{
-    gboolean powered = connman_technology_get_powered(wifi_technology);
-
-    pr_dbg("on_wifi_powered_changed: %d\n", powered);
-
-    if (powered) {
-        // cWiFiGetLogicalName();
-        WiFiStatus = OK;
-    } else {
-        // cWiFiTcpClose();
-    }
-}
-
-/**
- * @brief           Handle property changes on ConnMan DBus objects.
- *
- * The different types of ConnMan object all use the same property API, so this
- * function can be used by all types of ConnMan objects.
- *
- * @param proxy     The DBus proxy object.
- * @param name      The property name
- * @param value     The property value
- */
-static void on_connman_property_changed(GObject *proxy, const gchar *name,
-                                        GVariant *value)
-{
-    GVariant *real_value, *entry, *properties;
-    gchar *invalidated = NULL;
-
-    // pr_dbg("PropertyChanged: %s - %s\n", name, g_variant_print(value, TRUE));
-
-    // values are boxed
-    real_value = g_variant_get_variant(value);
-    g_dbus_proxy_set_cached_property(G_DBUS_PROXY(proxy), name, real_value);
-
-    // trigger notify signal
-    entry = g_variant_new_dict_entry(g_variant_new_string(name), value);
-    properties = g_variant_new_array(NULL, &entry, 1);
-    g_signal_emit_by_name(proxy, "g-properties-changed", properties, &invalidated);
-
-    g_variant_unref(real_value);
-}
-
-/**
- * @brief       Get a DBus proxy object for a ConnMan technology.
- *
- * Creates the proxy object and connects signals to handle changes.
- *
- * @param path  The path of the DBus object.
- * @return      The proxy object.
- */
-static ConnmanTechnology *cWiFiGetTechnologyProxy(const gchar *path)
-{
-    ConnmanTechnology *proxy;
-    GError *error = NULL;
-
-    proxy = connman_technology_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-        G_DBUS_PROXY_FLAGS_NONE, "net.connman", path, NULL, &error);
-    if (proxy) {
-        GVariant *properties;
-
-        // ConnMan does not support org.freedestop.DBus.Properties so we have
-        // to take care of this ourselves
-
-        g_signal_connect(proxy, "property-changed",
-                         G_CALLBACK(on_connman_property_changed), NULL);
-        // There is a race condition where the properties could change before
-        // we connect the "property-changed" signal. So, we have to get the
-        // properties again to be sure we have the correct values.
-        if (connman_technology_call_get_properties_sync(proxy, &properties, NULL, &error)) {
-            GVariantIter iter;
-            gchar *name;
-            GVariant *value;
-
-            g_variant_iter_init(&iter, properties);
-            while (g_variant_iter_loop(&iter, "{sv}", &name, &value)) {
-                connman_technology_emit_property_changed(proxy, name,
-                                                g_variant_new_variant(value));
-            }
-            g_variant_unref(properties);
-        } else {
-            g_printerr("Error getting properties for technology: %s\n",
-                       error->message);
-            g_error_free(error);
-        }
-    } else {
-        g_printerr("Error creating connman technology proxy: %s\n", error->message);
-        g_error_free(error);
-    }
-
-    return proxy;
-}
-
-/**
- * @brief       Handle the removal of the wifi technology.
- *
- * Frees the global instance.
- */
-static void on_wifi_technology_removed(void)
-{
-    g_object_unref(wifi_technology);
-    wifi_technology = NULL;
-}
-
-/**
- * @brief       Handle the removal of the ethernet technology.
- *
- * Frees the global instance.
- */
-static void on_ethernet_technology_removed(void)
-{
-    g_object_unref(ethernet_technology);
-    ethernet_technology = NULL;
-}
-
-/**
- * @brief               Handle the addition of a technology.
- *
- * @param object        The ConnMan manager object that received the signal.
- * @param path          The path that was added.
- * @param properties    The technology's properties (ignored)
- */
-static void on_technology_added(ConnmanManager *object, gchar *path,
-                                GVariant *properties)
-{
-    GVariant *type;
-    const gchar *type_string;
-
-    type = g_variant_lookup_value(properties, "Type", NULL);
-    type_string = g_variant_get_string(type, NULL);
-    pr_dbg("on_technology_added: %s\n", type_string);
-
-    if (g_strcmp0(type_string, "wifi") == 0) {
-        // WiFiStatus = OK;
-        wifi_technology = cWiFiGetTechnologyProxy(path);
-        g_signal_connect(wifi_technology, "notify::powered",
-                         G_CALLBACK(on_wifi_powered_changed), NULL);
-        g_object_notify(G_OBJECT(wifi_technology), "powered");
-    } else if (g_strcmp0(type_string, "ethernet") == 0) {
-        ethernet_technology = cWiFiGetTechnologyProxy(path);
-    }
-    // TODO: we also need to grab bluetooth to power it on/off.
-    // Connman takes control of bluetooth power, so it can't be done
-    // from bluez.
-
-    g_variant_unref(type);
-}
-
-/**
- * @brief           Handle the removal of a technology.
- *
- * @param object    The ConnMan manager object that received the signal.
- * @param path      The path that was removed.
- */
-static void on_technology_removed(ConnmanManager *object, gchar *path)
-{
-    pr_dbg("on_technology_removed: %s\n", path);
-
-    if (wifi_technology && g_strcmp0(path,
-        g_dbus_proxy_get_object_path(G_DBUS_PROXY(wifi_technology))) == 0)
-    {
-        on_wifi_technology_removed();
-    }
-    else if (ethernet_technology && g_strcmp0(path,
-        g_dbus_proxy_get_object_path(G_DBUS_PROXY(ethernet_technology))) == 0)
-    {
-        on_ethernet_technology_removed();
-    }
-}
-
-/**
- * @brief   Get a dbus proxy object for net.connman.Services
- *
- * @return  The proxy object
- */
-static ConnmanService *cWiFiGetConnmanServiceProxy(const gchar *path)
-{
-    ConnmanService *proxy;
-    GError *error = NULL;
-
-    proxy = connman_service_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-        G_DBUS_PROXY_FLAGS_NONE, "net.connman", path, NULL, &error);
-    if (proxy) {
-        GVariant *properties;
-
-        // ConnMan does not support org.freedestop.DBus.Properties so we have
-        // to take care of this ourselves
-
-        g_signal_connect(proxy, "property-changed",
-                         G_CALLBACK(on_connman_property_changed), NULL);
-        // There is a race condition where the properties could change before
-        // we connect the "property-changed" signal. So, we have to get the
-        // properties again to be sure we have the correct values.
-        if (connman_service_call_get_properties_sync(proxy, &properties, NULL, &error)) {
-            GVariantIter iter;
-            gchar *name;
-            GVariant *value;
-
-            g_variant_iter_init(&iter, properties);
-            while (g_variant_iter_loop(&iter, "{sv}", &name, &value)) {
-                connman_service_emit_property_changed(proxy, name,
-                                                      g_variant_new_variant(value));
-            }
-            g_variant_unref(properties);
-        } else {
-            g_printerr("Error getting properties for service: %s\n",
-                       error->message);
-            g_error_free(error);
-        }
-
-        // this is used to keep track of state when connecting
-        g_object_set_qdata(G_OBJECT(proxy), C_WIFI_SERVICE_CONNECT_RESULT_QUARK,
-                           GINT_TO_POINTER(OK));
-    } else {
-        g_printerr("Error creating connman service proxy: %s\n", error->message);
-        g_error_free(error);
-    }
-
-    return proxy;
-}
-
-/**
- * brief                Handle incoming TCP connection.
- *
- * @param service       The service object.
- * @param connection    The connection object.
- * @param source_object User-defined object or NULL
- * @param user_data     User-defined data.
- * @return              TRUE to stop other handlers, otherwise FALSE.
- */
-static gboolean on_tcp_incoming(GSocketService *service,
-                                GSocketConnection *connection,
-                                GObject *source_object,
-                                gpointer user_data)
-{
-    ConnectionData *data = user_data;
-
-    pr_dbg("on_tcp_incoming\n");
-
-    if (data->connection) {
-        // we already have a connection, so ignore additional connections
-        return FALSE;
-    }
-
-    cWiFiStopBroadcast(data);
-    data->connection = g_object_ref(connection);
-    g_socket_set_blocking(g_socket_connection_get_socket(connection), FALSE);
-    TcpReadState = TCP_WAIT_ON_START;
-
-    return TRUE;
-}
-
-/**
- * @brief               Start the connection service.
- *
- * This starts broadcasting UDP messages and listening for TCP connections.
- * Communications are restricted to the proxy's subnet.
- *
- * @param proxy         The service to use for the connections.
- */
-static void cWifiStartConnection(ConnmanService *proxy)
-{
-    ConnectionData *data;
-    GVariant *ipv4, *value;
-    GInetAddress *address;
-    GSocketAddress *socket_address;
-    GError *error = NULL;
-    guint32 bytes, mask;
-
-    pr_dbg("cWifiStartConnection\n");
-
-    data = g_malloc0(sizeof(ConnectionData));
-    data->proxy = proxy;
-
-    // init the UDP broadcast socket
-
-    data->broadcast = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM,
-                                   G_SOCKET_PROTOCOL_UDP, &error);
-    if (!data->broadcast) {
-        g_printerr("Failed to create UDP socket:%s\n", error->message);
-        g_error_free(error);
-        goto err1;
-    }
-
-    // compute the UDP broadcast address
-
-    ipv4 = connman_service_get_ipv4(proxy);
-
-    value = g_variant_lookup_value(ipv4, "Address", NULL);
-    address = g_inet_address_new_from_string(g_variant_get_string(value, NULL));
-    g_variant_unref(value);
-    memcpy(&bytes, g_inet_address_to_bytes(address), sizeof(bytes));
-    socket_address = g_inet_socket_address_new(address, TCP_PORT);
-    g_object_unref(address);
-
-    value = g_variant_lookup_value(ipv4, "Netmask", NULL);
-    address = g_inet_address_new_from_string(g_variant_get_string(value, NULL));
-    g_variant_unref(value);
-    memcpy(&mask, g_inet_address_to_bytes(address), sizeof(mask));
-    g_object_unref(address);
-
-    // init the UDP broadcast address
-
-    bytes |= ~mask;
-    address = g_inet_address_new_from_bytes((guint8 *)&bytes, G_SOCKET_FAMILY_IPV4);
-    g_socket_set_broadcast(data->broadcast, TRUE);
-    data->broadcast_address = g_inet_socket_address_new(address, BROADCAST_PORT);
-    g_object_unref(address);
-
-    // init the TCP service
-
-    data->service = g_socket_service_new();
-    if (!g_socket_listener_add_address(G_SOCKET_LISTENER(data->service),
-                                       socket_address, G_SOCKET_TYPE_STREAM,
-                                       G_SOCKET_PROTOCOL_TCP, NULL,
-                                       NULL, &error))
-    {
-        g_object_unref(socket_address);
-        g_printerr("Failed to create TCP listener:%s\n", error->message);
-        g_error_free(error);
-        goto err2;
-    }
-    g_object_unref(socket_address);
-    g_signal_connect(data->service, "incoming", G_CALLBACK(on_tcp_incoming), data);
-
-    // start the service and the broadcast
-
-    connection_data = data;
-    g_socket_service_start(data->service);
-    cWiFiStartBroadcast(data);
-
-    return;
-
-err2:
-    g_object_unref(data->service);
-    g_object_unref(data->broadcast);
-err1:
-    g_free(data);
-}
-
-/**
- * @brief               Stop the active connection.
- *
- * @param proxy         The service that owns the connection (currently ignored)
- */
-static void cWiFiStopConnection(ConnmanService *proxy)
-{
-    ConnectionData *data = connection_data;
-
-    pr_dbg("cWifiStartConnection\n");
-
-    connection_data = NULL;
-
-    cWiFiStopBroadcast(data);
-    g_socket_service_stop(data->service);
-    if (data->connection) {
-        cWiFiTcpClose(data);
-    }
-    g_socket_listener_close(G_SOCKET_LISTENER(data->service));
-    g_object_unref(data->service);
-    g_object_unref(data->broadcast_address);
-    g_object_unref(data->broadcast);
-    g_free(data);
-}
-
-/**
- * @brief               Handle changes in service state
- *
- * If a service is connected and there is not already an active TCP connection,
- * this starts a new connection. If the service belonging to the active TCP
- * connection is disconnected, the TCP connection is stopped.
- *
- * @param proxy         The service that changed state
- */
-static void on_service_state_changed(ConnmanService *proxy)
-{
-    const char *state = connman_service_get_state(proxy);
-
-    pr_dbg("on_service_state_changed: %s: %s\n", connman_service_get_name(proxy),
-           state);
-
-    // These two states mean that we have a valid network connection
-    if (g_strcmp0(state, "ready") == 0 || g_strcmp0(state, "online") == 0) {
-        // It is possible for connman to have multiple active connections.
-        // Only the first connection to become ready/online gets used for
-        // communications.
-        if (!connection_data) {
-            cWifiStartConnection(proxy);
-            return;
-        }
-    } else if (connection_data && connection_data->proxy == proxy) {
-        // If this service was disconnected and it was being used for
-        // communication, then we need to stop it.
-        cWiFiStopConnection(proxy);
-    }
-}
-
-/**
- * @brief           Compares the object path of a proxy to an object path
- *
- * @param proxy     The proxy instance.
- * @param path      The object path to compare to.
- * @return          0 if path matches the proxy's path.
- */
-static gint compare_proxy_path(GDBusProxy *proxy, const gchar *path)
-{
-    const gchar *proxy_path = g_dbus_proxy_get_object_path(proxy);
-
-    return g_strcmp0(proxy_path, path);
-}
-
-/**
- * @brief           Handles service change events
- *
- * Updates the global service_list. Once an item is in service_list, we ignore
- * the order supplied from connman. This is necessary because lms expects the
- * order to not change since it uses "index" to access services.
- *
- * @param object    The ConnMan manager instance.
- * @param changed   A list of services that have changed.
- * @param removed   A list of object paths that have been removed.
- */
-static void on_services_changed(ConnmanManager *object, GVariant *changed,
-                                GStrv removed)
-{
-    GVariantIter iter;
-    gchar *path;
-    GVariant **properties;
-
-    pr_dbg("on_services_changed\n");
-
-    g_variant_iter_init(&iter, changed);
-    while (g_variant_iter_loop(&iter, "(oa{sv})", &path, &properties)) {
-        GList *match;
-
-        match = g_list_find_custom(service_list, path,
-                                   (GCompareFunc)compare_proxy_path);
-        if (!match) {
-            // only add the service if it is not already in the list
-            ConnmanService *proxy = cWiFiGetConnmanServiceProxy(path);
-            service_list = g_list_append(service_list, proxy);
-            g_signal_connect(proxy, "notify::state",
-                             G_CALLBACK(on_service_state_changed), NULL);
-            on_service_state_changed(proxy);
-            pr_dbg("added: %s\n", path);
-        }
-        // path and properties are freed by g_variant_iter_loop
-    }
-
-    if (service_list_state == DATA16_MAX) {
-        service_list_state = 1;
-    } else {
-        service_list_state++;
-    }
-
-    for (; *removed; removed++) {
-        GList *match;
-
-        path = *removed;
-        match = g_list_find_custom(service_list, path,
-                                   (GCompareFunc)compare_proxy_path);
-        if (match) {
-            // removed services are saved since we can't change the index of
-            // items in service_list here. They will be removed when we call
-            // cWiFiScanForAPs
-            removed_list = g_list_prepend(removed_list, match->data);
-            pr_dbg("removed: %s\n", path);
-        } else {
-            g_critical("Failed to remove %s", path);
-        }
-    }
-}
-
-/**
- * @brief   Get a dbus proxy object for net.connman.Manager
- *
- * This also connects signals to the proxy for monitoring technologies and
- * services.
- *
- * @return  The proxy object
- */
-static ConnmanManager *cWiFiGetConnmanManagerProxy(void)
-{
-    ConnmanManager *proxy;
-    GError *error = NULL;
-
-    // TODO: Watch dbus for connman
-    // It would be better to watch the bus so that we can handle restart of
-    // connman without having to restart lms2012.
-    proxy = connman_manager_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-        G_DBUS_PROXY_FLAGS_NONE, "net.connman", "/", NULL, &error);
-    if (proxy) {
-        GVariant *technologies;
-        GVariant *services;
-
-        // We are interested in monitoring technologies
-
-        g_signal_connect(proxy, "technology-added",
-                         G_CALLBACK(on_technology_added), NULL);
-        g_signal_connect(proxy, "technology-removed",
-                         G_CALLBACK(on_technology_removed), NULL);
-        if (connman_manager_call_get_technologies_sync(proxy, &technologies, NULL, &error)) {
-            GVariantIter iter;
-            GVariant *item;
-
-            g_variant_iter_init(&iter, technologies);
-            while ((item = g_variant_iter_next_value(&iter))) {
-                GVariant *path = g_variant_get_child_value(item, 0);
-                GVariant *properties = g_variant_get_child_value(item, 1);
-
-                connman_manager_emit_technology_added(proxy,
-                    g_variant_get_string(path, NULL), properties);
-
-                g_variant_unref(path);
-                g_variant_unref(properties);
-                g_variant_unref(item);
-            }
-            g_variant_unref(technologies);
-        } else {
-            g_printerr("Error getting technologies: %s\n", error->message);
-            g_clear_error(&error);
-        }
-
-        // We also want to monitor services
-
-        g_signal_connect(proxy, "services-changed",
-                         G_CALLBACK(on_services_changed), NULL);
-        if (connman_manager_call_get_services_sync(proxy, &services, NULL, &error)) {
-            const gchar *removed = NULL;
-
-            connman_manager_emit_services_changed(proxy, services, &removed);
-            g_variant_unref(services);
-        } else {
-            g_printerr("Error getting services: %s\n", error->message);
-            g_clear_error(&error);
-        }
-    } else {
-        g_printerr("Error creating connman manager proxy: %s\n", error->message);
-        g_error_free(error);
-    }
-
-    return proxy;
-}
-
-static gboolean on_connman_agent_report_error(ConnmanAgent *object,
-                                              GDBusMethodInvocation *invocation,
-                                              const gchar *arg_service,
-                                              const gchar *arg_error)
-{
-    g_printerr("ConnMan agent error on %s: %s\n", arg_service, arg_error);
-
-    connman_agent_complete_report_error(object, invocation);
-
-    return TRUE;
-}
-
-static gboolean on_connman_agent_request_input(ConnmanAgent *object,
-                                               GDBusMethodInvocation *invocation,
-                                               const gchar *arg_service,
-                                               GVariant *arg_fields)
-{
-    GList *match;
-    GObject *service;
-    GVariantDict args, result;
-
-    match = g_list_find_custom(service_list, arg_service,
-                               (GCompareFunc)compare_proxy_path);
-    if (!match) {
-        g_dbus_method_invocation_return_dbus_error(invocation,
-            "net.connman.Agent.Error.Canceled",
-            "Could not find matching service.");
-
-        return TRUE;
-    }
-
-    service = match->data;
-    g_variant_dict_init(&args, arg_fields);
-    g_variant_dict_init(&result, NULL);
-    if (g_variant_dict_contains(&args, "Passphrase")) {
-        GVariantDict passphrase_dict;
-
-        g_variant_dict_init(&passphrase_dict,
-                            g_variant_dict_lookup_value(&args, "Passphrase", NULL));
-
-        g_variant_dict_insert(&result, "Passphrase", "s",
-            g_object_get_qdata(service, C_WIFI_SERVICE_PASSPHRASE_QUARK));
-
-        connman_agent_complete_request_input(object, invocation,
-                                             g_variant_dict_end(&result));
-    }
-    else {
-        g_dbus_method_invocation_return_dbus_error(invocation,
-            "net.connman.Agent.Error.Canceled",
-            "Unexpected agent request.");
-    }
-
-    return TRUE;
-}
-
-static gboolean on_connman_agent_cancel(ConnmanAgent *object,
-                                        GDBusMethodInvocation *invocation)
-{
-    g_printerr("ConnMan agent canceled\n");
-
-    connman_agent_complete_cancel(object, invocation);
-
-    return TRUE;
-}
-
-static void cWiFiRegisterAgent(void)
-{
-    GDBusConnection *connection;
-    GError *error = NULL;
-
-    connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
-    if (!connection) {
-        g_printerr("Failed to get system bus: %s\n", error->message);
-        g_clear_error(&error);
-    }
-
-    connman_agent = connman_agent_skeleton_new();
-    g_signal_connect(connman_agent,
-                     "handle-report-error",
-                     G_CALLBACK(on_connman_agent_report_error),
-                     NULL);
-    g_signal_connect(connman_agent,
-                     "handle-request-input",
-                     G_CALLBACK(on_connman_agent_request_input),
-                     NULL);
-    g_signal_connect(connman_agent,
-                     "handle-cancel",
-                     G_CALLBACK(on_connman_agent_cancel),
-                     NULL);
-    if (!g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(connman_agent),
-                                          connection,
-                                          C_WIFI_CONNMAN_AGENT_DBUS_PATH,
-                                          &error))
-    {
-        g_printerr("Failed export connman agent: %s\n", error->message);
-        g_clear_error(&error);
-    }
-
-    if (!connman_manager_call_register_agent_sync(connman_manager,
-                                                  C_WIFI_CONNMAN_AGENT_DBUS_PATH,
-                                                  NULL,
-                                                  &error))
-    {
-        g_printerr("Failed register connman agent: %s\n", error->message);
-        g_clear_error(&error);
-    }
-
-    g_object_unref(connection);
+    // TODO probably callback hooks to c#
+    return OK;
 }
 
 RESULT cWiFiExit(void)
 {
-    GError *error = NULL;
     RESULT Result;
 
     // TODO: Do we want to always turn off WiFi on exit? This is what LEGO does.
     Result = OK; //cWiFiTurnOff();
-
-    if (connman_agent) {
-        if (!connman_manager_call_unregister_agent_sync(connman_manager,
-                                                        C_WIFI_CONNMAN_AGENT_DBUS_PATH,
-                                                        NULL,
-                                                        &error))
-        {
-            g_printerr("Failed to unregister connman agent: %s\n", error->message);
-            g_clear_error(&error);
-        }
-        g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(connman_agent));
-        g_object_unref(connman_agent);
-    }
-
-    if (connman_manager) {
-        if (wifi_technology) {
-            on_wifi_technology_removed();
-        }
-        if (ethernet_technology) {
-            on_ethernet_technology_removed();
-        }
-        g_list_free_full(service_list, (GDestroyNotify)g_object_unref);
-        service_list = NULL;
-        g_object_unref(connman_manager);
-        connman_manager = NULL;
-    }
 
     return Result;
 }
 
 RESULT cWiFiInit(void)
 {
-    RESULT Result = FAIL;
+    RESULT Result = OK;
 
     pr_dbg("\ncWiFiInit START %d\n", WiFiStatus);
 
@@ -1385,11 +667,6 @@ RESULT cWiFiInit(void)
     TcpReadState = TCP_IDLE;
     cWiFiSetBtSerialNo();
     cWiFiSetBrickName();
-    connman_manager = cWiFiGetConnmanManagerProxy();
-    if (connman_manager) {
-        cWiFiRegisterAgent();
-        Result = OK;
-    }
 
     pr_dbg("\nWiFiStatus = %d\n", WiFiStatus);
 

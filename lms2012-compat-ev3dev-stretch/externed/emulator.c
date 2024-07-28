@@ -1,5 +1,6 @@
-#include "ext_wifi.h"
+#include "emulator.h"
 
+// WIFI 
 void ext_getIpAddr(char* addr)
 { 
     strcpy(addr, ext_ipAddr);
@@ -32,3 +33,19 @@ void ext_registerWifiDataFromBrickCallback(void (*f)(unsigned char*, unsigned sh
     ext_wifiDataFromBrickCallback = f;
 }
 
+void ext_registerWifiDataToBrickCallback(int (*f)(unsigned char*, unsigned short))
+{
+    ext_wifiDataToBrickCallback = f;
+}
+
+void ext_registerCloseTcpFromBrickCallback(void (*f)(void))
+{
+    ext_closeTcpFromBrickCallback = f;
+}
+
+void ext_registerStartTcpFromBrickCallback(void (*f)(void))
+{
+    ext_startTcpFromBrickCallback = f;
+}
+
+// end WIFI

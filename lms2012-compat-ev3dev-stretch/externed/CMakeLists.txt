@@ -1,6 +1,6 @@
 
 set (SOURCE_FILES
-    ext_wifi.c
+    emulator.c
 )
 
 add_library (externed OBJECT ${SOURCE_FILES})

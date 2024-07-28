@@ -39,8 +39,6 @@ static const DATA8 FiletypeToNormalIcon[FILETYPES] = {
     [TYPE_TEXT]         =  ICON_TEXT
 };
 
-#include "PCApp.xbm"
-
 RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
                   DATA8 Lng, DATA8 *pType, DATA8 *pAnswer)
 {
@@ -64,10 +62,6 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
     DATA32  Free;
     RESULT  TmpResult;
     HANDLER TmpHandle;
-
-#ifdef ALLOW_DEBUG_PULSE
-    VMInstance.Pulse |=  vmPULSE_BROWSER;
-#endif
 
     PrgId   =  CurrentProgramId();
     ObjId   =  CallingObjectId();
@@ -732,7 +726,8 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
                                 }
                                 else
                                 {
-                                    dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pB->IconStartX,pB->IconStartY + (Tmp * pB->LineHeight),PCApp_width,PCApp_height,(UBYTE*)PCApp_bits);
+                                    // TODO: draw PcApp
+                                    //dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pB->IconStartX,pB->IconStartY + (Tmp * pB->LineHeight),PCApp_width,PCApp_height,(UBYTE*)PCApp_bits);
                                 }
 
                                 pB->Text[0]  =  0;
