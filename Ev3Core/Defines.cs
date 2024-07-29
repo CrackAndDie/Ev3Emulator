@@ -1,6 +1,4 @@
 ﻿using Ev3Core.Enums;
-using System.Drawing;
-using System.Reflection.Emit;
 
 namespace Ev3Core
 {
@@ -1397,6 +1395,7 @@ namespace Ev3Core
 				}),
 		};
 		#endregion
+
 		#region c_sound.h
 		public const int STEP_SIZE_TABLE_ENTRIES = 89;
 			public const int INDEX_TABLE_ENTRIES = 16;
@@ -1652,7 +1651,56 @@ namespace Ev3Core
 		#endregion
 
 		#region c_input.h
+		public const int INPUT_PORTS = INPUTS;
+		public const int INPUT_DEVICES = (INPUT_PORTS * CHAIN_DEPT);
+
+		public const int OUTPUT_PORTS = OUTPUTS;
+		public const int OUTPUT_DEVICES = (OUTPUT_PORTS * CHAIN_DEPT);
+
+		public const int DEVICES = (INPUT_DEVICES + OUTPUT_DEVICES);
+
+		public const int INPUT_VALUES = (INPUT_PORTS * 3);
+		public const int INPUT_VALUE_SIZE = 5;
+		public const int INPUT_BUFFER_SIZE = (INPUT_VALUES * INPUT_VALUE_SIZE);
+		public const int INPUT_SIZE = (INPUT_VALUES * 2);
 		// public static KeyValuePair<OP, OPCODE> INPUT_DEVICE_LIST = OC(opINPUT_DEVICE_LIST,&cInputDeviceList,7,0 )
 		#endregion
-	}
+
+		#region c_ui.h
+		public const int IMAGEBUFFER_SIZE = 1000;
+		public const int KEYBUF_SIZE = 100;
+		public const int UI_WR_BUFFER_SIZE = 255;
+
+		public const int GRAPH_BUFFERS = (INPUTS + OUTPUTS);
+		public const int GRAPH_BUFFER_SIZE = LCD_WIDTH;
+
+		public const int MAX_NOTIFY_LINES = 8;
+		public const int MAX_NOTIFY_LINE_CHARS = 32;
+
+		public const int TEXTSIZE = 24;
+
+		public const int HWVERS_SIZE = 6;
+		public const int FWVERS_SIZE = 7;
+		public const int FWBUILD_SIZE = 11;
+		public const int OSVERS_SIZE = 17;
+		public const int OSBUILD_SIZE = 11;
+		public const int IPADDR_SIZE = 16;
+
+		public const int BUTTON_ACTIVE = 0x01;
+		public const int BUTTON_PRESSED = 0x02; //!< button is pressed at the moment
+		public const int BUTTON_ACTIVATED = 0x04; //!< button has been activated since last read
+		public const int BUTTON_LONGPRESS = 0x08; //!< button long press detected
+		public const int BUTTON_BUMBED = 0x10; //!< button has been pressed and released
+		public const int BUTTON_LONG_LATCH = 0x20;
+
+		public const int BUTTON_CLR = (BUTTON_ACTIVATED | BUTTON_LONGPRESS | BUTTON_BUMBED | BUTTON_LONG_LATCH);
+		public const int BUTTON_FLUSH = (BUTTON_ACTIVATED | BUTTON_LONGPRESS | BUTTON_BUMBED | BUTTON_LONG_LATCH);
+
+		public const int BUTTON_ALIVE = 0x01;
+		public const int BUTTON_CLICK = 0x02;
+		public const int BUTTON_BUFPRINT = 0x04;
+
+		public const int BUTTON_SET = (BUTTON_ALIVE | BUTTON_CLICK);
+        #endregion
+    }
 }
