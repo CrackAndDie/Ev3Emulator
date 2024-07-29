@@ -35,6 +35,10 @@ global using IMOFFS = int;
 
 global using HANDLER = short;
 
+// from c_com.h
+global using CMDSIZE = ushort;
+global using MSGCNT = ushort;
+
 public class IMGHEAD
 {
     public UBYTE[] Sign = new UBYTE[4];                      //!< Place holder for the file type identifier

@@ -762,7 +762,7 @@
 		public const int TONE_LEVEL_12 = 96;  // 96%
 
 		public static SWORD[] StepSizeTable = new SWORD[STEP_SIZE_TABLE_ENTRIES]
-		{ 
+		{
 			7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
 			19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
 			50, 55, 60, 66, 73, 80, 88, 97, 107, 118,
@@ -791,6 +791,128 @@
 		#region c_memory.h
 		public const int POOL_TYPE_MEMORY = 0;
 		public const int POOL_TYPE_FILE = 1;
+		#endregion
+
+		#region c_com.h
+		public const int SYSTEM_COMMAND_REPLY = 0x01;    //  System command, reply required
+		public const int SYSTEM_COMMAND_NO_REPLY = 0x81;  //  System command, reply not required
+
+		public const int BEGIN_DOWNLOAD = 0x92;   //  Begin file down load
+		public const int CONTINUE_DOWNLOAD = 0x93;   //  Continue file down load
+		public const int BEGIN_UPLOAD = 0x94;   //  Begin file upload
+		public const int CONTINUE_UPLOAD = 0x95;   //  Continue file upload
+		public const int BEGIN_GETFILE = 0x96;   //  Begin get bytes from a file (while writing to the file)
+		public const int CONTINUE_GETFILE = 0x97;   //  Continue get byte from a file (while writing to the file)
+		public const int CLOSE_FILEHANDLE = 0x98;    //  Close file handle
+		public const int LIST_FILES = 0x99;    //  List files
+		public const int CONTINUE_LIST_FILES = 0x9A;    //  Continue list files
+		public const int CREATE_DIR = 0x9B;   //  Create directory
+		public const int DELETE_FILE = 0x9C;   //  Delete
+		public const int LIST_OPEN_HANDLES = 0x9D;  //  List handles
+		public const int WRITEMAILBOX = 0x9E;   //  Write to mailbox
+		public const int BLUETOOTHPIN = 0x9F;  //  Transfer trusted pin code to brick
+		public const int ENTERFWUPDATE = 0xA0;  //  Restart the brick in Firmware update mode
+		public const int SETBUNDLEID = 0xA1;  //  Set Bundle ID for mode 2
+		public const int SETBUNDLESEEDID = 0xA2;  //  Set bundle seed ID for mode 2
+
+		public const int SYSTEM_REPLY = 0x03;   //  System command reply
+		public const int SYSTEM_REPLY_ERROR = 0x05;   //  System command reply error
+
+		// SYSTEM command return codes
+		public const int SUCCESS = 0x00;
+		public const int UNKNOWN_HANDLE = 0x01;
+		public const int HANDLE_NOT_READY = 0x02;
+		public const int CORRUPT_FILE = 0x03;
+		public const int NO_HANDLES_AVAILABLE = 0x04;
+		public const int NO_PERMISSION = 0x05;
+		public const int ILLEGAL_PATH = 0x06;
+		public const int FILE_EXITS = 0x07;
+		public const int END_OF_FILE = 0x08;
+		public const int SIZE_ERROR = 0x09;
+		public const int UNKNOWN_ERROR = 0x0A;
+		public const int ILLEGAL_FILENAME = 0x0B;
+		public const int ILLEGAL_CONNECTION = 0x0C;
+
+		public const int DIRECT_COMMAND_REPLY = 0x00;   //  Direct command, reply required
+		public const int DIRECT_COMMAND_NO_REPLY = 0x80;   //  Direct command, reply not required
+
+		public const int DIRECT_REPLY = 0x02;   //  Direct command reply
+		public const int DIRECT_REPLY_ERROR = 0x04;  //  Direct command reply error
+
+		public const int DIR_CMD_REPLY_WITH_BUSY = 0x0F;  //  Direct command, reply required
+		public const int DIR_CMD_NO_REPLY_WITH_BUSY = 0x8F;  //  Direct command, reply not required
+
+		// it was enum
+		public const int USBDEV = 0;
+		public const int USBHOST = 1;
+		public const int BTSLAVE = 2;
+		public const int BTMASTER1 = 3;
+		public const int BTMASTER2 = 4;
+		public const int BTMASTER3 = 5;
+		public const int BTMASTER4 = 6;
+		public const int BTMASTER5 = 7;
+		public const int BTMASTER6 = 8;
+		public const int BTMASTER7 = 9;
+		public const int WIFI = 10;
+		public const int NO_OF_CHS = 11;
+
+		public const int MAX_MSG_SIZE = 1024;
+		public const int NO_OF_MAILBOXES = 30;
+		public const int MAILBOX_CONTENT_SIZE = 250;
+		public const int USB_CMD_IN_REP_SIZE = 1024;
+		public const int USB_CMD_OUT_REP_SIZE = 1024;
+
+		public const int SIZEOF_BEGINLIST = 6;
+		public const int SIZEOF_RPLYBEGINLIST = 12;
+		public const int SIZEOF_CONTINUELIST = 7;
+		public const int SIZEOF_RPLYCONTINUELIST = 8;
+		public const int SIZEOF_BEGINGETFILE = 6;
+		public const int SIZEOF_RPLYBEGINGETFILE = 12;
+		public const int SIZEOF_CONTINUEGETFILE = 7;
+		public const int SIZEOF_RPLYCONTINUEGETFILE = 12;
+		public const int SIZEOF_BEGINREAD = 6;
+		public const int SIZEOF_RPLYBEGINREAD = 12;
+		public const int SIZEOF_CONTINUEREAD = 7;
+		public const int SIZEOF_RPLYCONTINUEREAD = 8;
+		public const int SIZEOF_LISTHANDLES = 4;
+		public const int SIZEOF_RPLYLISTHANDLES = 7;
+		public const int SIZEOF_REMOVEFILE = 4;
+		public const int SIZEOF_RPLYREMOVEFILE = 7;
+		public const int SIZEOF_MAKEDIR = 4;
+		public const int SIZEOF_RPLYMAKEDIR = 7;
+		public const int SIZEOF_CLOSEHANDLE = 5;
+		public const int SIZEOF_RPLYCLOSEHANDLE = 8;
+		public const int SIZEOF_BEGINDL = 10;
+		public const int SIZEOF_RPLYBEGINDL = 8;
+		public const int SIZEOF_CONTINUEDL = 7;
+		public const int SIZEOF_RPLYCONTINUEDL = 8;
+		public const int SIZEOF_WRITEMAILBOX = 7;
+		public const int SIZEOF_WRITETOMAILBOXPAYLOAD = 2;
+		public const int SIZEOF_BLUETOOTHPIN = 7;
+		public const int SIZEOF_RPLYBLUETOOTHPIN = 7;
+		public const int SIZEOF_BUNDLEID = 6;
+		public const int SIZEOF_RPLYBUNDLEID = 7;
+		public const int SIZEOF_BUNDLESEEDID = 6;
+		public const int SIZEOF_RPLYBUNDLESEEDID = 7;
+
+		// it was enum
+		public const int TXIDLE = 0;
+		public const int TXFILEUPLOAD = 1;
+		public const int TXGETFILE = 2;
+		public const int TXLISTFILES = 3;
+		public const int TXFOLDER = 4;
+		public const int TXFILE = 5;
+		public const int RXIDLE = 6;
+		public const int RXFILEDL = 7;
+		// it was enum
+		public const int SUBSTATE_IDLE = 0;
+		public const int FILE_IN_PROGRESS_WAIT_FOR_REPLY = 1;
+		public const int FILE_COMPLETE_WAIT_FOR_REPLY = 2;
+		// it was enum
+		public const int DIR_CMD_REPLY = 0x01;
+		public const int DIR_CMD_NOREPLY = 0x02;
+		public const int SYS_CMD_REPLY = 0x04;
+		public const int SYS_CMD_NOREPLY = 0x08;
 		#endregion
 	}
 }
