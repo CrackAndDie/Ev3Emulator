@@ -68,3 +68,11 @@ public class OBJHEAD                   // Object header
     public TRIGGER TriggerCount;                 //!< Used to determine how many triggers needed before the BLOCK object is activated
     public LBINDEX LocalBytes;                   //!< Number of bytes to allocate for local variables
 }
+
+/*! \struct LABEL
+ *          Label data hold information used for labels
+ */
+public class LABEL
+{
+	public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
+}

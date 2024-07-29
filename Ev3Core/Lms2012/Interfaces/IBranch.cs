@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Ev3Core.Lms2012.Interfaces
+﻿namespace Ev3Core.Lms2012.Interfaces
 {
     public interface IBranch
     {
@@ -14,7 +8,7 @@ namespace Ev3Core.Lms2012.Interfaces
 
         void cBranchJrTrue();
 
-        void cBranchJrNan(;
+        void cBranchJrNan();
 
         void cBranchJrLt8();
 
