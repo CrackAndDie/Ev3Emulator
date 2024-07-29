@@ -1,4 +1,8 @@
-﻿namespace Ev3Core
+﻿using Ev3Core.Enums;
+using System.Drawing;
+using System.Reflection.Emit;
+
+namespace Ev3Core
 {
 	public partial class Defines
 	{
@@ -729,64 +733,724 @@
 		public const int PARS = (PAR + 0x04);  //!< DATAS  parameter
 		public const int PARV = (PAR + 0x05);  //!< Parameter type variable
 
-		public const int FILENAME_SUBP = 12;
-		public const int TST_SUBP = 6;
-		#endregion
+		// TODO: check it out. wtf is going on here
+		//public const byte FILENAME_SUBP = 12;
+		public const byte TST_SUBP = 6;
 
+		public const byte UI_READ_SUBP = 0;
+		public const byte UI_WRITE_SUBP = 1;
+		public const byte UI_DRAW_SUBP = 2;
+		public const byte UI_BUTTON_SUBP = 3;
+		public const byte FILE_SUBP = 4;
+		public const byte PROGRAM_SUBP = 5;
+		public const byte VM_SUBP = 6;
+		public const byte STRING_SUBP = 7;
+		public const byte COM_READ_SUBP = 8;
+		public const byte COM_WRITE_SUBP = 9;
+		public const byte SOUND_SUBP = 10;
+		public const byte INPUT_SUBP = 11;
+		public const byte ARRAY_SUBP = 12;
+		public const byte MATH_SUBP = 13;
+		public const byte COM_GET_SUBP = 14;
+		public const byte COM_SET_SUBP = 15;
+		public const byte FILENAME_SUBP = 16;
+
+		public const byte SUBPS = 17;
+
+		public static KeyValuePair<OP, OPCODE> OC(OP opCode, byte par1, byte par2, byte par3, byte par4, byte par5, byte par6, byte par7, byte par8)
+		{
+			return new KeyValuePair<OP, OPCODE>(opCode, new OPCODE()
+			{
+				Name = Enum.GetName(opCode.GetType(), opCode).ToCharArray(),
+				Pars = ((ULONG)par1) + ((ULONG)par2 << 4) + ((ULONG)par3 << 8) + ((ULONG)par4 << 12) +
+						((ULONG)par5 << 16) + ((ULONG)par6 << 20) + ((ULONG)par7 << 24) + ((ULONG)par8 << 28),
+			});
+		}
+
+		public static KeyValuePair<byte, SUBCODE> SC(string subCodeName, byte subcode, byte par1, byte par2, byte par3, byte par4, byte par5, byte par6, byte par7, byte par8)
+		{
+			return new KeyValuePair<byte, SUBCODE>(subcode, new SUBCODE()
+			{
+				Name = subCodeName.ToCharArray(),
+				Pars = ((ULONG)par1) + ((ULONG)par2 << 4) + ((ULONG)par3 << 8) + ((ULONG)par4 << 12) +
+						((ULONG)par5 << 16) + ((ULONG)par6 << 20) + ((ULONG)par7 << 24) + ((ULONG)par8 << 28),
+			});
+		}
+
+		public static KeyValuePair<OP, OPCODE>[] OpCodes = 
+		{
+			//    OpCode                  Parameters                                      Unused
+			//    VM
+			OC(   OP.opERROR,                0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opNOP,                  0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opPROGRAM_STOP,         PAR16,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opPROGRAM_START,        PAR16,PAR32,PAR32,PAR8,                         0,0,0,0               ),
+			OC(   OP.opOBJECT_STOP,          PAR16,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opOBJECT_START,         PAR16,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opOBJECT_TRIG,          PAR16,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opOBJECT_WAIT,          PAR16,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opRETURN,               0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opCALL,                 PAR16,PARNO,                                    0,0,0,0,0,0           ),
+			OC(   OP.opOBJECT_END,           0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opSLEEP,                0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opPROGRAM_INFO,         PAR8, SUBP, PROGRAM_SUBP,                       0,0,0,0,0             ),
+			OC(   OP.opLABEL,                PARLAB,                                         0,0,0,0,0,0,0         ),
+			OC(   OP.opPROBE,                PAR16,PAR16,PAR32,PAR32,                        0,0,0,0               ),
+			OC(   OP.opDO,                   PAR16,PAR32,PAR32,                              0,0,0,0,0             ),
+			//    Math
+			OC(   OP.opADD8,                 PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opADD16,                PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opADD32,                PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opADDF,                 PARF,PARF,PARF,                                 0,0,0,0,0             ),
+			OC(   OP.opSUB8,                 PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opSUB16,                PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opSUB32,                PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opSUBF,                 PARF,PARF,PARF,                                 0,0,0,0,0             ),
+			OC(   OP.opMUL8,                 PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opMUL16,                PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opMUL32,                PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opMULF,                 PARF,PARF,PARF,                                 0,0,0,0,0             ),
+			OC(   OP.opDIV8,                 PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opDIV16,                PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opDIV32,                PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opDIVF,                 PARF,PARF,PARF,                                 0,0,0,0,0             ),
+			//    Logic
+			OC(   OP.opOR8,                  PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOR16,                 PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opOR32,                 PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opAND8,                 PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opAND16,                PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opAND32,                PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opXOR8,                 PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opXOR16,                PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opXOR32,                PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opRL8,                  PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opRL16,                 PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opRL32,                 PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			//    Move
+			OC(   OP.opINIT_BYTES,           PAR8,PAR32,PARVALUES,PAR8,                      0,0,0,0               ),
+			OC(   OP.opMOVE8_8,              PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opMOVE8_16,             PAR8,PAR16,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVE8_32,             PAR8,PAR32,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVE8_F,              PAR8,PARF,                                      0,0,0,0,0,0           ),
+			OC(   OP.opMOVE16_8,             PAR16,PAR8,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVE16_16,            PAR16,PAR16,                                    0,0,0,0,0,0           ),
+			OC(   OP.opMOVE16_32,            PAR16,PAR32,                                    0,0,0,0,0,0           ),
+			OC(   OP.opMOVE16_F,             PAR16,PARF,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVE32_8,             PAR32,PAR8,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVE32_16,            PAR32,PAR16,                                    0,0,0,0,0,0           ),
+			OC(   OP.opMOVE32_32,            PAR32,PAR32,                                    0,0,0,0,0,0           ),
+			OC(   OP.opMOVE32_F,             PAR32,PARF,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVEF_8,              PARF,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opMOVEF_16,             PARF,PAR16,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVEF_32,             PARF,PAR32,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMOVEF_F,              PARF,PARF,                                      0,0,0,0,0,0           ),
+			//    Branch
+			OC(   OP.opJR,                   PAR32,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opJR_FALSE,             PAR8,PAR32,                                     0,0,0,0,0,0           ),
+			OC(   OP.opJR_TRUE,              PAR8,PAR32,                                     0,0,0,0,0,0           ),
+			OC(   OP.opJR_NAN,               PARF,PAR32,                                     0,0,0,0,0,0           ),
+			//    Compare
+			OC(   OP.opCP_LT8,               PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_LT16,              PAR16,PAR16,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_LT32,              PAR32,PAR32,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_LTF,               PARF,PARF,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_GT8,               PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_GT16,              PAR16,PAR16,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_GT32,              PAR32,PAR32,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_GTF,               PARF,PARF,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_EQ8,               PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_EQ16,              PAR16,PAR16,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_EQ32,              PAR32,PAR32,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_EQF,               PARF,PARF,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_NEQ8,              PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_NEQ16,             PAR16,PAR16,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_NEQ32,             PAR32,PAR32,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_NEQF,              PARF,PARF,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_LTEQ8,             PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_LTEQ16,            PAR16,PAR16,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_LTEQ32,            PAR32,PAR32,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_LTEQF,             PARF,PARF,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_GTEQ8,             PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCP_GTEQ16,            PAR16,PAR16,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_GTEQ32,            PAR32,PAR32,PAR8,                               0,0,0,0,0             ),
+			OC(   OP.opCP_GTEQF,             PARF,PARF,PAR8,                                 0,0,0,0,0             ),
+			//    Select
+			OC(   OP.opSELECT8,              PAR8,PAR8,PAR8,PAR8,                            0,0,0,0               ),
+			OC(   OP.opSELECT16,             PAR8,PAR16,PAR16,PAR16,                         0,0,0,0               ),
+			OC(   OP.opSELECT32,             PAR8,PAR32,PAR32,PAR32,                         0,0,0,0               ),
+			OC(   OP.opSELECTF,              PAR8,PARF,PARF,PARF,                            0,0,0,0               ),
+
+			OC(   OP.opSYSTEM,               PAR8,PAR32,                                     0,0,0,0,0,0           ),
+			OC(   OP.opPORT_CNV_OUTPUT,      PAR32,PAR8,PAR8,PAR8,                           0,0,0,0               ),
+			OC(   OP.opPORT_CNV_INPUT,       PAR32,PAR8,PAR8,                                0,0,0,0,0             ),
+			OC(   OP.opNOTE_TO_FREQ,         PAR8,PAR16,                                     0,0,0,0,0,0           ),
+
+			//    Branch
+			OC(   OP.opJR_LT8,               PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_LT16,              PAR16,PAR16,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_LT32,              PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_LTF,               PARF,PARF,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_GT8,               PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_GT16,              PAR16,PAR16,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_GT32,              PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_GTF,               PARF,PARF,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_EQ8,               PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_EQ16,              PAR16,PAR16,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_EQ32,              PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_EQF,               PARF,PARF,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_NEQ8,              PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_NEQ16,             PAR16,PAR16,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_NEQ32,             PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_NEQF,              PARF,PARF,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_LTEQ8,             PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_LTEQ16,            PAR16,PAR16,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_LTEQ32,            PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_LTEQF,             PARF,PARF,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_GTEQ8,             PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opJR_GTEQ16,            PAR16,PAR16,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_GTEQ32,            PAR32,PAR32,PAR32,                              0,0,0,0,0             ),
+			OC(   OP.opJR_GTEQF,             PARF,PARF,PAR32,                                0,0,0,0,0             ),
+			//    VM
+			OC(   OP.opINFO,                 PAR8,SUBP,VM_SUBP,                              0,0,0,0,0             ),
+			OC(   OP.opSTRINGS,              PAR8,SUBP,STRING_SUBP,                          0,0,0,0,0             ),
+			OC(   OP.opMEMORY_WRITE,         PAR16,PAR16,PAR32,PAR32,PAR8,                   0,0,0                 ),
+			OC(   OP.opMEMORY_READ,          PAR16,PAR16,PAR32,PAR32,PAR8,                   0,0,0                 ),
+			//    UI
+			OC(   OP.opUI_FLUSH,             0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opUI_READ,              PAR8,SUBP,UI_READ_SUBP,                         0,0,0,0,0             ),
+			OC(   OP.opUI_WRITE,             PAR8,SUBP,UI_WRITE_SUBP,                        0,0,0,0,0             ),
+			OC(   OP.opUI_BUTTON,            PAR8,SUBP,UI_BUTTON_SUBP,                       0,0,0,0,0             ),
+			OC(   OP.opUI_DRAW,              PAR8,SUBP,UI_DRAW_SUBP,                         0,0,0,0,0             ),
+			//    Timer
+			OC(   OP.opTIMER_WAIT,           PAR32,PAR32,                                    0,0,0,0,0,0           ),
+			OC(   OP.opTIMER_READY,          PAR32,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opTIMER_READ,           PAR32,                                          0,0,0,0,0,0,0         ),
+			//    VM
+			OC(   OP.opBP0,                  0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opBP1,                  0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opBP2,                  0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opBP3,                  0,                                              0,0,0,0,0,0,0         ),
+			OC(   OP.opBP_SET,               PAR16,PAR8,PAR32,                               0,0,0,0,0             ),
+			OC(   OP.opMATH,                 PAR8,SUBP,MATH_SUBP,                            0,0,0,0,0             ),
+			OC(   OP.opRANDOM,               PAR16,PAR16,PAR16,                              0,0,0,0,0             ),
+			OC(   OP.opTIMER_READ_US,        PAR32,                                          0,0,0,0,0,0,0         ),
+			OC(   OP.opKEEP_ALIVE,           PAR8,                                           0,0,0,0,0,0,0         ),
+			//    Com
+			OC(   OP.opCOM_READ,             PAR8,SUBP,COM_READ_SUBP,                        0,0,0,0,0             ),
+			OC(   OP.opCOM_WRITE,            PAR8,SUBP,COM_WRITE_SUBP,                       0,0,0,0,0             ),
+			//    Sound
+			OC(   OP.opSOUND,                PAR8,SUBP,SOUND_SUBP,                           0,0,0,0,0             ),
+			OC(   OP.opSOUND_TEST,           PAR8,                                           0,0,0,0,0,0,0         ),
+			OC(   OP.opSOUND_READY,          0,                                              0,0,0,0,0,0,0         ),
+			//    Input
+			OC(   OP.opINPUT_SAMPLE,         PAR32,PAR16,PAR16,PAR8,PAR8,PAR8,PAR8,PARF                            ),
+			OC(   OP.opINPUT_DEVICE_LIST,    PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opINPUT_DEVICE,         PAR8,SUBP,INPUT_SUBP,                           0,0,0,0,0             ),
+			OC(   OP.opINPUT_READ,           PAR8,PAR8,PAR8,PAR8,PAR8,                       0,0,0                 ),
+			OC(   OP.opINPUT_READSI,         PAR8,PAR8,PAR8,PAR8,PARF,                       0,0,0                 ),
+			OC(   OP.opINPUT_TEST,           PAR8,                                           0,0,0,0,0,0,0         ),
+			OC(   OP.opINPUT_TEST,           PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opINPUT_READY,          PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opINPUT_READEXT,        PAR8,PAR8,PAR8,PAR8,PAR8,PARNO,                 0,0                   ),
+			OC(   OP.opINPUT_WRITE,          PAR8,PAR8,PAR8,PAR8,                            0,0,0,0               ),
+			//    Output
+			OC(   OP.opOUTPUT_SET_TYPE,      PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_RESET,         PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opOUTPUT_STOP,          PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_SPEED,         PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_POWER,         PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_START,         PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opOUTPUT_POLARITY,      PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_READ,          PAR8,PAR8,PAR8,PAR32,                           0,0,0,0               ),
+			OC(   OP.opOUTPUT_READY,         PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opOUTPUT_TEST,          PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_STEP_POWER,    PAR8,PAR8,PAR8,PAR32,PAR32,PAR32,PAR8,          0                     ),
+			OC(   OP.opOUTPUT_TIME_POWER,    PAR8,PAR8,PAR8,PAR32,PAR32,PAR32,PAR8,          0                     ),
+			OC(   OP.opOUTPUT_STEP_SPEED,    PAR8,PAR8,PAR8,PAR32,PAR32,PAR32,PAR8,          0                     ),
+			OC(   OP.opOUTPUT_TIME_SPEED,    PAR8,PAR8,PAR8,PAR32,PAR32,PAR32,PAR8,          0                     ),
+			OC(   OP.opOUTPUT_STEP_SYNC,     PAR8,PAR8,PAR8,PAR16,PAR32,PAR8,                0,0                   ),
+			OC(   OP.opOUTPUT_TIME_SYNC,     PAR8,PAR8,PAR8,PAR16,PAR32,PAR8,                0,0                   ),
+			OC(   OP.opOUTPUT_CLR_COUNT,     PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opOUTPUT_GET_COUNT,     PAR8,PAR8,PAR32,                                0,0,0,0,0             ),
+			OC(   OP.opOUTPUT_PRG_STOP,      0,                                              0,0,0,0,0,0,0         ),
+			//    Memory
+			OC(   OP.opFILE,                 PAR8,SUBP,FILE_SUBP,                            0,0,0,0,0             ),
+			OC(   OP.opARRAY,                PAR8,SUBP,ARRAY_SUBP,                           0,0,0,0,0             ),
+			OC(   OP.opARRAY_WRITE,          PAR16,PAR32,PARV,                               0,0,0,0,0             ),
+			OC(   OP.opARRAY_READ,           PAR16,PAR32,PARV,                               0,0,0,0,0             ),
+			OC(   OP.opARRAY_APPEND,         PAR16,PARV,                                     0,0,0,0,0,0           ),
+			OC(   OP.opMEMORY_USAGE,         PAR32,PAR32,                                    0,0,0,0,0,0           ),
+			OC(   OP.opFILENAME,             PAR8,SUBP,FILENAME_SUBP,                        0,0,0,0,0             ),
+			//    Move
+			OC(   OP.opREAD8,                PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opREAD16,               PAR16,PAR8,PAR16,                               0,0,0,0,0             ),
+			OC(   OP.opREAD32,               PAR32,PAR8,PAR32,                               0,0,0,0,0             ),
+			OC(   OP.opREADF,                PARF,PAR8,PARF,                                 0,0,0,0,0             ),
+			OC(   OP.opWRITE8,               PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opWRITE16,              PAR16,PAR8,PAR16,                               0,0,0,0,0             ),
+			OC(   OP.opWRITE32,              PAR32,PAR8,PAR32,                               0,0,0,0,0             ),
+			OC(   OP.opWRITEF,               PARF,PAR8,PARF,                                 0,0,0,0,0             ),
+			//    Com
+			OC(   OP.opCOM_READY,            PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opCOM_READDATA,         PAR8,PAR8,PAR16,PAR8,                           0,0,0,0               ),
+			OC(   OP.opCOM_WRITEDATA,        PAR8,PAR8,PAR16,PAR8,                           0,0,0,0               ),
+			OC(   OP.opCOM_GET,              PAR8,SUBP,COM_GET_SUBP,                         0,0,0,0,0             ),
+			OC(   OP.opCOM_SET,              PAR8,SUBP,COM_SET_SUBP,                         0,0,0,0,0             ),
+			OC(   OP.opCOM_TEST,             PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
+			OC(   OP.opCOM_REMOVE,           PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opCOM_WRITEFILE,        PAR8,PAR8,PAR8,PAR8,                            0,0,0,0               ),
+
+			OC(   OP.opMAILBOX_OPEN,         PAR8,PAR8,PAR8,PAR8,PAR8,                       0,0,0                 ),
+			OC(   OP.opMAILBOX_WRITE,        PAR8,PAR8,PAR8,PAR8,PARNO,                      0,0,0                 ),
+			OC(   OP.opMAILBOX_READ,         PAR8,PAR8,PARNO,                                0,0,0,0,0             ),
+			OC(   OP.opMAILBOX_TEST,         PAR8,PAR8,                                      0,0,0,0,0,0           ),
+			OC(   OP.opMAILBOX_READY,        PAR8,                                           0,0,0,0,0,0,0         ),
+			OC(   OP.opMAILBOX_CLOSE,        PAR8,                                           0,0,0,0,0,0,0         ),
+			//    Test
+			OC(   OP.opTST,                  PAR8,SUBP,TST_SUBP,                             0,0,0,0,0             ),
+		};
+
+		public static KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>[] SubCodes =
+		{
+			//    ParameterFormat         SubCode                 Parameters                                      Unused
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				PROGRAM_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    VM
+					SC(nameof(OBJ_STOP), OBJ_STOP, PAR16, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(OBJ_START), OBJ_START, PAR16, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(GET_STATUS), GET_STATUS, PAR16, PAR8,                                     0,0,0,0,0,0           ),
+					SC(nameof(GET_SPEED), GET_SPEED, PAR16, PAR32,                                    0,0,0,0,0,0           ),
+					SC(nameof(GET_PRGRESULT), GET_PRGRESULT, PAR16, PAR8,                                     0,0,0,0,0,0           ),
+					SC(nameof(SET_INSTR), SET_INSTR, PAR16,                                          0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				FILE_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    Memory
+					SC(nameof(OPEN_APPEND), OPEN_APPEND, PAR8, PAR16,                                     0,0,0,0,0,0           ),
+					SC(nameof(OPEN_READ), OPEN_READ, PAR8, PAR16, PAR32,                               0,0,0,0,0             ),
+					SC(nameof(OPEN_WRITE), OPEN_WRITE, PAR8, PAR16,                                     0,0,0,0,0,0           ),
+					SC(nameof(READ_VALUE), READ_VALUE, PAR16, PAR8, PARF,                                0,0,0,0,0             ),
+					SC(nameof(WRITE_VALUE), WRITE_VALUE, PAR16, PAR8, PARF, PAR8, PAR8,                      0,0,0                 ),
+					SC(nameof(READ_TEXT), READ_TEXT, PAR16, PAR8, PAR16, PAR8,                          0,0,0,0               ),
+					SC(nameof(WRITE_TEXT), WRITE_TEXT, PAR16, PAR8, PAR8,                                0,0,0,0,0             ),
+					SC(nameof(CLOSE), CLOSE, PAR16,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(LOAD_IMAGE), LOAD_IMAGE, PAR16, PAR8, PAR32, PAR32,                         0,0,0,0               ),
+					SC(nameof(GET_HANDLE), GET_HANDLE, PAR8, PAR16, PAR8,                                0,0,0,0,0             ),
+					SC(nameof(MAKE_FOLDER), MAKE_FOLDER, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_LOG_NAME), GET_LOG_NAME, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_POOL), GET_POOL, PAR32, PAR16, PAR32,                              0,0,0,0,0             ),
+					SC(nameof(GET_FOLDERS), GET_FOLDERS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_SUBFOLDER_NAME), GET_SUBFOLDER_NAME, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(WRITE_LOG), WRITE_LOG, PAR16, PAR32, PAR8, PARF,                          0,0,0,0               ),
+					SC(nameof(CLOSE_LOG), CLOSE_LOG, PAR16, PAR8,                                     0,0,0,0,0,0           ),
+					SC(nameof(SET_LOG_SYNC_TIME), SET_LOG_SYNC_TIME, PAR32, PAR32,                                    0,0,0,0,0,0           ),
+					SC(nameof(DEL_SUBFOLDER), DEL_SUBFOLDER, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_LOG_SYNC_TIME), GET_LOG_SYNC_TIME, PAR32, PAR32,                                    0,0,0,0,0,0           ),
+					SC(nameof(GET_IMAGE), GET_IMAGE, PAR8, PAR16, PAR8, PAR32,                          0,0,0,0               ),
+					SC(nameof(GET_ITEM), GET_ITEM, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(GET_CACHE_FILES), GET_CACHE_FILES, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_CACHE_FILE), GET_CACHE_FILE, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(PUT_CACHE_FILE), PUT_CACHE_FILE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(DEL_CACHE_FILE), DEL_CACHE_FILE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(OPEN_LOG), OPEN_LOG, PAR8, PAR32, PAR32, PAR32, PAR32, PAR32, PAR8, PAR16                         ),
+					SC(nameof(READ_BYTES), READ_BYTES, PAR16, PAR16, PAR8,                               0,0,0,0,0             ),
+					SC(nameof(WRITE_BYTES), WRITE_BYTES, PAR16, PAR16, PAR8,                               0,0,0,0,0             ),
+					SC(nameof(REMOVE), REMOVE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(MOVE), MOVE, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				ARRAY_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(CREATE8), CREATE8, PAR32, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(CREATE16), CREATE16, PAR32, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(CREATE32), CREATE32, PAR32, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(CREATEF), CREATEF, PAR32, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(RESIZE), RESIZE, PAR16, PAR32,                                    0,0,0,0,0,0           ),
+					SC(nameof(DELETE), DELETE, PAR16,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(FILL), FILL, PAR16, PARV,                                     0,0,0,0,0,0           ),
+					SC(nameof(COPY), COPY, PAR16, PAR16,                                    0,0,0,0,0,0           ),
+					SC(nameof(INIT8), INIT8, PAR16, PAR32, PAR32, PARVALUES, PAR8,               0,0,0                 ),
+					SC(nameof(INIT16), INIT16, PAR16, PAR32, PAR32, PARVALUES, PAR16,              0,0,0                 ),
+					SC(nameof(INIT32), INIT32, PAR16, PAR32, PAR32, PARVALUES, PAR32,              0,0,0                 ),
+					SC(nameof(INITF), INITF, PAR16, PAR32, PAR32, PARVALUES, PARF,               0,0,0                 ),
+					SC(nameof(SIZE), SIZE, PAR16, PAR32,                                    0,0,0,0,0,0           ),
+					SC(nameof(READ_CONTENT), READ_CONTENT, PAR16, PAR16, PAR32, PAR32, PAR8,                   0,0,0                 ),
+					SC(nameof(WRITE_CONTENT), WRITE_CONTENT, PAR16, PAR16, PAR32, PAR32, PAR8,                   0,0,0                 ),
+					SC(nameof(READ_SIZE), READ_SIZE, PAR16, PAR16, PAR32,                              0,0,0,0,0             ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				FILENAME_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(EXIST), EXIST, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(TOTALSIZE), TOTALSIZE, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
+					SC(nameof(SPLIT), SPLIT, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
+					SC(nameof(MERGE), MERGE, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
+					SC(nameof(CHECK), CHECK, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(PACK), PACK, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(UNPACK), UNPACK, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_FOLDERNAME), GET_FOLDERNAME, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				VM_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    VM
+					SC(nameof(SET_ERROR), SET_ERROR, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_ERROR), GET_ERROR, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(ERRORTEXT), ERRORTEXT, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+
+					SC(nameof(GET_VOLUME), GET_VOLUME, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(SET_VOLUME), SET_VOLUME, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_MINUTES), GET_MINUTES, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(SET_MINUTES), SET_MINUTES, PAR8,                                           0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				TST_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(TST_OPEN), TST_OPEN,               0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(TST_CLOSE), TST_CLOSE,              0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(TST_READ_PINS), TST_READ_PINS, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(TST_WRITE_PINS), TST_WRITE_PINS, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(TST_READ_ADC), TST_READ_ADC, PAR8, PAR16,                                     0,0,0,0,0,0           ),
+					SC(nameof(TST_WRITE_UART), TST_WRITE_UART, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(TST_READ_UART), TST_READ_UART, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(TST_ENABLE_UART), TST_ENABLE_UART, PAR32,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(TST_DISABLE_UART), TST_DISABLE_UART,       0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(TST_ACCU_SWITCH), TST_ACCU_SWITCH, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TST_BOOT_MODE2), TST_BOOT_MODE2,         0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(TST_POLL_MODE2), TST_POLL_MODE2, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TST_CLOSE_MODE2), TST_CLOSE_MODE2,        0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(TST_RAM_CHECK), TST_RAM_CHECK, PAR8,                                           0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				STRING_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(GET_SIZE), GET_SIZE, PAR8, PAR16,                                     0,0,0,0,0,0           ),
+					SC(nameof(ADD), ADD, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(COMPARE), COMPARE, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(DUPLICATE), DUPLICATE, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(VALUE_TO_STRING), VALUE_TO_STRING, PARF, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(STRING_TO_VALUE), STRING_TO_VALUE, PAR8, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(STRIP), STRIP, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(NUMBER_TO_STRING), NUMBER_TO_STRING, PAR16, PAR8, PAR8,                                0,0,0,0,0             ),
+					SC(nameof(SUB), SUB, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(VALUE_FORMATTED), VALUE_FORMATTED, PARF, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(NUMBER_FORMATTED), NUMBER_FORMATTED, PAR32, PAR8, PAR8, PAR8,                           0,0,0,0               ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				UI_READ_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    UI
+					SC(nameof(GET_VBATT), GET_VBATT, PARF,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_IBATT), GET_IBATT, PARF,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_OS_VERS), GET_OS_VERS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_EVENT), GET_EVENT, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_TBATT), GET_TBATT, PARF,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_IINT), GET_IINT, PARF,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_IMOTOR), GET_IMOTOR, PARF,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_STRING), GET_STRING, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(KEY), KEY, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_SHUTDOWN), GET_SHUTDOWN, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_WARNING), GET_WARNING, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_LBATT), GET_LBATT, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_ADDRESS), GET_ADDRESS, PAR32,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(GET_CODE), GET_CODE, PAR32, PAR32, PAR32, PAR8,                         0,0,0,0               ),
+					SC(nameof(TEXTBOX_READ), TEXTBOX_READ, PAR8, PAR32, PAR8, PAR8, PAR16, PAR8,                0,0                   ),
+					SC(nameof(GET_HW_VERS), GET_HW_VERS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_FW_VERS), GET_FW_VERS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_FW_BUILD), GET_FW_BUILD, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_OS_BUILD), GET_OS_BUILD, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_VERSION), GET_VERSION, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_IP), GET_IP, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_SDCARD), GET_SDCARD, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
+					SC(nameof(GET_USBSTICK), GET_USBSTICK, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				UI_WRITE_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(WRITE_FLUSH), WRITE_FLUSH,            0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(FLOATVALUE), FLOATVALUE, PARF, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(STAMP), STAMP, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(PUT_STRING), PUT_STRING, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(CODE), CODE, PAR8, PAR32,                                     0,0,0,0,0,0           ),
+					SC(nameof(DOWNLOAD_END), DOWNLOAD_END,           0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(SCREEN_BLOCK), SCREEN_BLOCK, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TEXTBOX_APPEND), TEXTBOX_APPEND, PAR8, PAR32, PAR8, PAR8,                           0,0,0,0               ),
+					SC(nameof(SET_BUSY), SET_BUSY, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(VALUE8), VALUE8, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(VALUE16), VALUE16, PAR16,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(VALUE32), VALUE32, PAR32,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(VALUEF), VALUEF, PARF,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(INIT_RUN), INIT_RUN,               0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(UPDATE_RUN), UPDATE_RUN,             0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(LED), LED, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(POWER), POWER, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TERMINAL), TERMINAL, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GRAPH_SAMPLE), GRAPH_SAMPLE,           0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(SET_TESTPIN), SET_TESTPIN, PAR8,                                           0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				UI_DRAW_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(UPDATE), UPDATE,                 0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(CLEAN), CLEAN,                  0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(FILLRECT), FILLRECT, PAR8, PAR16, PAR16, PAR16, PAR16,                   0,0,0                 ),
+					SC(nameof(RECT), RECT, PAR8, PAR16, PAR16, PAR16, PAR16,                   0,0,0                 ),
+					SC(nameof(PIXEL), PIXEL, PAR8, PAR16, PAR16,                               0,0,0,0,0             ),
+					SC(nameof(LINE), LINE, PAR8, PAR16, PAR16, PAR16, PAR16,                   0,0,0                 ),
+					SC(nameof(CIRCLE), CIRCLE, PAR8, PAR16, PAR16, PAR16,                         0,0,0,0               ),
+					SC(nameof(TEXT), TEXT, PAR8, PAR16, PAR16, PAR8,                          0,0,0,0               ),
+					SC(nameof(ICON), ICON, PAR8, PAR16, PAR16, PAR8, PAR8,                     0,0,0                 ),
+					SC(nameof(PICTURE), PICTURE, PAR8, PAR16, PAR16, PAR32,                         0,0,0,0               ),
+					SC(nameof(VALUE), VALUE, PAR8, PAR16, PAR16, PARF, PAR8, PAR8,                0,0                   ),
+					SC(nameof(NOTIFICATION), NOTIFICATION, PAR8, PAR16, PAR16, PAR8, PAR8, PAR8, PAR8, PAR8                             ),
+					SC(nameof(QUESTION), QUESTION, PAR8, PAR16, PAR16, PAR8, PAR8, PAR8, PAR8, PAR8                             ),
+					SC(nameof(KEYBOARD), KEYBOARD, PAR8, PAR16, PAR16, PAR8, PAR8, PAR8, PAR8, PAR8                             ),
+					SC(nameof(BROWSE), BROWSE, PAR8, PAR16, PAR16, PAR16, PAR16, PAR8, PAR8, PAR8                           ),
+					SC(nameof(VERTBAR), VERTBAR, PAR8, PAR16, PAR16, PAR16, PAR16, PAR16, PAR16, PAR16                        ),
+					SC(nameof(INVERSERECT), INVERSERECT, PAR16, PAR16, PAR16, PAR16,                        0,0,0,0               ),
+					SC(nameof(SELECT_FONT), SELECT_FONT, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TOPLINE), TOPLINE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(FILLWINDOW), FILLWINDOW, PAR8, PAR16, PAR16,                               0,0,0,0,0             ),
+					SC(nameof(SCROLL), SCROLL, PAR16,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(DOTLINE), DOTLINE, PAR8, PAR16, PAR16, PAR16, PAR16, PAR16, PAR16,       0                     ),
+					SC(nameof(VIEW_VALUE), VIEW_VALUE, PAR8, PAR16, PAR16, PARF, PAR8, PAR8,                0,0                   ),
+					SC(nameof(VIEW_UNIT), VIEW_UNIT, PAR8, PAR16, PAR16, PARF, PAR8, PAR8, PAR8, PAR8                             ),
+					SC(nameof(FILLCIRCLE), FILLCIRCLE, PAR8, PAR16, PAR16, PAR16,                         0,0,0,0               ),
+					SC(nameof(STORE), STORE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(RESTORE), RESTORE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(ICON_QUESTION), ICON_QUESTION, PAR8, PAR16, PAR16, PAR8, PAR32,                    0,0,0                 ),
+					SC(nameof(BMPFILE), BMPFILE, PAR8, PAR16, PAR16, PAR8,                          0,0,0,0               ),
+					SC(nameof(GRAPH_SETUP), GRAPH_SETUP, PAR16, PAR16, PAR16, PAR16, PAR8, PAR16, PAR16, PAR16                        ),
+					SC(nameof(GRAPH_DRAW), GRAPH_DRAW, PAR8, PARF, PARF, PARF, PARF,                       0,0,0                 ),
+					SC(nameof(POPUP), POPUP, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TEXTBOX), TEXTBOX, PAR16, PAR16, PAR16, PAR16, PAR8, PAR32, PAR8, PAR8                          ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				UI_BUTTON_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(SHORTPRESS), SHORTPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(LONGPRESS), LONGPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(FLUSH), FLUSH,                  0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(WAIT_FOR_PRESS), WAIT_FOR_PRESS,         0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(PRESS), PRESS, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(RELEASE), RELEASE, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_HORZ), GET_HORZ, PAR16,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(GET_VERT), GET_VERT, PAR16,                                          0,0,0,0,0,0,0         ),
+					SC(nameof(PRESSED), PRESSED, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_BACK_BLOCK), SET_BACK_BLOCK, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(GET_BACK_BLOCK), GET_BACK_BLOCK, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(TESTSHORTPRESS), TESTSHORTPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(TESTLONGPRESS), TESTLONGPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_BUMBED), GET_BUMBED, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_CLICK), GET_CLICK, PAR8,                                           0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				COM_READ_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    Com
+					SC(nameof(COMMAND), COMMAND, PAR32, PAR32, PAR32, PAR8,                         0,0,0,0               ),
+				}),
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				COM_WRITE_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					SC(nameof(REPLY), REPLY, PAR32, PAR32, PAR8,                               0,0,0,0,0             ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				SOUND_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    Sound
+					SC(nameof(BREAK), BREAK,                  0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(TONE), TONE, PAR8, PAR16, PAR16,                               0,0,0,0,0             ),
+					SC(nameof(PLAY), PLAY, PAR8, PARS,                                      0,0,0,0,0,0           ),
+					SC(nameof(REPEAT), REPEAT, PAR8, PARS,                                      0,0,0,0,0,0           ),
+					SC(nameof(SERVICE), SERVICE,                0,                                              0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				INPUT_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    Input
+					SC(nameof(GET_TYPEMODE), GET_TYPEMODE, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(GET_CONNECTION), GET_CONNECTION, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(GET_NAME), GET_NAME, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(GET_SYMBOL), GET_SYMBOL, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(GET_FORMAT), GET_FORMAT, PAR8, PAR8, PAR8, PAR8, PAR8, PAR8,                  0,0                   ),
+					SC(nameof(GET_RAW), GET_RAW, PAR8, PAR8, PAR32,                                0,0,0,0,0             ),
+					SC(nameof(GET_MODENAME), GET_MODENAME, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
+					SC(nameof(SET_RAW), SET_RAW, PAR8, PAR8, PAR8, PAR32,                           0,0,0,0               ),
+					SC(nameof(GET_FIGURES), GET_FIGURES, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(GET_CHANGES), GET_CHANGES, PAR8, PAR8, PARF,                                 0,0,0,0,0             ),
+					SC(nameof(CLR_CHANGES), CLR_CHANGES, PAR8, PAR8,0,                                    0,0,0,0,0             ),
+					SC(nameof(READY_PCT), READY_PCT, PAR8, PAR8, PAR8, PAR8, PARNO,                      0,0,0                 ),
+					SC(nameof(READY_RAW), READY_RAW, PAR8, PAR8, PAR8, PAR8, PARNO,                      0,0,0                 ),
+					SC(nameof(READY_SI), READY_SI, PAR8, PAR8, PAR8, PAR8, PARNO,                      0,0,0                 ),
+					SC(nameof(GET_MINMAX), GET_MINMAX, PAR8, PAR8, PARF, PARF,                            0,0,0,0               ),
+					SC(nameof(CAL_MINMAX), CAL_MINMAX, PAR8, PAR8, PAR32, PAR32,                          0,0,0,0               ),
+					SC(nameof(CAL_DEFAULT), CAL_DEFAULT, PAR8, PAR8,0,                                    0,0,0,0,0             ),
+					SC(nameof(CAL_MIN), CAL_MIN, PAR8, PAR8, PAR32,                                0,0,0,0,0             ),
+					SC(nameof(CAL_MAX), CAL_MAX, PAR8, PAR8, PAR32,                                0,0,0,0,0             ),
+					SC(nameof(GET_BUMPS), GET_BUMPS, PAR8, PAR8, PARF,                                 0,0,0,0,0             ),
+					SC(nameof(SETUP), SETUP, PAR8, PAR8, PAR8, PAR16, PAR8, PAR8, PAR8, PAR8                              ),
+					SC(nameof(CLR_ALL), CLR_ALL, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(STOP_ALL), STOP_ALL, PAR8,                                           0,0,0,0,0,0,0         ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				MATH_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    Math
+					SC(nameof(EXP), EXP, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(MOD), MOD, PARF, PARF, PARF,                                 0,0,0,0,0             ),
+					SC(nameof(FLOOR), FLOOR, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(CEIL), CEIL, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(ROUND), ROUND, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(ABS), ABS, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(NEGATE), NEGATE, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(SQRT), SQRT, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(LOG), LOG, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(LN), LN, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(SIN), SIN, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(COS), COS, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(TAN), TAN, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(ASIN), ASIN, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(ACOS), ACOS, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(ATAN), ATAN, PARF, PARF,                                      0,0,0,0,0,0           ),
+					SC(nameof(MOD8), MOD8, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(MOD16), MOD16, PAR16, PAR16, PAR16,                              0,0,0,0,0             ),
+					SC(nameof(MOD32), MOD32, PAR32, PAR32, PAR32,                              0,0,0,0,0             ),
+					SC(nameof(POW), POW, PARF, PARF, PARF,                                 0,0,0,0,0             ),
+					SC(nameof(TRUNC), TRUNC, PARF, PAR8, PARF,                                 0,0,0,0,0             ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				COM_GET_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    ComGet
+					SC(nameof(GET_ON_OFF), GET_ON_OFF, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_VISIBLE), GET_VISIBLE, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_RESULT), GET_RESULT, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(GET_PIN), GET_PIN, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(SEARCH_ITEMS), SEARCH_ITEMS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SEARCH_ITEM), SEARCH_ITEM, PAR8, PAR8, PAR8, PAR8, PAR8, PAR8, PAR8, PAR8                               ),
+					SC(nameof(FAVOUR_ITEMS), FAVOUR_ITEMS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(FAVOUR_ITEM), FAVOUR_ITEM, PAR8, PAR8, PAR8, PAR8, PAR8, PAR8, PAR8,             0                     ),
+					SC(nameof(GET_ID), GET_ID, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(GET_BRICKNAME), GET_BRICKNAME, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_NETWORK), GET_NETWORK, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
+					SC(nameof(GET_PRESENT), GET_PRESENT, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(GET_ENCRYPT), GET_ENCRYPT, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(CONNEC_ITEMS), CONNEC_ITEMS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(CONNEC_ITEM), CONNEC_ITEM, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
+					SC(nameof(GET_INCOMING), GET_INCOMING, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
+					SC(nameof(GET_MODE2), GET_MODE2, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+				}),
+
+			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				COM_SET_SUBP,
+				new KeyValuePair<byte, SUBCODE>[]
+				{
+					//    ComSet
+					SC(nameof(SET_ON_OFF), SET_ON_OFF, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_VISIBLE), SET_VISIBLE, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_SEARCH), SET_SEARCH, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_PIN), SET_PIN, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(SET_PASSKEY), SET_PASSKEY, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_CONNECTION), SET_CONNECTION, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(SET_BRICKNAME), SET_BRICKNAME, PAR8,                                           0,0,0,0,0,0,0         ),
+					SC(nameof(SET_MOVEUP), SET_MOVEUP, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_MOVEDOWN), SET_MOVEDOWN, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_ENCRYPT), SET_ENCRYPT, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
+					SC(nameof(SET_SSID), SET_SSID, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+					SC(nameof(SET_MODE2), SET_MODE2, PAR8, PAR8,                                      0,0,0,0,0,0           ),
+				}),
+		};
+		#endregion
 		#region c_sound.h
 		public const int STEP_SIZE_TABLE_ENTRIES = 89;
-		public const int INDEX_TABLE_ENTRIES = 16;
+			public const int INDEX_TABLE_ENTRIES = 16;
 
-		// Percentage to SoundLevel -
-		// Adjust the percentage, if non-linear SPL response is needed
+			// Percentage to SoundLevel -
+			// Adjust the percentage, if non-linear SPL response is needed
 
-		public const int SND_LEVEL_1 = 13;  // 13% (12.5)
-		public const int SND_LEVEL_2 = 25;  // 25%
-		public const int SND_LEVEL_3 = 38;  // 38% (37.5)
-		public const int SND_LEVEL_4 = 50;  // 50%
-		public const int SND_LEVEL_5 = 63;  // 63% (62.5)
-		public const int SND_LEVEL_6 = 75;  // 75%
-		public const int SND_LEVEL_7 = 88;  // 88% (87.5)
+			public const int SND_LEVEL_1 = 13;  // 13% (12.5)
+			public const int SND_LEVEL_2 = 25;  // 25%
+			public const int SND_LEVEL_3 = 38;  // 38% (37.5)
+			public const int SND_LEVEL_4 = 50;  // 50%
+			public const int SND_LEVEL_5 = 63;  // 63% (62.5)
+			public const int SND_LEVEL_6 = 75;  // 75%
+			public const int SND_LEVEL_7 = 88;  // 88% (87.5)
 
-		public const int TONE_LEVEL_1 = 8;  //  8%
-		public const int TONE_LEVEL_2 = 16;  // 16%
-		public const int TONE_LEVEL_3 = 24;  // 24%
-		public const int TONE_LEVEL_4 = 32;  // 32%
-		public const int TONE_LEVEL_5 = 40;  // 40%
-		public const int TONE_LEVEL_6 = 48;  // 48%
-		public const int TONE_LEVEL_7 = 56;  // 56%
-		public const int TONE_LEVEL_8 = 64;  // 64%
-		public const int TONE_LEVEL_9 = 72;  // 72%
-		public const int TONE_LEVEL_10 = 80;  // 80%
-		public const int TONE_LEVEL_11 = 88;  // 88%
-		public const int TONE_LEVEL_12 = 96;  // 96%
+			public const int TONE_LEVEL_1 = 8;  //  8%
+			public const int TONE_LEVEL_2 = 16;  // 16%
+			public const int TONE_LEVEL_3 = 24;  // 24%
+			public const int TONE_LEVEL_4 = 32;  // 32%
+			public const int TONE_LEVEL_5 = 40;  // 40%
+			public const int TONE_LEVEL_6 = 48;  // 48%
+			public const int TONE_LEVEL_7 = 56;  // 56%
+			public const int TONE_LEVEL_8 = 64;  // 64%
+			public const int TONE_LEVEL_9 = 72;  // 72%
+			public const int TONE_LEVEL_10 = 80;  // 80%
+			public const int TONE_LEVEL_11 = 88;  // 88%
+			public const int TONE_LEVEL_12 = 96;  // 96%
 
-		public static SWORD[] StepSizeTable = new SWORD[STEP_SIZE_TABLE_ENTRIES]
-		{
-			7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
-			19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
-			50, 55, 60, 66, 73, 80, 88, 97, 107, 118,
-			130, 143, 157, 173, 190, 209, 230, 253, 279, 307,
-			337, 371, 408, 449, 494, 544, 598, 658, 724, 796,
-			876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066,
-			2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358,
-			5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899,
-			15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
-		};
+			public static SWORD[] StepSizeTable = new SWORD[STEP_SIZE_TABLE_ENTRIES]
+			{
+				7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
+				19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
+				50, 55, 60, 66, 73, 80, 88, 97, 107, 118,
+				130, 143, 157, 173, 190, 209, 230, 253, 279, 307,
+				337, 371, 408, 449, 494, 544, 598, 658, 724, 796,
+				876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066,
+				2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358,
+				5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899,
+				15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
+			};
 
-		public static SWORD[] IndexTable = new SWORD[INDEX_TABLE_ENTRIES]
-		{
-			-1, -1, -1, -1, 2, 4, 6, 8,
-			-1, -1, -1, -1, 2, 4, 6, 8
-		};
+			public static SWORD[] IndexTable = new SWORD[INDEX_TABLE_ENTRIES]
+			{
+				-1, -1, -1, -1, 2, 4, 6, 8,
+				-1, -1, -1, -1, 2, 4, 6, 8
+			};
 
-		public const int FILEFORMAT_RAW_SOUND = 0x0100;
-		public const int FILEFORMAT_ADPCM_SOUND = 0x0101;
-		public const int SOUND_MODE_ONCE = 0x00;
-		public const int SOUND_LOOP = 0x01;
-		public const int SOUND_ADPCM_INIT_VALPREV = 0x7F;
-		public const int SOUND_ADPCM_INIT_INDEX = 20;
-		#endregion
+			public const int FILEFORMAT_RAW_SOUND = 0x0100;
+			public const int FILEFORMAT_ADPCM_SOUND = 0x0101;
+			public const int SOUND_MODE_ONCE = 0x00;
+			public const int SOUND_LOOP = 0x01;
+			public const int SOUND_ADPCM_INIT_VALPREV = 0x7F;
+			public const int SOUND_ADPCM_INIT_INDEX = 20;
+			#endregion
 
 		#region c_memory.h
 		public const int POOL_TYPE_MEMORY = 0;
@@ -913,6 +1577,82 @@
 		public const int DIR_CMD_NOREPLY = 0x02;
 		public const int SYS_CMD_REPLY = 0x04;
 		public const int SYS_CMD_NOREPLY = 0x08;
+		#endregion
+
+		#region c_wifi.h
+		public const string WIFI_PERSISTENT_PATH = vmSETTINGS_DIR;        // FileSys guidance ;-)
+		public const string WIFI_PERSISTENT_FILENAME = "WiFiConnections.dat";// Persistent storage for KNOWN connections
+
+		public const int MAC_ADDRESS_LENGTH = 18;  // xx:xx:xx:xx:xx:xx + /0x00
+		public const int FREQUENCY_LENGTH = 5;
+		public const int SIGNAL_LEVEL_LENGTH = 4;
+		public const int SECURITY_LENGTH = 129;//33
+		public const int FRIENDLY_NAME_LENGTH = 33;
+
+		public const int PSK_LENGTH = 65; // 32 bytes = 256 bit + /0x00
+		public const int KEY_MGMT_LENGTH = 33;
+		public const int PAIRWISE_LENGTH = 33;
+		public const int GROUP_LENGTH = 33;
+		public const int PROTO_LENGTH = 33;
+
+		public const int WIFI_INIT_TIMEOUT = 10; //60
+		public const int WIFI_INIT_DELAY = 10;
+
+		public const string BROADCAST_IP_LOW = "255";  // "192.168.0.255"
+		public const int BROADCAST_PORT = 3015;  // UDP
+		public const int TCP_PORT = 5555;
+		public const int BEACON_TIME = 5;        // 5 sec's between BEACONs
+
+		public const int TIME_FOR_WIFI_DONGLE_CHECK = 10;
+
+		public const int BLUETOOTH_SER_LENGTH = 13; // No "white" ;space separators
+		public const int BRICK_HOSTNAME_LENGTH = (NAME_LENGTH + 1);
+
+		public const int WIFI_NOT_INITIATED = 0;   // NOTHING INIT'ed
+		public const int WIFI_INIT = 0;            // Do the time consumption stuff
+		public const int WIFI_INITIATED = 0;      // Initiated and ready for AP:
+												  // We have the H/W stack up and running
+		public const int READY_FOR_AP_SEARCH = 0;  // Stack ready for further AP search
+		public const int SEARCH_APS = 0;           // As it says
+		public const int SEARCH_PENDING = 0;       // Time consumption search
+		public const int AP_LIST_UPDATED = 0;     // User have forced a new search
+		public const int AP_CONNECTING = 0;
+		public const int WIFI_CONNECTED_TO_AP = 0; // User has connected to an AP
+		public const int UDP_NOT_INITIATED = 0;    // Ready for starting Beacons
+		public const int INIT_UDP_CONNECTION = 0;  // Do the init via UDP
+		public const int UPD_FIRST_TX = 0;         // Temporary state after start Beacon TX
+		public const int UDP_VISIBLE = 0;          // We TX'es a lot of Beacon
+		public const int UDP_CONNECTED = 0;        // We have an active negotiation connection
+		public const int TCP_NOT_CONNECTED = 0;    // Waiting for the PC to connect via TCP
+		public const int TCP_CONNECTED = 0;    // We have a TCP connection established
+		public const int CLOSED = 0;               // UDP/TCP closed
+
+		public const int NOT_INIT = 0x00;
+		public const int LOAD_SUPPLICANT = 0x01;
+		public const int WAIT_ON_INTERFACE = 0x02;
+		public const int DONE = 0x80;
+
+		public const int TCP_IDLE = 0x00;
+		public const int TCP_WAIT_ON_START = 0x01;
+		public const int TCP_WAIT_ON_LENGTH = 0x02;
+		public const int TCP_WAIT_ON_FIRST_CHUNK = 0x04;
+		public const int TCP_WAIT_ON_ONLY_CHUNK = 0x08;
+		public const int TCP_WAIT_COLLECT_BYTES = 0x10;
+
+		public const int VISIBLE = 0x1;
+		public const int CONNECTED = 0x02;
+		public const int WPA2 = 0x04;
+		public const int KNOWN = 0x08;
+		public const int UNKNOWN = 0x80;
+		public const int AP_FLAG_ADJUST_FOR_STORAGE = ((int)(~(VISIBLE + CONNECTED + UNKNOWN)));  // Set/reset for persistent storage
+
+		public const int NO_CONNECTION = 0x0;
+		public const int CONNECTION_MADE = 0x01;
+		public const int SEARCHING = 0x02;
+		#endregion
+
+		#region c_input.h
+		// public static KeyValuePair<OP, OPCODE> INPUT_DEVICE_LIST = OC(opINPUT_DEVICE_LIST,&cInputDeviceList,7,0 )
 		#endregion
 	}
 }

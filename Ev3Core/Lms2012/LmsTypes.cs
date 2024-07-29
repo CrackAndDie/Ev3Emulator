@@ -80,3 +80,17 @@ public class LABEL
 {
 	public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
 }
+
+// bytecodes.c
+
+public class OPCODE
+{
+    public ULONG Pars;                         //!< Contains parameter info nibbles (max 8)
+    public char[] Name;                        //!< Opcode name
+}
+
+public class SUBCODE
+{
+    public ULONG Pars;                         //!< Contains parameter info nibbles (max 8)
+    public char[] Name;                        //!< Sub code name
+}
