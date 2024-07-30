@@ -270,11 +270,6 @@ namespace Ev3Core.Cui.Interfaces
         public GRAPH Graph = new GRAPH();
         public TXTBOX Txtbox = new TXTBOX();
 
-        public int PowerFile;
-        public int UiFile;
-        public int AdcFile;
-        public int DispFile;
-
         public ULONG SleepTimer;
 
         public ULONG MilliSeconds;

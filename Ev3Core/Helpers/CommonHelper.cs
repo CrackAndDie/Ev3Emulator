@@ -75,5 +75,34 @@
 
 			return j == a.Length;
 		}
+
+		public static int Memcmp(byte[] a, byte[] b, int num)
+		{
+			for (int i = 0; i < num; ++i)
+			{
+				if (a[i] != b[i])
+				{
+					return a[i] > b[i] ? 1 : -1;
+				}
+			}
+
+			return 0;
+		}
+
+		public static void Memmove(byte[] a, byte[] b, int num, int aP = 0, int bP = 0)
+		{
+			for (int i = 0; i < num; ++i)
+			{
+				a[i + aP] = b[i + bP];
+			}
+		}
+
+		public static void Memset(byte[] a, byte val, int num, int aP = 0)
+		{
+			for (int i = aP; i < aP + num; ++i)
+			{
+				a[i] = val;
+			}
+		}
 	}
 }

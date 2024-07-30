@@ -1,4 +1,6 @@
-﻿using Ev3Core.Enums;
+﻿using Ev3Core.Cui.Interfaces;
+using Ev3Core.Enums;
+using Ev3Core.Helpers;
 
 namespace Ev3Core
 {
@@ -775,7 +777,7 @@ namespace Ev3Core
 			});
 		}
 
-		public static KeyValuePair<OP, OPCODE>[] OpCodes = 
+		public static Dictionary<OP, OPCODE> OpCodes = new Dictionary<OP, OPCODE>(new[]
 		{
 			//    OpCode                  Parameters                                      Unused
 			//    VM
@@ -1007,14 +1009,14 @@ namespace Ev3Core
 			OC(   OP.opMAILBOX_CLOSE,        PAR8,                                           0,0,0,0,0,0,0         ),
 			//    Test
 			OC(   OP.opTST,                  PAR8,SUBP,TST_SUBP,                             0,0,0,0,0             ),
-		};
+		});
 
-		public static KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>[] SubCodes =
+		public static Dictionary<byte, Dictionary<byte, SUBCODE>> SubCodes = new Dictionary<byte, Dictionary<byte, SUBCODE>>(new[]
 		{
 			//    ParameterFormat         SubCode                 Parameters                                      Unused
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				PROGRAM_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    VM
 					SC(nameof(OBJ_STOP), OBJ_STOP, PAR16, PAR16,                                    0,0,0,0,0,0           ),
@@ -1023,11 +1025,11 @@ namespace Ev3Core
 					SC(nameof(GET_SPEED), GET_SPEED, PAR16, PAR32,                                    0,0,0,0,0,0           ),
 					SC(nameof(GET_PRGRESULT), GET_PRGRESULT, PAR16, PAR8,                                     0,0,0,0,0,0           ),
 					SC(nameof(SET_INSTR), SET_INSTR, PAR16,                                          0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				FILE_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    Memory
 					SC(nameof(OPEN_APPEND), OPEN_APPEND, PAR8, PAR16,                                     0,0,0,0,0,0           ),
@@ -1061,11 +1063,11 @@ namespace Ev3Core
 					SC(nameof(WRITE_BYTES), WRITE_BYTES, PAR16, PAR16, PAR8,                               0,0,0,0,0             ),
 					SC(nameof(REMOVE), REMOVE, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(MOVE), MOVE, PAR8, PAR8,                                      0,0,0,0,0,0           ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				ARRAY_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(CREATE8), CREATE8, PAR32, PAR16,                                    0,0,0,0,0,0           ),
 					SC(nameof(CREATE16), CREATE16, PAR32, PAR16,                                    0,0,0,0,0,0           ),
@@ -1083,11 +1085,11 @@ namespace Ev3Core
 					SC(nameof(READ_CONTENT), READ_CONTENT, PAR16, PAR16, PAR32, PAR32, PAR8,                   0,0,0                 ),
 					SC(nameof(WRITE_CONTENT), WRITE_CONTENT, PAR16, PAR16, PAR32, PAR32, PAR8,                   0,0,0                 ),
 					SC(nameof(READ_SIZE), READ_SIZE, PAR16, PAR16, PAR32,                              0,0,0,0,0             ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				FILENAME_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(EXIST), EXIST, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(TOTALSIZE), TOTALSIZE, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
@@ -1097,11 +1099,11 @@ namespace Ev3Core
 					SC(nameof(PACK), PACK, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(UNPACK), UNPACK, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(GET_FOLDERNAME), GET_FOLDERNAME, PAR8, PAR8,                                      0,0,0,0,0,0           ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				VM_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    VM
 					SC(nameof(SET_ERROR), SET_ERROR, PAR8,                                           0,0,0,0,0,0,0         ),
@@ -1112,11 +1114,11 @@ namespace Ev3Core
 					SC(nameof(SET_VOLUME), SET_VOLUME, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(GET_MINUTES), GET_MINUTES, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(SET_MINUTES), SET_MINUTES, PAR8,                                           0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				TST_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(TST_OPEN), TST_OPEN,               0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(TST_CLOSE), TST_CLOSE,              0,                                              0,0,0,0,0,0,0         ),
@@ -1132,11 +1134,11 @@ namespace Ev3Core
 					SC(nameof(TST_POLL_MODE2), TST_POLL_MODE2, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(TST_CLOSE_MODE2), TST_CLOSE_MODE2,        0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(TST_RAM_CHECK), TST_RAM_CHECK, PAR8,                                           0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				STRING_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(GET_SIZE), GET_SIZE, PAR8, PAR16,                                     0,0,0,0,0,0           ),
 					SC(nameof(ADD), ADD, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
@@ -1149,11 +1151,11 @@ namespace Ev3Core
 					SC(nameof(SUB), SUB, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
 					SC(nameof(VALUE_FORMATTED), VALUE_FORMATTED, PARF, PAR8, PAR8, PAR8,                            0,0,0,0               ),
 					SC(nameof(NUMBER_FORMATTED), NUMBER_FORMATTED, PAR32, PAR8, PAR8, PAR8,                           0,0,0,0               ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				UI_READ_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    UI
 					SC(nameof(GET_VBATT), GET_VBATT, PARF,                                           0,0,0,0,0,0,0         ),
@@ -1179,11 +1181,11 @@ namespace Ev3Core
 					SC(nameof(GET_IP), GET_IP, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(GET_SDCARD), GET_SDCARD, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
 					SC(nameof(GET_USBSTICK), GET_USBSTICK, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				UI_WRITE_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(WRITE_FLUSH), WRITE_FLUSH,            0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(FLOATVALUE), FLOATVALUE, PARF, PAR8, PAR8,                                 0,0,0,0,0             ),
@@ -1205,11 +1207,11 @@ namespace Ev3Core
 					SC(nameof(TERMINAL), TERMINAL, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(GRAPH_SAMPLE), GRAPH_SAMPLE,           0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(SET_TESTPIN), SET_TESTPIN, PAR8,                                           0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				UI_DRAW_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(UPDATE), UPDATE,                 0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(CLEAN), CLEAN,                  0,                                              0,0,0,0,0,0,0         ),
@@ -1244,11 +1246,11 @@ namespace Ev3Core
 					SC(nameof(GRAPH_DRAW), GRAPH_DRAW, PAR8, PARF, PARF, PARF, PARF,                       0,0,0                 ),
 					SC(nameof(POPUP), POPUP, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(TEXTBOX), TEXTBOX, PAR16, PAR16, PAR16, PAR16, PAR8, PAR32, PAR8, PAR8                          ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				UI_BUTTON_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(SHORTPRESS), SHORTPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(LONGPRESS), LONGPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
@@ -1265,25 +1267,25 @@ namespace Ev3Core
 					SC(nameof(TESTLONGPRESS), TESTLONGPRESS, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(GET_BUMBED), GET_BUMBED, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(GET_CLICK), GET_CLICK, PAR8,                                           0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				COM_READ_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    Com
 					SC(nameof(COMMAND), COMMAND, PAR32, PAR32, PAR32, PAR8,                         0,0,0,0               ),
-				}),
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+				})),
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				COM_WRITE_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(REPLY), REPLY, PAR32, PAR32, PAR8,                               0,0,0,0,0             ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				SOUND_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    Sound
 					SC(nameof(BREAK), BREAK,                  0,                                              0,0,0,0,0,0,0         ),
@@ -1291,11 +1293,11 @@ namespace Ev3Core
 					SC(nameof(PLAY), PLAY, PAR8, PARS,                                      0,0,0,0,0,0           ),
 					SC(nameof(REPEAT), REPEAT, PAR8, PARS,                                      0,0,0,0,0,0           ),
 					SC(nameof(SERVICE), SERVICE,                0,                                              0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				INPUT_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    Input
 					SC(nameof(GET_TYPEMODE), GET_TYPEMODE, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
@@ -1321,11 +1323,11 @@ namespace Ev3Core
 					SC(nameof(SETUP), SETUP, PAR8, PAR8, PAR8, PAR16, PAR8, PAR8, PAR8, PAR8                              ),
 					SC(nameof(CLR_ALL), CLR_ALL, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(STOP_ALL), STOP_ALL, PAR8,                                           0,0,0,0,0,0,0         ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				MATH_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    Math
 					SC(nameof(EXP), EXP, PARF, PARF,                                      0,0,0,0,0,0           ),
@@ -1349,11 +1351,11 @@ namespace Ev3Core
 					SC(nameof(MOD32), MOD32, PAR32, PAR32, PAR32,                              0,0,0,0,0             ),
 					SC(nameof(POW), POW, PARF, PARF, PARF,                                 0,0,0,0,0             ),
 					SC(nameof(TRUNC), TRUNC, PARF, PAR8, PARF,                                 0,0,0,0,0             ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				COM_GET_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    ComGet
 					SC(nameof(GET_ON_OFF), GET_ON_OFF, PAR8, PAR8,                                      0,0,0,0,0,0           ),
@@ -1373,11 +1375,11 @@ namespace Ev3Core
 					SC(nameof(CONNEC_ITEM), CONNEC_ITEM, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
 					SC(nameof(GET_INCOMING), GET_INCOMING, PAR8, PAR8, PAR8, PAR8,                            0,0,0,0               ),
 					SC(nameof(GET_MODE2), GET_MODE2, PAR8, PAR8,                                      0,0,0,0,0,0           ),
-				}),
+				})),
 
-			new KeyValuePair<byte, KeyValuePair<byte, SUBCODE>[]>(
+			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
 				COM_SET_SUBP,
-				new KeyValuePair<byte, SUBCODE>[]
+				new Dictionary<byte, SUBCODE>(new []
 				{
 					//    ComSet
 					SC(nameof(SET_ON_OFF), SET_ON_OFF, PAR8, PAR8,                                      0,0,0,0,0,0           ),
@@ -1392,40 +1394,40 @@ namespace Ev3Core
 					SC(nameof(SET_ENCRYPT), SET_ENCRYPT, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),
 					SC(nameof(SET_SSID), SET_SSID, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(SET_MODE2), SET_MODE2, PAR8, PAR8,                                      0,0,0,0,0,0           ),
-				}),
-		};
+				})),
+		});
 		#endregion
 
 		#region c_sound.h
 		public const int STEP_SIZE_TABLE_ENTRIES = 89;
-			public const int INDEX_TABLE_ENTRIES = 16;
+		public const int INDEX_TABLE_ENTRIES = 16;
 
-			// Percentage to SoundLevel -
-			// Adjust the percentage, if non-linear SPL response is needed
+		// Percentage to SoundLevel -
+		// Adjust the percentage, if non-linear SPL response is needed
 
-			public const int SND_LEVEL_1 = 13;  // 13% (12.5)
-			public const int SND_LEVEL_2 = 25;  // 25%
-			public const int SND_LEVEL_3 = 38;  // 38% (37.5)
-			public const int SND_LEVEL_4 = 50;  // 50%
-			public const int SND_LEVEL_5 = 63;  // 63% (62.5)
-			public const int SND_LEVEL_6 = 75;  // 75%
-			public const int SND_LEVEL_7 = 88;  // 88% (87.5)
+		public const int SND_LEVEL_1 = 13;  // 13% (12.5)
+		public const int SND_LEVEL_2 = 25;  // 25%
+		public const int SND_LEVEL_3 = 38;  // 38% (37.5)
+		public const int SND_LEVEL_4 = 50;  // 50%
+		public const int SND_LEVEL_5 = 63;  // 63% (62.5)
+		public const int SND_LEVEL_6 = 75;  // 75%
+		public const int SND_LEVEL_7 = 88;  // 88% (87.5)
 
-			public const int TONE_LEVEL_1 = 8;  //  8%
-			public const int TONE_LEVEL_2 = 16;  // 16%
-			public const int TONE_LEVEL_3 = 24;  // 24%
-			public const int TONE_LEVEL_4 = 32;  // 32%
-			public const int TONE_LEVEL_5 = 40;  // 40%
-			public const int TONE_LEVEL_6 = 48;  // 48%
-			public const int TONE_LEVEL_7 = 56;  // 56%
-			public const int TONE_LEVEL_8 = 64;  // 64%
-			public const int TONE_LEVEL_9 = 72;  // 72%
-			public const int TONE_LEVEL_10 = 80;  // 80%
-			public const int TONE_LEVEL_11 = 88;  // 88%
-			public const int TONE_LEVEL_12 = 96;  // 96%
+		public const int TONE_LEVEL_1 = 8;  //  8%
+		public const int TONE_LEVEL_2 = 16;  // 16%
+		public const int TONE_LEVEL_3 = 24;  // 24%
+		public const int TONE_LEVEL_4 = 32;  // 32%
+		public const int TONE_LEVEL_5 = 40;  // 40%
+		public const int TONE_LEVEL_6 = 48;  // 48%
+		public const int TONE_LEVEL_7 = 56;  // 56%
+		public const int TONE_LEVEL_8 = 64;  // 64%
+		public const int TONE_LEVEL_9 = 72;  // 72%
+		public const int TONE_LEVEL_10 = 80;  // 80%
+		public const int TONE_LEVEL_11 = 88;  // 88%
+		public const int TONE_LEVEL_12 = 96;  // 96%
 
-			public static SWORD[] StepSizeTable = new SWORD[STEP_SIZE_TABLE_ENTRIES]
-			{
+		public static SWORD[] StepSizeTable = new SWORD[STEP_SIZE_TABLE_ENTRIES]
+		{
 				7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
 				19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
 				50, 55, 60, 66, 73, 80, 88, 97, 107, 118,
@@ -1435,21 +1437,21 @@ namespace Ev3Core
 				2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358,
 				5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899,
 				15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
-			};
+		};
 
-			public static SWORD[] IndexTable = new SWORD[INDEX_TABLE_ENTRIES]
-			{
+		public static SWORD[] IndexTable = new SWORD[INDEX_TABLE_ENTRIES]
+		{
 				-1, -1, -1, -1, 2, 4, 6, 8,
 				-1, -1, -1, -1, 2, 4, 6, 8
-			};
+		};
 
-			public const int FILEFORMAT_RAW_SOUND = 0x0100;
-			public const int FILEFORMAT_ADPCM_SOUND = 0x0101;
-			public const int SOUND_MODE_ONCE = 0x00;
-			public const int SOUND_LOOP = 0x01;
-			public const int SOUND_ADPCM_INIT_VALPREV = 0x7F;
-			public const int SOUND_ADPCM_INIT_INDEX = 20;
-			#endregion
+		public const int FILEFORMAT_RAW_SOUND = 0x0100;
+		public const int FILEFORMAT_ADPCM_SOUND = 0x0101;
+		public const int SOUND_MODE_ONCE = 0x00;
+		public const int SOUND_LOOP = 0x01;
+		public const int SOUND_ADPCM_INIT_VALPREV = 0x7F;
+		public const int SOUND_ADPCM_INIT_INDEX = 20;
+		#endregion
 
 		#region c_memory.h
 		public const int POOL_TYPE_MEMORY = 0;
@@ -1701,6 +1703,182 @@ namespace Ev3Core
 		public const int BUTTON_BUFPRINT = 0x04;
 
 		public const int BUTTON_SET = (BUTTON_ALIVE | BUTTON_CLICK);
-        #endregion
-    }
+		#endregion
+
+		#region c_ui.c
+		public const int CALL_INTERVAL = 400;  // [mS]
+
+		public static IMGDATA[] DownloadSuccesSound = { opINFO, LC0(GET_VOLUME), LV0(0), opSOUND, LC0(PLAY), LV0(0), LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, opSOUND_READY, opOBJECT_END };
+
+		public const int REAL_ANY_BUTTON = 6;
+		public const int REAL_NO_BUTTON = 7;
+
+		public static Dictionary<int, sbyte> MappedToReal = new Dictionary<int, sbyte>()
+		{
+			{ UP_BUTTON, 0 },
+			{ ENTER_BUTTON, 1 },
+			{ DOWN_BUTTON, 2 },
+			{ RIGHT_BUTTON, 3 },
+			{ LEFT_BUTTON, 4 },
+			{ BACK_BUTTON, 5 },
+			{ ANY_BUTTON, REAL_ANY_BUTTON },
+			{ NO_BUTTON, REAL_NO_BUTTON },
+		};
+
+		public const float SHUNT_IN = 0.11f;             //  [Ohm]
+		public const float AMP_CIN = 22.0f;       //  [Times]
+
+		public const float EP2_SHUNT_IN = 0.05f;           //  [Ohm]
+		public const float EP2_AMP_CIN = 15.0f;          //  [Times]
+
+		public const float SHUNT_OUT = 0.055f;           //  [Ohm]
+		public const float AMP_COUT = 19.0f;            //  [Times]
+
+		public const float VCE = 0.05f;            //  [V]
+		public const float AMP_VIN = 0.5f;            //  [Times]
+
+		public const int AVR_CIN = 300;
+		public const int AVR_COUT = 30;
+		public const int AVR_VIN = 30;
+
+		public static float CNT_V(float C) { return (((DATAF)C * (DATAF)ADC_REF) / ((DATAF)ADC_RES * (DATAF)1000.0)); }
+
+		public const int TOP_BATT_ICONS = 5;
+		public static UBYTE[] TopLineBattIconMap =
+		{
+			SICON_BATT_0,           //  0
+			SICON_BATT_1,           //  1
+			SICON_BATT_2,           //  2
+			SICON_BATT_3,           //  3
+			SICON_BATT_4            //  4
+		};
+
+		public const int TOP_BT_ICONS = 4;
+		public static UBYTE[] TopLineBtIconMap =
+		{
+			SICON_BT_ON,            //  001
+			SICON_BT_VISIBLE,       //  011
+			SICON_BT_CONNECTED,     //  101
+			SICON_BT_CONNVISIB,     //  111
+		};
+
+		public const int TOP_WIFI_ICONS = 4;
+		public static UBYTE[] TopLineWifiIconMap =
+		{
+			SICON_WIFI_3,           //  001
+			SICON_WIFI_3,           //  011
+			SICON_WIFI_CONNECTED,   //  101
+			SICON_WIFI_CONNECTED,   //  111
+		};
+		#endregion
+
+		#region d_lcd.h
+		public static void LCDClear(UBYTE[] lcd)
+		{
+			for (int i = 0; i < LCD_BUFFER_SIZE; ++i)
+			{
+				lcd[i] = (byte)BG_COLOR;
+			}
+		}
+
+		public static void LCDClearTopline(UBYTE[] lcd)
+		{
+			for (int i = 0; i < LCD_TOPLINE_SIZE; ++i)
+			{
+				lcd[i] = (byte)BG_COLOR;
+			}
+		}
+
+		public static void LCDErase(UBYTE[] lcd)
+		{
+			for (int i = LCD_TOPLINE_SIZE; i < LCD_BUFFER_SIZE; ++i)
+			{
+				lcd[i] = (byte)BG_COLOR;
+			}
+		}
+		#endregion
+
+		#region d_lcd.c
+		// it was not a define but i don't care
+		public static Dictionary<int, FONTINFO> FontInfo = new Dictionary<int, FONTINFO>()
+		{
+			{ NORMAL_FONT, new FONTINFO()
+							{
+								pFontBits    = BmpHelper.GetBytesOf(BmpType.NormalFont),
+								FontHeight   = 9,
+								FontWidth    = 8,
+								FontHorz     = 16,
+								FontFirst    = 0x20,
+								FontLast     = 0x7F
+							}},
+			{ SMALL_FONT, new FONTINFO()
+							{
+								pFontBits    = BmpHelper.GetBytesOf(BmpType.SmallFont),
+								FontHeight   = 8,
+								FontWidth    = 8,
+								FontHorz     = 16,
+								FontFirst    = 0x20,
+								FontLast     = 0x7F
+							}},
+			{ LARGE_FONT, new FONTINFO()
+							{
+								pFontBits = BmpHelper.GetBytesOf(BmpType.LargeFont),
+								FontHeight = 16,
+								FontWidth = 16,
+								FontHorz = 16,
+								FontFirst = 0x20,
+								FontLast = 0x7F
+							}},
+			{ TINY_FONT, new FONTINFO()
+							{
+								pFontBits = BmpHelper.GetBytesOf(BmpType.TinyFont),
+								FontHeight = 7,
+								FontWidth = 5,
+								FontHorz = 16,
+								FontFirst = 0x20,
+								FontLast = 0x7F
+							}} 
+		};
+
+		// it was also not a define
+		public static Dictionary<int, ICONINFO> IconInfo = new Dictionary<int, ICONINFO>()
+		{
+			{ NORMAL_ICON, new ICONINFO()
+							{
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.NormalIcons),
+								IconSize     = 420,
+								IconHeight   = 12,
+								IconWidth    = 24,
+							}},
+			{ SMALL_ICON, new ICONINFO()
+							{
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.SmallIcons),
+								IconSize     = 176,
+								IconHeight   = 8,
+								IconWidth    = 16,
+							}},
+			{ LARGE_ICON, new ICONINFO()
+							{
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.LargeIcons),
+								IconSize     = 616,
+								IconHeight   = 22,
+								IconWidth    = 24,
+							}},
+			{ MENU_ICON, new ICONINFO()
+							{
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.MenuIcons),
+								IconSize     = 132,
+								IconHeight   = 12,
+								IconWidth    = 16,
+							}},
+			{ ARROW_ICON, new ICONINFO()
+							{
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.ArrowIcons),
+								IconSize     = 36,
+								IconHeight   = 12,
+								IconWidth    = 8,
+							}},
+};
+		#endregion
+	}
 }

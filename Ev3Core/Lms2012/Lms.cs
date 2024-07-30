@@ -1,4 +1,5 @@
-﻿using Ev3Core.Lms2012.Interfaces;
+﻿using Ev3Core.Enums;
+using Ev3Core.Lms2012.Interfaces;
 
 namespace Ev3Core.Lms2012
 {
@@ -34,7 +35,12 @@ namespace Ev3Core.Lms2012
             throw new NotImplementedException();
         }
 
-        public void Info()
+		public DSPSTAT ExecuteByteCode(byte[] pByteCode, byte[] pGlobals, byte[] pLocals)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Info()
         {
             throw new NotImplementedException();
         }

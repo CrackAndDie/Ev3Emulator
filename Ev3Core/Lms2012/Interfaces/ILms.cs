@@ -1,9 +1,5 @@
-﻿using Ev3Core.Csound;
-using Ev3Core.Enums;
+﻿using Ev3Core.Enums;
 using Ev3Core.Helpers;
-using Ev3Core.Lms2012.Interfaces;
-using System;
-using System.Reflection.Emit;
 using static Ev3Core.Defines;
 
 namespace Ev3Core.Lms2012.Interfaces
@@ -42,6 +38,14 @@ namespace Ev3Core.Lms2012.Interfaces
 
 		void TstClose();
 		void Tst();
+
+		// was not presented in lms2012.h
+		DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals);
+		void SetTerminalEnable(DATA8 Value);
+		DATA8 GetTerminalEnable();
+		void SetSleepMinutes(DATA8 Minutes);
+		DATA8 GetSleepMinutes();
+		void ProgramEnd(PRGID PrgId);
 	}
 
 	public class OBJ // Object
@@ -240,6 +244,8 @@ namespace Ev3Core.Lms2012.Interfaces
 	public class LCD
 	{
 		public UBYTE[] Lcd = CommonHelper.Array1d<UBYTE>(LCD_BUFFER_SIZE);
+
+		public static int LcdSizeof = LCD_BUFFER_SIZE;
 	}
 
 	public class SOUND
