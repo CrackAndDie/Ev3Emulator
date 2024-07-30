@@ -40,48 +40,48 @@
 		ICON_BRICK1 = 34,
 		N_ICON_NOS
 	}
+}
 
-	namespace Ev3Core
+namespace Ev3Core
+{
+	public partial class Defines
 	{
-		public partial class Defines
-		{
-			public const int ICON_NONE = -1;
-			public const int ICON_RUN = 0;
-			public const int ICON_FOLDER = 1;
-			public const int ICON_FOLDER2 = 2;
-			public const int ICON_USB = 3;
-			public const int ICON_SD = 4;
-			public const int ICON_SOUND = 5;
-			public const int ICON_IMAGE = 6;
-			public const int ICON_SETTINGS = 7;
-			public const int ICON_ONOFF = 8;
-			public const int ICON_SEARCH = 9;
-			public const int ICON_WIFI = 10;
-			public const int ICON_CONNECTIONS = 11;
-			public const int ICON_ADD_HIDDEN = 12;
-			public const int ICON_TRASHBIN = 13;
-			public const int ICON_VISIBILITY = 14;
-			public const int ICON_KEY = 15;
-			public const int ICON_CONNECT = 16;
-			public const int ICON_DISCONNECT = 17;
-			public const int ICON_UP = 18;
-			public const int ICON_DOWN = 19;
-			public const int ICON_WAIT1 = 20;
-			public const int ICON_WAIT2 = 21;
-			public const int ICON_BLUETOOTH = 22;
-			public const int ICON_INFO = 23;
-			public const int ICON_TEXT = 24;
+		public const int ICON_NONE = -1;
+		public const int ICON_RUN = 0;
+		public const int ICON_FOLDER = 1;
+		public const int ICON_FOLDER2 = 2;
+		public const int ICON_USB = 3;
+		public const int ICON_SD = 4;
+		public const int ICON_SOUND = 5;
+		public const int ICON_IMAGE = 6;
+		public const int ICON_SETTINGS = 7;
+		public const int ICON_ONOFF = 8;
+		public const int ICON_SEARCH = 9;
+		public const int ICON_WIFI = 10;
+		public const int ICON_CONNECTIONS = 11;
+		public const int ICON_ADD_HIDDEN = 12;
+		public const int ICON_TRASHBIN = 13;
+		public const int ICON_VISIBILITY = 14;
+		public const int ICON_KEY = 15;
+		public const int ICON_CONNECT = 16;
+		public const int ICON_DISCONNECT = 17;
+		public const int ICON_UP = 18;
+		public const int ICON_DOWN = 19;
+		public const int ICON_WAIT1 = 20;
+		public const int ICON_WAIT2 = 21;
+		public const int ICON_BLUETOOTH = 22;
+		public const int ICON_INFO = 23;
+		public const int ICON_TEXT = 24;
 
 
-			public const int ICON_QUESTIONMARK = 27;
-			public const int ICON_INFO_FILE = 28;
-			public const int ICON_DISC = 29;
-			public const int ICON_CONNECTED = 30;
-			public const int ICON_OBP = 31;
-			public const int ICON_OBD = 32;
-			public const int ICON_OPENFOLDER = 33;
-			public const int ICON_BRICK1 = 34;
-			public const int N_ICON_NOS = 35;
-		}
+		public const int ICON_QUESTIONMARK = 27;
+		public const int ICON_INFO_FILE = 28;
+		public const int ICON_DISC = 29;
+		public const int ICON_CONNECTED = 30;
+		public const int ICON_OBP = 31;
+		public const int ICON_OBD = 32;
+		public const int ICON_OPENFOLDER = 33;
+		public const int ICON_BRICK1 = 34;
+		public const int N_ICON_NOS = 35;
 	}
 }

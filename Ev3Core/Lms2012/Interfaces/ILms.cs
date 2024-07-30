@@ -40,12 +40,19 @@ namespace Ev3Core.Lms2012.Interfaces
 		void Tst();
 
 		// was not presented in lms2012.h
+		PRGID CurrentProgramId();
+		OBJID CallingObjectId();
 		DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals);
 		void SetTerminalEnable(DATA8 Value);
 		DATA8 GetTerminalEnable();
 		void SetSleepMinutes(DATA8 Minutes);
 		DATA8 GetSleepMinutes();
 		void ProgramEnd(PRGID PrgId);
+		RESULT ValidateChar(ref DATA8 pChar, DATA8 Set);
+		RESULT ValidateString(DATA8[] pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
+
+		DATA8 CheckUsbstick(ref DATA8 pChanged, ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
+		DATA8 CheckSdcard(ref DATA8 pChanged, ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
 	}
 
 	public class OBJ // Object

@@ -6,7 +6,6 @@ namespace Ev3Core.Cmemory.Interfaces
 {
     public interface IMemory
     {
-
         RESULT cMemoryInit();
 
         RESULT cMemoryOpen(PRGID PrgId, GBINDEX Size, object[][] pMemory);
@@ -39,7 +38,7 @@ namespace Ev3Core.Cmemory.Interfaces
 
         RESULT cMemoryGetImage(DATA8[] pText, DATA16 Size, UBYTE[] pBmp);
 
-        DSPSTAT cMemoryCloseFile(PRGID PrgId, HANDLER Handle);
+        DSPSTAT cMemoryCloseFile(PRGID PrgId, FileInfo Handle);
 
         RESULT cMemoryCheckOpenWrite(char[] pFileName);
 
@@ -65,7 +64,7 @@ namespace Ev3Core.Cmemory.Interfaces
 
 
 
-        RESULT cMemoryOpenFolder(PRGID PrgId, DATA8 Type, DATA8[] pFolderName, ref HANDLER pHandle);
+        RESULT cMemoryOpenFolder(PRGID PrgId, DATA8 Type, DATA8[] pFolderName, ref DirectoryInfo pHandle);
 
         RESULT cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16[] pItems);
 
@@ -79,7 +78,7 @@ namespace Ev3Core.Cmemory.Interfaces
 
         RESULT cMemoryGetItem(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType);
 
-        void cMemoryCloseFolder(PRGID PrgId, ref HANDLER pHandle);
+        void cMemoryCloseFolder(PRGID PrgId, DirectoryInfo pHandle);
 
         void cMemoryGetUsage(ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
 

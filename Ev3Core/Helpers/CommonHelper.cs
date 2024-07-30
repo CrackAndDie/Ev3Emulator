@@ -104,5 +104,20 @@
 				a[i] = val;
 			}
 		}
+
+		public static int Snprintf<T>(T[] dst, int dstBeg, int max, params T[][] data)
+		{
+			foreach (var dt in data)
+			{
+				int dtIndexer = 0;
+				for (int i = dstBeg; i < Math.Min(Math.Min(dst.Length, dstBeg + max), dt.Length); ++i)
+				{
+					dst[i] = dt[dtIndexer];
+					dtIndexer++;
+				}
+				dstBeg += dt.Length;
+			}
+			return 0; // idk what to return
+		}
 	}
 }

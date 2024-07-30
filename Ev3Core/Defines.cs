@@ -1770,6 +1770,22 @@ namespace Ev3Core
 			SICON_WIFI_CONNECTED,   //  101
 			SICON_WIFI_CONNECTED,   //  111
 		};
+
+		public static Dictionary<int, DATA8> FiletypeToNormalIcon = new Dictionary<int, sbyte>()
+		{
+			{ FILETYPE_UNKNOWN, ICON_FOLDER },
+			{ TYPE_FOLDER, ICON_FOLDER },
+			{ TYPE_SOUND, ICON_SOUND },
+			{ TYPE_BYTECODE,  ICON_RUN },
+			{ TYPE_GRAPHICS, ICON_IMAGE },
+			{ TYPE_DATALOG,  ICON_OBD },
+			{ TYPE_PROGRAM,  ICON_OBP },
+			{ TYPE_TEXT,  ICON_TEXT }
+		};
+
+		public const int MAX_KEYB_DEEPT = 3;
+		public const int MAX_KEYB_WIDTH = 12;
+		public const int MAX_KEYB_HEIGHT = 4;
 		#endregion
 
 		#region d_lcd.h
