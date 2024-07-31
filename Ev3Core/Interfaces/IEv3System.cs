@@ -6,5 +6,6 @@
 
 		ILedHandler LedHandler { get; }
 		ILcdHandler LcdHandler { get; }
+		ISoundHandler SoundHandler { get; }
 	}
 }

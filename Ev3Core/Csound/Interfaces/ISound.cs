@@ -30,7 +30,7 @@ namespace Ev3Core.Csound.Interfaces
         //*****************************************************************************
 
         public int SoundDriverDescriptor;
-        public int hSoundFile;
+        public FileInfo hSoundFile;
 
         public DATA8 SoundOwner;
         public DATA8 cSoundState;

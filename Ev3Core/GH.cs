@@ -1,5 +1,7 @@
 ﻿using Ev3Core.Ccom.Interfaces;
 using Ev3Core.Cmemory.Interfaces;
+using Ev3Core.Csound;
+using Ev3Core.Csound.Interfaces;
 using Ev3Core.Cui;
 using Ev3Core.Cui.Interfaces;
 using Ev3Core.Interfaces;
@@ -21,6 +23,10 @@ namespace Ev3Core
 
         // c_com
         public readonly static ICom Com = null;
+
+        // c_sound
+        public readonly static ISound Sound = new Sound();
+        public readonly static SOUND_GLOBALS SoundInstance = new SOUND_GLOBALS();
 
         // c_ui
         public readonly static ITerminal Terminal = new Terminal();
