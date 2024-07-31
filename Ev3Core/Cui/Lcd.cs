@@ -25,8 +25,8 @@ namespace Ev3Core.Cui
 		{
 			if (CommonHelper.Memcmp(pDisp.Lcd, GH.VMInstance.LcdBuffer.Lcd, pDisp.Lcd.Length) != 0)
 			{
-				// TODO: send buff somewhere
 				Array.Copy(GH.UiInstance.LcdBuffer.Lcd, GH.VMInstance.LcdBuffer.Lcd, GH.VMInstance.LcdBuffer.Lcd.Length);
+				GH.Ev3System.LcdHandler.UpdateLcd(GH.UiInstance.LcdBuffer.Lcd);
 				GH.VMInstance.LcdUpdated = 1;
 			}
 		}
@@ -44,6 +44,7 @@ namespace Ev3Core.Cui
 		public void dLcdInit(byte[] pImage)
 		{
 			// TODO: 
+			GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
 		}
 
 		public byte dLcdRead()
@@ -54,6 +55,7 @@ namespace Ev3Core.Cui
 		public void dLcdExit()
 		{
 			// TODO: 
+			GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
 		}
 
 		public void dLcdScroll(byte[] pImage, short Y0)

@@ -5,5 +5,6 @@
 		ILogger Logger { get; }
 
 		ILedHandler LedHandler { get; }
+		ILcdHandler LcdHandler { get; }
 	}
 }

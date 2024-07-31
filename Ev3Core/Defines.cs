@@ -1786,6 +1786,18 @@ namespace Ev3Core
 		public const int MAX_KEYB_DEEPT = 3;
 		public const int MAX_KEYB_WIDTH = 12;
 		public const int MAX_KEYB_HEIGHT = 4;
+
+		public static Dictionary<int, sbyte[]> Delimiter = new Dictionary<int, sbyte[]>
+		{
+			[DEL_NONE] = new sbyte[0],
+			[DEL_TAB] = new sbyte[1] { (sbyte)'\t' },
+			[DEL_SPACE] = new sbyte[1] { (sbyte)' ' },
+			[DEL_RETURN] = new sbyte[1] { (sbyte)'\r' },
+			[DEL_COLON] = new sbyte[1] { (sbyte)':' },
+			[DEL_COMMA] = new sbyte[1] { (sbyte)',' },
+			[DEL_LINEFEED] = new sbyte[1] { (sbyte)'\n' },
+			[DEL_CRLF] = new sbyte[2] { (sbyte)'\r', (sbyte)'\n' },
+		};
 		#endregion
 
 		#region d_lcd.h
@@ -1853,7 +1865,7 @@ namespace Ev3Core
 								FontHorz = 16,
 								FontFirst = 0x20,
 								FontLast = 0x7F
-							}} 
+							}}
 		};
 
 		// it was also not a define

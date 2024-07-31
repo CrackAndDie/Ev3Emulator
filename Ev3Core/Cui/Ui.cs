@@ -1,6 +1,7 @@
 ﻿using Ev3Core;
 using Ev3Core.Cui.Interfaces;
 using Ev3Core.Enums;
+using Ev3Core.Extensions;
 using Ev3Core.Helpers;
 using Ev3Core.Lms2012.Interfaces;
 using System.Collections.Generic;
@@ -590,6 +591,7 @@ namespace Ev3Core.Cui
 			//{
 			//	write(GH.UiInstance.PowerFile, &Data8, 1);
 			//}
+			GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
 		}
 
 		UBYTE AtoN(DATA8 Char)
@@ -625,6 +627,10 @@ namespace Ev3Core.Cui
 			}
 		}
 
+		void cUiWriteString(string pString)
+		{
+			cUiWriteString(pString.ToCharArray().Select(x => (DATA8)x).ToArray());
+		}
 
 		void cUiWriteString(DATA8[] pString)
 		{
@@ -2561,7 +2567,7 @@ namespace Ev3Core.Cui
 		RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8 Lng, ref DATA8 pType, DATA8[] pAnswer)
 		{
 			RESULT Result = RESULT.BUSY;
-			DATA32 Image;
+			DATA32[] Image = null;
 			BROWSER pB;
 			PRGID PrgId;
 			OBJID ObjId;
@@ -2569,17 +2575,17 @@ namespace Ev3Core.Cui
 			DATA16 Indent;
 			DATA16 Item;
 			DATA16 TotalItems;
-			DATA8 TmpType;
+			DATA8 TmpType = 0;
 			DATA8 Folder;
-			DATA8 OldPriority;
-			DATA8 Priority;
+			DATA8 OldPriority = 0;
+			DATA8 Priority = 0;
 			DATA8 Color;
 			DATA16 Ignore;
 			DATA8 Data8 = 0;
 			DATA32 Total = 0;
 			DATA32 Free = 0;
 			RESULT TmpResult;
-			HANDLER TmpHandle;
+			FileInfo TmpHandle = null;
 
 			PrgId = GH.Lms.CurrentProgramId();
 			ObjId = GH.Lms.CallingObjectId();
@@ -2618,7 +2624,7 @@ namespace Ev3Core.Cui
 				GH.UiInstance.UiUpdate = 1;
 			}
 
-			if (ProgramStatusChange(USER_SLOT) == STOPPED)
+			if ((int)GH.Lms.ProgramStatusChange(USER_SLOT) == STOPPED)
 			{
 				if (Type != BROWSE_FILES)
 				{
@@ -2634,13 +2640,13 @@ namespace Ev3Core.Cui
 
 			if ((pType == TYPE_RESTART_BROWSER))
 			{
-				if (pB.hFiles != 0)
+				if (pB.hFiles != null)
 				{
-					cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+					GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 				}
-				if (pB.hFolders != 0)
+				if (pB.hFolders != null)
 				{
-					cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+					GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFolders);
 				}
 				pB.PrgId = 0;
 				pB.ObjId = 0;
@@ -2692,7 +2698,7 @@ namespace Ev3Core.Cui
 				pB.ScrollHeight = (short)(pB.ScreenHeight - 2);
 				pB.ScrollSpan = (short)(pB.ScrollHeight - pB.NobHeight);
 
-				strncpy((char*)pB.TopFolder, (char*)pAnswer, MAX_FILENAME_SIZE);
+				CommonHelper.Strncpy(pB.TopFolder, pAnswer, MAX_FILENAME_SIZE);
 
 				pB.PrgId = PrgId;
 				pB.ObjId = ObjId;
@@ -2716,13 +2722,13 @@ namespace Ev3Core.Cui
 				{
 					GH.UiInstance.UiUpdate = 0;
 
-					if (pB.hFiles != 0)
+					if (pB.hFiles != null)
 					{
-						cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+						GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 					}
-					if (pB.hFolders != 0)
+					if (pB.hFolders != null)
 					{
-						cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+						GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFolders);
 					}
 
 					pB.OpenFolder = 0;
@@ -2734,35 +2740,35 @@ namespace Ev3Core.Cui
 						case BROWSE_FOLDERS:
 						case BROWSE_FOLDS_FILES:
 							{
-								if (cMemoryOpenFolder(PrgId, TYPE_FOLDER, pB.TopFolder, &pB.hFolders) == OK)
+								if (GH.Memory.cMemoryOpenFolder(PrgId, TYPE_FOLDER, pB.TopFolder, ref pB.hFolders) == OK)
 								{
 									//******************************************************************************************************
 									if (pB.OpenFolder != 0)
 									{
-										cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.SubFolder, &TmpType);
-										if (strcmp((char*)pB.SubFolder, SDCARD_FOLDER) == 0)
+										GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.SubFolder, ref TmpType);
+										if (CommonHelper.Strcmp(pB.SubFolder, SDCARD_FOLDER) == 0)
 										{
 											Item = pB.ItemPointer;
-											cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, pType, &Priority);
-											Result = cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
+											GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+											Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
 											pType = TYPE_SDCARD;
 
-											snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+											CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 										}
 										else
 										{
-											if (strcmp((char*)pB.SubFolder, USBSTICK_FOLDER) == 0)
+											if (CommonHelper.Strcmp(pB.SubFolder, USBSTICK_FOLDER) == 0)
 											{
 												Item = pB.ItemPointer;
-												cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, pType, &Priority);
-												Result = cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
+												GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+												Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
 												pType = TYPE_USBSTICK;
 
-												snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+												CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 											}
 											else
 											{
-												Result = cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB.SubFolder, &pB.hFiles);
+												Result = GH.Memory.cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB.SubFolder, ref pB.hFiles);
 												Result = RESULT.BUSY;
 											}
 										}
@@ -2784,7 +2790,7 @@ namespace Ev3Core.Cui
 
 						case BROWSE_FILES:
 							{
-								if (cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB.TopFolder, &pB.hFiles) == OK)
+								if (GH.Memory.cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB.TopFolder, ref pB.hFiles) == OK)
 								{
 
 								}
@@ -2799,7 +2805,7 @@ namespace Ev3Core.Cui
 					}
 				}
 
-				if (strstr((char*)pB.SubFolder, SDCARD_FOLDER) != NULL)
+				if (CommonHelper.Strstr(pB.SubFolder, SDCARD_FOLDER.ToSbyteArray()))
 				{
 					pB.Sdcard = 1;
 				}
@@ -2808,7 +2814,7 @@ namespace Ev3Core.Cui
 					pB.Sdcard = 0;
 				}
 
-				if (strstr((char*)pB.SubFolder, USBSTICK_FOLDER) != NULL)
+				if (CommonHelper.Strstr(pB.SubFolder, USBSTICK_FOLDER.ToSbyteArray()))
 				{
 					pB.Usbstick = 1;
 				}
@@ -2824,25 +2830,25 @@ namespace Ev3Core.Cui
 					case BROWSE_FOLDS_FILES:
 						{
 							// Collect folders in directory
-							TmpResult = cMemoryGetFolderItems(pB.PrgId, pB.hFolders, &pB.Folders);
+							TmpResult = GH.Memory.cMemoryGetFolderItems(pB.PrgId, pB.hFolders, ref pB.Folders);
 
 							// Collect files in folder
 							if ((pB.OpenFolder != 0) && (TmpResult == OK))
 							{
-								TmpResult = cMemoryGetFolderItems(pB.PrgId, pB.hFiles, &pB.Files);
+								TmpResult = GH.Memory.cMemoryGetFolderItems(pB.PrgId, pB.hFiles, ref pB.Files);
 							}
 						}
 						break;
 
 					case BROWSE_CACHE:
 						{
-							pB.Folders = (DATA16)cMemoryGetCacheFiles();
+							pB.Folders = (DATA16)GH.Memory.cMemoryGetCacheFiles();
 						}
 						break;
 
 					case BROWSE_FILES:
 						{
-							TmpResult = cMemoryGetFolderItems(pB.PrgId, pB.hFiles, &pB.Files);
+							TmpResult = GH.Memory.cMemoryGetFolderItems(pB.PrgId, pB.hFiles, ref pB.Files);
 						}
 						break;
 
@@ -2853,7 +2859,7 @@ namespace Ev3Core.Cui
 					if (cUiGetShortPress(BACK_BUTTON) != 0)
 					{
 						// Close folder
-						cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+						GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 						if (pB.ItemPointer > pB.OpenFolder)
 						{
 							pB.ItemPointer -= pB.Files;
@@ -2870,17 +2876,17 @@ namespace Ev3Core.Cui
 						if (cUiGetShortPress(BACK_BUTTON) != 0)
 						{
 							// Collapse sdcard
-							if (pB.hFiles != 0)
+							if (pB.hFiles != null)
 							{
-								cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+								GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 							}
-							if (pB.hFolders != 0)
+							if (pB.hFolders != null)
 							{
-								cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+								GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFolders);
 							}
 							pB.PrgId = 0;
 							pB.ObjId = 0;
-							strcpy((char*)pAnswer, vmPRJS_DIR);
+							CommonHelper.Strcpy(pAnswer, vmPRJS_DIR);
 							pType = 0;
 							pB.SubFolder[0] = 0;
 						}
@@ -2894,17 +2900,17 @@ namespace Ev3Core.Cui
 						if (cUiGetShortPress(BACK_BUTTON) != 0)
 						{
 							// Collapse usbstick
-							if (pB.hFiles != 0)
+							if (pB.hFiles != null)
 							{
-								cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+								GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 							}
-							if (pB.hFolders != 0)
+							if (pB.hFolders != null)
 							{
-								cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+								GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFolders);
 							}
 							pB.PrgId = 0;
 							pB.ObjId = 0;
-							strcpy((char*)pAnswer, vmPRJS_DIR);
+							CommonHelper.Strcpy(pAnswer, vmPRJS_DIR);
 							pType = 0;
 							pB.SubFolder[0] = 0;
 						}
@@ -2925,9 +2931,9 @@ namespace Ev3Core.Cui
 						{ // File selected
 
 							Item = (short)(pB.ItemPointer - pB.OpenFolder);
-							Result = cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, pType);
+							Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, ref pType);
 
-							snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+							CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 						}
 						else
 						{ // Folder selected
@@ -2936,11 +2942,11 @@ namespace Ev3Core.Cui
 							{ // Enter on open folder
 
 								Item = pB.OpenFolder;
-								Result = cMemoryGetItem(pB.PrgId, pB.hFolders, Item, Lng, pAnswer, pType);
+								Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, Lng, pAnswer, ref pType);
 							}
 							else
 							{ // Close folder
-								cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+								GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 								if (pB.ItemPointer > pB.OpenFolder)
 								{
 									pB.ItemPointer -= pB.Files;
@@ -2959,10 +2965,10 @@ namespace Ev3Core.Cui
 								{ // Folder
 
 									Item = pB.ItemPointer;
-									cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, pType, &Priority);
-									Result = cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
+									GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+									Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
 
-									snprintf((char*)pAnswer, Lng, "%s/%s", (char*)pB.FullPath, (char*)pB.Filename);
+									CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath, new sbyte[] { (sbyte)'/' }, pB.Filename);
 									pType = TYPE_BYTECODE;
 								}
 								break;
@@ -2971,31 +2977,31 @@ namespace Ev3Core.Cui
 								{ // Folder & File
 
 									pB.OpenFolder = pB.ItemPointer;
-									cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.SubFolder, &TmpType);
-									if (strcmp((char*)pB.SubFolder, SDCARD_FOLDER) == 0)
+									GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, pB.OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.SubFolder, ref TmpType);
+									if (CommonHelper.Strcmp(pB.SubFolder, SDCARD_FOLDER) == 0)
 									{
 										Item = pB.ItemPointer;
-										cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, pType, &Priority);
-										Result = cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
+										GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+										Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
 										pType = TYPE_SDCARD;
 
-										snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+										CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 									}
 									else
 									{
-										if (strcmp((char*)pB.SubFolder, USBSTICK_FOLDER) == 0)
+										if (CommonHelper.Strcmp(pB.SubFolder, USBSTICK_FOLDER) == 0)
 										{
 											Item = pB.ItemPointer;
-											cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, pType, &Priority);
-											Result = cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
+											GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, MAX_FILENAME_SIZE, pB.Filename, ref pType, ref Priority);
+											Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, ref pType);
 											pType = TYPE_USBSTICK;
 
-											snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+											CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 										}
 										else
 										{
 											pB.ItemStart = pB.ItemPointer;
-											Result = cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB.SubFolder, &pB.hFiles);
+											Result = GH.Memory.cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB.SubFolder, ref pB.hFiles);
 
 											Result = RESULT.BUSY;
 										}
@@ -3008,8 +3014,8 @@ namespace Ev3Core.Cui
 
 									Item = pB.ItemPointer;
 
-									pType = cMemoryGetCacheName(Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (char*)pB.FullPath, (char*)pB.Filename);
-									snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+									pType = GH.Memory.cMemoryGetCacheName((sbyte)Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pB.Filename);
+									CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 									Result = OK;
 								}
 								break;
@@ -3022,9 +3028,9 @@ namespace Ev3Core.Cui
 
 										Item = (short)(pB.ItemPointer - pB.OpenFolder);
 
-										Result = cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, pType);
+										Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFiles, Item, Lng, pB.FullPath, ref pType);
 
-										snprintf((char*)pAnswer, Lng, "%s", (char*)pB.FullPath);
+										CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
 										Result = OK;
 									}
 								}
@@ -3133,19 +3139,20 @@ namespace Ev3Core.Cui
 								{
 									case BROWSE_FOLDERS:
 										{
-											cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, pB.Chars, pB.Filename, &TmpType, &Priority);
-											if (cMemoryGetItemIcon(pB.PrgId, pB.hFolders, Item, &TmpHandle, &Image) == OK)
+											GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (sbyte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
+											if (GH.Memory.cMemoryGetItemIcon(pB.PrgId, pB.hFolders, Item, ref TmpHandle, Image) == OK)
 											{
-												GH.Lcd.dLcdDrawBitmap(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, pB.IconStartY + (Tmp * pB.LineHeight), (IP)Image);
-												cMemoryCloseFile(pB.PrgId, TmpHandle);
+												GH.Lcd.dLcdDrawBitmap(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, (sbyte)(pB.IconStartY + (Tmp * pB.LineHeight)), CommonHelper.CastArray<int, byte>(Image));
+												GH.Memory.cMemoryCloseFile(pB.PrgId, TmpHandle);
 											}
 											else
 											{
-												dLcdDrawPicture(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, pB.IconStartY + (Tmp * pB.LineHeight), PCApp_width, PCApp_height, (UBYTE*)PCApp_bits);
+												var pcApp = BmpHelper.Get(BmpType.App);
+												GH.Lcd.dLcdDrawPicture(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), pcApp.Width, pcApp.Height, pcApp.Data);
 											}
 
 											pB.Text[0] = 0;
-											if (strcmp((char*)pB.Filename, "Bluetooth") == 0)
+											if (CommonHelper.Strcmp(pB.Filename, "Bluetooth") == 0)
 											{
 												if (GH.UiInstance.BtOn != 0)
 												{
@@ -3158,7 +3165,7 @@ namespace Ev3Core.Cui
 											}
 											else
 											{
-												if (strcmp((char*)pB.Filename, "WiFi") == 0)
+												if (CommonHelper.Strcmp(pB.Filename, "WiFi") == 0)
 												{
 													if (GH.UiInstance.WiFiOn != 0)
 													{
@@ -3171,7 +3178,7 @@ namespace Ev3Core.Cui
 												}
 												else
 												{
-													if (cMemoryGetItemText(pB.PrgId, pB.hFolders, Item, pB.Chars, pB.Text) != OK)
+													if (GH.Memory.cMemoryGetItemText(pB.PrgId, pB.hFolders, Item, (sbyte)pB.Chars, pB.Text) != OK)
 													{
 														pB.Text[0] = 0;
 													}
@@ -3212,7 +3219,7 @@ namespace Ev3Core.Cui
 
 									case BROWSE_FOLDS_FILES:
 										{
-											cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, pB.Chars, pB.Filename, &TmpType, &Priority);
+											GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders, Item, (sbyte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
 											GH.Lcd.dLcdDrawIcon(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 
 											if ((Priority == 1) || (Priority == 2))
@@ -3252,14 +3259,14 @@ namespace Ev3Core.Cui
 
 									case BROWSE_CACHE:
 										{
-											TmpType = cMemoryGetCacheName(Item, pB.Chars, (char*)pB.FullPath, (char*)pB.Filename);
+											TmpType = GH.Memory.cMemoryGetCacheName((sbyte)Item, (sbyte)pB.Chars, pB.FullPath, pB.Filename);
 											GH.Lcd.dLcdDrawIcon(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 										}
 										break;
 
 									case BROWSE_FILES:
 										{
-											cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, pB.Chars, pB.Filename, &TmpType, &Priority);
+											GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, (sbyte)pB.Chars, pB.Filename, ref TmpType, ref Priority);
 											GH.Lcd.dLcdDrawIcon(GH.UiInstance.pLcd.Lcd, Color, pB.IconStartX, (short)(pB.IconStartY + (Tmp * pB.LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 										}
 										break;
@@ -3313,7 +3320,7 @@ namespace Ev3Core.Cui
 							{ // Show file
 
 								// Get file name and type
-								cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, pB.Chars - 1, pB.Filename, &TmpType, &Priority);
+								GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFiles, Item, (sbyte)(pB.Chars - 1), pB.Filename, ref TmpType, ref Priority);
 
 								// show File icons
 								GH.Lcd.dLcdDrawIcon(GH.UiInstance.pLcd.Lcd, Color, (short)(pB.IconStartX + pB.CharWidth), (short)(pB.IconStartY + (Tmp * pB.LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
@@ -3365,14 +3372,14 @@ namespace Ev3Core.Cui
 						{
 							if (pB.OpenFolder != 0)
 							{
-								if (pB.hFiles != 0)
+								if (pB.hFiles != null)
 								{
-									cMemoryCloseFolder(pB.PrgId, &pB.hFiles);
+									GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFiles);
 								}
 							}
-							if (pB.hFolders != 0)
+							if (pB.hFolders != null)
 							{
-								cMemoryCloseFolder(pB.PrgId, &pB.hFolders);
+								GH.Memory.cMemoryCloseFolder(pB.PrgId, pB.hFolders);
 							}
 						}
 						pB.PrgId = 0;
@@ -3415,44 +3422,2517 @@ namespace Ev3Core.Cui
 			return (Result);
 		}
 
-		public void cUiButton()
+		DATA16 cUiTextboxGetLines(DATA8[] pText, DATA32 Size, DATA8 Del)
 		{
-			throw new NotImplementedException();
+			DATA32 Point = 0;
+			DATA16 Lines = 0;
+			DATA8 DelPoi;
+
+			if (Del < DELS)
+			{
+				while (pText.Length > Point && (Point < Size))
+				{
+					DelPoi = 0;
+					while ((pText.Length > Point) && (Point < Size) && (Delimiter[Del].Length > DelPoi) && (pText[Point] == Delimiter[Del][DelPoi]))
+					{
+						DelPoi++;
+						Point++;
+					}
+					if (Delimiter[Del][DelPoi] == 0)
+					{
+						Lines++;
+					}
+					else
+					{
+						if ((pText.Length > Point) && (Point < Size))
+						{
+							Point++;
+						}
+					}
+				}
+			}
+
+			return (Lines);
 		}
 
-		
+		void cUiTextboxAppendLine(DATA8[] pText, DATA32 Size, DATA8 Del, ref DATA8 pLine, DATA8 Font)
+		{
+			DATA32 Point = 0;
+			DATA8 DelPoi = 0;
+
+			if (Del < DELS)
+			{
+				while ((pText.Length > Point) && (Point < Size))
+				{
+					Point++;
+				}
+				if ((Point < Size) && (Font != 0))
+				{
+					pText[Point] = Font;
+					Point++;
+				}
+
+				while ((Point < Size) && (pLine != 0))
+				{
+					pText[Point] = pLine;
+					Point++;
+					pLine++;
+				}
+				while ((Point < Size) && (Delimiter[Del].Length > DelPoi))
+				{
+					pText[Point] = Delimiter[Del][DelPoi];
+					Point++;
+					DelPoi++;
+				}
+			}
+		}
+
+		DATA32 cUiTextboxFindLine(DATA8[] pText, DATA32 Size, DATA8 Del, DATA16 Line, ref DATA8 pFont)
+		{
+			DATA32 Result = -1;
+			DATA32 Point = 0;
+			DATA8 DelPoi = 0;
+
+			pFont = 0;
+			if (Del < DELS)
+			{
+				Result = Point;
+				while ((Line != 0) && (pText.Length > Point) && (Point < Size))
+				{
+
+					DelPoi = 0;
+					while ((pText.Length > Point) && (Point < Size) && (Delimiter[Del].Length > DelPoi) && (pText[Point] == Delimiter[Del][DelPoi]))
+					{
+						DelPoi++;
+						Point++;
+					}
+					if (Delimiter[Del][DelPoi] == 0)
+					{
+						Line--;
+						if (Line != 0)
+						{
+							Result = Point;
+						}
+					}
+					else
+					{
+						if ((pText.Length > Point) && (Point < Size))
+						{
+							Point++;
+						}
+					}
+				}
+				if (Line != 0)
+				{
+					Result = -1;
+				}
+				if (Result >= 0)
+				{
+					if ((pText[Result] > 0) && (pText[Result] < FONTTYPES))
+					{
+						pFont = pText[Result];
+						Result++;
+					}
+				}
+			}
+
+			return (Result);
+		}
+
+		void cUiTextboxReadLine(DATA8[] pText, DATA32 Size, DATA8 Del, DATA8 Lng, DATA16 Line, DATA8[] pLine, ref DATA8 pFont)
+		{
+			DATA32 Start;
+			DATA32 Point = 0;
+			DATA8 DelPoi = 0;
+			DATA8 Run = 1;
+
+			Start = cUiTextboxFindLine(pText, Size, Del, Line, ref pFont);
+			Point = Start;
+
+			pLine[0] = 0;
+
+			if (Point >= 0)
+			{
+				while ((Run != 0) && (pText.Length > Point) && (Point < Size))
+				{
+					DelPoi = 0;
+					while ((pText.Length > Point) && (Point < Size) && (Delimiter[Del].Length > DelPoi) && (pText[Point] == Delimiter[Del][DelPoi]))
+					{
+						DelPoi++;
+						Point++;
+					}
+					if (Delimiter[Del][DelPoi] == 0)
+					{
+						Run = 0;
+					}
+					else
+					{
+						if ((pText.Length > Point) && (Point < Size))
+						{
+							Point++;
+						}
+					}
+				}
+				Point -= (DATA32)DelPoi;
+
+				if (((Point - Start) + 1) < (DATA32)Lng)
+				{
+					Lng = (sbyte)((DATA8)(Point - Start) + 1);
+				}
+				CommonHelper.Snprintf(pLine, 0, Lng, pText.Skip(Start).ToArray());
+			}
+		}
+
+		RESULT cUiTextbox(DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1, DATA8[] pText, DATA32 Size, DATA8 Del, ref DATA16 pLine)
+		{
+			RESULT Result = RESULT.BUSY;
+			TXTBOX pB;
+			DATA16 Item;
+			DATA16 TotalItems;
+			DATA16 Tmp;
+			DATA16 Ypos;
+			DATA8 Color;
+
+			pB = GH.UiInstance.Txtbox;
+			Color = FG_COLOR;
+
+			if (pLine < 0)
+			{
+				//* INIT *****************************************************************************************************
+				// Define screen
+				pB.ScreenStartX = X;
+				pB.ScreenStartY = Y;
+				pB.ScreenWidth = X1;
+				pB.ScreenHeight = Y1;
+
+				pB.Font = GH.UiInstance.Font;
+
+				// calculate chars and lines on screen
+				pB.CharWidth = GH.Lcd.dLcdGetFontWidth(pB.Font);
+				pB.CharHeight = GH.Lcd.dLcdGetFontHeight(pB.Font);
+				pB.Chars = ((short)(pB.ScreenWidth / pB.CharWidth));
+
+				// calculate lines on screen
+				pB.LineSpace = 5;
+				pB.LineHeight = (short)(pB.CharHeight + pB.LineSpace);
+				pB.Lines = ((short)(pB.ScreenHeight / pB.LineHeight));
+
+				// calculate start of text
+				pB.TextStartX = cUiAlignX(pB.ScreenStartX);
+				pB.TextStartY = (short)(pB.ScreenStartY + (pB.LineHeight - pB.CharHeight) / 2);
+
+				// Calculate selection barBrowser
+				pB.SelectStartX = pB.ScreenStartX;
+				pB.SelectWidth = (short)(pB.ScreenWidth - (pB.CharWidth + 5));
+				pB.SelectStartY = (short)(pB.TextStartY - 1);
+				pB.SelectHeight = (short)(pB.CharHeight + 1);
+
+				// Calculate scroll bar
+				pB.ScrollWidth = 5;
+				pB.NobHeight = 7;
+				pB.ScrollStartX = (short)(pB.ScreenStartX + pB.ScreenWidth - pB.ScrollWidth);
+				pB.ScrollStartY = (short)(pB.ScreenStartY + 1);
+				pB.ScrollHeight = (short)(pB.ScreenHeight - 2);
+				pB.ScrollSpan = (short)(pB.ScrollHeight - pB.NobHeight);
+
+				pB.Items = cUiTextboxGetLines(pText, Size, Del);
+				pB.ItemStart = 1;
+				pB.ItemPointer = 1;
+
+				pB.NeedUpdate = 1;
+
+				pLine = 0;
+			}
+
+			TotalItems = pB.Items;
+
+			Tmp = cUiGetVert();
+			if (Tmp != 0)
+			{ // up/down arrow pressed
+
+				pB.NeedUpdate = 1;
+
+				// Calculate item pointer
+				pB.ItemPointer += Tmp;
+				if (pB.ItemPointer < 1)
+				{
+					pB.ItemPointer = 1;
+					pB.NeedUpdate = 0;
+				}
+				if (pB.ItemPointer > TotalItems)
+				{
+					pB.ItemPointer = TotalItems;
+					pB.NeedUpdate = 0;
+				}
+			}
+
+			// Calculate item start
+			if (pB.ItemPointer < pB.ItemStart)
+			{
+				if (pB.ItemPointer > 0)
+				{
+					pB.ItemStart = pB.ItemPointer;
+				}
+			}
+			if (pB.ItemPointer >= (pB.ItemStart + pB.Lines))
+			{
+				pB.ItemStart = (short)(pB.ItemPointer - pB.Lines);
+				pB.ItemStart++;
+			}
+
+			if (cUiGetShortPress(ENTER_BUTTON) != 0)
+			{
+				pLine = pB.ItemPointer;
+
+				Result = OK;
+			}
+			if (cUiGetShortPress(BACK_BUTTON) != 0)
+			{
+				pLine = -1;
+
+				Result = OK;
+			}
+
+			if (pB.NeedUpdate != 0)
+			{
+				//* UPDATE ***************************************************************************************************
+				pB.NeedUpdate = 0;
+
+				// clear screen
+				GH.Lcd.dLcdFillRect(GH.UiInstance.pLcd.Lcd, BG_COLOR, pB.ScreenStartX, pB.ScreenStartY, pB.ScreenWidth, pB.ScreenHeight);
+
+				Ypos = (short)(pB.TextStartY + 2);
+
+				for (Tmp = 0; Tmp < pB.Lines; Tmp++)
+				{
+					Item = (short)(Tmp + pB.ItemStart);
+
+					if (Item <= TotalItems)
+					{
+						cUiTextboxReadLine(pText, Size, Del, TEXTSIZE, Item, pB.Text, ref pB.Font);
+
+						// calculate chars and lines on screen
+						pB.CharWidth = GH.Lcd.dLcdGetFontWidth(pB.Font);
+						pB.CharHeight = GH.Lcd.dLcdGetFontHeight(pB.Font);
+
+						// calculate lines on screen
+						pB.LineSpace = 2;
+						pB.LineHeight = (short)(pB.CharHeight + pB.LineSpace);
+						pB.Lines = ((short)(pB.ScreenHeight / pB.LineHeight));
+
+						// Calculate selection barBrowser
+						pB.SelectStartX = pB.ScreenStartX;
+						pB.SelectWidth = (short)(pB.ScreenWidth - (pB.ScrollWidth + 2));
+						pB.SelectStartY = (short)(pB.TextStartY - 1);
+						pB.SelectHeight = (short)(pB.CharHeight + 1);
+
+						pB.Chars = ((short)(pB.SelectWidth / pB.CharWidth));
+
+						pB.Text[pB.Chars] = 0;
+
+						if ((Ypos + pB.LineHeight) <= (pB.ScreenStartY + pB.ScreenHeight))
+						{
+							GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, pB.TextStartX, Ypos, pB.Font, pB.Text);
+						}
+						else
+						{
+							Tmp = pB.Lines;
+						}
+					}
+
+					cUiDrawBar(1, pB.ScrollStartX, pB.ScrollStartY, pB.ScrollWidth, pB.ScrollHeight, 0, TotalItems, pB.ItemPointer);
+
+					if ((Ypos + pB.LineHeight) <= (pB.ScreenStartY + pB.ScreenHeight))
+					{
+						// Draw selection
+						if (pB.ItemPointer == (Tmp + pB.ItemStart))
+						{
+							GH.Lcd.dLcdInverseRect(GH.UiInstance.pLcd.Lcd, pB.SelectStartX, (short)(Ypos - 1), pB.SelectWidth, pB.LineHeight);
+						}
+					}
+					Ypos += pB.LineHeight;
+				}
+
+				// Update
+				cUiUpdateLcd();
+				GH.UiInstance.ScreenBusy = 0;
+			}
+
+			return (Result);
+		}
+
+		void cUiGraphSetup(DATA16 StartX, DATA16 SizeX, DATA8 Items, DATA16[] pOffset, DATA16[] pSpan, DATAF[] pMin, DATAF[] pMax, DATAF[] pVal)
+		{
+			DATA16 Item;
+			DATA16 Pointer;
+
+			GH.UiInstance.Graph.Initialized = 0;
+
+			GH.UiInstance.Graph.pOffset = pOffset;
+			GH.UiInstance.Graph.pSpan = pSpan;
+			GH.UiInstance.Graph.pMin = pMin;
+			GH.UiInstance.Graph.pMax = pMax;
+			GH.UiInstance.Graph.pVal = pVal;
+
+			if (Items < 0)
+			{
+				Items = 0;
+			}
+			if (Items > GRAPH_BUFFERS)
+			{
+				Items = GRAPH_BUFFERS;
+			}
+
+
+			GH.UiInstance.Graph.GraphStartX = StartX;
+			GH.UiInstance.Graph.GraphSizeX = SizeX;
+			GH.UiInstance.Graph.Items = Items;
+			GH.UiInstance.Graph.Pointer = 0;
+
+			for (Item = 0; Item < GH.UiInstance.Graph.Items; Item++)
+			{
+				for (Pointer = 0; Pointer < GH.UiInstance.Graph.GraphSizeX; Pointer++)
+				{
+					GH.UiInstance.Graph.Buffer[Item][Pointer] = DATAF_NAN;
+				}
+			}
+
+			GH.UiInstance.Graph.Initialized = 1;
+
+			// Simulate graph
+			GH.UiInstance.Graph.Value = GH.UiInstance.Graph.pMin[0];
+			GH.UiInstance.Graph.Down = 0;
+			GH.UiInstance.Graph.Inc = (GH.UiInstance.Graph.pMax[0] - GH.UiInstance.Graph.pMin[0]) / (DATAF)20;
+		}
+
+		void cUiGraphSample()
+		{
+			DATAF Sample;
+			DATA16 Item;
+			DATA16 Pointer;
+
+			if (GH.UiInstance.Graph.Initialized != 0)
+			{ // Only if initialized
+
+				if (GH.UiInstance.Graph.Pointer < GH.UiInstance.Graph.GraphSizeX)
+				{
+					for (Item = 0; Item < (GH.UiInstance.Graph.Items); Item++)
+					{
+						// Insert sample
+						Sample = GH.UiInstance.Graph.pVal[Item];
+
+						if (!(float.IsNaN(Sample)))
+						{
+							GH.UiInstance.Graph.Buffer[Item][GH.UiInstance.Graph.Pointer] = Sample;
+						}
+						else
+						{
+							GH.UiInstance.Graph.Buffer[Item][GH.UiInstance.Graph.Pointer] = DATAF_NAN;
+						}
+					}
+					GH.UiInstance.Graph.Pointer++;
+				}
+				else
+				{
+					// Scroll buffers
+					for (Item = 0; Item < (GH.UiInstance.Graph.Items); Item++)
+					{
+						for (Pointer = 0; Pointer < (GH.UiInstance.Graph.GraphSizeX - 1); Pointer++)
+						{
+							GH.UiInstance.Graph.Buffer[Item][Pointer] = GH.UiInstance.Graph.Buffer[Item][Pointer + 1];
+						}
+
+						// Insert sample
+						Sample = GH.UiInstance.Graph.pVal[Item];
+
+						if (!(float.IsNaN(Sample)))
+						{
+							GH.UiInstance.Graph.Buffer[Item][Pointer] = Sample;
+						}
+						else
+						{
+							GH.UiInstance.Graph.Buffer[Item][Pointer] = DATAF_NAN;
+						}
+					}
+				}
+			}
+		}
+
+		void cUiGraphDraw(DATA8 View, ref DATAF pActual, ref DATAF pLowest, ref DATAF pHighest, ref DATAF pAverage)
+		{
+			DATAF Sample;
+			DATA8 Samples;
+			DATA16 Value;
+			DATA16 Item;
+			DATA16 Pointer;
+			DATA16 X;
+			DATA16 Y1;
+			DATA16 Y2;
+			DATA8 Color = 1;
+
+			pActual = DATAF_NAN;
+			pLowest = DATAF_NAN;
+			pHighest = DATAF_NAN;
+			pAverage = DATAF_NAN;
+			Samples = 0;
+
+			if (GH.UiInstance.Graph.Initialized != 0)
+			{ // Only if initialized
+
+				if (GH.UiInstance.ScreenBlocked == 0)
+				{
+
+					// View or all
+					if ((View >= 0) && (View < GH.UiInstance.Graph.Items))
+					{
+						Item = View;
+
+						Y1 = ((short)(GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]));
+
+						// Draw buffers
+						X = GH.UiInstance.Graph.GraphStartX;
+						for (Pointer = 0; Pointer < GH.UiInstance.Graph.Pointer; Pointer++)
+						{
+							Sample = GH.UiInstance.Graph.Buffer[Item][Pointer];
+							if (!(float.IsNaN(Sample)))
+							{
+								pActual = Sample;
+								if (float.IsNaN(pAverage))
+								{
+									pAverage = (DATAF)0;
+									pLowest = pActual;
+									pHighest = pActual;
+								}
+								else
+								{
+									if (pActual < pLowest)
+									{
+										pLowest = pActual;
+									}
+									if (pActual > pHighest)
+									{
+										pHighest = pActual;
+									}
+								}
+								pAverage += pActual;
+								Samples++;
+
+								// Scale Y axis
+								Value = (DATA16)((((Sample - GH.UiInstance.Graph.pMin[Item]) * (DATAF)GH.UiInstance.Graph.pSpan[Item]) / (GH.UiInstance.Graph.pMax[Item] - GH.UiInstance.Graph.pMin[Item])));
+
+								// Limit Y axis
+								if (Value > GH.UiInstance.Graph.pSpan[Item])
+								{
+									Value = GH.UiInstance.Graph.pSpan[Item];
+								}
+								if (Value < 0)
+								{
+									Value = 0;
+								}
+								/*
+											printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,UiInstance.Graph.pMin[Item],UiInstance.Graph.pMax[Item],UiInstance.Graph.pOffset[Item],UiInstance.Graph.pSpan[Item],Value);
+								*/
+								Y2 = (short)((GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]) - Value);
+								if (Pointer > 1)
+								{
+									if (Y2 > Y1)
+									{
+										GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
+										GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
+									}
+									else
+									{
+										if (Y2 < Y1)
+										{
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
+										}
+										else
+										{
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
+										}
+									}
+									GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 1), Y1, X, Y2);
+								}
+								else
+								{
+									GH.Lcd.dLcdDrawPixel(GH.UiInstance.pLcd.Lcd, Color, X, Y2);
+								}
+
+								Y1 = Y2;
+							}
+							X++;
+						}
+						if (Samples != 0)
+						{
+							pAverage = pAverage / (DATAF)Samples;
+						}
+
+					}
+					else
+					{
+						// Draw buffers
+						for (Item = 0; Item < GH.UiInstance.Graph.Items; Item++)
+						{
+							Y1 = ((short)(GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]));
+
+							X = (short)(GH.UiInstance.Graph.GraphStartX + 1);
+							for (Pointer = 0; Pointer < GH.UiInstance.Graph.Pointer; Pointer++)
+							{
+								Sample = GH.UiInstance.Graph.Buffer[Item][Pointer];
+
+								// Scale Y axis
+								Value = (DATA16)((((Sample - GH.UiInstance.Graph.pMin[Item]) * (DATAF)GH.UiInstance.Graph.pSpan[Item]) / (GH.UiInstance.Graph.pMax[Item] - GH.UiInstance.Graph.pMin[Item])));
+
+								// Limit Y axis
+								if (Value > GH.UiInstance.Graph.pSpan[Item])
+								{
+									Value = GH.UiInstance.Graph.pSpan[Item];
+								}
+								if (Value < 0)
+								{
+									Value = 0;
+								}
+								Y2 = (short)((GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]) - Value);
+								if (Pointer > 1)
+								{
+
+									if (Y2 > Y1)
+									{
+										GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
+										GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
+									}
+									else
+									{
+										if (Y2 < Y1)
+										{
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
+										}
+										else
+										{
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
+											GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
+										}
+									}
+									GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, (short)(X - 1), Y1, X, Y2);
+
+								}
+								else
+								{
+									GH.Lcd.dLcdDrawPixel(GH.UiInstance.pLcd.Lcd, Color, X, Y2);
+								}
+
+								Y1 = Y2;
+								X++;
+							}
+						}
+					}
+					GH.UiInstance.ScreenBusy = 1;
+				}
+			}
+		}
 
 		public void cUiDraw()
 		{
-			throw new NotImplementedException();
-		}
+			PRGID TmpPrgId;
+			OBJID TmpObjId;
+			IP TmpIp;
+			int TmpIpInd;
+			DATA8[] GBuffer = new DATA8[25];
+			UBYTE[] pBmp = new UBYTE[LCD_BUFFER_SIZE];
+			DATA8 Cmd;
+			DATA8 Color;
+			DATA16 X;
+			DATA16 Y;
+			DATA16 X1;
+			DATA16 Y1;
+			DATA16 Y2;
+			DATA16 Y3;
+			DATA32 Size;
+			DATA16 R;
+			DATA8[] pText;
+			DATA8 No;
+			DATAF DataF;
+			DATA8 Figures;
+			DATA8 Decimals;
+			IP pI;
+			DATA8 pState;
+			DATA8[] pAnswer;
+			DATA8 Lng = 0;
+			DATA8 SelectedChar;
+			DATA8 pType;
+			DATA8 Type;
+			DATA16 On;
+			DATA16 Off;
+			DATA16 CharWidth;
+			DATA16 CharHeight;
+			DATA8 TmpColor;
+			DATA16 Tmp;
+			DATA8 Length;
+			DATA8[] pUnit;
+			DATA32 pIcons;
+			DATA8 Items;
+			DATA8 View;
+			DATA16[] pOffset;
+			DATA16[] pSpan;
+			DATAF[] pMin;
+			DATAF[] pMax;
+			DATAF[] pVal;
+			DATA16 Min;
+			DATA16 Max;
+			DATA16 Act;
+			DATAF Actual = 0;
+			DATAF Lowest = 0;
+			DATAF Highest = 0;
+			DATAF Average = 0;
+			DATA8 Icon1;
+			DATA8 Icon2;
+			DATA8 Icon3;
+			DATA8 Blocked;
+			DATA8 Open;
+			DATA8 Del;
+			DATA8 pCharSet;
+			DATA16 pLine;
 
-		
+
+			TmpPrgId = GH.Lms.CurrentProgramId();
+
+			if ((TmpPrgId != GUI_SLOT) && (TmpPrgId != DEBUG_SLOT))
+			{
+				GH.UiInstance.RunScreenEnabled = 0;
+			}
+			if (GH.UiInstance.ScreenBlocked == 0)
+			{
+				Blocked = 0;
+			}
+			else
+			{
+				TmpObjId = GH.Lms.CallingObjectId();
+				if ((TmpPrgId == GH.UiInstance.ScreenPrgId) && (TmpObjId == GH.UiInstance.ScreenObjId))
+				{
+					Blocked = 0;
+				}
+				else
+				{
+					Blocked = 1;
+				}
+			}
+
+			TmpIp = GH.Lms.GetObjectIp();
+			TmpIpInd = GH.Lms.GetObjectIpInd();
+			Cmd = (DATA8)GH.Lms.PrimParPointer();
+
+			switch (Cmd)
+			{ // Function
+
+				case UPDATE:
+					{
+						if (Blocked == 0)
+						{
+							cUiUpdateLcd();
+							GH.UiInstance.ScreenBusy = 0;
+						}
+					}
+					break;
+
+				case CLEAN:
+					{
+						if (Blocked == 0)
+						{
+							GH.UiInstance.Font = NORMAL_FONT;
+
+							Color = BG_COLOR;
+							if (Color != 0)
+							{
+								Color = -1;
+							}
+							CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, LCD_BUFFER_SIZE, 0);
+
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case TEXTBOX:
+					{
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						X1 = (DATA16)GH.Lms.PrimParPointer();  // size x
+						Y1 = (DATA16)GH.Lms.PrimParPointer();  // size y
+						pText = (DATA8[])GH.Lms.PrimParPointer();    // textbox
+						Size = (DATA32)GH.Lms.PrimParPointer();  // textbox size
+						Del = (DATA8)GH.Lms.PrimParPointer();   // delimitter
+						pLine = (DATA16)GH.Lms.PrimParPointer();   // line
+
+						if (Blocked == 0)
+						{
+							if (cUiTextbox(X, Y, X1, Y1, pText, Size, Del, ref pLine) == RESULT.BUSY)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case FILLRECT:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						X1 = (DATA16)GH.Lms.PrimParPointer();
+						Y1 = (DATA16)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdFillRect(GH.UiInstance.pLcd.Lcd, Color, X, Y, X1, Y1);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case INVERSERECT:
+					{
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						X1 = (DATA16)GH.Lms.PrimParPointer();
+						Y1 = (DATA16)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdInverseRect(GH.UiInstance.pLcd.Lcd, X, Y, X1, Y1);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case RECT:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						X1 = (DATA16)GH.Lms.PrimParPointer();
+						Y1 = (DATA16)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdRect(GH.UiInstance.pLcd.Lcd, Color, X, Y, X1, Y1);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case PIXEL:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdDrawPixel(GH.UiInstance.pLcd.Lcd, Color, X, Y);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case LINE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						X1 = (DATA16)GH.Lms.PrimParPointer();
+						Y1 = (DATA16)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, Color, X, Y, X1, Y1);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case DOTLINE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						X1 = (DATA16)GH.Lms.PrimParPointer();
+						Y1 = (DATA16)GH.Lms.PrimParPointer();
+						On = (DATA16)GH.Lms.PrimParPointer();
+						Off = (DATA16)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdDrawDotLine(GH.UiInstance.pLcd.Lcd, Color, X, Y, X1, Y1, On, Off);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case CIRCLE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						R = (DATA16)GH.Lms.PrimParPointer();
+						if (R != 0)
+						{
+							if (Blocked == 0)
+							{
+								GH.Lcd.dLcdDrawCircle(GH.UiInstance.pLcd.Lcd, Color, X, Y, R);
+								GH.UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+
+				case FILLCIRCLE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						R = (DATA16)GH.Lms.PrimParPointer();
+						if (R != 0)
+						{
+							if (Blocked == 0)
+							{
+								GH.Lcd.dLcdDrawFilledCircle(GH.UiInstance.pLcd.Lcd, Color, X, Y, R);
+								GH.UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+
+				case TEXT:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						pText = (DATA8[])GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, X, Y, GH.UiInstance.Font, pText);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case ICON:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						Type = (DATA8)GH.Lms.PrimParPointer();
+						No = (DATA8)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdDrawIcon(GH.UiInstance.pLcd.Lcd, Color, X, Y, Type, No);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case BMPFILE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						pText = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (GH.Memory.cMemoryGetImage(pText, LCD_BUFFER_SIZE, pBmp) == OK)
+							{
+								GH.Lcd.dLcdDrawBitmap(GH.UiInstance.pLcd.Lcd, Color, X, Y, pBmp);
+								GH.UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+
+				case PICTURE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						pI = (IP)GH.Lms.PrimParPointer();
+						if (pI != null)
+						{
+							if (Blocked == 0)
+							{
+								GH.Lcd.dLcdDrawBitmap(GH.UiInstance.pLcd.Lcd, Color, X, Y, pI);
+								GH.UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+
+				case VALUE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						DataF = (DATAF)GH.Lms.PrimParPointer();
+						Figures = (DATA8)GH.Lms.PrimParPointer();
+						Decimals = (DATA8)GH.Lms.PrimParPointer();
+
+						if (float.IsNaN(DataF))
+						{
+							for (Lng = 0; Lng < Figures; Lng++)
+							{
+								GBuffer[Lng] = (sbyte)'-';
+							}
+						}
+						else
+						{
+							// TODO: i don't want to do it now
+							//if (Figures < 0)
+							//{
+							//	Figures = (sbyte)(0 - Figures);
+							//	CommonHelper.Snprintf(GBuffer, 0, 24, new sbyte[] { Decimals }, DataF);
+							//}
+							//else
+							//{
+							//	snprintf((char*)GBuffer, 24, "%*.*f", Figures, Decimals, DataF);
+							//}
+							GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+							if (GBuffer[0] == '-')
+							{ // Negative
+
+								Figures++;
+							}
+						}
+						GBuffer[Figures] = 0;
+						pText = GBuffer;
+						if (Blocked == 0)
+						{
+							GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, X, Y, GH.UiInstance.Font, pText);
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case VIEW_VALUE:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						DataF = (DATAF)GH.Lms.PrimParPointer();
+						Figures = (DATA8)GH.Lms.PrimParPointer();
+						Decimals = (DATA8)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+
+							TmpColor = Color;
+							CharWidth = GH.Lcd.dLcdGetFontWidth(GH.UiInstance.Font);
+							CharHeight = GH.Lcd.dLcdGetFontHeight(GH.UiInstance.Font);
+							X1 = (short)(((CharWidth + 2) / 3) - 1);
+							Y1 = ((short)(CharHeight / 2));
+
+							// TODO: I don't want to do it now
+							//Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+							GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+
+							if (Lng != 0)
+							{
+								if (GBuffer[0] == '-')
+								{ // Negative
+
+									TmpColor = Color;
+									Lng--;
+									pText = GBuffer.Skip(1).ToArray();
+								}
+								else
+								{ // Positive
+
+									TmpColor = (sbyte)(1 - Color);
+									pText = GBuffer;
+								}
+
+								// Make sure negative sign is deleted from last time
+								GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1));
+								if (CharHeight > 12)
+								{
+									GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1 - 1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1 - 1));
+								}
+
+								// Check for "not a number"
+								Tmp = 0;
+								while ((pText[Tmp] != 0) && (pText[Tmp] != 'n'))
+								{
+									Tmp++;
+								}
+								if (pText[Tmp] == 'n')
+								{ // "nan"
+
+									for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+									{
+										GBuffer[Tmp] = (sbyte)'-';
+									}
+									GBuffer[Tmp] = 0;
+
+									// Draw figures
+									GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, X, Y, GH.UiInstance.Font, GBuffer);
+								}
+								else
+								{ // Normal number
+
+									// Check number of figures
+									if (Lng > Figures)
+									{ // Limit figures
+
+										for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+										{
+											GBuffer[Tmp] = (sbyte)'>';
+										}
+										GBuffer[Tmp] = 0;
+										Lng = (sbyte)(DATA16)Figures;
+										pText = GBuffer;
+										TmpColor = (sbyte)(1 - Color);
+
+										// Find X indent
+										Tmp = (short)(((DATA16)Figures - Lng) * CharWidth);
+									}
+									else
+									{ // Centre figures
+
+										// Find X indent
+										Tmp = (short)(((((DATA16)Figures - Lng) + 1) / 2) * CharWidth);
+									}
+
+									// Draw figures
+									GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, (short)(X + Tmp), Y, GH.UiInstance.Font, pText);
+
+									// Draw negative sign
+									GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1), (short)(X + Tmp), (short)(Y + Y1));
+									if (CharHeight > 12)
+									{
+										GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1 - 1), (short)(X + Tmp), (short)(Y + Y1 - 1));
+									}
+								}
+							}
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case VIEW_UNIT:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						DataF = (DATAF)GH.Lms.PrimParPointer();
+						Figures = (DATA8)GH.Lms.PrimParPointer();
+						Decimals = (DATA8)GH.Lms.PrimParPointer();
+						Length = (DATA8)GH.Lms.PrimParPointer();
+						pUnit = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							TmpColor = Color;
+							CharWidth = GH.Lcd.dLcdGetFontWidth(LARGE_FONT);
+							CharHeight = GH.Lcd.dLcdGetFontHeight(LARGE_FONT);
+							X1 = (short)(((CharWidth + 2) / 3) - 1);
+							Y1 = ((short)(CharHeight / 2));
+
+							// TODO: I don't want to do it now
+							//Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+							GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+
+							if (Lng != 0)
+							{
+								if (GBuffer[0] == '-')
+								{ // Negative
+
+									TmpColor = Color;
+									Lng--;
+									pText = GBuffer.Skip(1).ToArray();
+								}
+								else
+								{ // Positive
+
+									TmpColor = (sbyte)(1 - Color);
+									pText = GBuffer;
+								}
+
+								// Make sure negative sign is deleted from last time
+								GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1));
+								if (CharHeight > 12)
+								{
+									GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1 - 1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1 - 1));
+								}
+
+								// Check for "not a number"
+								Tmp = 0;
+								while ((pText[Tmp] != 0) && (pText[Tmp] != 'n'))
+								{
+									Tmp++;
+								}
+								if (pText[Tmp] == 'n')
+								{ // "nan"
+
+									for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+									{
+										GBuffer[Tmp] = (sbyte)'-';
+									}
+									GBuffer[Tmp] = 0;
+
+									// Draw figures
+									GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, X, Y, LARGE_FONT, GBuffer);
+								}
+								else
+								{ // Normal number
+
+									// Check number of figures
+									if (Lng > Figures)
+									{ // Limit figures
+
+										for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
+										{
+											GBuffer[Tmp] = (sbyte)'>';
+										}
+										GBuffer[Tmp] = 0;
+										Lng = (sbyte)(DATA16)Figures;
+										pText = GBuffer;
+										TmpColor = (sbyte)(1 - Color);
+
+										// Find X indent
+										Tmp = (short)(((DATA16)Figures - Lng) * CharWidth);
+									}
+									else
+									{ // Centre figures
+
+										// Find X indent
+										Tmp = (short)(((((DATA16)Figures - Lng) + 1) / 2) * CharWidth);
+									}
+									Tmp = 0;
+
+									// Draw figures
+									GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, (short)(X + Tmp), Y, LARGE_FONT, pText);
+
+									// Draw negative sign
+									GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1), (short)(X + Tmp), (short)(Y + Y1));
+									if (CharHeight > 12)
+									{
+										GH.Lcd.dLcdDrawLine(GH.UiInstance.pLcd.Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1 - 1), (short)(X + Tmp), (short)(Y + Y1 - 1));
+									}
+
+									Tmp = (short)(((((DATA16)Lng))) * CharWidth);
+									CommonHelper.Snprintf(GBuffer, 0, Length, pUnit);
+									GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, (short)(X + Tmp), Y, SMALL_FONT, GBuffer);
+
+								}
+							}
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case NOTIFICATION:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						Icon1 = (DATA8)GH.Lms.PrimParPointer();
+						Icon2 = (DATA8)GH.Lms.PrimParPointer();
+						Icon3 = (DATA8)GH.Lms.PrimParPointer();
+						pText = (DATA8[])GH.Lms.PrimParPointer();
+						pState = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cUiNotification(Color, X, Y, Icon1, Icon2, Icon3, pText, ref pState) == BUSY)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case QUESTION:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						Icon1 = (DATA8)GH.Lms.PrimParPointer();
+						Icon2 = (DATA8)GH.Lms.PrimParPointer();
+						pText = (DATA8[])GH.Lms.PrimParPointer();
+						pState = (DATA8)GH.Lms.PrimParPointer();
+						pAnswer = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cUiQuestion(Color, X, Y, Icon1, Icon2, pText, ref pState, ref pAnswer[0]) == BUSY)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+
+				case ICON_QUESTION:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						pState = (DATA8)GH.Lms.PrimParPointer();
+						pIcons = (DATA32)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							if (cUiIconQuestion(Color, X, Y, ref pState, ref pIcons) == RESULT.BUSY)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+
+				case KEYBOARD:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						No = (DATA8)GH.Lms.PrimParPointer();   // Icon
+						Lng = (DATA8)GH.Lms.PrimParPointer();   // length
+						pText = (DATA8[])GH.Lms.PrimParPointer();    // default
+						pCharSet = (DATA8)GH.Lms.PrimParPointer();    // valid char set
+						pAnswer = (DATA8[])GH.Lms.PrimParPointer();    // string
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							pAnswer = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+
+						if (Blocked == 0)
+						{
+							SelectedChar = cUiKeyboard(Color, X, Y, No, Lng, pText, ref pCharSet, pAnswer);
+
+							// Wait for "ENTER"
+							if (SelectedChar != 0x0D)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case BROWSE:
+					{
+						Type = (DATA8)GH.Lms.PrimParPointer();   // Browser type
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						X1 = (DATA16)GH.Lms.PrimParPointer();  // size x
+						Y1 = (DATA16)GH.Lms.PrimParPointer();  // size y
+						Lng = (DATA8)GH.Lms.PrimParPointer();   // length
+						pType = (DATA8)GH.Lms.PrimParPointer();    // item type
+						pAnswer = (DATA8[])GH.Lms.PrimParPointer();    // item name
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							pAnswer = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+
+						if (Blocked == 0)
+						{
+							if (cUiBrowser(Type, X, Y, X1, Y1, Lng, ref pType, pAnswer) == RESULT.BUSY)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case VERTBAR:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						X1 = (DATA16)GH.Lms.PrimParPointer();  // size x
+						Y1 = (DATA16)GH.Lms.PrimParPointer();  // size y
+						Min = (DATA16)GH.Lms.PrimParPointer();  // min
+						Max = (DATA16)GH.Lms.PrimParPointer();  // max
+						Act = (DATA16)GH.Lms.PrimParPointer();  // actual
+
+						if (Blocked == 0)
+						{
+							cUiDrawBar(Color, X, Y, X1, Y1, Min, Max, Act);
+						}
+					}
+					break;
+
+				case SELECT_FONT:
+					{
+						GH.UiInstance.Font = (DATA8)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (GH.UiInstance.Font >= FONTTYPES)
+							{
+								GH.UiInstance.Font = (FONTTYPES - 1);
+							}
+							if (GH.UiInstance.Font < 0)
+							{
+								GH.UiInstance.Font = 0;
+							}
+						}
+					}
+					break;
+
+				case TOPLINE:
+					{
+						GH.UiInstance.TopLineEnabled = (DATA8)GH.Lms.PrimParPointer();
+					}
+					break;
+
+				case FILLWINDOW:
+					{
+						Color = (DATA8)GH.Lms.PrimParPointer();
+						Y = (DATA16)GH.Lms.PrimParPointer();  // start y
+						Y1 = (DATA16)GH.Lms.PrimParPointer();  // size y
+						if (Blocked == 0)
+						{
+							GH.UiInstance.Font = NORMAL_FONT;
+
+							if ((Y + Y1) < LCD_HEIGHT)
+							{
+								if ((Color == 0) || (Color == 1))
+								{
+									Y *= ((LCD_WIDTH + 7) / 8);
+
+									if (Y1 != 0)
+									{
+										Y1 *= ((LCD_WIDTH + 7) / 8);
+									}
+									else
+									{
+										Y1 = (short)(LCD_BUFFER_SIZE - Y);
+									}
+
+									if (Color != 0)
+									{
+										Color = -1;
+									}
+									CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, Y1, Y);
+								}
+								else
+								{
+									if (Y1 == 0)
+									{
+										Y1 = LCD_HEIGHT;
+									}
+									Y2 = ((LCD_WIDTH + 7) / 8);
+									for (Tmp = Y; Tmp < Y1; Tmp++)
+									{
+										Y3 = (short)(Tmp * ((LCD_WIDTH + 7) / 8));
+										CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, Y2, Y3);
+										Color = (sbyte)~Color;
+									}
+								}
+							}
+
+							GH.UiInstance.ScreenBusy = 1;
+						}
+					}
+					break;
+
+				case STORE:
+					{
+						No = (DATA8)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (No < LCD_STORE_LEVELS)
+							{
+								Array.Copy(GH.UiInstance.LcdSafe.Lcd, GH.UiInstance.LcdPool[No].Lcd, LCD.LcdSizeof);
+							}
+						}
+					}
+					break;
+
+				case RESTORE:
+					{
+						No = (DATA8)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (No < LCD_STORE_LEVELS)
+							{
+								Array.Copy(GH.UiInstance.LcdPool[No].Lcd, GH.UiInstance.LcdSafe.Lcd, LCD.LcdSizeof);
+								GH.UiInstance.ScreenBusy = 1;
+							}
+						}
+					}
+					break;
+
+				case GRAPH_SETUP:
+					{
+						X = (DATA16)GH.Lms.PrimParPointer();  // start x
+						X1 = (DATA16)GH.Lms.PrimParPointer();  // size y
+						Items = (DATA8)GH.Lms.PrimParPointer();   // items
+						pOffset = (DATA16[])GH.Lms.PrimParPointer();  // handle to offset Y
+						pSpan = (DATA16[])GH.Lms.PrimParPointer();  // handle to span y
+						pMin = (DATAF[])GH.Lms.PrimParPointer();  // handle to min
+						pMax = (DATAF[])GH.Lms.PrimParPointer();  // handle to max
+						pVal = (DATAF[])GH.Lms.PrimParPointer();  // handle to val
+
+						if (Blocked == 0)
+						{
+							cUiGraphSetup(X, X1, Items, pOffset, pSpan, pMin, pMax, pVal);
+						}
+					}
+					break;
+
+				case GRAPH_DRAW:
+					{
+						View = (DATA8)GH.Lms.PrimParPointer();   // view
+
+						cUiGraphDraw(View, ref Actual, ref Lowest, ref Highest, ref Average);
+
+						GH.Lms.PrimParPointer(Actual);
+						GH.Lms.PrimParPointer(Lowest);
+						GH.Lms.PrimParPointer(Highest);
+						GH.Lms.PrimParPointer(Average);
+					}
+					break;
+
+				case SCROLL:
+					{
+						Y = (DATA16)GH.Lms.PrimParPointer();
+						if ((Y > 0) && (Y < LCD_HEIGHT))
+						{
+							GH.Lcd.dLcdScroll(GH.UiInstance.pLcd.Lcd, Y);
+						}
+					}
+					break;
+
+				case POPUP:
+					{
+						Open = (DATA8)GH.Lms.PrimParPointer();
+						if (Blocked == 0)
+						{
+							if (Open != 0)
+							{
+								if (GH.UiInstance.ScreenBusy == 0)
+								{
+									TmpObjId = GH.Lms.CallingObjectId();
+
+									Array.Copy(GH.UiInstance.LcdSafe.Lcd, GH.UiInstance.LcdSave.Lcd, LCD.LcdSizeof);
+									GH.UiInstance.ScreenPrgId = TmpPrgId;
+									GH.UiInstance.ScreenObjId = TmpObjId;
+									GH.UiInstance.ScreenBlocked = 1;
+								}
+								else
+								{ // Wait on scrreen
+
+									GH.Lms.SetObjectIp(TmpIp);
+									GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+									GH.Lms.SetDispatchStatus(BUSYBREAK);
+								}
+							}
+							else
+							{
+								Array.Copy(GH.UiInstance.LcdSave.Lcd, GH.UiInstance.LcdSafe.Lcd, LCD.LcdSizeof);
+								GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
+
+								GH.UiInstance.ScreenPrgId = ushort.MaxValue;
+								GH.UiInstance.ScreenObjId = ushort.MaxValue;
+								GH.UiInstance.ScreenBlocked = 0;
+							}
+						}
+						else
+						{ // Wait on not blocked
+
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+			}
+		}
 
 		public void cUiFlush()
 		{
-			throw new NotImplementedException();
+			cUiFlushBuffer();
+		}
+
+		public void cUiRead()
+		{
+			IP TmpIp;
+			int TmpIpInd;
+			DATA8 Cmd;
+			DATA8 Lng;
+			DATA8 Data8 = 0;
+			DATA8[] pSource;
+			DATA8[] pDestination;
+			DATA16 Data16;
+			IMGDATA Tmp;
+			IMGHEAD pImage;
+			DATA32 Length = 0;
+			DATA32 Total = 0;
+			DATA32 Size = 0;
+			IMGHEAD pImgHead;
+			OBJHEAD pObjHead;
+
+
+			TmpIp = GH.Lms.GetObjectIp();
+			TmpIpInd = GH.Lms.GetObjectIpInd();
+			Cmd = (DATA8)GH.Lms.PrimParPointer();
+
+			switch (Cmd)
+			{ // Function
+
+				case GET_STRING:
+					{
+						if (GH.UiInstance.Keys != 0)
+						{
+							Lng = (DATA8)GH.Lms.PrimParPointer();
+							pDestination = (DATA8[])GH.Lms.PrimParPointer();
+							pSource = (DATA8[])GH.UiInstance.KeyBuffer;
+
+							int pInd = 0;
+							while ((GH.UiInstance.Keys != 0) && (Lng != 0))
+							{
+								pDestination[pInd] = pSource[pInd];
+								pInd++;
+								GH.UiInstance.Keys--;
+								Lng--;
+							}
+							pDestination = null;
+							GH.UiInstance.KeyBufIn = 0;
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case KEY:
+					{
+						if (GH.UiInstance.KeyBufIn != 0)
+						{
+							GH.Lms.PrimParPointer((DATA8)GH.UiInstance.KeyBuffer[0]);
+							GH.UiInstance.KeyBufIn--;
+
+							for (Lng = 0; Lng < GH.UiInstance.KeyBufIn; Lng++)
+							{
+								GH.UiInstance.KeyBuffer[Lng] = GH.UiInstance.KeyBuffer[Lng + 1];
+							}
+						}
+						else
+						{
+							GH.Lms.PrimParPointer((DATA8)0);
+						}
+					}
+					break;
+
+				case GET_SHUTDOWN:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.ShutDown);
+						GH.UiInstance.ShutDown = 0;
+					}
+					break;
+
+				case GET_WARNING:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Warning);
+					}
+					break;
+
+				case GET_LBATT:
+					{
+						Data16 = (DATA16)(GH.UiInstance.Vbatt * 1000.0);
+						Data16 -= GH.UiInstance.BattIndicatorLow;
+						Data16 = (short)((Data16 * 100) / (GH.UiInstance.BattIndicatorHigh - GH.UiInstance.BattIndicatorLow));
+						if (Data16 > 100)
+						{
+							Data16 = 100;
+						}
+						if (Data16 < 0)
+						{
+							Data16 = 0;
+						}
+						GH.Lms.PrimParPointer((DATA8)Data16);
+					}
+					break;
+
+				case ADDRESS:
+					{
+						if (GH.UiInstance.Keys != 0)
+						{
+							GH.Lms.PrimParPointer((DATA32)int.Parse(GH.UiInstance.KeyBuffer.AsString()));
+							GH.UiInstance.Keys = 0;
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case CODE:
+					{
+						if (GH.UiInstance.Keys != 0)
+						{
+							Length = (DATA32)GH.Lms.PrimParPointer();
+							pImage = (IMGHEAD)GH.Lms.PrimParPointer();
+
+							// TODO: WARNING: code shite changes
+							pImgHead = pImage;
+							pObjHead = (OBJHEAD)GH.Lms.PrimParPointer();
+							pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+							if (Length > (IMGHEAD.SizeOf + OBJHEAD.SizeOf))
+							{
+
+								pImgHead.Sign[0] = (byte)'l';
+								pImgHead.Sign[1] = (byte)'e';
+								pImgHead.Sign[2] = (byte)'g';
+								pImgHead.Sign[3] = (byte)'o';
+								pImgHead.ImageSize = 0;
+								pImgHead.VersionInfo = (UWORD)(VERS * 100.0);
+								pImgHead.NumberOfObjects = 1;
+								pImgHead.GlobalBytes = 0;
+
+								pObjHead.OffsetToInstructions = new byte[] { IMGHEAD.SizeOf + OBJHEAD.SizeOf };
+								pObjHead.OwnerObjectId = 0;
+								pObjHead.TriggerCount = 0;
+								pObjHead.LocalBytes = MAX_COMMAND_LOCALS;
+
+								pSource = (DATA8[])GH.UiInstance.KeyBuffer;
+								Size = IMGHEAD.SizeOf + OBJHEAD.SizeOf;
+
+								Length -= IMGHEAD.SizeOf + OBJHEAD.SizeOf;
+								Length--;
+								int pSourceInd = 0;
+								int pDestInd = 0;
+								while ((GH.UiInstance.Keys != 0) && (Length != 0))
+								{
+									Tmp = (IMGDATA)(AtoN(pSource[pSourceInd]) << 4);
+									pSourceInd++;
+									GH.UiInstance.Keys--;
+									if (GH.UiInstance.Keys != 0)
+									{
+										Tmp += (IMGDATA)(AtoN(pSource[pSourceInd]));
+										pSourceInd++;
+										GH.UiInstance.Keys--;
+									}
+									else
+									{
+										Tmp = 0;
+									}
+									pDestination[pDestInd] = (sbyte)Tmp;
+									pDestInd++;
+									Length--;
+									Size++;
+								}
+								pDestination[pDestInd] = opOBJECT_END;
+								Size++;
+								pImgHead.ImageSize = (uint)Size;
+								CommonHelper.Memset(GH.UiInstance.Globals, 0, GH.UiInstance.Globals.Length);
+
+								GH.Lms.PrimParPointer(GH.UiInstance.Globals);
+								GH.Lms.PrimParPointer(1);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case GET_HW_VERS:
+					{
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)(GH.UiInstance.HwVers.Length + 1);
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination, 0, Lng, CommonHelper.CastArray<char, sbyte>(GH.UiInstance.HwVers));
+						}
+					}
+					break;
+
+				case GET_FW_VERS:
+					{
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)(GH.UiInstance.FwVers.Length + 1);
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination, 0, Lng, CommonHelper.CastArray<char, sbyte>(GH.UiInstance.FwVers));
+						}
+					}
+					break;
+
+				case GET_FW_BUILD:
+					{
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)(GH.UiInstance.FwBuild.Length + 1);
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination,0, Lng, CommonHelper.CastArray<char, sbyte>(GH.UiInstance.FwBuild));
+						}
+					}
+					break;
+
+				case GET_OS_VERS:
+					{
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)(GH.UiInstance.OsVers.Length + 1);
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination, 0, Lng, CommonHelper.CastArray<char, sbyte>(GH.UiInstance.OsVers));
+						}
+					}
+					break;
+
+				case GET_OS_BUILD:
+					{
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)(GH.UiInstance.OsBuild.Length + 1);
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination, 0, Lng, CommonHelper.CastArray<char, sbyte>(GH.UiInstance.OsBuild));
+						}
+					}
+					break;
+
+				case GET_VERSION:
+					{
+						// TODO: I don't want to do it now
+						//CommonHelper.Snprintf(GH.UiInstance.ImageBuffer, 0, IMAGEBUFFER_SIZE, "%s V%4.2f%c(%s %s)", PROJECT, VERS, SPECIALVERS, __DATE__, __TIME__);
+						GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+						pSource = CommonHelper.CastArray<byte, DATA8>(GH.UiInstance.ImageBuffer);
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = (DATA8)(GH.UiInstance.ImageBuffer.Length + 1);
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination,0, Lng, CommonHelper.CastArray<byte, sbyte>(GH.UiInstance.ImageBuffer));
+						}
+					}
+					break;
+
+				case GET_IP:
+					{
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data8 = IPADDR_SIZE;
+							if ((Lng > Data8) || (Lng == -1))
+							{
+								Lng = Data8;
+							}
+							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.Snprintf(pDestination,0, Lng, CommonHelper.CastArray<char, sbyte>(GH.UiInstance.IpAddr));
+						}
+
+					}
+					break;
+
+				case GET_POWER:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Vbatt);
+						GH.Lms.PrimParPointer(GH.UiInstance.Ibatt);
+						GH.Lms.PrimParPointer(GH.UiInstance.Iintegrated);
+						GH.Lms.PrimParPointer(GH.UiInstance.Imotor);
+					}
+					break;
+
+				case GET_VBATT:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Vbatt);
+					}
+					break;
+
+				case GET_IBATT:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Ibatt);
+					}
+					break;
+
+				case GET_IINT:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Iintegrated);
+					}
+					break;
+
+				case GET_IMOTOR:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Imotor);
+					}
+					break;
+
+				case GET_EVENT:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Event);
+						GH.UiInstance.Event = 0;
+					}
+					break;
+
+				case GET_TBATT:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Tbatt);
+					}
+					break;
+
+				case TEXTBOX_READ:
+					{
+						pSource = (DATA8[])GH.Lms.PrimParPointer();
+						Size = (DATA32)GH.Lms.PrimParPointer();
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+						Lng = (DATA8)GH.Lms.PrimParPointer();
+						Data16 = (DATA16)GH.Lms.PrimParPointer();
+						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+
+						cUiTextboxReadLine(pSource, Size, Data8, Lng, Data16, pDestination, ref Data8);
+					}
+					break;
+
+				case GET_SDCARD:
+					{
+						GH.Lms.PrimParPointer(GH.Lms.CheckSdcard(ref Data8, ref Total, ref Size, 0));
+						GH.Lms.PrimParPointer(Total);
+						GH.Lms.PrimParPointer(Size);
+					}
+					break;
+
+				case GET_USBSTICK:
+					{
+						GH.Lms.PrimParPointer(GH.Lms.CheckUsbstick(ref Data8, ref Total, ref Size, 0));
+						GH.Lms.PrimParPointer(Total);
+						GH.Lms.PrimParPointer(Size);
+					}
+					break;
+
+			}
+		}
+
+		public void cUiWrite()
+		{
+			int TmpIpInd;
+			IP TmpIp;
+			DATA8 Cmd;
+			DATA8[] pSource;
+			DSPSTAT DspStat = DSPSTAT.BUSYBREAK;
+			DATA8[] Buffer = new DATA8[50];
+			DATA8 Data8;
+			DATA16 Data16;
+			DATA32 Data32;
+			DATA8[] pGlobal;
+			DATA32 Tmp;
+			DATAF DataF;
+			DATA8 Figures;
+			DATA8 Decimals;
+			DATA8 No;
+			DATA8[] pText;
+
+
+			TmpIp = GH.Lms.GetObjectIp();
+			TmpIpInd = GH.Lms.GetObjectIpInd();
+			Cmd = (DATA8)GH.Lms.PrimParPointer();
+
+			switch (Cmd)
+			{ // Function
+
+				case WRITE_FLUSH:
+					{
+						cUiFlush();
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case FLOATVALUE:
+					{
+						DataF = (DATAF)GH.Lms.PrimParPointer();
+						Figures = (DATA8)GH.Lms.PrimParPointer();
+						Decimals = (DATA8)GH.Lms.PrimParPointer();
+
+
+						// TODO: don't want to do this now
+						// snprintf((char*)Buffer, 32, "%*.*f", Figures, Decimals, DataF);
+						GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+						cUiWriteString(Buffer);
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case STAMP:
+					{ // write time, prgid, objid, ip
+
+						pSource = (DATA8[])GH.Lms.PrimParPointer();
+						// TODO: don't want to do this now
+						// snprintf((char*)Buffer, 50, "####[ %09u %01u %03u %06u %s]####\r\n", GetTime(), CurrentProgramId(), CallingObjectId(), CurrentObjectIp(), pSource);
+						GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+						cUiWriteString(Buffer);
+						cUiFlush();
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case PUT_STRING:
+					{
+						pSource = (DATA8[])GH.Lms.PrimParPointer();
+						cUiWriteString(pSource);
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case CODE:
+					{
+						pGlobal = (DATA8[])GH.Lms.PrimParPointer();
+						Data32 = (DATA32)GH.Lms.PrimParPointer();
+
+						pSource = pGlobal;
+
+						cUiWriteString("\r\n    ");
+						for (Tmp = 0; Tmp < Data32; Tmp++)
+						{
+							// TODO: don't want to do this now
+							// snprintf((char*)Buffer, 7, "%02X ", pSource[Tmp] & 0xFF);
+							GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+							cUiWriteString(Buffer);
+							if (((Tmp & 0x3) == 0x3) && ((Tmp & 0xF) != 0xF))
+							{
+								cUiWriteString(" ");
+							}
+							if (((Tmp & 0xF) == 0xF) && (Tmp < (Data32 - 1)))
+							{
+								cUiWriteString("\r\n    ");
+							}
+						}
+						cUiWriteString("\r\n");
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case TEXTBOX_APPEND:
+					{
+						pText = (DATA8[])GH.Lms.PrimParPointer();
+						Data32 = (DATA32)GH.Lms.PrimParPointer();
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+						pSource = (DATA8[])GH.Lms.PrimParPointer();
+
+						cUiTextboxAppendLine(pText, Data32, Data8, ref pSource[0], GH.UiInstance.Font);
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case SET_BUSY:
+					{
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Data8 != 0)
+						{
+							unchecked { GH.UiInstance.Warning |= (sbyte)WARNING_BUSY; }
+						}
+						else
+						{
+							unchecked { GH.UiInstance.Warning &= (sbyte)~WARNING_BUSY; }
+						}
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case VALUE8:
+					{
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+						if (Data8 != DATA8_NAN)
+						{
+							CommonHelper.Snprintf(Buffer, 0, 7, new sbyte[] { Data8 });
+						}
+						else
+						{
+							CommonHelper.Snprintf(Buffer, 0, 7, new sbyte[] { (sbyte)'n', (sbyte)'a', (sbyte)'n' });
+						}
+						cUiWriteString(Buffer);
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case VALUE16:
+					{
+						Data16 = (DATA16)GH.Lms.PrimParPointer();
+						if (Data16 != DATA16_NAN)
+						{
+							// TODO: don't want to do this now
+							// snprintf((char*)Buffer, 9, "%d", Data16 & 0xFFFF);
+							GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+						}
+						else
+						{
+							CommonHelper.Snprintf(Buffer, 0, 7, new sbyte[] { (sbyte)'n', (sbyte)'a', (sbyte)'n' });
+						}
+						cUiWriteString(Buffer);
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case VALUE32:
+					{
+						Data32 = (DATA32)GH.Lms.PrimParPointer();
+						if (Data32 != DATA32_NAN)
+						{
+							// TODO: don't want to do this now
+							// snprintf((char*)Buffer, 14, "%ld", (long unsigned int)(Data32 & 0xFFFFFFFF));
+							GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+						}
+						else
+						{
+							CommonHelper.Snprintf(Buffer, 0, 7, new sbyte[] { (sbyte)'n', (sbyte)'a', (sbyte)'n' });
+						}
+
+						cUiWriteString(Buffer);
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case VALUEF:
+					{
+						DataF = (DATAF)GH.Lms.PrimParPointer();
+						// TODO: don't want to do this now
+						// snprintf((char*)Buffer, 24, "%f", DataF);
+						GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+						cUiWriteString(Buffer);
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case LED:
+					{
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+						if (Data8 < 0)
+						{
+							Data8 = 0;
+						}
+						if (Data8 >= LEDPATTERNS)
+						{
+							Data8 = LEDPATTERNS - 1;
+						}
+						cUiSetLed(Data8);
+						GH.UiInstance.RunLedEnabled = 0;
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case POWER:
+					{
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+
+						// TODO: don't want to do this now
+						//if (GH.UiInstance.PowerFile >= 0)
+						//{
+						//	ioctl(UiInstance.PowerFile, 0, (size_t) & Data8);
+						//}
+						GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case TERMINAL:
+					{
+						No = (DATA8)GH.Lms.PrimParPointer();
+
+						if (No != 0)
+						{
+							GH.Lms.SetTerminalEnable(1);
+						}
+						else
+						{
+							GH.Lms.SetTerminalEnable(0);
+						}
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case SET_TESTPIN:
+					{
+						Data8 = (DATA8)GH.Lms.PrimParPointer();
+						cUiTestpin(Data8);
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case INIT_RUN:
+					{
+						GH.UiInstance.RunScreenEnabled = 3;
+
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case UPDATE_RUN:
+					{
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case GRAPH_SAMPLE:
+					{
+						cUiGraphSample();
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case DOWNLOAD_END:
+					{
+						GH.UiInstance.UiUpdate = 1;
+						cUiDownloadSuccesSound();
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				case SCREEN_BLOCK:
+					{
+						GH.UiInstance.ScreenBlocked = (DATA8)GH.Lms.PrimParPointer();
+						DspStat = DSPSTAT.NOBREAK;
+					}
+					break;
+
+				default:
+					{
+						DspStat = DSPSTAT.FAILBREAK;
+					}
+					break;
+
+			}
+
+			if (DspStat == DSPSTAT.BUSYBREAK)
+			{ // Rewind IP
+
+				GH.Lms.SetObjectIp(TmpIp);
+				GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+			}
+			GH.Lms.SetDispatchStatus(DspStat);
+		}
+
+		public void cUiButton()
+		{
+			PRGID TmpPrgId;
+			OBJID TmpObjId;
+			IP TmpIp;
+			int TmpIpInd;
+			DATA8 Cmd;
+			DATA8 Button;
+			DATA8 State;
+			DATA16 Inc;
+			DATA8 Blocked;
+
+			TmpIp = GH.Lms.GetObjectIp();
+			TmpIpInd = GH.Lms.GetObjectIpInd();
+			TmpPrgId = GH.Lms.CurrentProgramId();
+
+			if (GH.UiInstance.ScreenBlocked == 0)
+			{
+				Blocked = 0;
+			}
+			else
+			{
+				TmpObjId = GH.Lms.CallingObjectId();
+				if ((TmpPrgId == GH.UiInstance.ScreenPrgId) && (TmpObjId == GH.UiInstance.ScreenObjId))
+				{
+					Blocked = 0;
+				}
+				else
+				{
+					Blocked = 1;
+				}
+			}
+
+			Cmd = (DATA8)GH.Lms.PrimParPointer();
+
+			State = 0;
+			Inc = 0;
+
+			switch (Cmd)
+			{ // Function
+
+				case PRESS:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+						cUiSetPress(Button, 1);
+					}
+					break;
+
+				case RELEASE:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+						cUiSetPress(Button, 0);
+					}
+					break;
+
+				case SHORTPRESS:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetShortPress(Button);
+						}
+						GH.Lms.PrimParPointer(State);
+					}
+					break;
+
+				case GET_BUMBED:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetBumbed(Button);
+						}
+						GH.Lms.PrimParPointer(State);
+					}
+					break;
+
+				case PRESSED:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetPress(Button);
+						}
+						GH.Lms.PrimParPointer(State);
+					}
+					break;
+
+				case LONGPRESS:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiGetLongPress(Button);
+						}
+						GH.Lms.PrimParPointer(State);
+					}
+					break;
+
+				case FLUSH:
+					{
+						if (Blocked == 0)
+						{
+							cUiButtonFlush();
+						}
+					}
+					break;
+
+				case WAIT_FOR_PRESS:
+					{
+						if (Blocked == 0)
+						{
+							if (cUiWaitForPress() == 0)
+							{
+								GH.Lms.SetObjectIp(TmpIp);
+								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetDispatchStatus(BUSYBREAK);
+							}
+						}
+						else
+						{
+							GH.Lms.SetObjectIp(TmpIp);
+							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetDispatchStatus(BUSYBREAK);
+						}
+					}
+					break;
+
+				case GET_HORZ:
+					{
+						if (Blocked == 0)
+						{
+							Inc = cUiGetHorz();
+						}
+						GH.Lms.PrimParPointer(Inc);
+					}
+					break;
+
+				case GET_VERT:
+					{
+						if (Blocked == 0)
+						{
+							Inc = cUiGetVert();
+						}
+						GH.Lms.PrimParPointer(Inc);
+					}
+					break;
+
+				case SET_BACK_BLOCK:
+					{
+						GH.UiInstance.BackButtonBlocked = (DATA8)GH.Lms.PrimParPointer();
+					}
+					break;
+
+				case GET_BACK_BLOCK:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.BackButtonBlocked);
+					}
+					break;
+
+				case TESTSHORTPRESS:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiTestShortPress(Button);
+						}
+						GH.Lms.PrimParPointer(State);
+					}
+					break;
+
+				case TESTLONGPRESS:
+					{
+						Button = (DATA8)GH.Lms.PrimParPointer();
+
+						if (Blocked == 0)
+						{
+							State = cUiTestLongPress(Button);
+						}
+						GH.Lms.PrimParPointer(State);
+					}
+					break;
+
+				case GET_CLICK:
+					{
+						GH.Lms.PrimParPointer(GH.UiInstance.Click);
+						GH.UiInstance.Click = 0;
+					}
+					break;
+			}
 		}
 
 		public void cUiKeepAlive()
 		{
-			throw new NotImplementedException();
-		}
-
-		
-
-		public void cUiRead()
-		{
-			throw new NotImplementedException();
-		}
-
-		
-
-		
-
-		public void cUiWrite()
-		{
-			throw new NotImplementedException();
+			cUiAlive();
+			GH.Lms.PrimParPointer((DATA8)GH.Lms.GetSleepMinutes());
 		}
 	}
 }

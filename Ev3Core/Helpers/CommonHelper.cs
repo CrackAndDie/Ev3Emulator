@@ -1,4 +1,6 @@
-﻿namespace Ev3Core.Helpers
+﻿using System.Runtime.InteropServices;
+
+namespace Ev3Core.Helpers
 {
 	public static class CommonHelper
 	{
@@ -33,7 +35,20 @@
 			return arr;
 		}
 
-		public static int Strcmp(byte[] first, string second)
+		public static TTo[] CastArray<TFrom, TTo>(TFrom[] arr) 
+			where TFrom : struct
+			where TTo : struct
+		{
+			ReadOnlySpan<TFrom> shortSpan = new ReadOnlySpan<TFrom>(arr);
+			return MemoryMarshal.Cast<TFrom, TTo>(shortSpan).ToArray();
+		}
+
+		public static TTo[] CastObjectArray<TTo>(object[] arr)
+		{
+			return arr.Select(x => (TTo)x).ToArray();
+		}
+
+		public static int Strcmp(sbyte[] first, string second)
 		{
 			if (first.Length > second.Length)
 				return 1;
@@ -52,7 +67,7 @@
 			return 0;
 		}
 
-		public static bool Strstr(byte[] b, byte[] a)
+		public static bool Strstr(sbyte[] b, sbyte[] a)
 		{
 			if (b.Length < a.Length)
 				return false;
@@ -118,6 +133,22 @@
 				dstBeg += dt.Length;
 			}
 			return 0; // idk what to return
+		}
+
+		public static void Strncpy(sbyte[] dst, sbyte[] src, int num)
+		{
+			for (int i = 0; i < Math.Min(src.Length, num); ++i)
+			{
+				dst[i] = src[i];
+			}
+		}
+
+		public static void Strcpy(sbyte[] dst, string src)
+		{
+			for (int i = 0; i < Math.Min(src.Length, dst.Length); ++i)
+			{
+				dst[i] = (sbyte)src[i];
+			}
 		}
 	}
 }

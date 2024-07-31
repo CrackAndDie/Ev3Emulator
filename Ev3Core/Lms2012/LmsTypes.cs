@@ -47,6 +47,8 @@ public class IMGHEAD
     public OBJID NumberOfObjects;              //!< Total number of objects in image
     public GBINDEX GlobalBytes;                  //!< Number of bytes to allocate for global variables
 
+    public const int SizeOf = 16;
+
     public IMGHEAD()
     {
     }
@@ -71,6 +73,8 @@ public class OBJHEAD                   // Object header
     public OBJID OwnerObjectId;                //!< Used by BLOCK's to hold the owner id
     public TRIGGER TriggerCount;                 //!< Used to determine how many triggers needed before the BLOCK object is activated
     public LBINDEX LocalBytes;                   //!< Number of bytes to allocate for local variables
+
+	public const int SizeOf = 12;
 }
 
 /*! \struct LABEL

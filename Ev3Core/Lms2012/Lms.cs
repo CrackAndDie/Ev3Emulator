@@ -15,12 +15,32 @@ namespace Ev3Core.Lms2012
             throw new NotImplementedException();
         }
 
-        public void cBranchJr()
+		public ushort CallingObjectId()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void cBranchJr()
         {
             throw new NotImplementedException();
         }
 
-        public void DefLabel()
+		public sbyte CheckSdcard(ref sbyte pChanged, ref int pTotal, ref int pFree, sbyte Force)
+		{
+			throw new NotImplementedException();
+		}
+
+		public sbyte CheckUsbstick(ref sbyte pChanged, ref int pTotal, ref int pFree, sbyte Force)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ushort CurrentProgramId()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void DefLabel()
         {
             throw new NotImplementedException();
         }
@@ -36,6 +56,26 @@ namespace Ev3Core.Lms2012
         }
 
 		public DSPSTAT ExecuteByteCode(byte[] pByteCode, byte[] pGlobals, byte[] pLocals)
+		{
+			throw new NotImplementedException();
+		}
+
+		public byte[] GetObjectIp()
+		{
+			throw new NotImplementedException();
+		}
+
+		public int GetObjectIpInd()
+		{
+			throw new NotImplementedException();
+		}
+
+		public sbyte GetSleepMinutes()
+		{
+			throw new NotImplementedException();
+		}
+
+		public sbyte GetTerminalEnable()
 		{
 			throw new NotImplementedException();
 		}
@@ -115,12 +155,27 @@ namespace Ev3Core.Lms2012
             throw new NotImplementedException();
         }
 
-        public void Probe()
+		public object PrimParPointer()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void PrimParPointer(object data)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Probe()
         {
             throw new NotImplementedException();
         }
 
-        public void ProgramInfo()
+		public void ProgramEnd(ushort PrgId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void ProgramInfo()
         {
             throw new NotImplementedException();
         }
@@ -130,7 +185,17 @@ namespace Ev3Core.Lms2012
             throw new NotImplementedException();
         }
 
-        public void ProgramStop()
+		public OBJSTAT ProgramStatus(ushort PrgId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public OBJSTAT ProgramStatusChange(ushort PrgId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void ProgramStop()
         {
             throw new NotImplementedException();
         }
@@ -140,7 +205,37 @@ namespace Ev3Core.Lms2012
             throw new NotImplementedException();
         }
 
-        public void Sleep()
+		public void SetDispatchStatus(DSPSTAT DspStat)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void SetDispatchStatus(int DspStat)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void SetObjectIp(byte[] Ip)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void SetObjectIpInd(int ind)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void SetSleepMinutes(sbyte Minutes)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void SetTerminalEnable(sbyte Value)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Sleep()
         {
             throw new NotImplementedException();
         }
@@ -164,5 +259,20 @@ namespace Ev3Core.Lms2012
         {
             throw new NotImplementedException();
         }
-    }
+
+		public RESULT ValidateChar(ref sbyte pChar, sbyte Set)
+		{
+			throw new NotImplementedException();
+		}
+
+		public RESULT ValidateString(sbyte[] pString, sbyte Set)
+		{
+			throw new NotImplementedException();
+		}
+
+		public object[] VmMemoryResize(short Handle, int Elements)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

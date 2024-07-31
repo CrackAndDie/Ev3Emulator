@@ -40,6 +40,9 @@ namespace Ev3Core.Lms2012.Interfaces
 		void Tst();
 
 		// was not presented in lms2012.h
+		object PrimParPointer(); // to get
+		void PrimParPointer(object data); // to set
+
 		PRGID CurrentProgramId();
 		OBJID CallingObjectId();
 		DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals);
@@ -50,6 +53,17 @@ namespace Ev3Core.Lms2012.Interfaces
 		void ProgramEnd(PRGID PrgId);
 		RESULT ValidateChar(ref DATA8 pChar, DATA8 Set);
 		RESULT ValidateString(DATA8[] pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
+		object[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
+		void SetDispatchStatus(DSPSTAT DspStat);
+		void SetDispatchStatus(int DspStat);
+
+		IP GetObjectIp();
+		int GetObjectIpInd();
+		void SetObjectIp(IP Ip);
+		void SetObjectIpInd(int ind);
+
+		OBJSTAT ProgramStatus(PRGID PrgId);
+		OBJSTAT ProgramStatusChange(PRGID PrgId);
 
 		DATA8 CheckUsbstick(ref DATA8 pChanged, ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
 		DATA8 CheckSdcard(ref DATA8 pChanged, ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
@@ -363,6 +377,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public OBJHEAD[] pObjHead;                     //!< Pointer to start of object headers
 		public OBJ[][] pObjList;                     //!< Pointer to object pointer list
 
+		public int ObjectIpInd = 0;                     //!< Working object Ip index
 		public IP ObjectIp;                     //!< Working object Ip
 		public LP ObjectLocal;                  //!< Working object locals
 		public OBJID Objects;                      //!< No of objects in image

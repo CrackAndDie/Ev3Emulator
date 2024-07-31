@@ -24,15 +24,15 @@ namespace Ev3Core.Cmemory.Interfaces
 
         DATA8 cMemoryGetCacheFiles();
 
-        DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, char[] pFileName, char[] pName);
+        DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, DATA8[] pFileName, DATA8[] pName);
 
-        DATA8 cMemoryFindSubFolders(char[] pFolderName);
+        DATA8 cMemoryFindSubFolders(DATA8[] pFolderName);
 
-        DATA8 cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, char[] pFolderName, char[] pSubFolderName);
+        DATA8 cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, DATA8[] pFolderName, DATA8[] pSubFolderName);
 
-        DATA8 cMemoryFindFiles(char[] pFolderName);
+        DATA8 cMemoryFindFiles(DATA8[] pFolderName);
 
-        void cMemoryGetResourcePath(PRGID PrgId, char[] pString, DATA8 MaxLength);
+        void cMemoryGetResourcePath(PRGID PrgId, DATA8[] pString, DATA8 MaxLength);
 
         RESULT cMemoryGetIcon(DATA8[] pFolderName, DATA8 Item, DATA32[] pImagePointer);
 
@@ -40,11 +40,11 @@ namespace Ev3Core.Cmemory.Interfaces
 
         DSPSTAT cMemoryCloseFile(PRGID PrgId, FileInfo Handle);
 
-        RESULT cMemoryCheckOpenWrite(char[] pFileName);
+        RESULT cMemoryCheckOpenWrite(DATA8[] pFileName);
 
-        RESULT cMemoryCheckFilename(char[] pFilename, char[] pPath, char[] pName, char[] pExt);
+        RESULT cMemoryCheckFilename(DATA8[] pFilename, DATA8[] pPath, DATA8[] pName, DATA8[] pExt);
 
-        RESULT cMemoryGetMediaName(char[] pChar, char[] pName);
+        RESULT cMemoryGetMediaName(DATA8[] pChar, DATA8[] pName);
 
 
 
@@ -66,17 +66,17 @@ namespace Ev3Core.Cmemory.Interfaces
 
         RESULT cMemoryOpenFolder(PRGID PrgId, DATA8 Type, DATA8[] pFolderName, ref DirectoryInfo pHandle);
 
-        RESULT cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16[] pItems);
+        RESULT cMemoryGetFolderItems(PRGID PrgId, DirectoryInfo Handle, ref DATA16 pItems);
 
-        RESULT cMemoryGetItemName(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType, ref DATA8 pPriority);
+        RESULT cMemoryGetItemName(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType, ref DATA8 pPriority);
 
-        RESULT cMemoryGetItemIcon(PRGID PrgId, HANDLER Handle, DATA16 Item, ref HANDLER pHandle, DATA32[] pImagePointer);
+        RESULT cMemoryGetItemIcon(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, ref FileInfo pHandle, DATA32[] pImagePointer);
 
-        RESULT cMemoryGetItemText(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8[] pText);
+        RESULT cMemoryGetItemText(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, DATA8[] pText);
 
-        RESULT cMemorySetItemText(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8[] pText);
+        RESULT cMemorySetItemText(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8[] pText);
 
-        RESULT cMemoryGetItem(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType);
+        RESULT cMemoryGetItem(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType);
 
         void cMemoryCloseFolder(PRGID PrgId, DirectoryInfo pHandle);
 

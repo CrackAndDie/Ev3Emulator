@@ -185,9 +185,9 @@ namespace Ev3Core.Cui.Interfaces
         public DATA16 Chars;
         public DATA16 Lines;
 
-        public HANDLER hFolders;
-        public HANDLER hFiles;
-        public PRGID PrgId;
+        public DirectoryInfo hFolders = null;
+        public DirectoryInfo hFiles = null;
+		public PRGID PrgId;
         public OBJID ObjId;
 
         public DATA16 OldFiles;
