@@ -135,6 +135,21 @@ namespace Ev3Core.Helpers
 			return 0; // idk what to return
 		}
 
+		public static int Sprintf<T>(T[] dst, int dstBeg, params T[][] data)
+		{
+			foreach (var dt in data)
+			{
+				int dtIndexer = 0;
+				for (int i = dstBeg; i < Math.Min(dst.Length, dt.Length); ++i)
+				{
+					dst[i] = dt[dtIndexer];
+					dtIndexer++;
+				}
+				dstBeg += dt.Length;
+			}
+			return 0; // idk what to return
+		}
+
 		public static void Strncpy(sbyte[] dst, sbyte[] src, int num)
 		{
 			for (int i = 0; i < Math.Min(src.Length, num); ++i)

@@ -1,5 +1,6 @@
 ﻿using Ev3Core.Csound.Interfaces;
 using Ev3Core.Enums;
+using Ev3Core.Extensions;
 using Ev3Core.Helpers;
 using static Ev3Core.Defines;
 
@@ -421,41 +422,40 @@ namespace Ev3Core.Csound
 						PathName[0] = (char)0;
 						if (pFileName[0] != '.')
 						{
-							GetResourcePath(PathName, MAX_FILENAME_SIZE);
-							sprintf(SoundInstance.PathBuffer, "%s%s.rsf", (char*)PathName, (char*)pFileName);
+							GH.Lms.GetResourcePath(PathName, MAX_FILENAME_SIZE);
+							CommonHelper.Sprintf<char>(GH.SoundInstance.PathBuffer, 0, PathName, pFileName.ToCharArray(), ".rsf".ToCharArray());
 						}
 						else
 						{
-							sprintf(SoundInstance.PathBuffer, "%s.rsf", (char*)pFileName);
+							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, 0, pFileName.ToCharArray(), ".rsf".ToCharArray());
 						}
 
 						// Open SoundFile
 
-						SoundInstance.hSoundFile = open(SoundInstance.PathBuffer, O_RDONLY, 0666);
+						GH.SoundInstance.hSoundFile = new FileInfo(string.Concat(GH.SoundInstance.PathBuffer));
 
-						if (SoundInstance.hSoundFile >= 0)
+						if (GH.SoundInstance.hSoundFile != null)
 						{
 							// Get actual FileSize
-							stat(SoundInstance.PathBuffer, &SoundInstance.FileStatus);
-							SoundInstance.SoundFileLength = SoundInstance.FileStatus.st_size;
+							GH.SoundInstance.SoundFileLength = SoundInstance.FileStatus.st_size;
 
 							// BIG Endianess
 
 							read(SoundInstance.hSoundFile, &Tmp1, 1);
 							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							SoundInstance.SoundFileFormat = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							GH.SoundInstance.SoundFileFormat = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
 
 							read(SoundInstance.hSoundFile, &Tmp1, 1);
 							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							SoundInstance.SoundDataLength = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							GH.SoundInstance.SoundDataLength = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
 
 							read(SoundInstance.hSoundFile, &Tmp1, 1);
 							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							SoundInstance.SoundSampleRate = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							GH.SoundInstance.SoundSampleRate = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
 
 							read(SoundInstance.hSoundFile, &Tmp1, 1);
 							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							SoundInstance.SoundPlayMode = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							GH.SoundInstance.SoundPlayMode = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
 
 							SoundInstance.cSoundState = SOUND_SETUP_FILE;
 
