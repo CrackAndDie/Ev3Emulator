@@ -56,6 +56,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		object[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
 		void SetDispatchStatus(DSPSTAT DspStat);
 		void SetDispatchStatus(int DspStat);
+		void GetResourcePath(char[] pString, DATA8 MaxLength);
 
 		IP GetObjectIp();
 		int GetObjectIpInd();

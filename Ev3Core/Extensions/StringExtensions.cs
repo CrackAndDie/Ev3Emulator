@@ -10,6 +10,11 @@ namespace Ev3Core.Extensions
 			return CommonHelper.CastArray<char, sbyte>(str.ToCharArray());
 		}
 
+		public static byte[] ToByteArray(this sbyte[] arr)
+		{
+			return CommonHelper.CastArray<sbyte, byte>(arr);
+		}
+
 		public static char[] ToCharArray(this sbyte[] arr)
 		{
 			return arr.Select(x => (char)x).ToArray();

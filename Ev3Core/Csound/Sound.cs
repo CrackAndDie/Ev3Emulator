@@ -75,43 +75,19 @@ namespace Ev3Core.Csound
 						{
 							GH.SoundInstance.SoundData[0] = SERVICE;
 
-							if (GH.SoundInstance.SoundFileFormat == FILEFORMAT_ADPCM_SOUND)
+							// Adjust the chunk size if necessary
+							if (GH.SoundInstance.SoundDataLength > SOUND_CHUNK)
+								BytesToRead = SOUND_CHUNK;
+							else
+								BytesToRead = GH.SoundInstance.SoundDataLength;
+
+							if (GH.SoundInstance.hSoundFile != null)  // Valid file
 							{
-								// Adjust the chunk size for ADPCM (nibbles) if necessary
-								if (GH.SoundInstance.SoundDataLength > SOUND_ADPCM_CHUNK)
-									BytesToRead = SOUND_ADPCM_CHUNK;
-								else
-									BytesToRead = GH.SoundInstance.SoundDataLength;
+								var tmpArr = GH.SoundInstance.SoundData.Skip(1).ToArray();
+								BytesRead = SoundHelper.Read(GH.SoundInstance.hSoundFile, tmpArr, BytesToRead);
+								Array.Copy(tmpArr, 0, GH.SoundInstance.SoundData, 1, BytesToRead);
 
-								if (GH.SoundInstance.hSoundFile != null)  // Valid file
-								{
-									BytesRead = SoundHelper.Read(GH.SoundInstance.hSoundFile, AdPcmData, BytesToRead);
-
-									for (i = 0; i < BytesRead; i++)
-									{
-										GH.SoundInstance.SoundData[2 * i + 1] = cSoundGetAdPcmValue((AdPcmData[i] >> 4) & 0x0F);
-										GH.SoundInstance.SoundData[2 * i + 2] = cSoundGetAdPcmValue(AdPcmData[i] & 0x0F);
-									}
-
-									GH.SoundInstance.BytesToWrite = (UBYTE)(1 + BytesRead * 2);
-								}
-							}
-							else // Non compressed data
-							{
-								// Adjust the chunk size if necessary
-								if (GH.SoundInstance.SoundDataLength > SOUND_CHUNK)
-									BytesToRead = SOUND_CHUNK;
-								else
-									BytesToRead = GH.SoundInstance.SoundDataLength;
-
-								if (GH.SoundInstance.hSoundFile != null)  // Valid file
-								{
-									var tmpArr = GH.SoundInstance.SoundData.Skip(1).ToArray();
-									BytesRead = SoundHelper.Read(GH.SoundInstance.hSoundFile, tmpArr, BytesToRead);
-									Array.Copy(tmpArr, 0, GH.SoundInstance.SoundData, 1, BytesToRead);
-
-									GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
-								}
+								GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
 							}
 
 							BytesWritten = GH.Ev3System.SoundHandler.PlayChunk(GH.SoundInstance.SoundData, GH.SoundInstance.BytesToWrite);
@@ -437,33 +413,32 @@ namespace Ev3Core.Csound
 						if (GH.SoundInstance.hSoundFile != null)
 						{
 							// Get actual FileSize
-							GH.SoundInstance.SoundFileLength = SoundInstance.FileStatus.st_size;
+							GH.SoundInstance.SoundFileLength = (ushort)GH.SoundInstance.hSoundFile.Length;
 
 							// BIG Endianess
+							using FileStream fileStream = new FileStream(GH.SoundInstance.hSoundFile.FullName, FileMode.Open);
+							Tmp1 = (byte)fileStream.ReadByte();
+							Tmp2 = (byte)fileStream.ReadByte();
+							GH.SoundInstance.SoundFileFormat = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
 
-							read(SoundInstance.hSoundFile, &Tmp1, 1);
-							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							GH.SoundInstance.SoundFileFormat = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							Tmp1 = (byte)fileStream.ReadByte();
+							Tmp2 = (byte)fileStream.ReadByte();
+							GH.SoundInstance.SoundDataLength = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
 
-							read(SoundInstance.hSoundFile, &Tmp1, 1);
-							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							GH.SoundInstance.SoundDataLength = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							Tmp1 = (byte)fileStream.ReadByte();
+							Tmp2 = (byte)fileStream.ReadByte();
+							GH.SoundInstance.SoundSampleRate = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
 
-							read(SoundInstance.hSoundFile, &Tmp1, 1);
-							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							GH.SoundInstance.SoundSampleRate = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							Tmp1 = (byte)fileStream.ReadByte();
+							Tmp2 = (byte)fileStream.ReadByte();
+							GH.SoundInstance.SoundPlayMode = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
 
-							read(SoundInstance.hSoundFile, &Tmp1, 1);
-							read(SoundInstance.hSoundFile, &Tmp2, 1);
-							GH.SoundInstance.SoundPlayMode = (UWORD)Tmp1 << 8 | (UWORD)Tmp2;
+							GH.SoundInstance.cSoundState = SOUND_SETUP_FILE;
 
-							SoundInstance.cSoundState = SOUND_SETUP_FILE;
-
-							if (SoundInstance.SoundFileFormat == FILEFORMAT_ADPCM_SOUND)
-								cSoundInitAdPcm();
+							// probably no need to init anything
+							//if (GH.SoundInstance.SoundFileFormat == FILEFORMAT_ADPCM_SOUND)
+							//	GH.cSoundInitAdPcm();
 						}
-
-
 					}
 					else
 					{
@@ -480,24 +455,16 @@ namespace Ev3Core.Csound
 
 			if (BytesToWrite > 0)
 			{
-				SoundInstance.SoundDriverDescriptor = open(SOUND_DEVICE_NAME, O_WRONLY);
-				if (SoundInstance.SoundDriverDescriptor >= 0)
-				{
-					BytesWritten = write(SoundInstance.SoundDriverDescriptor, SoundData, BytesToWrite);
-					close(SoundInstance.SoundDriverDescriptor);
-					SoundInstance.SoundDriverDescriptor = -1;
+				BytesWritten = GH.Ev3System.SoundHandler.PlayChunk(SoundData.ToByteArray(), (byte)BytesToWrite);
 
-					if (SoundInstance.cSoundState == SOUND_SETUP_FILE)  // The one and only situation
-					{
-						SoundInstance.BytesToWrite = 0;                   // Reset
-						if (TRUE == Loop)
-							SoundInstance.cSoundState = SOUND_FILE_LOOPING;
-						else
-							SoundInstance.cSoundState = SOUND_FILE_PLAYING;
-					}
+				if (GH.SoundInstance.cSoundState == SOUND_SETUP_FILE)  // The one and only situation
+				{
+					GH.SoundInstance.BytesToWrite = 0;                   // Reset
+					if (1 == Loop)
+						GH.SoundInstance.cSoundState = SOUND_FILE_LOOPING;
+					else
+						GH.SoundInstance.cSoundState = SOUND_FILE_PLAYING;
 				}
-				else
-					SoundInstance.cSoundState = SOUND_STOPPED;          // Couldn't do the job :-(
 			}
 			else
 			{
@@ -506,20 +473,37 @@ namespace Ev3Core.Csound
 			}
 		}
 
-		
-
-		
+		public void cSoundTest()
+		{
+			if (GH.SoundInstance.Sound.Status == BUSY)
+			{
+				GH.Lms.PrimParPointer((DATA8)1);
+			}
+			else
+			{
+				GH.Lms.PrimParPointer((DATA8)0);
+			}
+		}
 
 		public void cSoundReady()
 		{
-			throw new NotImplementedException();
-		}
+			IP TmpIp;
+			int TmpIpInd;
+			DSPSTAT DspStat = DSPSTAT.NOBREAK;
 
-		public void cSoundTest()
-		{
-			throw new NotImplementedException();
-		}
+			TmpIp = GH.Lms.GetObjectIp();
+			TmpIpInd = GH.Lms.GetObjectIpInd();
 
-		
+			if (GH.SoundInstance.Sound.Status == BUSY)
+			{ // If BUSY check for OVERRULED
+
+				{ // Rewind IP and set status
+					DspStat = DSPSTAT.BUSYBREAK; // break the interpreter and waits busy
+					GH.Lms.SetDispatchStatus(DspStat);
+					GH.Lms.SetObjectIp(TmpIp);
+					GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+				}
+			}
+		}
 	}
 }
