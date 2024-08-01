@@ -1,5 +1,7 @@
 ﻿using Ev3Core.Ccom.Interfaces;
 using Ev3Core.Cmemory.Interfaces;
+using Ev3Core.Coutput;
+using Ev3Core.Coutput.Interfaces;
 using Ev3Core.Csound;
 using Ev3Core.Csound.Interfaces;
 using Ev3Core.Cui;
@@ -19,7 +21,8 @@ namespace Ev3Core
         public readonly static GLOBALS VMInstance = new GLOBALS();
 
         // c_memory
-        public readonly static IMemory Memory = null;
+        public readonly static IMemory Memory = new Cmemory.Memory();
+        public readonly static MEMORY_GLOBALS MemoryInstance = new MEMORY_GLOBALS();
 
         // c_com
         public readonly static ICom Com = null;
@@ -32,5 +35,9 @@ namespace Ev3Core
         public readonly static ITerminal Terminal = new Terminal();
         public readonly static ILcd Lcd = new Lcd();
 		public readonly static UI_GLOBALS UiInstance = new UI_GLOBALS();
+
+        // c_output
+        public readonly static IOutput Output = new Output();
+        public readonly static OUTPUT_GLOBALS OutputInstance = new OUTPUT_GLOBALS();
 	}
 }

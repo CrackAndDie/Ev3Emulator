@@ -55,6 +55,6 @@ namespace Ev3Core.Coutput.Interfaces
         public int MotorFile;
 
         public MOTORDATA[] MotorData = CommonHelper.Array1d<MOTORDATA>(OUTPUTS, true);
-        public MOTORDATA pMotor;
+        public int pMotor = 0;
     }
 }

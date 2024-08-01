@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Ev3Core.Cinput.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace Ev3Core.Helpers
 {
@@ -46,6 +47,16 @@ namespace Ev3Core.Helpers
 		public static TTo[] CastObjectArray<TTo>(object[] arr)
 		{
 			return arr.Select(x => (TTo)x).ToArray();
+		}
+
+		public static byte[] GetBytes<T>(T data, bool isLe = true) where T : struct
+		{
+			var result = (byte[])typeof(BitConverter).GetMethod("GetBytes", new[] { typeof(T) }).Invoke(null, new[] { (object)data });
+			if ((isLe && BitConverter.IsLittleEndian) || (!isLe && !BitConverter.IsLittleEndian))
+				return result;
+			if ((isLe && !BitConverter.IsLittleEndian) || (!isLe && BitConverter.IsLittleEndian))
+				Array.Reverse(result);
+			return result;
 		}
 
 		public static int Strcmp(sbyte[] first, string second)

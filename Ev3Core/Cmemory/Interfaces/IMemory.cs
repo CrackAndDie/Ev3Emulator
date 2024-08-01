@@ -14,13 +14,16 @@ namespace Ev3Core.Cmemory.Interfaces
 
         RESULT cMemoryExit();
 
-        RESULT cMemoryMalloc(object[][] ppMemory, DATA32 Size);
+        RESULT cMemoryMalloc(object[][] ppMemory, DATA32 Size, int memind = 0);
+        RESULT cMemoryMalloc(out object[] ppMemory, DATA32 Size);
 
-        RESULT cMemoryRealloc(object[] pOldMemory, object[][] ppMemory, DATA32 Size);
+        RESULT cMemoryRealloc(object[] pOldMemory, object[][] ppMemory, DATA32 Size, int memind = 0);
+        RESULT cMemoryRealloc(object[] pOldMemory, out object[] ppMemory, DATA32 Size);
 
-        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory);
+        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory, int memind = 0);
+        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, out object[] pMemory);
 
-        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory);
+        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory, int memind = 0);
 
         DATA8 cMemoryGetCacheFiles();
 
@@ -101,13 +104,27 @@ namespace Ev3Core.Cmemory.Interfaces
         public DATA8 Free1;
         public DATA8 Free2;
         public DATA8[] pArray; // Must be aligned
-    }
+
+        public const int Sizeof = 16;
+
+		public static DESCR FromData(object[] data)
+		{
+			//TODO:!!!!
+			return new DESCR();
+		}
+	}
 
     public class FDESCR
     {
         public int hFile;
         public DATA8 Access;
         public char[] Filename = CommonHelper.Array1d<char>(vmFILENAMESIZE);
+
+        public static FDESCR FromData(object[] data)
+        {
+            //TODO:!!!!
+            return new FDESCR();
+        }
     }
 
     public class MEMORY_GLOBALS

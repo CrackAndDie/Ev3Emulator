@@ -1,5 +1,6 @@
 ﻿using Ev3Core.Enums;
 using Ev3Core.Helpers;
+using System.Runtime.Intrinsics.X86;
 using static Ev3Core.Defines;
 
 namespace Ev3Core.Lms2012.Interfaces
@@ -298,66 +299,124 @@ namespace Ev3Core.Lms2012.Interfaces
 
 	public class STEPPOWER
 	{
-		public DATA8 Cmd;
+		public UBYTE Cmd;
 		public DATA8 Nos;
 		public DATA8 Power;
 		public DATA32 Step1;
 		public DATA32 Step2;
 		public DATA32 Step3;
 		public DATA8 Brake;
+
+		public const int Sizeof = 16;
+
+		public byte[] ToByteArray()
+		{
+			var st1 = CommonHelper.GetBytes(Step1);
+			var st2 = CommonHelper.GetBytes(Step2);
+			var st3 = CommonHelper.GetBytes(Step3);
+			return new byte[] { Cmd, (byte)Nos, (byte)Power, st1[0], st1[1], st1[2], st1[3], st2[0], st2[1], st2[2], st2[3], st3[0], st3[1], st3[2], st3[3], (byte)Brake };
+		}
 	}
 
 	public class TIMEPOWER
 	{
-		public DATA8 Cmd;
+		public UBYTE Cmd;
 		public DATA8 Nos;
 		public DATA8 Power;
 		public DATA32 Time1;
 		public DATA32 Time2;
 		public DATA32 Time3;
 		public DATA8 Brake;
+
+		public const int Sizeof = 16;
+
+		public byte[] ToByteArray()
+		{
+			var st1 = CommonHelper.GetBytes(Time1);
+			var st2 = CommonHelper.GetBytes(Time2);
+			var st3 = CommonHelper.GetBytes(Time3);
+			return new byte[] { Cmd, (byte)Nos, (byte)Power, st1[0], st1[1], st1[2], st1[3], st2[0], st2[1], st2[2], st2[3], st3[0], st3[1], st3[2], st3[3], (byte)Brake };
+		}
 	}
 
 	public class STEPSPEED
 	{
-		public DATA8 Cmd;
+		public UBYTE Cmd;
 		public DATA8 Nos;
 		public DATA8 Speed;
 		public DATA32 Step1;
 		public DATA32 Step2;
 		public DATA32 Step3;
 		public DATA8 Brake;
+
+		public const int Sizeof = 16;
+
+		public byte[] ToByteArray()
+		{
+			var st1 = CommonHelper.GetBytes(Step1);
+			var st2 = CommonHelper.GetBytes(Step2);
+			var st3 = CommonHelper.GetBytes(Step3);
+			return new byte[] { Cmd, (byte)Nos, (byte)Speed, st1[0], st1[1], st1[2], st1[3], st2[0], st2[1], st2[2], st2[3], st3[0], st3[1], st3[2], st3[3], (byte)Brake };
+		}
 	}
 
 	public class TIMESPEED
 	{
-		public DATA8 Cmd;
+		public UBYTE Cmd;
 		public DATA8 Nos;
 		public DATA8 Speed;
 		public DATA32 Time1;
 		public DATA32 Time2;
 		public DATA32 Time3;
 		public DATA8 Brake;
+
+		public const int Sizeof = 16;
+
+		public byte[] ToByteArray()
+		{
+			var st1 = CommonHelper.GetBytes(Time1);
+			var st2 = CommonHelper.GetBytes(Time2);
+			var st3 = CommonHelper.GetBytes(Time3);
+			return new byte[] { Cmd, (byte)Nos, (byte)Speed, st1[0], st1[1], st1[2], st1[3], st2[0], st2[1], st2[2], st2[3], st3[0], st3[1], st3[2], st3[3], (byte)Brake };
+		}
 	}
 
 	public class STEPSYNC
 	{
-		public DATA8 Cmd;
+		public UBYTE Cmd;
 		public DATA8 Nos;
 		public DATA8 Speed;
 		public DATA16 Turn;
 		public DATA32 Step;
 		public DATA8 Brake;
+
+		public const int Sizeof = 10;
+
+		public byte[] ToByteArray()
+		{
+			var st1 = CommonHelper.GetBytes(Turn);
+			var st2 = CommonHelper.GetBytes(Step);
+			return new byte[] { Cmd, (byte)Nos, (byte)Speed, st1[0], st1[1], st2[0], st2[1], st2[2], st2[3], (byte)Brake };
+		}
 	}
 
 	public class TIMESYNC
 	{
-		public DATA8 Cmd;
+		public UBYTE Cmd;
 		public DATA8 Nos;
 		public DATA8 Speed;
 		public DATA16 Turn;
 		public DATA32 Time;
 		public DATA8 Brake;
+
+		public const int Sizeof = 10;
+
+		public byte[] ToByteArray()
+		{
+			var st1 = CommonHelper.GetBytes(Turn);
+			var st2 = CommonHelper.GetBytes(Time);
+			return new byte[] { Cmd, (byte)Nos, (byte)Speed, st1[0], st1[1], st2[0], st2[1], st2[2], st2[3], (byte)Brake };
+		}
 	}
 
 	public class GLOBALS

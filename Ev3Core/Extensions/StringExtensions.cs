@@ -7,7 +7,12 @@ namespace Ev3Core.Extensions
 	{
 		public static sbyte[] ToSbyteArray(this string str)
 		{
-			return CommonHelper.CastArray<char, sbyte>(str.ToCharArray());
+			return ToSbyteArray(str.ToCharArray());
+		}
+
+		public static sbyte[] ToSbyteArray(this char[] arr)
+		{
+			return CommonHelper.CastArray<char, sbyte>(arr);
 		}
 
 		public static byte[] ToByteArray(this sbyte[] arr)
@@ -17,7 +22,7 @@ namespace Ev3Core.Extensions
 
 		public static char[] ToCharArray(this sbyte[] arr)
 		{
-			return arr.Select(x => (char)x).ToArray();
+			return CommonHelper.CastArray<sbyte, char>(arr);
 		}
 
 		public static string AsString(this sbyte[] arr)
