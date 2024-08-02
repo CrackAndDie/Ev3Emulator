@@ -1,6 +1,8 @@
-﻿using Ev3Core.Cui.Interfaces;
+﻿using Ev3Core.Cinput.Interfaces;
+using Ev3Core.Cui.Interfaces;
 using Ev3Core.Enums;
 using Ev3Core.Helpers;
+using Ev3Core.Lms2012.Interfaces;
 
 namespace Ev3Core
 {
@@ -408,6 +410,12 @@ namespace Ev3Core
 
 		public const int IIC_DATA_LENGTH = MAX_DEVICE_DATALENGTH;
 		public const int IIC_NAME_LENGTH = 8;
+
+		// THIS IS FULLY CUSTOM SHITE
+		public const int IIC_SET_CONN = 0;
+		public const int IIC_READ_TYPE_INFO = 1;
+		public const int IIC_SETUP = 2;
+		public const int IIC_SET = 3;
 
 		public const int IIC_PORT_CHANGED = 0x01;    //!< Input port changed
 		public const int IIC_DATA_READY = 0x08;     //!< Data is ready

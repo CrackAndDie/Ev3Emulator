@@ -528,15 +528,14 @@ namespace Ev3Core.Cinput
 						GH.InputInstance.IicDat.WrLng = WrLng;
 						GH.InputInstance.IicDat.RdLng = RdLng;
 
-						// TODO: some shite with IIC
-						//Memcpy(&InputInstance.IicDat.WrData[0], pWrData, InputInstance.IicDat.WrLng);
+						Array.Copy(pWrData, 0, GH.InputInstance.IicDat.WrData, 0, GH.InputInstance.IicDat.WrLng);
 
-						//ioctl(InputInstance.IicFile, IIC_SETUP, &InputInstance.IicDat);
+						GH.Ev3System.InputHandler.IoctlI2c(IIC_SETUP, GH.InputInstance.IicDat);
 
-						//if (InputInstance.IicDat.Result == OK)
-						//{
-						//	Memcpy(pRdData, &InputInstance.IicDat.RdData[0], InputInstance.IicDat.RdLng);
-						//}
+						if (GH.InputInstance.IicDat.Result == OK)
+						{
+							Array.Copy(GH.InputInstance.IicDat.RdData, 0, pRdData, 0, GH.InputInstance.IicDat.RdLng);
+						}
 					}
 				}
 			}
@@ -1750,7 +1749,7 @@ namespace Ev3Core.Cinput
 			}
 		}
 
-		RESULT cInputStartTypeDataUpload()
+		public RESULT cInputStartTypeDataUpload()
 		{
 			GH.InputInstance.TypeDataIndex = 0;
 			GH.InputInstance.TypeDataTimer = DELAY_TO_TYPEDATA;
