@@ -188,6 +188,21 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
+		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, out object[] pMemory)
+		{
+			RESULT Result = RESULT.FAIL;
+			object[] pTmp;
+			pMemory = null
+
+			if (cMemoryGetPointer(PrgId, Handle, out pTmp) == OK)
+			{
+				pMemory = pTmp;
+				Result = OK;
+			}
+
+			return (Result);
+		}
+
 		DSPSTAT cMemoryFreeHandle(PRGID PrgId, HANDLER Handle)
 		{
 			DSPSTAT Result = DSPSTAT.FAILBREAK;

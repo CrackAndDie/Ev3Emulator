@@ -24,6 +24,7 @@ namespace Ev3Core.Cmemory.Interfaces
         RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, out object[] pMemory);
 
         RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory, int memind = 0);
+        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, out object[] pMemory);
 
         DATA8 cMemoryGetCacheFiles();
 

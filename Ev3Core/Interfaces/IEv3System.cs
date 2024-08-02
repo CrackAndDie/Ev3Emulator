@@ -8,5 +8,6 @@
 		ILcdHandler LcdHandler { get; }
 		ISoundHandler SoundHandler { get; }
 		IOutputHandler OutputHandler { get; }
+		IInputHandler InputHandler { get; }
 	}
 }

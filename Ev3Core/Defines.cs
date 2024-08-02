@@ -1668,6 +1668,21 @@ namespace Ev3Core
 		// public static KeyValuePair<OP, OPCODE> INPUT_DEVICE_LIST = OC(opINPUT_DEVICE_LIST,&cInputDeviceList,7,0 )
 		#endregion
 
+		#region c_input.c
+		public const int SENSOR_RESOLUTION = 1023;
+
+		/* Remember this is ARM AD converter  - 3,3 VDC as max voltage      */
+		/* When in color mode background value is substracted => min = 0!!! */
+		public const int AD_MAX = 2703;
+		public const int AD_FS = 3300;
+
+		public const int COLORSENSORBGMIN = (214 / (AD_FS / AD_MAX));
+		public const int COLORSENSORMIN = (1 / (AD_FS / AD_MAX)); /* 1 inserted else div 0 (1L/(120/AD_MAX)) */
+		public const int COLORSENSORMAX = ((AD_MAX * AD_FS) / 3300);
+		public const int COLORSENSORPCTDYN = (UBYTE)(((COLORSENSORMAX - COLORSENSORMIN) * 100L) / AD_MAX);
+		public const int COLORSENSORBGPCTDYN = (UBYTE)(((COLORSENSORMAX - COLORSENSORBGMIN) * 100L) / AD_MAX);
+		#endregion
+
 		#region c_ui.h
 		public const int IMAGEBUFFER_SIZE = 1000;
 		public const int KEYBUF_SIZE = 100;

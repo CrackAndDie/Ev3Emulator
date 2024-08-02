@@ -58,6 +58,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		void SetDispatchStatus(DSPSTAT DspStat);
 		void SetDispatchStatus(int DspStat);
 		void GetResourcePath(char[] pString, DATA8 MaxLength);
+		void SetInstructions(ULONG Instructions);
 
 		IP GetObjectIp();
 		int GetObjectIpInd();
@@ -117,7 +118,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public DATA8[] Name = CommonHelper.Array1d<DATA8>(FILENAME_SIZE);           //!
 	}
 
-	public class TYPES // if data type changes - remember to change "cInputTypeDataInit" !
+	public class TYPES : ICloneable // if data type changes - remember to change "cInputTypeDataInit" !
 	{
 		public SBYTE[] Name = CommonHelper.Array1d<SBYTE>(TYPE_NAME_LENGTH + 1); //!< Device name
 		public DATA8 Type;                       //!< Device type
@@ -139,6 +140,33 @@ namespace Ev3Core.Lms2012.Interfaces
 		public DATA8 Pins;                       //!< Device pin setup
 		public SBYTE[] Symbol = CommonHelper.Array1d<SBYTE>(SYMBOL_LENGTH + 1);  //!< SI unit symbol
 		public UWORD Align;
+
+		public object Clone()
+		{
+			return new TYPES()
+			{
+				Name = (SBYTE[])Name.Clone(),
+				Type = Type,
+				Connection = Connection,
+				Mode = Mode,
+				DataSets = DataSets,
+				Format = Format,
+				Figures = Figures,
+				Decimals = Decimals,
+				Views = Views,
+				RawMin = RawMin,
+				RawMax = RawMax,
+				PctMin = PctMin,
+				PctMax = PctMax,
+				SiMin = SiMin,
+				SiMax = SiMax,
+				InvalidTime = InvalidTime,
+				IdValue = IdValue,
+				Pins = Pins,
+				Symbol = (SBYTE[])Symbol.Clone(),
+				Align = Align,
+			};
+		}
 	}
 
 	public class COLORSTRUCT
@@ -242,6 +270,14 @@ namespace Ev3Core.Lms2012.Interfaces
 		public DATA8 PollLng;
 		public ULONG PollString;
 		public DATA8 ReadLng;
+
+		public const int Sizeof = 24;
+
+		public static IICSTR FromBytes(object[] data)
+		{
+			// TODO:
+			return null;
+		}
 	}
 
 	public class TSTPIN

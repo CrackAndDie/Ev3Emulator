@@ -78,6 +78,25 @@ namespace Ev3Core.Helpers
 			return 0;
 		}
 
+		public static int Strcmp(sbyte[] first, sbyte[] second)
+		{
+			if (first.Length > second.Length)
+				return 1;
+			if (first.Length < second.Length)
+				return -1;
+
+			for (int i = 0; i < first.Length; ++i)
+			{
+				char c1 = (char)first[i];
+				char c2 = (char)second[i];
+				if (c1 != c2)
+				{
+					return c1 > c2 ? 1 : -1;
+				}
+			}
+			return 0;
+		}
+
 		public static bool Strstr(sbyte[] b, sbyte[] a)
 		{
 			if (b.Length < a.Length)

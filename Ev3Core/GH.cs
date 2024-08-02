@@ -1,4 +1,6 @@
 ﻿using Ev3Core.Ccom.Interfaces;
+using Ev3Core.Cinput;
+using Ev3Core.Cinput.Interfaces;
 using Ev3Core.Cmemory.Interfaces;
 using Ev3Core.Coutput;
 using Ev3Core.Coutput.Interfaces;
@@ -39,5 +41,9 @@ namespace Ev3Core
         // c_output
         public readonly static IOutput Output = new Output();
         public readonly static OUTPUT_GLOBALS OutputInstance = new OUTPUT_GLOBALS();
+
+		// c_input
+		public readonly static IInput Input = new Input();
+		public readonly static INPUT_GLOBALS InputInstance = new INPUT_GLOBALS();
 	}
 }
