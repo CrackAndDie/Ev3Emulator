@@ -417,7 +417,12 @@ namespace Ev3Core
 		public const int IIC_SETUP = 2;
 		public const int IIC_SET = 3;
 
-		public const int IIC_PORT_CHANGED = 0x01;    //!< Input port changed
+		public const int UART_SET_CONN = 0;
+		public const int UART_READ_MODE_INFO = 1;
+		public const int UART_NACK_MODE_INFO = 2;
+		public const int UART_CLEAR_CHANGED = 3;
+
+        public const int IIC_PORT_CHANGED = 0x01;    //!< Input port changed
 		public const int IIC_DATA_READY = 0x08;     //!< Data is ready
 		public const int IIC_WRITE_REQUEST = 0x10;     //!< Write request
 

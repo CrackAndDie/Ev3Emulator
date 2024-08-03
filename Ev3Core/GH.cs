@@ -20,6 +20,10 @@ namespace Ev3Core
 
         // lms2012
         public readonly static ILms Lms = new Lms();
+        public readonly static IBranch Branch = new Branch();
+        public readonly static ICompare Compare = new Compare();
+        public readonly static IMath Math = new Math_();
+        public readonly static IMove Move = new Move();
         public readonly static GLOBALS VMInstance = new GLOBALS();
 
         // c_memory

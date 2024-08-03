@@ -749,8 +749,7 @@ namespace Ev3Core.Cinput
 
 									if (GH.InputInstance.IicFile >= MIN_HANDLE)
 									{
-										// TODO: wtf
-										// ioctl(InputInstance.IicFile, IIC_SET, &InputInstance.IicStr);
+										GH.Ev3System.InputHandler.IoctlI2c(IIC_SET, GH.InputInstance.IicStr);
 									}
 								}
 							}
@@ -781,18 +780,10 @@ namespace Ev3Core.Cinput
 								GH.InputInstance.DevCon.Mode[Index] = GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Index].TypeIndex].Mode;
 							}
 
-							// write setup string to "UART Device Controller" driver
-							if (GH.InputInstance.UartFile >= MIN_HANDLE)
-							{
-								// TODO: wtf
-								// ioctl(InputInstance.UartFile, UART_SET_CONN, &InputInstance.DevCon);
-							}
-							if (GH.InputInstance.IicFile >= MIN_HANDLE)
-							{
-								// TODO: wtf
-								// ioctl(InputInstance.IicFile, IIC_SET_CONN, &InputInstance.DevCon);
-							}
-						}
+                            // write setup string to "UART Device Controller" driver
+                            GH.Ev3System.InputHandler.IoctlUart(UART_SET_CONN, GH.InputInstance.DevCon);
+                            GH.Ev3System.InputHandler.IoctlI2c(IIC_SET_CONN, GH.InputInstance.DevCon);
+                        }
 					}
 					else
 					{ // Output device
@@ -1501,8 +1492,7 @@ namespace Ev3Core.Cinput
 						GH.InputInstance.UartCtl.Port = (sbyte)Port;
 						GH.InputInstance.UartCtl.Mode = GH.InputInstance.TmpMode[Port];
 
-						// TODO: wtf
-						// ioctl(InputInstance.UartFile, UART_READ_MODE_INFO, &InputInstance.UartCtl);
+						GH.Ev3System.InputHandler.IoctlUart(UART_READ_MODE_INFO, GH.InputInstance.UartCtl);
 
 						if (GH.InputInstance.UartCtl.TypeData.Name != null)
 						{ // Info available
@@ -1531,8 +1521,7 @@ namespace Ev3Core.Cinput
 					{ // All modes received set device mode 0
 
 						GH.InputInstance.UartCtl.Port = (sbyte)Port;
-						// TODO: wtf
-						// ioctl(InputInstance.UartFile, UART_CLEAR_CHANGED, &InputInstance.UartCtl);
+						GH.Ev3System.InputHandler.IoctlUart(UART_CLEAR_CHANGED, GH.InputInstance.UartCtl);
 						GH.InputInstance.Uart.Status[Port] &= ~UART_PORT_CHANGED;
 						cInputSetDeviceType((sbyte)Port, GH.InputInstance.DeviceType[Port], 0, 0);
 					}
@@ -1568,8 +1557,7 @@ namespace Ev3Core.Cinput
 
 						GH.InputInstance.IicStr.Port = (sbyte)Port;
 
-						//TODO: wtf
-						// ioctl(InputInstance.IicFile, IIC_READ_TYPE_INFO, &InputInstance.IicStr);
+						GH.Ev3System.InputHandler.IoctlI2c(IIC_READ_TYPE_INFO, GH.InputInstance.IicStr);
 
 						Index = IIC_NAME_LENGTH;
 						while ((Index != 0) && ((GH.InputInstance.IicStr.Manufacturer[Index] == ' ') || (GH.InputInstance.IicStr.Manufacturer[Index] == 0)))

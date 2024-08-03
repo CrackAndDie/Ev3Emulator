@@ -43,8 +43,9 @@ namespace Ev3Core.Lms2012.Interfaces
 		// was not presented in lms2012.h
 		object PrimParPointer(); // to get
 		void PrimParPointer(object data); // to set
+		void PrimParAdvance();
 
-		PRGID CurrentProgramId();
+        PRGID CurrentProgramId();
 		OBJID CallingObjectId();
 		DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals);
 		void SetTerminalEnable(DATA8 Value);
@@ -59,8 +60,10 @@ namespace Ev3Core.Lms2012.Interfaces
 		void SetDispatchStatus(int DspStat);
 		void GetResourcePath(char[] pString, DATA8 MaxLength);
 		void SetInstructions(ULONG Instructions);
+		void AdjustObjectIp(IMOFFS Value);
 
-		IP GetObjectIp();
+
+        IP GetObjectIp();
 		int GetObjectIpInd();
 		void SetObjectIp(IP Ip);
 		void SetObjectIpInd(int ind);
