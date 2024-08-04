@@ -75,6 +75,14 @@ public class OBJHEAD                   // Object header
     public LBINDEX LocalBytes;                   //!< Number of bytes to allocate for local variables
 
 	public const int SizeOf = 12;
+
+    public static OBJHEAD FromByteArray(byte[] arr)
+    {
+        return new OBJHEAD()
+        {
+            // TODO:
+        };
+    }
 }
 
 /*! \struct LABEL

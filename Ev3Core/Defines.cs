@@ -1593,8 +1593,67 @@ namespace Ev3Core
 		public const int SYS_CMD_NOREPLY = 0x08;
 		#endregion
 
-		#region c_wifi.h
-		public const string WIFI_PERSISTENT_PATH = vmSETTINGS_DIR;        // FileSys guidance ;-)
+		#region c_com.c
+		public const int FS_IDLE = 0;
+        #endregion
+
+        #region c_bt.c
+        public const string LEGO_BUNDLE_SEED_ID = "9RNK8ZF528";
+		public const string LEGO_BUNDLE_ID = "com.lego.lms";
+
+
+		public const int I_AM_IN_IDLE = 0;
+		public const int I_AM_MASTER = 1;
+		public const int I_AM_SLAVE = 2;
+		public const int I_AM_SCANNING = 3;
+		public const int STOP_SCANNING = 4;
+		public const int TURN_ON = 5;
+		public const int TURN_OFF = 6;
+		public const int RESTART = 7;
+		public const int BLUETOOTH_OFF = 8;
+
+		public const int MSG_BUF_EMPTY = 0;
+		public const int MSG_BUF_LEN = 1;
+		public const int MSG_BUF_BODY = 2;
+		public const int MSG_BUF_FULL = 3;
+
+		/* Constants related to Decode mode */
+		public const int MODE1 = 0;
+		public const int MODE2 = 1;
+		#endregion
+
+		#region c_i2c.c
+		public const int WRITE_DATA = 0x2A;    // Also referred to as 0x54
+		public const int READ_STATUS = 0x2A;    // Also referred to as 0x55
+		public const int WRITE_RAW = 0x2B;    // Also referred to as 0x56
+		public const int READ_DATA = 0x2B;    // Also referred to as 0x57
+
+		/* Bluetooth pins needs to be synchronized with pins in d_bt.c */
+		public const int CTS_PIC = 0;
+        public const int PIC_RST = 1;
+        public const int PIC_EN = 2;
+        public const int BLUETOOTH_PINS = 3;
+
+        public const int SET = 0;
+		public const int CLEAR = 1;
+		public const int HIIMP = 2;
+
+		public const int OVERRUN_ERROR = 0x01;
+		public const int CRC_ERROR = 0x02;
+		public const int INCORRECT_ACTION = 0x03;
+		public const int UNEXPECTED_ERROR = 0x04;
+		public const int RAW_OVERRUN_ERROR = 0x05;
+
+		public const int I2CBUF_SIZE = 150;
+		public const int APPDATABUF_SIZE = 150;
+		public const int MODE2BUF_SIZE = 1024;   // Must be power of 2
+		public const int MIN_MSG_LEN = 6;
+		public const uint SLEEPuS = ((ULONG)(1000));
+		public const uint SEC_1 = (((ULONG)(1000000)) / SLEEPuS);
+        #endregion
+
+        #region c_wifi.h
+        public const string WIFI_PERSISTENT_PATH = vmSETTINGS_DIR;        // FileSys guidance ;-)
 		public const string WIFI_PERSISTENT_FILENAME = "WiFiConnections.dat";// Persistent storage for KNOWN connections
 
 		public const int MAC_ADDRESS_LENGTH = 18;  // xx:xx:xx:xx:xx:xx + /0x00
