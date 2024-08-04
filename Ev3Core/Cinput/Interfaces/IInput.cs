@@ -19,9 +19,9 @@ namespace Ev3Core.Cinput.Interfaces
 
         void cInputUpdate(UWORD Time);
 
-        RESULT cInputCompressDevice(ref DATA8 pDevice, UBYTE Layer, UBYTE Port);
+        RESULT cInputCompressDevice(VarPointer<DATA8> pDevice, UBYTE Layer, UBYTE Port);
 
-        RESULT cInputGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, ref DATA8 pType, ref DATA8 pMode, DATA8[] pData);
+        RESULT cInputGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, VarPointer<DATA8> pType, VarPointer<DATA8> pMode, ArrayPointer<UBYTE> pData);
 
         RESULT cInputSetChainedDeviceType(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode);
 
@@ -51,7 +51,7 @@ namespace Ev3Core.Cinput.Interfaces
         public UWORD InvalidTime;                        //!< mS from type change to valid data
         public UWORD TimeoutTimer;                       //!< mS allowed to be busy timer
         public UWORD TypeIndex;                          //!< Index to information in "TypeData" table
-        public DATA8 Connection;                         //!< Connection type (from DCM)
+        public UBYTE Connection;                         //!< Connection type (from DCM)
         public OBJID Owner;
         public RESULT DevStatus;
         public DATA8 Busy;
@@ -98,19 +98,19 @@ namespace Ev3Core.Cinput.Interfaces
 
         public DATA32 InputNull;
 
-        public DATA8[] TmpMode = CommonHelper.Array1d<DATA8>(INPUT_PORTS);
+        public ArrayPointer<UBYTE> TmpMode = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(INPUT_PORTS));
 
-        public DATA8[] ConfigurationChanged = CommonHelper.Array1d<DATA8>(MAX_PROGRAMS);
+        public ArrayPointer<UBYTE> ConfigurationChanged = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_PROGRAMS));
 
-        public DATA8[] DeviceType = CommonHelper.Array1d<DATA8>(DEVICES);              //!< Type of all devices - for easy upload
-        public DATA8[] DeviceMode = CommonHelper.Array1d<DATA8>(DEVICES);              //!< Mode of all devices
+        public ArrayPointer<UBYTE> DeviceType = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(DEVICES));              //!< Type of all devices - for easy upload
+        public ArrayPointer<UBYTE> DeviceMode = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(DEVICES));              //!< Mode of all devices
         public DEVICE[] DeviceData = CommonHelper.Array1d<DEVICE>(DEVICES, true);              //!< Data for all devices
 
         public UWORD NoneIndex;
         public UWORD UnknownIndex;
         public DATA8 DCMUpdate;
 
-        public DATA8[] TypeModes = CommonHelper.Array1d<DATA8>(MAX_DEVICE_TYPE + 1);   //!< No of modes for specific type
+        public ArrayPointer<UBYTE> TypeModes =  new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_DEVICE_TYPE + 1));   //!< No of modes for specific type
 
         public UWORD MaxDeviceTypes;                   //!< Number of device type/mode entries in tabel
         public TYPES[] TypeData;                        //!< Type specific data

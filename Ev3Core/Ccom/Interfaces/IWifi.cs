@@ -9,9 +9,9 @@ namespace Ev3Core.Ccom.Interfaces
 		// Common Network stuff
 		// --------------------
 
-		RESULT cWiFiGetIpAddr(char[] IpAddress);
+		RESULT cWiFiGetIpAddr(ArrayPointer<UBYTE> IpAddress);
 
-		RESULT cWiFiGetMyMacAddr(char[] MacAddress);
+		RESULT cWiFiGetMyMacAddr(ArrayPointer<UBYTE> MacAddress);
 
 		RESULT cWiFiKnownDongleAttached();      // Known H/W
 
@@ -29,9 +29,9 @@ namespace Ev3Core.Ccom.Interfaces
 
 		//RESULT cWiFiTcpTempClose(void);
 
-		UWORD cWiFiWriteTcp(UBYTE[] Buffer, UWORD Length);
+		UWORD cWiFiWriteTcp(ArrayPointer<UBYTE> Buffer, UWORD Length);
 
-		UWORD cWiFiReadTcp(UBYTE[] Buffer, UWORD Length);
+		UWORD cWiFiReadTcp(ArrayPointer<UBYTE> Buffer, UWORD Length);
 
 		// WPA and AP stuff
 		// ----------------
@@ -41,21 +41,21 @@ namespace Ev3Core.Ccom.Interfaces
 
 		void cWiFiDeleteInList(int Index);      // Direct UI function
 
-		RESULT cWiFiGetApMacAddr(char[] MacAddr, int Index);
+		RESULT cWiFiGetApMacAddr(ArrayPointer<UBYTE> MacAddr, int Index);
 
-		RESULT cWiFiGetHiddenMacAddr(char[] MacAddr, int Index);
+		RESULT cWiFiGetHiddenMacAddr(ArrayPointer<UBYTE> MacAddr, int Index);
 
-		RESULT cWiFiGetName(char[] ApName, int Index, char Length);  // Get the FriendlyName owned by ApTable[Index]
+		RESULT cWiFiGetName(ArrayPointer<UBYTE> ApName, int Index, DATA8 Length);  // Get the FriendlyName owned by ApTable[Index]
 
-		RESULT cWiFiSetName(char[] ApName, int Index);  // Set the FriendlyName @ ApTable[Index]  // Hidden!?
+		RESULT cWiFiSetName(ArrayPointer<UBYTE> ApName, int Index);  // Set the FriendlyName @ ApTable[Index]  // Hidden!?
 
-		RESULT cWiFiSetSsid(char[] Ssid);
+		RESULT cWiFiSetSsid(ArrayPointer<UBYTE> Ssid);
 
 		RESULT cWiFiSetKeyManagToWpa2();
 
 		RESULT cWiFiSetKeyManagToNone();
 
-		RESULT cWiFiGetIndexFromName(char[] Name, ref UBYTE Index);
+		RESULT cWiFiGetIndexFromName(ArrayPointer<UBYTE> Name, VarPointer<UBYTE> Index);
 
 		void cWiFiSetEncryptToWpa2(int Index);
 
@@ -69,13 +69,13 @@ namespace Ev3Core.Ccom.Interfaces
 
 		RESULT cWiFiConnectToAp(int Index);
 
-		RESULT cWiFiMakePsk(char[] ApSsid, char[] PassPhrase, int Index);
+		RESULT cWiFiMakePsk(ArrayPointer<UBYTE> ApSsid, ArrayPointer<UBYTE> PassPhrase, int Index);
 
 		int cWiFiGetApListSize();
 
 		void cWiFiIncApListSize();
 
-		RESULT cWiFiAddHidden(char[] HiddenApName, char[] Security, char[] PassWord);
+		RESULT cWiFiAddHidden(ArrayPointer<UBYTE> HiddenApName, ArrayPointer<UBYTE> Security, ArrayPointer<UBYTE> PassWord);
 
 		RESULT cWiFiScanForAPs();
 

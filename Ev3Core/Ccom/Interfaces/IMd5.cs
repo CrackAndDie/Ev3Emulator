@@ -2,6 +2,6 @@
 {
 	public interface IMd5
 	{
-		int md5_file(char[] filename, int binary, byte[] md5_result);
+		int md5_file(ArrayPointer<UBYTE> filename, int binary, ArrayPointer<UBYTE> md5_result);
 	}
 }

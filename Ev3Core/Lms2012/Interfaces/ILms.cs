@@ -121,10 +121,10 @@ namespace Ev3Core.Lms2012.Interfaces
 
 	public class TYPES : ICloneable // if data type changes - remember to change "cInputTypeDataInit" !
 	{
-		public SBYTE[] Name = CommonHelper.Array1d<SBYTE>(TYPE_NAME_LENGTH + 1); //!< Device name
-		public DATA8 Type;                       //!< Device type
-		public DATA8 Connection;
-		public DATA8 Mode;                       //!< Device mode
+		public ArrayPointer<UBYTE> Name = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(TYPE_NAME_LENGTH + 1)); //!< Device name
+		public UBYTE Type;                       //!< Device type
+		public UBYTE Connection;
+		public UBYTE Mode;                       //!< Device mode
 		public DATA8 DataSets;
 		public DATA8 Format;
 		public DATA8 Figures;
@@ -139,7 +139,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public UWORD InvalidTime;                //!< mS from type change to valid data
 		public UWORD IdValue;                    //!< Device id value        (e.c. 0 ~ UART)
 		public DATA8 Pins;                       //!< Device pin setup
-		public SBYTE[] Symbol = CommonHelper.Array1d<SBYTE>(SYMBOL_LENGTH + 1);  //!< SI unit symbol
+		public ArrayPointer<UBYTE> Symbol = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(SYMBOL_LENGTH + 1));  //!< SI unit symbol
 		public UWORD Align;
 
 		public object Clone()
@@ -198,11 +198,11 @@ namespace Ev3Core.Lms2012.Interfaces
 
 		public DATA8[] Updated = CommonHelper.Array1d<DATA8>(INPUTS);
 
-		public DATA8[] InDcm = CommonHelper.Array1d<DATA8>(INPUTS);          //!< Input port device types
-		public DATA8[] InConn = CommonHelper.Array1d<DATA8>(INPUTS);
+		public ArrayPointer<UBYTE> InDcm = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(INPUTS));          //!< Input port device types
+		public ArrayPointer<UBYTE> InConn = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(INPUTS));
 
-		public DATA8[] OutDcm = CommonHelper.Array1d<DATA8>(OUTPUTS);        //!< Output port device types
-		public DATA8[] OutConn = CommonHelper.Array1d<DATA8>(OUTPUTS);
+		public ArrayPointer<UBYTE> OutDcm = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(OUTPUTS));        //!< Output port device types
+		public ArrayPointer<UBYTE> OutConn = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(OUTPUTS));
 		public UWORD PreemptMilliSeconds;
 	}
 
@@ -217,16 +217,16 @@ namespace Ev3Core.Lms2012.Interfaces
 
 	public class DEVCON
 	{
-		public DATA8[] Connection = CommonHelper.Array1d<DATA8>(INPUTS);
-		public DATA8[] Type = CommonHelper.Array1d<DATA8>(INPUTS);
-		public DATA8[] Mode = CommonHelper.Array1d<DATA8>(INPUTS);
+		public ArrayPointer<UBYTE> Connection = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(INPUTS));
+		public ArrayPointer<UBYTE> Type = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(INPUTS));
+		public ArrayPointer<UBYTE> Mode = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(INPUTS));
 	}
 
 	public class UARTCTL
 	{
 		public TYPES TypeData;
 		public DATA8 Port;
-		public DATA8 Mode;
+		public UBYTE Mode;
 	}
 
 	public class IIC
@@ -253,19 +253,19 @@ namespace Ev3Core.Lms2012.Interfaces
 		public DATA8 Repeat;
 		public DATA16 Time;
 		public DATA8 WrLng;
-		public DATA8[] WrData = CommonHelper.Array1d<DATA8>(IIC_DATA_LENGTH);
+		public ArrayPointer<UBYTE> WrData = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(IIC_DATA_LENGTH));
 		public DATA8 RdLng;
-		public DATA8[] RdData = CommonHelper.Array1d<DATA8>(IIC_DATA_LENGTH);
+		public ArrayPointer<UBYTE> RdData = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(IIC_DATA_LENGTH));
 	}
 
 	public class IICSTR
 	{
 		public DATA8 Port;
 		public DATA16 Time;
-		public DATA8 Type;
-		public DATA8 Mode;
-		public DATA8[] Manufacturer = CommonHelper.Array1d<DATA8>(IIC_NAME_LENGTH + 1);
-		public DATA8[] SensorType = CommonHelper.Array1d<DATA8>(IIC_NAME_LENGTH + 1);
+		public UBYTE Type;
+		public UBYTE Mode;
+		public ArrayPointer<UBYTE> Manufacturer = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(IIC_NAME_LENGTH + 1));
+		public ArrayPointer<UBYTE> SensorType = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(IIC_NAME_LENGTH + 1));
 		public DATA8 SetupLng;
 		public ULONG SetupString;
 		public DATA8 PollLng;
@@ -285,7 +285,7 @@ namespace Ev3Core.Lms2012.Interfaces
 	{
 		public DATA8 Port;
 		public DATA8 Length;
-		public DATA8[] String = CommonHelper.Array1d<DATA8>(TST_PIN_LENGTH + 1);
+		public ArrayPointer<UBYTE> String = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(TST_PIN_LENGTH + 1));
 	}
 
 	public class TSTUART
@@ -293,17 +293,17 @@ namespace Ev3Core.Lms2012.Interfaces
 		public DATA32 Bitrate;
 		public DATA8 Port;
 		public DATA8 Length;
-		public DATA8[] String = CommonHelper.Array1d<DATA8>(TST_UART_LENGTH);
+		public ArrayPointer<UBYTE> String = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(TST_UART_LENGTH));
 	}
 
 	public class UI
 	{
-		public DATA8[] Pressed = CommonHelper.Array1d<DATA8>(BUTTONS);                   //!< Pressed status
+		public ArrayPointer<UBYTE> Pressed = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(BUTTONS));                   //!< Pressed status
 	}
 
 	public class LCD
 	{
-		public UBYTE[] Lcd = CommonHelper.Array1d<UBYTE>(LCD_BUFFER_SIZE);
+		public ArrayPointer<UBYTE> Lcd = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(LCD_BUFFER_SIZE));
 
 		public static int LcdSizeof = LCD_BUFFER_SIZE;
 	}

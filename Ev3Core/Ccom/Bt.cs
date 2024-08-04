@@ -10,12 +10,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public byte BtGetMode2(ref byte pMode2)
+        public byte BtGetMode2(VarPointer<UBYTE> pMode2)
         {
             throw new NotImplementedException();
         }
 
-        public byte BtGetOnOff(ref byte On)
+        public byte BtGetOnOff(VarPointer<UBYTE> On)
         {
             throw new NotImplementedException();
         }
@@ -25,7 +25,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public void BtInit(char[] pName)
+        public void BtInit(ArrayPointer<UBYTE> pName)
         {
             throw new NotImplementedException();
         }
@@ -65,52 +65,52 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public byte cBtConnect(byte[] pName)
+        public byte cBtConnect(ArrayPointer<UBYTE> pName)
         {
             throw new NotImplementedException();
         }
 
-        public byte cBtDeleteFavourItem(byte[] pName)
+        public byte cBtDeleteFavourItem(ArrayPointer<UBYTE> pName)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf1(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf1(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf2(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf2(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf3(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf3(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf4(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf4(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf5(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf5(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf6(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf6(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtDevWriteBuf7(byte[] pBuf, ushort Size)
+        public ushort cBtDevWriteBuf7(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
@@ -120,22 +120,22 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public byte cBtDisconnect(byte[] pName)
+        public byte cBtDisconnect(ArrayPointer<UBYTE> pName)
         {
             throw new NotImplementedException();
         }
 
-        public byte cBtGetChNo(byte[] pName, ref byte pChNo)
+        public byte cBtGetChNo(ArrayPointer<UBYTE> pName, VarPointer<UBYTE> pChNo)
         {
             throw new NotImplementedException();
         }
 
-        public byte cBtGetConnListEntry(byte Item, byte[] pName, sbyte Length, ref byte pType)
+        public byte cBtGetConnListEntry(byte Item, ArrayPointer<UBYTE> pName, sbyte Length, VarPointer<UBYTE> pType)
         {
             throw new NotImplementedException();
         }
 
-        public byte cBtGetDevListEntry(byte Item, ref sbyte pConnected, ref sbyte pType, byte[] pName, sbyte Length)
+        public byte cBtGetDevListEntry(byte Item, VarPointer<SBYTE> pConnected, VarPointer<SBYTE> pType, ArrayPointer<UBYTE> pName, sbyte Length)
         {
             throw new NotImplementedException();
         }
@@ -150,12 +150,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public void cBtGetId(ref byte pId, byte Length)
+        public void cBtGetId(VarPointer<UBYTE> pId, byte Length)
         {
             throw new NotImplementedException();
         }
 
-        public void cBtGetIncoming(byte[] pName, ref byte pCod, byte Len)
+        public void cBtGetIncoming(ArrayPointer<UBYTE> pName, VarPointer<UBYTE> pCod, byte Len)
         {
             throw new NotImplementedException();
         }
@@ -175,7 +175,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public byte cBtGetSearchListEntry(byte Item, ref sbyte pConnected, ref sbyte pType, ref sbyte pParred, byte[] pName, sbyte Length)
+        public byte cBtGetSearchListEntry(byte Item, VarPointer<SBYTE> pConnected, VarPointer<SBYTE> pType, VarPointer<SBYTE> pParred, ArrayPointer<UBYTE> pName, sbyte Length)
         {
             throw new NotImplementedException();
         }
@@ -190,62 +190,62 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public ushort cBtI2cToBtBuf(byte[] pBuf, ushort Size)
+        public ushort cBtI2cToBtBuf(ArrayPointer<UBYTE> pBuf, ushort Size)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh0(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh0(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh1(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh1(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh2(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh2(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh3(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh3(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh4(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh4(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh5(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh5(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh6(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh6(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtReadCh7(byte[] pBuf, ushort Length)
+        public ushort cBtReadCh7(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtSetBundleId(ref byte pId)
+        public ushort cBtSetBundleId(VarPointer<UBYTE> pId)
         {
             throw new NotImplementedException();
         }
 
-        public ushort cBtSetBundleSeedId(ref byte pSeedId)
+        public ushort cBtSetBundleSeedId(VarPointer<UBYTE> pSeedId)
         {
             throw new NotImplementedException();
         }
 
-        public byte cBtSetName(byte[] pName, byte Length)
+        public byte cBtSetName(ArrayPointer<UBYTE> pName, byte Length)
         {
             throw new NotImplementedException();
         }
@@ -255,12 +255,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public byte cBtSetPin(ref byte pPin)
+        public byte cBtSetPin(VarPointer<UBYTE> pPin)
         {
             throw new NotImplementedException();
         }
 
-        public void cBtSetTrustedDev(ref byte pBtAddr, ref byte pPin, byte PinSize)
+        public void cBtSetTrustedDev(VarPointer<UBYTE> pBtAddr, VarPointer<UBYTE> pPin, byte PinSize)
         {
             throw new NotImplementedException();
         }

@@ -114,7 +114,7 @@ namespace Ev3Core.Ccom
             return (Result);
         }
 
-        UWORD cComReadBuffer(UBYTE[] pBuffer, UWORD Size)
+        UWORD cComReadBuffer(ArrayPointer<UBYTE> pBuffer, UWORD Size)
         {
             UWORD Length = 0;
 
@@ -122,7 +122,7 @@ namespace Ev3Core.Ccom
             return (Length);
         }
 
-        UWORD cComWriteBuffer(UBYTE[] pBuffer, UWORD Size)
+        UWORD cComWriteBuffer(ArrayPointer<UBYTE> pBuffer, UWORD Size)
         {
             UWORD Length = 0;
 
@@ -130,7 +130,7 @@ namespace Ev3Core.Ccom
             return (Length);
         }
 
-        UBYTE cComDirectCommand(UBYTE[] pBuffer, UBYTE[] pReply)
+        UBYTE cComDirectCommand(ArrayPointer<UBYTE> pBuffer, ArrayPointer<UBYTE> pReply)
         {
             UBYTE Result = 0;
             COMCMD pComCmd;
@@ -2538,7 +2538,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public void cComGetBrickName(sbyte Length, sbyte[] pBrickName)
+        public void cComGetBrickName(sbyte Length, ArrayPointer<UBYTE> pBrickName)
         {
             throw new NotImplementedException();
         }
@@ -2548,12 +2548,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cComGetDeviceData(sbyte Layer, sbyte Port, sbyte Length, ref sbyte pType, ref sbyte pMode, sbyte[] pData)
+        public RESULT cComGetDeviceData(sbyte Layer, sbyte Port, sbyte Length, VarPointer<DATA8> pType, VarPointer<DATA8> pMode, ArrayPointer<UBYTE> pData)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cComGetDeviceInfo(sbyte Length, byte[] pInfo)
+        public RESULT cComGetDeviceInfo(sbyte Length, ArrayPointer<UBYTE> pInfo)
         {
             throw new NotImplementedException();
         }
@@ -2617,7 +2617,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cComSetDeviceInfo(sbyte Length, byte[] pInfo)
+        public RESULT cComSetDeviceInfo(sbyte Length, ArrayPointer<UBYTE> pInfo)
         {
             throw new NotImplementedException();
         }

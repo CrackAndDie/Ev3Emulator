@@ -36,12 +36,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public ushort cDaisyData(byte[][] pData)
+        public ushort cDaisyData(ArrayPointer<ArrayPointer<UBYTE>> pData)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cDaisyDownStreamCmd(sbyte[] pData, sbyte Length, sbyte Layer)
+        public RESULT cDaisyDownStreamCmd(ArrayPointer<UBYTE> pData, sbyte Length, sbyte Layer)
         {
             throw new NotImplementedException();
         }
@@ -51,12 +51,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cDaisyGetDeviceInfo(sbyte Length, byte[] pInfo)
+        public RESULT cDaisyGetDeviceInfo(sbyte Length, ArrayPointer<UBYTE> pInfo)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cDaisyGetDownstreamData(sbyte Layer, sbyte Sensor, sbyte Length, ref sbyte pType, ref sbyte pMode, sbyte[] pData)
+        public RESULT cDaisyGetDownstreamData(sbyte Layer, sbyte Sensor, sbyte Length, VarPointer<sbyte> pType, VarPointer<sbyte> pMode, ArrayPointer<UBYTE> pData)
         {
             throw new NotImplementedException();
         }
@@ -91,7 +91,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cDaisyMotorDownStream(sbyte[] pData, sbyte Length, sbyte Layer, sbyte PortField)
+        public RESULT cDaisyMotorDownStream(ArrayPointer<UBYTE> pData, sbyte Length, sbyte Layer, sbyte PortField)
         {
             throw new NotImplementedException();
         }
@@ -131,7 +131,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cDaisySetDeviceInfo(sbyte Length, byte[] pInfo)
+        public RESULT cDaisySetDeviceInfo(sbyte Length, ArrayPointer<UBYTE> pInfo)
         {
             throw new NotImplementedException();
         }

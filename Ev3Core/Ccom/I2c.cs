@@ -6,7 +6,7 @@ namespace Ev3Core.Ccom
     public class I2c : II2c
     {
         // TODO: ms should be implemented
-        public ushort DataToMode2Decoding(byte[] pBuf, ushort Length)
+        public ushort DataToMode2Decoding(ArrayPointer<UBYTE> pBuf, ushort Length)
         {
             throw new NotImplementedException();
         }
@@ -21,7 +21,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT I2cInit(READBUF pBuf, WRITEBUF pWriteBuf, ref char pBundleId, ref char pBundleSeedId)
+        public RESULT I2cInit(READBUF pBuf, WRITEBUF pWriteBuf, VarPointer<DATA8> pBundleId, VarPointer<DATA8> pBundleSeedId)
         {
             throw new NotImplementedException();
         }

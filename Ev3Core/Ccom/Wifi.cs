@@ -6,7 +6,7 @@ namespace Ev3Core.Ccom
     // useful probably from this line https://github.com/mindboards/ev3sources/blob/78ebaf5b6f8fe31cc17aa5dce0f8e4916a4fc072/lms2012/c_com/source/c_wifi.c#L2627
     public class Wifi : IWifi
     {
-        public RESULT cWiFiAddHidden(char[] HiddenApName, char[] Security, char[] PassWord)
+        public RESULT cWiFiAddHidden(ArrayPointer<UBYTE> HiddenApName, ArrayPointer<UBYTE> Security, ArrayPointer<UBYTE> PassWord)
         {
             throw new NotImplementedException();
         }
@@ -42,7 +42,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiGetApMacAddr(char[] MacAddr, int Index)
+        public RESULT cWiFiGetApMacAddr(ArrayPointer<UBYTE> MacAddr, int Index)
         {
             throw new NotImplementedException();
         }
@@ -52,27 +52,27 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiGetHiddenMacAddr(char[] MacAddr, int Index)
+        public RESULT cWiFiGetHiddenMacAddr(ArrayPointer<UBYTE> MacAddr, int Index)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiGetIndexFromName(char[] Name, ref byte Index)
+        public RESULT cWiFiGetIndexFromName(ArrayPointer<UBYTE> Name, VarPointer<byte> Index)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiGetIpAddr(char[] IpAddress)
+        public RESULT cWiFiGetIpAddr(ArrayPointer<UBYTE> IpAddress)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiGetMyMacAddr(char[] MacAddress)
+        public RESULT cWiFiGetMyMacAddr(ArrayPointer<UBYTE> MacAddress)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiGetName(char[] ApName, int Index, char Length)
+        public RESULT cWiFiGetName(ArrayPointer<UBYTE> ApName, int Index, DATA8 Length)
         {
             throw new NotImplementedException();
         }
@@ -103,7 +103,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiMakePsk(char[] ApSsid, char[] PassPhrase, int Index)
+        public RESULT cWiFiMakePsk(ArrayPointer<UBYTE> ApSsid, ArrayPointer<UBYTE> PassPhrase, int Index)
         {
             throw new NotImplementedException();
         }
@@ -118,7 +118,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public ushort cWiFiReadTcp(byte[] Buffer, ushort Length)
+        public ushort cWiFiReadTcp(ArrayPointer<UBYTE> Buffer, ushort Length)
         {
             // TODO: impl this
             return 0;
@@ -164,12 +164,12 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiSetName(char[] ApName, int Index)
+        public RESULT cWiFiSetName(ArrayPointer<UBYTE> ApName, int Index)
         {
             throw new NotImplementedException();
         }
 
-        public RESULT cWiFiSetSsid(char[] Ssid)
+        public RESULT cWiFiSetSsid(ArrayPointer<UBYTE> Ssid)
         {
             throw new NotImplementedException();
         }
@@ -199,7 +199,7 @@ namespace Ev3Core.Ccom
             throw new NotImplementedException();
         }
 
-        public ushort cWiFiWriteTcp(byte[] Buffer, ushort Length)
+        public ushort cWiFiWriteTcp(ArrayPointer<UBYTE> Buffer, ushort Length)
         {
             // TODO: impl this
             return 0;

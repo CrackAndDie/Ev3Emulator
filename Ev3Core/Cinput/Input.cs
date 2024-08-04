@@ -13,19 +13,19 @@ namespace Ev3Core.Cinput
 		TYPES[] TypeDefault =
 		{
 			//   Name										   Type                   Connection                Mode	 DataSets     Format      Figures       Decimals      Views      RawMin         RawMax            PctMin         PctMax            SiMin        SiMax            Time             IdValue        Pins             Symbol
-			new TYPES() { Name = "PORT ERROR".ToSbyteArray(), Type = TYPE_ERROR,   Connection = CONN_ERROR,   Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', Symbol = new sbyte[0] },
-			new TYPES() { Name = "NONE".ToSbyteArray(),       Type = TYPE_NONE,    Connection = CONN_NONE,    Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', Symbol = new sbyte[0] },
-			new TYPES() { Name = "UNKNOWN".ToSbyteArray(),    Type = TYPE_UNKNOWN, Connection = CONN_UNKNOWN, Mode = 0, DataSets = 1, Format = 1, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 1023.0f, PctMin = 0.0f, PctMax = 100.0f, SiMin = 0.0f, SiMax = 1023.0f, InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', Symbol = new sbyte[0] },
-			new TYPES() { Name = "\0".ToSbyteArray() }
+			new TYPES() { Name = "PORT ERROR".ToArrayPointer(), Type = TYPE_ERROR,   Connection = CONN_ERROR,   Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', Symbol = new ArrayPointer<UBYTE>(new byte[0]) },
+			new TYPES() { Name = "NONE".ToArrayPointer(),       Type = TYPE_NONE,    Connection = CONN_NONE,    Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', Symbol = new ArrayPointer<UBYTE>(new byte[0]) },
+			new TYPES() { Name = "UNKNOWN".ToArrayPointer(),    Type = TYPE_UNKNOWN, Connection = CONN_UNKNOWN, Mode = 0, DataSets = 1, Format = 1, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 1023.0f, PctMin = 0.0f, PctMax = 100.0f, SiMin = 0.0f, SiMax = 1023.0f, InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', Symbol = new ArrayPointer<UBYTE>(new byte[0]) },
+			new TYPES() { Name = "\0".ToArrayPointer() }
 		};
 
-		IMGDATA[] CLR_LAYER_CLR_CHANGES = { opINPUT_DEVICE, CLR_CHANGES, 0, 0, opINPUT_DEVICE, CLR_CHANGES, 0, 1, opINPUT_DEVICE, CLR_CHANGES, 0, 2, opINPUT_DEVICE, CLR_CHANGES, 0, 3, opOBJECT_END };
-		IMGDATA[] CLR_LAYER_CLR_BUMBED = { opUI_BUTTON, FLUSH, opOBJECT_END };
-		IMGDATA[] CLR_LAYER_OUTPUT_RESET = { opOUTPUT_RESET, 0, 15, opOBJECT_END };
-		IMGDATA[] CLR_LAYER_OUTPUT_CLR_COUNT = { opOUTPUT_CLR_COUNT, 0, 15, opOBJECT_END };
-		IMGDATA[] CLR_LAYER_INPUT_WRITE = { opINPUT_WRITE, 0, 0, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 1, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 2, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 3, 1, DEVCMD_RESET, opOBJECT_END };
+		ArrayPointer<UBYTE> CLR_LAYER_CLR_CHANGES = new ArrayPointer<UBYTE>( new byte[] { opINPUT_DEVICE, CLR_CHANGES, 0, 0, opINPUT_DEVICE, CLR_CHANGES, 0, 1, opINPUT_DEVICE, CLR_CHANGES, 0, 2, opINPUT_DEVICE, CLR_CHANGES, 0, 3, opOBJECT_END });
+        ArrayPointer<UBYTE> CLR_LAYER_CLR_BUMBED = new ArrayPointer<UBYTE>(new byte[] { opUI_BUTTON, FLUSH, opOBJECT_END });
+        ArrayPointer<UBYTE> CLR_LAYER_OUTPUT_RESET = new ArrayPointer<UBYTE>(new byte[] { opOUTPUT_RESET, 0, 15, opOBJECT_END });
+        ArrayPointer<UBYTE> CLR_LAYER_OUTPUT_CLR_COUNT = new ArrayPointer<UBYTE>(new byte[] { opOUTPUT_CLR_COUNT, 0, 15, opOBJECT_END });
+        ArrayPointer<UBYTE> CLR_LAYER_INPUT_WRITE = new ArrayPointer<UBYTE>(new byte[] { opINPUT_WRITE, 0, 0, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 1, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 2, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 3, 1, DEVCMD_RESET, opOBJECT_END });
 
-		IMGDATA[] STOP_LAYER = { opOUTPUT_PRG_STOP, opOBJECT_END };
+        ArrayPointer<UBYTE> STOP_LAYER = new ArrayPointer<UBYTE>(new byte[] { opOUTPUT_PRG_STOP, opOBJECT_END });
 
 		void ClrLayer()
 		{
@@ -71,25 +71,25 @@ namespace Ev3Core.Cinput
 			return (Result);
 		}
 
-		public RESULT cInputCompressDevice(ref sbyte pDevice, byte Layer, byte Port)
+		public RESULT cInputCompressDevice(VarPointer<sbyte> pDevice, byte Layer, byte Port)
 		{
 			RESULT Result = RESULT.FAIL;
 
 			if (Port >= INPUT_DEVICES)
 			{ // OUTPUT
 
-				pDevice = (sbyte)(OUTPUT_PORTS * Layer);
-				pDevice += (sbyte)Port;
+				pDevice.Data = (sbyte)(OUTPUT_PORTS * Layer);
+				pDevice.Data += (sbyte)Port;
 
 			}
 			else
 			{ // INPUT
 
-				pDevice = ((sbyte)(INPUT_PORTS * Layer));
-				pDevice += (sbyte)Port;
+				pDevice.Data = ((sbyte)(INPUT_PORTS * Layer));
+				pDevice.Data += (sbyte)Port;
 			}
 
-			if ((pDevice >= 0) && (pDevice < DEVICES))
+			if ((pDevice.Data >= 0) && (pDevice.Data < DEVICES))
 			{
 				Result = OK;
 			}
@@ -97,7 +97,7 @@ namespace Ev3Core.Cinput
 			return (Result);
 		}
 
-		RESULT cInputInsertNewIicString(DATA8 Type, DATA8 Mode, DATA8[] pManufacturer, DATA8[] pSensorType, DATA8 SetupLng, ULONG SetupString, DATA8 PollLng, ULONG PollString, DATA8 ReadLng)
+		RESULT cInputInsertNewIicString(DATA8 Type, DATA8 Mode, ArrayPointer<UBYTE> pManufacturer, ArrayPointer<UBYTE> pSensorType, DATA8 SetupLng, ULONG SetupString, DATA8 PollLng, ULONG PollString, DATA8 ReadLng)
 		{
 			RESULT Result = RESULT.FAIL;  // FAIL=full, OK=new, BUSY=found
 			IICSTR pTmp;
@@ -165,7 +165,7 @@ namespace Ev3Core.Cinput
 			return (Result);
 		}
 
-		RESULT cInputGetIicString(DATA8 Type, DATA8 Mode, IICSTR IicStr)
+		RESULT cInputGetIicString(UBYTE Type, UBYTE Mode, IICSTR IicStr)
 		{
 			RESULT Result = RESULT.FAIL;  // FAIL=full, OK=new, BUSY=found
 			UWORD Index = 0;
@@ -205,7 +205,7 @@ namespace Ev3Core.Cinput
 		}
 
 
-		RESULT cInputGetNewTypeDataPointer(SBYTE[] pName, DATA8 Type, DATA8 Mode, DATA8 Connection, out TYPES ppPlace)
+		RESULT cInputGetNewTypeDataPointer(ArrayPointer<UBYTE> pName, UBYTE Type, UBYTE Mode, DATA8 Connection, out TYPES ppPlace)
 		{
 			RESULT Result = RESULT.FAIL;  // FAIL=full, OK=new, BUSY=found
 			UWORD Index = 0;
@@ -261,14 +261,14 @@ namespace Ev3Core.Cinput
 			return (Result);
 		}
 
-		RESULT cInputInsertTypeData(char[] pFilename)
+		RESULT cInputInsertTypeData(ArrayPointer<UBYTE> pFilename)
 		{
 			RESULT Result = RESULT.FAIL;
 			string Buf;
-			char[] Name = new char[256];
-			char[] Symbol = new char[256];
-			char[] Manufacturer = new char[256];
-			char[] SensorType = new char[256];
+            ArrayPointer<byte> Name = new ArrayPointer<byte>(new byte[256]);
+            ArrayPointer<byte> Symbol = new ArrayPointer<byte>(new byte[256]);
+            ArrayPointer<byte> Manufacturer = new ArrayPointer<byte>(new byte[256]);
+            ArrayPointer<byte> SensorType = new ArrayPointer<byte>(new byte[256]);
 			uint Type;
 			uint Connection;
 			uint Mode;
@@ -301,7 +301,7 @@ namespace Ev3Core.Cinput
 						string[] data = Buf.Split();
 						Type = uint.Parse(data[0]);
 						Mode = uint.Parse(data[1]);
-						Name = data[2].ToCharArray();
+						Name.Data = data[2].ToByteArray();
 						DataSets = uint.Parse(data[3]);
 						Format = uint.Parse(data[4]);
 						Figures = uint.Parse(data[5]);
@@ -317,24 +317,24 @@ namespace Ev3Core.Cinput
 						Tmp.SiMax = float.Parse(data[15], CultureInfo.InvariantCulture);
 						Time = uint.Parse(data[16]);
 						IdValue = uint.Parse(data[17]);
-						Symbol = data[18].ToCharArray();
+						Symbol.Data = data[18].ToByteArray();
 
 						Count = 19; // anime hahaha
 						if (Count == TYPE_PARAMETERS)
 						{
-							Tmp.Type = (DATA8)Type;
-							Tmp.Mode = (DATA8)Mode;
+							Tmp.Type = (UBYTE)Type;
+							Tmp.Mode = (UBYTE)Mode;
 							Tmp.DataSets = (DATA8)DataSets;
 							Tmp.Format = (DATA8)Format;
 							Tmp.Figures = (DATA8)Figures;
 							Tmp.Decimals = (DATA8)Decimals;
-							Tmp.Connection = (DATA8)Connection;
+							Tmp.Connection = (UBYTE)Connection;
 							Tmp.Views = (DATA8)Views;
 							Tmp.Pins = (DATA8)Pins;
 							Tmp.InvalidTime = (UWORD)Time;
 							Tmp.IdValue = (UWORD)IdValue;
 
-							Result = cInputGetNewTypeDataPointer(Name.ToSbyteArray(), (DATA8)Type, (DATA8)Mode, (DATA8)Connection, out pTypes);
+							Result = cInputGetNewTypeDataPointer(Name, (UBYTE)Type, (UBYTE)Mode, (DATA8)Connection, out pTypes);
 							//            printf("cInputTypeDataInit\r\n");
 							if (Result == OK)
 							{
@@ -345,11 +345,11 @@ namespace Ev3Core.Cinput
 								{
 									if (Name[Count] == '_')
 									{
-										pTypes.Name[Count] = (sbyte)' ';
+										pTypes.Name[Count] = (byte)' ';
 									}
 									else
 									{
-										pTypes.Name[Count] = (sbyte)Name[Count];
+										pTypes.Name[Count] = (byte)Name[Count];
 									}
 									Count++;
 								}
@@ -366,11 +366,11 @@ namespace Ev3Core.Cinput
 									{
 										if (Symbol[Count] == '_')
 										{
-											pTypes.Symbol[Count] = (sbyte)' ';
+											pTypes.Symbol[Count] = (byte)' ';
 										}
 										else
 										{
-											pTypes.Symbol[Count] = (sbyte)Symbol[Count];
+											pTypes.Symbol[Count] = (byte)Symbol[Count];
 										}
 										Count++;
 									}
@@ -385,7 +385,7 @@ namespace Ev3Core.Cinput
 									data = Buf.Split();
 									Type = uint.Parse(data[0]);
 									Mode = uint.Parse(data[1]);
-									Name = data[2].ToCharArray();
+									Name.Data = data[2].ToByteArray();
 									DataSets = uint.Parse(data[3]);
 									Format = uint.Parse(data[4]);
 									Figures = uint.Parse(data[5]);
@@ -401,9 +401,9 @@ namespace Ev3Core.Cinput
 									Tmp.SiMax = float.Parse(data[15], CultureInfo.InvariantCulture);
 									Time = uint.Parse(data[16]);
 									IdValue = uint.Parse(data[17]);
-									Symbol = data[18].ToCharArray();
-									Manufacturer = data[19].ToCharArray();
-									SensorType = data[20].ToCharArray();
+									Symbol.Data = data[18].ToByteArray();
+									Manufacturer.Data = data[19].ToByteArray();
+									SensorType.Data = data[20].ToByteArray();
 									SetupLng = uint.Parse(data[21]);
 									SetupString = Convert.ToUInt32(data[22], 16);
 									PollLng = uint.Parse(data[23]);
@@ -413,7 +413,7 @@ namespace Ev3Core.Cinput
 									Count = 26; // anime hahaha
 									if (Count == (TYPE_PARAMETERS + 7))
 									{
-										cInputInsertNewIicString((sbyte)Type, (sbyte)Mode, Manufacturer.ToSbyteArray(), SensorType.ToSbyteArray(), (DATA8)SetupLng, (ULONG)SetupString, (DATA8)PollLng, (ULONG)PollString, (DATA8)ReadLng);
+										cInputInsertNewIicString((sbyte)Type, (sbyte)Mode, Manufacturer, SensorType, (DATA8)SetupLng, (ULONG)SetupString, (DATA8)PollLng, (ULONG)PollString, (DATA8)ReadLng);
 										//                  printf("%02u %01u IIC %u 0x%08X %u 0x%08X %u\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,ReadLng);
 									}
 								}
@@ -431,7 +431,7 @@ namespace Ev3Core.Cinput
 
 		void cInputTypeDataInit()
 		{
-			char[] PrgNameBuf = new char[255];
+			ArrayPointer<UBYTE> PrgNameBuf = new ArrayPointer<UBYTE>(new byte[255]);
 			UWORD Index = 0;
 			UBYTE TypeDataFound = 0;
 
@@ -464,7 +464,7 @@ namespace Ev3Core.Cinput
 			}
 
 			//  printf("Search start\r\n");
-			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToCharArray(), "/".ToCharArray(), TYPEDATE_FILE_NAME.ToCharArray(), EXT_CONFIG.ToCharArray());
+			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), TYPEDATE_FILE_NAME.ToArrayPointer(), EXT_CONFIG.ToArrayPointer());
 
 			if (cInputInsertTypeData(PrgNameBuf) == OK)
 			{
@@ -473,7 +473,7 @@ namespace Ev3Core.Cinput
 
 			for (Index = TYPE_THIRD_PARTY_START; Index <= TYPE_THIRD_PARTY_END; Index++)
 			{
-				CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToCharArray(), "/".ToCharArray(), TYPEDATE_FILE_NAME.ToCharArray(), Index.ToString("00").ToCharArray(), EXT_CONFIG.ToCharArray());
+				CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), TYPEDATE_FILE_NAME.ToArrayPointer(), Index.ToString("00").ToArrayPointer(), EXT_CONFIG.ToArrayPointer());
 				if (cInputInsertTypeData(PrgNameBuf) == OK)
 				{
 					TypeDataFound = 1;
@@ -487,7 +487,7 @@ namespace Ev3Core.Cinput
 			}
 		}
 
-		RESULT cInputSetupDevice(DATA8 Device, DATA8 Repeat, DATA16 Time, DATA8 WrLng, DATA8[] pWrData, DATA8 RdLng, DATA8[] pRdData)
+		RESULT cInputSetupDevice(DATA8 Device, DATA8 Repeat, DATA16 Time, DATA8 WrLng, ArrayPointer<UBYTE> pWrData, DATA8 RdLng, ArrayPointer<UBYTE> pRdData)
 		{
 
 			GH.InputInstance.IicDat.Result = RESULT.FAIL;
@@ -528,13 +528,13 @@ namespace Ev3Core.Cinput
 						GH.InputInstance.IicDat.WrLng = WrLng;
 						GH.InputInstance.IicDat.RdLng = RdLng;
 
-						Array.Copy(pWrData, 0, GH.InputInstance.IicDat.WrData, 0, GH.InputInstance.IicDat.WrLng);
+						Array.Copy(pWrData.Data, 0, GH.InputInstance.IicDat.WrData, 0, GH.InputInstance.IicDat.WrLng);
 
 						GH.Ev3System.InputHandler.IoctlI2c(IIC_SETUP, GH.InputInstance.IicDat);
 
 						if (GH.InputInstance.IicDat.Result == OK)
 						{
-							Array.Copy(GH.InputInstance.IicDat.RdData, 0, pRdData, 0, GH.InputInstance.IicDat.RdLng);
+							Array.Copy(GH.InputInstance.IicDat.RdData, 0, pRdData.Data, 0, GH.InputInstance.IicDat.RdLng);
 						}
 					}
 				}
@@ -543,7 +543,7 @@ namespace Ev3Core.Cinput
 			return (GH.InputInstance.IicDat.Result);
 		}
 
-		RESULT cInputFindDumbInputDevice(DATA8 Device, DATA8 Type, DATA8 Mode, ref UWORD pTypeIndex)
+		RESULT cInputFindDumbInputDevice(DATA8 Device, UBYTE Type, UBYTE Mode, ref UWORD pTypeIndex)
 		{
 			RESULT Result = RESULT.FAIL;
 			UWORD IdValue = 0;
@@ -635,7 +635,7 @@ namespace Ev3Core.Cinput
 			return (Result);
 		}
 
-		RESULT cInputFindDevice(DATA8 Type, DATA8 Mode, ref UWORD pTypeIndex)
+		RESULT cInputFindDevice(UBYTE Type, UBYTE Mode, ref UWORD pTypeIndex)
 		{
 			RESULT Result = RESULT.FAIL;
 			UWORD Index = 0;
@@ -688,7 +688,7 @@ namespace Ev3Core.Cinput
 		}
 
 
-		void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
+		void cInputSetDeviceType(DATA8 Device, UBYTE Type, UBYTE Mode, int Line)
 		{
 			UWORD Index;
 			char[] Buf = new char[INPUTS * 2 + 1];
@@ -844,9 +844,9 @@ namespace Ev3Core.Cinput
 			DATA8 Type;
 			DATA8 Mode;
 			int File;
-			char[] PrgNameBuf = new char[vmFILENAMESIZE];
+			ArrayPointer<UBYTE> PrgNameBuf = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
 
-			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToCharArray(), "/".ToCharArray(), vmCALDATA_FILE_NAME.ToCharArray(), vmEXT_CONFIG.ToCharArray());
+			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), vmCALDATA_FILE_NAME.ToArrayPointer(), vmEXT_CONFIG.ToArrayPointer());
 			// TODO: calibration
 			//File = open(PrgNameBuf, O_RDONLY);
 			//if (File >= MIN_HANDLE)
@@ -1294,7 +1294,7 @@ namespace Ev3Core.Cinput
 			return (Result);
 		}
 
-		void cInputWriteDeviceRaw(DATA8 Device, DATA8 Connection, DATA8 Type, DATAF DataF)
+		void cInputWriteDeviceRaw(DATA8 Device, UBYTE Connection, UBYTE Type, DATAF DataF)
 		{
 			UBYTE Byte;
 			UWORD Word;
@@ -1374,8 +1374,8 @@ namespace Ev3Core.Cinput
 			DATA8 Result = DATA8_NAN;
 			UWORD TypeIndex;
 			DATAF Raw;
-			DATA8 Type;
-			DATA8 Mode;
+			UBYTE Type;
+            UBYTE Mode;
 			DATAF Min;
 			DATAF Max;
 			DATAF Pct;
@@ -1420,9 +1420,9 @@ namespace Ev3Core.Cinput
 		{
 			UWORD TypeIndex;
 			DATAF Raw;
-			DATA8 Type;
-			DATA8 Mode;
-			DATA8 Connection;
+            UBYTE Type;
+            UBYTE Mode;
+            UBYTE Connection;
 			DATAF Min;
 			DATAF Max;
 
@@ -1542,8 +1542,8 @@ namespace Ev3Core.Cinput
 		RESULT cInputCheckIicInfo(UBYTE Port)
 		{
 			RESULT Result = RESULT.BUSY;
-			DATA8 Type;
-			DATA8 Mode;
+			UBYTE Type;
+            UBYTE Mode;
 			UWORD Index;
 
 			if (GH.InputInstance.IicFile >= MIN_HANDLE)
@@ -1873,7 +1873,7 @@ namespace Ev3Core.Cinput
 			return ((sbyte)(No + (Layer * INPUT_PORTS)));
 		}
 
-		void cInputSetType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
+		void cInputSetType(DATA8 Device, UBYTE Type, UBYTE Mode, int Line)
 		{
 			if (GH.InputInstance.DeviceData[Device].DevStatus == OK)
 			{
@@ -1897,14 +1897,14 @@ namespace Ev3Core.Cinput
 		{
 			PRGID TmpPrgId;
 			DATA8 Length;
-			DATA8[] pDevices;
-			DATA8[] pChanged;
+			ArrayPointer<UBYTE> pDevices;
+            ArrayPointer<UBYTE> pChanged;
 			DATA8 Count;
 
 			TmpPrgId = GH.Lms.CurrentProgramId();
-			Length = (DATA8)GH.Lms.PrimParPointer();
-			pDevices = (DATA8[])GH.Lms.PrimParPointer();
-			pChanged = (DATA8[])GH.Lms.PrimParPointer();
+			Length = GH.Lms.PrimParPointer().GetDATA8();
+			pDevices = GH.Lms.PrimParPointer();
+			pChanged = GH.Lms.PrimParPointer();
 
 			pChanged[0] = GH.InputInstance.ConfigurationChanged[TmpPrgId];
 			GH.InputInstance.ConfigurationChanged[TmpPrgId] = 0;
@@ -1929,15 +1929,15 @@ namespace Ev3Core.Cinput
 			DATA8 Device = 0;
 			DATA8 Layer;
 			DATA8 Length;
-			DATA8[] pDestination;
+			ArrayPointer<UBYTE> pDestination;
 			DATA8 Count = 0;
 			DATA8 Modes = 0;
-			DATA8[] TmpName;
+			ArrayPointer<UBYTE> TmpName;
 			DATA8 Data8 = 0;
 			DATA32 Data32 = 0;
-			DATA8 Type;
-			DATA8 Mode;
-			DATA8 Connection;
+			UBYTE Type;
+            UBYTE Mode;
+			UBYTE Connection;
 			DATA8 Values;
 			DATA8 Value;
 			DATA8 Views = 0;
@@ -1952,13 +1952,12 @@ namespace Ev3Core.Cinput
 			DATA16 Time;
 			DATA8 WrLng;
 			DATA8 RdLng;
-			DATA8[] pWrData;
-			DATA8[] pRdData;
+			ArrayPointer<UBYTE> pWrData;
+            ArrayPointer<UBYTE> pRdData;
 			UWORD TypeIndex = 0;
 			RESULT Result;
 
 			TmpIp = GH.Lms.GetObjectIp();
-			TmpIpInd = GH.Lms.GetObjectIpInd();
 			Cmd = (DATA8)GH.Lms.PrimParPointer();
 			if ((Cmd != CAL_MINMAX) && (Cmd != CAL_MIN) && (Cmd != CAL_MAX) && (Cmd != CAL_DEFAULT) && (Cmd != CLR_ALL) && (Cmd != STOP_ALL))
 			{
@@ -1970,10 +1969,10 @@ namespace Ev3Core.Cinput
 
 				case CAL_MINMAX:
 					{
-						Type = (DATA8)GH.Lms.PrimParPointer();
-						Mode = (DATA8)GH.Lms.PrimParPointer();
-						Min = (DATAF)(DATA32)GH.Lms.PrimParPointer();
-						Max = (DATAF)(DATA32)GH.Lms.PrimParPointer();
+						Type = GH.Lms.PrimParPointer().GetUBYTE();
+						Mode = GH.Lms.PrimParPointer().GetUBYTE();
+						Min = (DATAF)GH.Lms.PrimParPointer().GetDATA32();
+						Max = (DATAF)GH.Lms.PrimParPointer().GetDATA32();
 
 						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 						{
@@ -1985,9 +1984,9 @@ namespace Ev3Core.Cinput
 
 				case CAL_MIN:
 					{
-						Type = (DATA8)GH.Lms.PrimParPointer();
-						Mode = (DATA8)GH.Lms.PrimParPointer();
-						Min = (DATAF)(DATA32)GH.Lms.PrimParPointer();
+						Type = GH.Lms.PrimParPointer().GetUBYTE();
+						Mode = GH.Lms.PrimParPointer().GetUBYTE();
+						Min = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
 
 						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 						{
@@ -2010,9 +2009,9 @@ namespace Ev3Core.Cinput
 
 				case CAL_MAX:
 					{
-						Type = (DATA8)GH.Lms.PrimParPointer();
-						Mode = (DATA8)GH.Lms.PrimParPointer();
-						Max = (DATAF)(DATA32)GH.Lms.PrimParPointer();
+						Type = GH.Lms.PrimParPointer().GetUBYTE();
+						Mode = GH.Lms.PrimParPointer().GetUBYTE();
+						Max = (DATAF)GH.Lms.PrimParPointer().GetDATA32();
 
 						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 						{
@@ -2035,8 +2034,8 @@ namespace Ev3Core.Cinput
 
 				case CAL_DEFAULT:
 					{
-						Type = (DATA8)GH.Lms.PrimParPointer();
-						Mode = (DATA8)GH.Lms.PrimParPointer();
+						Type = GH.Lms.PrimParPointer().GetUBYTE();
+						Mode = GH.Lms.PrimParPointer().GetUBYTE();
 
 						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 						{
@@ -2055,8 +2054,8 @@ namespace Ev3Core.Cinput
 							Type = GH.InputInstance.DeviceType[Device];
 							Mode = GH.InputInstance.DeviceMode[Device];
 						}
-						GH.Lms.PrimParPointer((DATA8)Type);
-						GH.Lms.PrimParPointer((DATA8)Mode);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Type);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Mode);
 					}
 					break;
 
@@ -2068,14 +2067,14 @@ namespace Ev3Core.Cinput
 						{
 							Connection = GH.InputInstance.DeviceData[Device].Connection;
 						}
-						GH.Lms.PrimParPointer((DATA8)Connection);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Connection);
 					}
 					break;
 
 				case GET_NAME:
 					{
-						Length = (DATA8)GH.Lms.PrimParPointer();
-						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+						Length = GH.Lms.PrimParPointer().GetDATA8();
+						pDestination = GH.Lms.PrimParPointer();
 						Count = 0;
 
 						if (Device < DEVICES)
@@ -2103,7 +2102,7 @@ namespace Ev3Core.Cinput
 								}
 								while (Count < (Length - 1))
 								{
-									pDestination[Count] = (sbyte)' ';
+									pDestination[Count] = (byte)' ';
 
 									Count++;
 								}
@@ -2118,8 +2117,8 @@ namespace Ev3Core.Cinput
 
 				case GET_SYMBOL:
 					{
-						Length = (DATA8)GH.Lms.PrimParPointer();
-						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+						Length = GH.Lms.PrimParPointer().GetDATA8();
+						pDestination = GH.Lms.PrimParPointer();
 						Count = 0;
 
 						if (Device < DEVICES)
@@ -2147,7 +2146,7 @@ namespace Ev3Core.Cinput
 								}
 								while (Count < (Length - 1))
 								{
-									pDestination[Count] = (sbyte)' ';
+									pDestination[Count] = (byte)' ';
 
 									Count++;
 								}
@@ -2169,10 +2168,10 @@ namespace Ev3Core.Cinput
 							Modes = (DATA8)GH.InputInstance.TypeModes[GH.InputInstance.DeviceType[Device]];
 							Views = (DATA8)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Views;
 						}
-						GH.Lms.PrimParPointer((DATA8)Count);
-						GH.Lms.PrimParPointer((DATA8)Data8);
-						GH.Lms.PrimParPointer((DATA8)Modes);
-						GH.Lms.PrimParPointer((DATA8)Views);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Count);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Data8);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Modes);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Views);
 					}
 					break;
 
@@ -2188,7 +2187,7 @@ namespace Ev3Core.Cinput
 								Data32 = (DATA32)DataF;
 							}
 						}
-						GH.Lms.PrimParPointer((DATA32)Data32);
+						GH.Lms.PrimParPointer().SetDATA32((DATA32)Data32);
 					}
 					break;
 
@@ -2199,8 +2198,8 @@ namespace Ev3Core.Cinput
 							Count = (DATA8)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Figures;
 							Data8 = (DATA8)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Decimals;
 						}
-						GH.Lms.PrimParPointer((DATA8)Count);
-						GH.Lms.PrimParPointer((DATA8)Data8);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Count);
+						GH.Lms.PrimParPointer().SetDATA8((DATA8)Data8);
 					}
 					break;
 
@@ -2211,16 +2210,16 @@ namespace Ev3Core.Cinput
 							Min = (DATAF)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].SiMin;
 							Max = (DATAF)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].SiMax;
 						}
-						GH.Lms.PrimParPointer((DATAF)Min);
-						GH.Lms.PrimParPointer((DATAF)Max);
+						GH.Lms.PrimParPointer().SetDATAF((DATAF)Min);
+						GH.Lms.PrimParPointer().SetDATAF((DATAF)Max);
 					}
 					break;
 
 				case GET_MODENAME:
 					{
-						Mode = (DATA8)GH.Lms.PrimParPointer();
+						Mode = GH.Lms.PrimParPointer().GetUBYTE();
 						Length = (DATA8)GH.Lms.PrimParPointer();
-						pDestination = (DATA8[])GH.Lms.PrimParPointer();
+						pDestination = GH.Lms.PrimParPointer();
 						Count = 0;
 
 						if (Device < DEVICES)
@@ -2260,7 +2259,7 @@ namespace Ev3Core.Cinput
 												}
 												while (Count < (Length - 1))
 												{
-													pDestination[Count] = (sbyte)' ';
+													pDestination[Count] = (byte)' ';
 
 													Count++;
 												}
@@ -2281,8 +2280,8 @@ namespace Ev3Core.Cinput
 
 				case SET_RAW:
 					{
-						Type = (DATA8)GH.Lms.PrimParPointer();
-						Data32 = (DATA32)GH.Lms.PrimParPointer();
+						Type = GH.Lms.PrimParPointer().GetUBYTE();
+						Data32 = GH.Lms.PrimParPointer().GetDATA32();
 
 						cInputWriteDeviceRaw(Device, GH.InputInstance.DeviceData[Device].Connection, Type, Data32);
 					}
@@ -2299,7 +2298,7 @@ namespace Ev3Core.Cinput
 								DataF = (DATAF)GH.InputInstance.DeviceData[Device].Changes;
 							}
 						}
-						GH.Lms.PrimParPointer((DATAF)DataF);
+						GH.Lms.PrimParPointer().SetDATAF((DATAF)DataF);
 					}
 					break;
 
@@ -2314,7 +2313,7 @@ namespace Ev3Core.Cinput
 								DataF = (DATAF)GH.InputInstance.DeviceData[Device].Bumps;
 							}
 						}
-						GH.Lms.PrimParPointer((DATAF)DataF);
+						GH.Lms.PrimParPointer().SetDATAF((DATAF)DataF);
 					}
 					break;
 
@@ -2332,9 +2331,9 @@ namespace Ev3Core.Cinput
 				case READY_RAW: // Fall through
 				case READY_SI:
 					{
-						Type = (DATA8)GH.Lms.PrimParPointer();
-						Mode = (DATA8)GH.Lms.PrimParPointer();
-						Values = (DATA8)GH.Lms.PrimParPointer();
+						Type = GH.Lms.PrimParPointer().GetUBYTE();
+						Mode = GH.Lms.PrimParPointer().GetUBYTE();
+						Values = GH.Lms.PrimParPointer().GetDATA8();
 
 						Value = 0;
 						Busy = 0;
@@ -2416,7 +2415,7 @@ namespace Ev3Core.Cinput
 											{
 												case READY_PCT:
 													{
-														GH.Lms.PrimParPointer((DATA8)cInputReadDevicePct(Device, Value, 0, ref _tmppp));
+														GH.Lms.PrimParPointer().SetDATA8((DATA8)cInputReadDevicePct(Device, Value, 0, ref _tmppp));
 													}
 													break;
 
@@ -2425,11 +2424,11 @@ namespace Ev3Core.Cinput
 														DataF = cInputReadDeviceRaw(Device, Value, 0, ref _tmppp);
 														if (float.IsNaN(DataF))
 														{
-															GH.Lms.PrimParPointer((DATA32)DATA32_NAN);
+															GH.Lms.PrimParPointer().SetDATA32((DATA32)DATA32_NAN);
 														}
 														else
 														{
-															GH.Lms.PrimParPointer((DATA32)DataF);
+															GH.Lms.PrimParPointer().SetDATA32((DATA32)DataF);
 														}
 													}
 													break;
@@ -2437,7 +2436,7 @@ namespace Ev3Core.Cinput
 												case READY_SI:
 													{
 														DataF = (DATAF)cInputReadDeviceSi(Device, Value, 0, ref _tmppp);
-														GH.Lms.PrimParPointer((DATAF)DataF);
+														GH.Lms.PrimParPointer().SetDATAF((DATAF)DataF);
 
 													}
 													break;
@@ -2474,8 +2473,7 @@ namespace Ev3Core.Cinput
 						if (Busy != 0)
 						{ // Busy -> block VMThread
 
-							GH.Lms.SetObjectIp(TmpIp);
-							GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+							GH.Lms.SetObjectIp(TmpIp - 1);
 							GH.Lms.SetDispatchStatus(BUSYBREAK);
 						}
 						else
@@ -2487,19 +2485,19 @@ namespace Ev3Core.Cinput
 								{
 									case READY_PCT:
 										{
-											GH.Lms.PrimParPointer((DATA8)DATA8_NAN);
+											GH.Lms.PrimParPointer().SetDATA8((DATA8)DATA8_NAN);
 										}
 										break;
 
 									case READY_RAW:
 										{
-											GH.Lms.PrimParPointer((DATA32)DATA32_NAN);
+											GH.Lms.PrimParPointer().SetDATA32((DATA32)DATA32_NAN);
 										}
 										break;
 
 									case READY_SI:
 										{
-											GH.Lms.PrimParPointer((DATAF)DATAF_NAN);
+											GH.Lms.PrimParPointer().SetDATAF((DATAF)DATAF_NAN);
 										}
 										break;
 
@@ -2513,12 +2511,12 @@ namespace Ev3Core.Cinput
 				case SETUP:
 					{ // INPUT_DEVICE(SETUP,LAYER,NO,REPEAT,TIME,WRLNG,WRDATA,RDLNG,RDDATA)
 
-						Repeat = (DATA8)GH.Lms.PrimParPointer();
-						Time = (DATA16)GH.Lms.PrimParPointer();
-						WrLng = (DATA8)GH.Lms.PrimParPointer();
-						pWrData = (DATA8[])GH.Lms.PrimParPointer();
-						RdLng = (DATA8)GH.Lms.PrimParPointer();
-						pRdData = (DATA8[])GH.Lms.PrimParPointer();
+						Repeat = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+						Time = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+						WrLng = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+						pWrData = GH.Lms.PrimParPointer();
+						RdLng = GH.Lms.PrimParPointer().GetDATA8();
+						pRdData = GH.Lms.PrimParPointer();
 
 						if (GH.VMInstance.Handle >= 0)
 						{
@@ -2530,8 +2528,7 @@ namespace Ev3Core.Cinput
 							if (cInputSetupDevice(Device, Repeat, Time, WrLng, pWrData, RdLng, pRdData) == RESULT.BUSY)
 							{ // Busy -> block VMThread
 
-								GH.Lms.SetObjectIp(TmpIp);
-								GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+								GH.Lms.SetObjectIp(TmpIp - 1);
 								GH.Lms.SetDispatchStatus(BUSYBREAK);
 							}
 						}
@@ -2567,38 +2564,38 @@ namespace Ev3Core.Cinput
 
 		public void cInputRead()
 		{
-			DATA8 Type;
-			DATA8 Mode;
+            UBYTE Type;
+			UBYTE Mode;
 			DATA8 Device;
 
 			Device = cInputGetDevice();
-			Type = (DATA8)GH.Lms.PrimParPointer();
-			Mode = (DATA8)GH.Lms.PrimParPointer();
+			Type = GH.Lms.PrimParPointer().GetUBYTE();
+			Mode = GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Device < DEVICES)
 			{
 				cInputSetType(Device, Type, Mode, 0);
 			}
 			short _tmppp = 0;
-			GH.Lms.PrimParPointer((DATA8)cInputReadDevicePct(Device, 0, 0, ref _tmppp));
+			GH.Lms.PrimParPointer().SetDATA8((DATA8)cInputReadDevicePct(Device, 0, 0, ref _tmppp));
 		}
 
 		public void cInputReadSi()
 		{
-			DATA8 Type;
-			DATA8 Mode;
+            UBYTE Type;
+            UBYTE Mode;
 			DATA8 Device;
 
 			Device = cInputGetDevice();
-			Type = (DATA8)GH.Lms.PrimParPointer();
-			Mode = (DATA8)GH.Lms.PrimParPointer();
+			Type = GH.Lms.PrimParPointer().GetUBYTE();
+            Mode = GH.Lms.PrimParPointer().GetUBYTE();
 
-			if (Device < DEVICES)
+            if (Device < DEVICES)
 			{
 				cInputSetType(Device, Type, Mode, 0);
 			}
 			short _tmppp = 0;
-			GH.Lms.PrimParPointer((DATAF)cInputReadDeviceSi(Device, 0, 0, ref _tmppp));
+			GH.Lms.PrimParPointer().SetDATAF((DATAF)cInputReadDeviceSi(Device, 0, 0, ref _tmppp));
 		}
 
 		public void cInputTest()
@@ -2615,25 +2612,22 @@ namespace Ev3Core.Cinput
 					Busy = 0;
 				}
 			}
-			GH.Lms.PrimParPointer((DATA8)Busy);
+			GH.Lms.PrimParPointer().SetDATA8((DATA8)Busy);
 		}
 
 		public void cInputReady()
 		{
 			IP TmpIp;
-			int TmpIpInd;
 			DATA8 Device;
 
 			TmpIp = GH.Lms.GetObjectIp();
-			TmpIpInd = GH.Lms.GetObjectIpInd();
 			Device = cInputGetDevice();
 
 			if (Device < DEVICES)
 			{
 				if (GH.InputInstance.DeviceData[Device].DevStatus == RESULT.BUSY)
 				{
-					GH.Lms.SetObjectIp(TmpIp);
-					GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+					GH.Lms.SetObjectIp(TmpIp - 1);
 					GH.Lms.SetDispatchStatus(BUSYBREAK);
 				}
 			}
@@ -2642,7 +2636,7 @@ namespace Ev3Core.Cinput
 		public void cInputWrite()
 		{
 			DATA8 Bytes;
-			DATA8[] Data;
+			ArrayPointer<UBYTE> Data;
 			DATA8 Device;
 			DATA8 Tmp;
 			IP TmpIp;
@@ -2651,11 +2645,10 @@ namespace Ev3Core.Cinput
 			DSPSTAT DspStat = DSPSTAT.FAILBREAK;
 
 			TmpIp = GH.Lms.GetObjectIp();
-			TmpIpInd = GH.Lms.GetObjectIpInd();
 
 			Device = cInputGetDevice();
-			Bytes = (DATA8)GH.Lms.PrimParPointer();
-			Data = (DATA8[])GH.Lms.PrimParPointer();
+			Bytes = GH.Lms.PrimParPointer().GetDATA8();
+			Data = GH.Lms.PrimParPointer();
 
 			if (Device < INPUT_DEVICES)
 			{
@@ -2732,8 +2725,7 @@ namespace Ev3Core.Cinput
 			if (DspStat == DSPSTAT.BUSYBREAK)
 			{ // Rewind IP
 
-				GH.Lms.SetObjectIp(TmpIp);
-				GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+				GH.Lms.SetObjectIp(TmpIp - 1);
 			}
 			GH.Lms.SetDispatchStatus(DspStat);
 		}
@@ -2741,16 +2733,16 @@ namespace Ev3Core.Cinput
 		public void cInputReadExt()
 		{
 			DATAF Raw;
-			DATA8 Type;
-			DATA8 Mode;
+			UBYTE Type;
+            UBYTE Mode;
 			DATA8 Format;
 			DATA8 Values;
 			DATA8 Device;
 			DATA8 Value;
 
 			Device = cInputGetDevice();
-			Type = (DATA8)GH.Lms.PrimParPointer();
-			Mode = (DATA8)GH.Lms.PrimParPointer();
+			Type = GH.Lms.PrimParPointer().GetUBYTE();
+			Mode = GH.Lms.PrimParPointer().GetUBYTE();
 			Format = (DATA8)GH.Lms.PrimParPointer();
 			Values = (DATA8)GH.Lms.PrimParPointer();
 			Value = 0;
@@ -2766,7 +2758,7 @@ namespace Ev3Core.Cinput
 					{
 						case DATA_PCT:
 							{
-								GH.Lms.PrimParPointer((DATA8)cInputReadDevicePct(Device, Value, 0, ref _tmppp));
+								GH.Lms.PrimParPointer().SetDATA8((DATA8)cInputReadDevicePct(Device, Value, 0, ref _tmppp));
 							}
 							break;
 
@@ -2775,24 +2767,24 @@ namespace Ev3Core.Cinput
 								Raw = cInputReadDeviceRaw(Device, Value, 0, ref _tmppp);
 								if (float.IsNaN(Raw))
 								{
-									GH.Lms.PrimParPointer((DATA32)DATA32_NAN);
+									GH.Lms.PrimParPointer().SetDATA32((DATA32)DATA32_NAN);
 								}
 								else
 								{
-									GH.Lms.PrimParPointer((DATA32)Raw);
+									GH.Lms.PrimParPointer().SetDATA32((DATA32)Raw);
 								}
 							}
 							break;
 
 						case DATA_SI:
 							{
-								GH.Lms.PrimParPointer((DATAF)cInputReadDeviceSi(Device, Value, 0, ref _tmppp));
+								GH.Lms.PrimParPointer().SetDATAF((DATAF)cInputReadDeviceSi(Device, Value, 0, ref _tmppp));
 							}
 							break;
 
 						default:
 							{
-								GH.Lms.PrimParPointer((DATA8)DATA8_NAN);
+								GH.Lms.PrimParPointer().SetDATA8((DATA8)DATA8_NAN);
 							}
 							break;
 
@@ -2806,25 +2798,25 @@ namespace Ev3Core.Cinput
 				{
 					case DATA_PCT:
 						{
-							GH.Lms.PrimParPointer((DATA8)DATA8_NAN);
+							GH.Lms.PrimParPointer().SetDATA8((DATA8)DATA8_NAN);
 						}
 						break;
 
 					case DATA_RAW:
 						{
-							GH.Lms.PrimParPointer((DATA32)DATA32_NAN);
+							GH.Lms.PrimParPointer().SetDATA32((DATA32)DATA32_NAN);
 						}
 						break;
 
 					case DATA_SI:
 						{
-							GH.Lms.PrimParPointer((DATAF)DATAF_NAN);
+							GH.Lms.PrimParPointer().SetDATAF((DATAF)DATAF_NAN);
 						}
 						break;
 
 					default:
 						{
-							GH.Lms.PrimParPointer((DATA8)DATA8_NAN);
+							GH.Lms.PrimParPointer().SetDATA8((DATA8)DATA8_NAN);
 						}
 						break;
 
@@ -2838,26 +2830,26 @@ namespace Ev3Core.Cinput
 			DATA32 SampleTime;
 			DATA32 Data32;
 			DATA16 NoOfPorts;
-			DATA16[] pInits;
-			DATA8[] pDevices;
-			DATA8[] pTypes;
-			DATA8[] pModes;
-			DATA8[] pDataSets;
-			DATAF[] pValues;
+			ArrayPointer<UBYTE> pInits;
+            ArrayPointer<UBYTE> pDevices;
+            ArrayPointer<UBYTE> pTypes;
+            ArrayPointer<UBYTE> pModes;
+            ArrayPointer<UBYTE> pDataSets;
+            ArrayPointer<UBYTE> pValues;
 			DATA16 Index;
 			DATA8 Device;
-			DATA8 Type;
-			DATA8 Mode;
+			UBYTE Type;
+            UBYTE Mode;
 
 
 			SampleTime = (DATA32)GH.Lms.PrimParPointer();
 			NoOfPorts = (DATA16)GH.Lms.PrimParPointer();
-			pInits = (DATA16[])GH.Lms.PrimParPointer();
-			pDevices = (DATA8[])GH.Lms.PrimParPointer();
-			pTypes = (DATA8[])GH.Lms.PrimParPointer();
-			pModes = (DATA8[])GH.Lms.PrimParPointer();
-			pDataSets = (DATA8[])GH.Lms.PrimParPointer();
-			pValues = (DATAF[])GH.Lms.PrimParPointer();
+			pInits = GH.Lms.PrimParPointer();
+			pDevices = GH.Lms.PrimParPointer();
+			pTypes = GH.Lms.PrimParPointer();
+			pModes = GH.Lms.PrimParPointer();
+			pDataSets = GH.Lms.PrimParPointer();
+			pValues = GH.Lms.PrimParPointer();
 			if (GH.VMInstance.Handle >= 0)
 			{
 				Data32 = (DATA32)NoOfPorts;
@@ -2871,14 +2863,14 @@ namespace Ev3Core.Cinput
 				for (Index = 0; Index < NoOfPorts; Index++)
 				{ // Service all devices
 
-					Device = pDevices[Index];
+					Device = (sbyte)pDevices[Index];
 
 					if (Device >= INPUTS)
 					{
 						Device += 12;
 					}
 
-					pValues[Index] = DATAF_NAN;
+					pValues.SetDATAF(DATAF_NAN, false, (uint)Index * 4);
 
 					if ((Device >= 0) && (Device < DEVICES))
 					{
@@ -2887,8 +2879,10 @@ namespace Ev3Core.Cinput
 
 						cInputSetType(Device, Type, Mode, 0);
 
-						pValues[Index] = cInputReadDeviceSi(Device, pDataSets[Index], (short)SampleTime, ref pInits[Index]);
-					}
+						DATA16 tmpShort = pInits.GetDATA8(false, (uint)Index * 2);
+                        pValues.SetDATAF(cInputReadDeviceSi(Device, (sbyte)pDataSets[Index], (short)SampleTime, ref tmpShort), false, (uint)Index * 4);
+						pInits.SetDATA8((DATA8)tmpShort, false, (uint)Index * 2);
+                    }
 				}
 			}
 		}
@@ -2899,7 +2893,7 @@ namespace Ev3Core.Cinput
 			GH.Ev3System.Logger.LogWarning($"Call of not implemented method in {System.Environment.StackTrace}");
 		}
 
-		public RESULT cInputGetDeviceData(sbyte Layer, sbyte Port, sbyte Length, ref sbyte pType, ref sbyte pMode, sbyte[] pData)
+		public RESULT cInputGetDeviceData(sbyte Layer, sbyte Port, sbyte Length, VarPointer<sbyte> pType, VarPointer<sbyte> pMode, ArrayPointer<UBYTE> pData)
 		{
 			RESULT Result = RESULT.OK;
 

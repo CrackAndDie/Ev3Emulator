@@ -39,6 +39,13 @@ global using HANDLER = short;
 // from c_com.h
 global using CMDSIZE = ushort;
 global using MSGCNT = ushort;
+using Ev3Core.Extensions;
+
+public interface IByteCastable<T>
+{
+    T GetObject(ArrayPointer<byte> buff, bool updateOffset = false);
+    void SetData(ArrayPointer<byte> buff, bool updateOffset = false);
+}
 
 public abstract class IPointer<T>
 {
@@ -62,6 +69,19 @@ public class ArrayPointer<T> : IPointer<T>
 {
     public uint Offset = 0;
     public T[] Data = null;
+
+    public int Length
+    {
+        get { return Data.Skip((int)Offset).ToArray().Length; }
+    }
+
+    public ArrayPointer() { }
+
+    public ArrayPointer(T[] data, uint offset = 0)
+    {
+        Data = data;
+        Offset = offset;
+    }
 
     // methods
     public static ArrayPointer<T> operator ++(ArrayPointer<T> arr)
@@ -100,6 +120,20 @@ public class ArrayPointer<T> : IPointer<T>
         return arr;
     }
 
+    public T this[int index]
+    {
+        get
+        {
+            // get the item for that index.
+            return Data[index + Offset];
+        }
+        set
+        {
+            // set the item for this index. value will be of type Thing.
+            Data[index + Offset] = value;
+        }
+    }
+
     public static implicit operator int(ArrayPointer<T> arr)
     {
         return (int)arr.Offset;
@@ -119,9 +153,14 @@ public class ArrayPointer<T> : IPointer<T>
     {
         return arr.Data[arr.Offset];
     }
+
+    public static explicit operator ArrayPointer<T>(T[] arr)
+    {
+        return new ArrayPointer<T>(arr);
+    }
 }
 
-public class IMGHEAD
+public class IMGHEAD : IByteCastable<IMGHEAD>
 {
     public UBYTE[] Sign = new UBYTE[4];                      //!< Place holder for the file type identifier
     public IMINDEX ImageSize;                    //!< Image size
@@ -133,6 +172,40 @@ public class IMGHEAD
 
     public IMGHEAD()
     {
+    }
+
+    public IMGHEAD GetObject(GP buff, bool updateOffset = false)
+    {
+        var prevOffset = buff.Offset;
+
+        Sign[0] = buff.GetUBYTE(true);
+        Sign[1] = buff.GetUBYTE(true);
+        Sign[2] = buff.GetUBYTE(true);
+        Sign[3] = buff.GetUBYTE(true);
+        ImageSize = buff.GetULONG(true);
+        VersionInfo = buff.GetUWORD(true);
+        NumberOfObjects = buff.GetUWORD(true);
+        GlobalBytes = buff.GetULONG(true);
+
+        if (!updateOffset) buff.Offset = prevOffset;
+
+        return this;
+    }
+
+    public void SetData(GP buff, bool updateOffset = false)
+    {
+        var prevOffset = buff.Offset;
+
+        buff.SetUBYTE(Sign[0], true);
+        buff.SetUBYTE(Sign[1], true);
+        buff.SetUBYTE(Sign[2], true);
+        buff.SetUBYTE(Sign[3], true);
+        buff.SetULONG(ImageSize, true);
+        buff.SetUWORD(VersionInfo, true);
+        buff.SetUWORD(NumberOfObjects, true);
+        buff.SetULONG(GlobalBytes, true);
+
+        if (!updateOffset) buff.Offset = prevOffset;
     }
 }
 
@@ -149,7 +222,7 @@ public class IMGHEAD
 /*! \struct OBJHEAD
  *          Object header used for all types of objects (VMTHREAD, SUBCALL, BLOCK and ALIAS)
  */
-public class OBJHEAD                   // Object header
+public class OBJHEAD : IByteCastable<OBJHEAD>                  // Object header
 {
     public IP OffsetToInstructions;         //!< Offset to instructions from image start
     public OBJID OwnerObjectId;                //!< Used by BLOCK's to hold the owner id
@@ -158,21 +231,60 @@ public class OBJHEAD                   // Object header
 
 	public const int SizeOf = 12;
 
-    public static OBJHEAD FromByteArray(byte[] arr)
+    public OBJHEAD GetObject(GP buff, bool updateOffset = false)
     {
-        return new OBJHEAD()
-        {
-            // TODO:
-        };
+        var prevOffset = buff.Offset;
+
+        OffsetToInstructions = new IP();
+        OffsetToInstructions.Offset = buff.GetULONG(true); // it is OffsetToInstructions
+        OwnerObjectId = buff.GetUWORD(true);
+        TriggerCount = buff.GetUWORD(true);
+        LocalBytes = buff.GetULONG(true);
+
+        if (!updateOffset) buff.Offset = prevOffset;
+
+        return this;
+    }
+
+    public void SetData(GP buff, bool updateOffset = false)
+    {
+        var prevOffset = buff.Offset;
+
+        buff.SetULONG(OffsetToInstructions.Offset, true);
+        buff.SetUWORD(OwnerObjectId, true);
+        buff.SetUWORD(TriggerCount, true);
+        buff.SetULONG(LocalBytes, true);
+
+        if (!updateOffset) buff.Offset = prevOffset;
     }
 }
 
 /*! \struct LABEL
  *          Label data hold information used for labels
  */
-public class LABEL
+public class LABEL : IByteCastable<LABEL>
 {
 	public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
+
+    public LABEL GetObject(GP buff, bool updateOffset = false)
+    {
+        var prevOffset = buff.Offset;
+
+        Addr = buff.GetULONG(true);
+
+        if (!updateOffset) buff.Offset = prevOffset;
+
+        return this;
+    }
+
+    public void SetData(GP buff, bool updateOffset = false)
+    {
+        var prevOffset = buff.Offset;
+
+        buff.SetULONG(Addr, true);
+
+        if (!updateOffset) buff.Offset = prevOffset;
+    }
 }
 
 // bytecodes.c

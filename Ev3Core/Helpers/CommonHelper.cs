@@ -59,7 +59,7 @@ namespace Ev3Core.Helpers
 			return result;
 		}
 
-		public static int Strcmp(sbyte[] first, string second)
+		public static int Strcmp(ArrayPointer<UBYTE> first, string second)
 		{
 			if (first.Length > second.Length)
 				return 1;
@@ -78,7 +78,7 @@ namespace Ev3Core.Helpers
 			return 0;
 		}
 
-		public static int Strcmp(sbyte[] first, sbyte[] second)
+		public static int Strcmp(ArrayPointer<UBYTE> first, ArrayPointer<UBYTE> second)
 		{
 			if (first.Length > second.Length)
 				return 1;
@@ -97,7 +97,7 @@ namespace Ev3Core.Helpers
 			return 0;
 		}
 
-		public static bool Strstr(sbyte[] b, sbyte[] a)
+		public static bool Strstr(ArrayPointer<UBYTE> b, ArrayPointer<UBYTE> a)
 		{
 			if (b.Length < a.Length)
 				return false;
@@ -121,7 +121,7 @@ namespace Ev3Core.Helpers
 			return j == a.Length;
 		}
 
-		public static int Memcmp(byte[] a, byte[] b, int num)
+		public static int Memcmp(ArrayPointer<UBYTE> a, ArrayPointer<UBYTE> b, int num)
 		{
 			for (int i = 0; i < num; ++i)
 			{
@@ -134,7 +134,7 @@ namespace Ev3Core.Helpers
 			return 0;
 		}
 
-		public static void Memmove(byte[] a, byte[] b, int num, int aP = 0, int bP = 0)
+		public static void Memmove(ArrayPointer<UBYTE> a, ArrayPointer<UBYTE> b, int num, int aP = 0, int bP = 0)
 		{
 			for (int i = 0; i < num; ++i)
 			{
@@ -142,7 +142,7 @@ namespace Ev3Core.Helpers
 			}
 		}
 
-		public static void Memset(byte[] a, byte val, int num, int aP = 0)
+		public static void Memset(ArrayPointer<UBYTE> a, byte val, int num, int aP = 0)
 		{
 			for (int i = aP; i < aP + num; ++i)
 			{
@@ -150,7 +150,7 @@ namespace Ev3Core.Helpers
 			}
 		}
 
-		public static int Snprintf<T>(T[] dst, int dstBeg, int max, params T[][] data)
+		public static int Snprintf(ArrayPointer<UBYTE> dst, int dstBeg, int max, params ArrayPointer<UBYTE>[] data)
 		{
 			foreach (var dt in data)
 			{
@@ -165,7 +165,7 @@ namespace Ev3Core.Helpers
 			return 0; // idk what to return
 		}
 
-		public static int Sprintf<T>(T[] dst, int dstBeg, params T[][] data)
+		public static int Sprintf(ArrayPointer<UBYTE> dst, int dstBeg, params ArrayPointer<UBYTE>[] data)
 		{
 			foreach (var dt in data)
 			{
@@ -180,7 +180,7 @@ namespace Ev3Core.Helpers
 			return 0; // idk what to return
 		}
 
-		public static void Strncpy(sbyte[] dst, sbyte[] src, int num)
+		public static void Strncpy(ArrayPointer<UBYTE> dst, ArrayPointer<UBYTE> src, int num)
 		{
 			for (int i = 0; i < Math.Min(src.Length, num); ++i)
 			{
@@ -188,11 +188,11 @@ namespace Ev3Core.Helpers
 			}
 		}
 
-		public static void Strcpy(sbyte[] dst, string src)
+		public static void Strcpy(ArrayPointer<UBYTE> dst, string src)
 		{
 			for (int i = 0; i < Math.Min(src.Length, dst.Length); ++i)
 			{
-				dst[i] = (sbyte)src[i];
+				dst[i] = (byte)src[i];
 			}
 		}
 	}

@@ -48,21 +48,21 @@ namespace Ev3Core.Ccom.Interfaces
 		void cComReadyMailBox();
 		void cComCloseMailBox();
 
-		void cComGetBrickName(DATA8 Length, DATA8[] pBrickName);
+		void cComGetBrickName(DATA8 Length, ArrayPointer<UBYTE> pBrickName);
 		DATA8 cComGetEvent();
 
 		// DAISY chain
 		// Write type data to chain
-		RESULT cComSetDeviceInfo(DATA8 Length, UBYTE[] pInfo);
+		RESULT cComSetDeviceInfo(DATA8 Length, ArrayPointer<UBYTE> pInfo);
 
 		// Read type data from chain
-		RESULT cComGetDeviceInfo(DATA8 Length, UBYTE[] pInfo);
+		RESULT cComGetDeviceInfo(DATA8 Length, ArrayPointer<UBYTE> pInfo);
 
 		// Write mode to chain
 		RESULT cComSetDeviceType(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode);
 
 		// Read device data from chain
-		RESULT cComGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, ref DATA8 pType, ref DATA8 pMode, DATA8[] pData);
+		RESULT cComGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, VarPointer<DATA8> pType, VarPointer<DATA8> pMode, ArrayPointer<UBYTE> pData);
 	}
 
 	public class COMCMD                        //!< Common command struct
@@ -521,13 +521,13 @@ namespace Ev3Core.Ccom.Interfaces
 		// Com Global variables
 		//*****************************************************************************
 		[Obsolete]
-		public IMGDATA[] Image = CommonHelper.Array1d<IMGDATA>(16 + 12 + USB_CMD_IN_REP_SIZE - 6); // must be aligned // TODO: check it properly
+		public IMGDATA[] Image = CommonHelper.Array1d<IMGDATA>(IMGHEAD.SizeOf + OBJHEAD.SizeOf + USB_CMD_IN_REP_SIZE - 6); // must be aligned // TODO: check it properly
 		public DATA32 Alignment;
 		public UBYTE[] Globals = CommonHelper.Array1d<UBYTE>(MAX_COMMAND_GLOBALS);
 		public UBYTE CommandReady;
 
-		public Func<UBYTE[], UWORD, UWORD>[] ReadChannel = new Func<UBYTE[], UWORD, UWORD>[NO_OF_CHS];
-		public Func<UBYTE[], UWORD, UWORD>[] WriteChannel = new Func<UBYTE[], UWORD, UWORD>[NO_OF_CHS];
+		public Func<ArrayPointer<UBYTE>, UWORD, UWORD>[] ReadChannel = new Func<ArrayPointer<UBYTE>, UWORD, UWORD>[NO_OF_CHS];
+		public Func<ArrayPointer<UBYTE>, UWORD, UWORD>[] WriteChannel = new Func<ArrayPointer<UBYTE>, UWORD, UWORD>[NO_OF_CHS];
 
 		public FIL[] Files = CommonHelper.Array1d<FIL>(MAX_FILE_HANDLES, true);
 
