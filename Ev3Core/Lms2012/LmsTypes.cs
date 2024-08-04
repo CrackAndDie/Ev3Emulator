@@ -22,9 +22,10 @@ global using IMGDATA = byte;
 global using PRGID = ushort;
 
 global using OBJID = ushort;
-global using IP = byte[];
-global using LP = byte[];
-global using GP = byte[];
+
+global using IP = ArrayPointer<byte>;
+global using LP = ArrayPointer<byte>;
+global using GP = ArrayPointer<byte>;
 
 global using IMINDEX = uint;
 global using GBINDEX = uint;
@@ -38,6 +39,87 @@ global using HANDLER = short;
 // from c_com.h
 global using CMDSIZE = ushort;
 global using MSGCNT = ushort;
+
+public abstract class IPointer<T>
+{
+    public virtual ArrayPointer<T> AsArray()
+    {
+        return (ArrayPointer<T>)this;
+    }
+
+    public virtual VarPointer<T> AsVar()
+    {
+        return (VarPointer<T>)this;
+    }
+}
+
+public class VarPointer<T> : IPointer<T>
+{
+    public T Data = default(T);
+}
+
+public class ArrayPointer<T> : IPointer<T>
+{
+    public uint Offset = 0;
+    public T[] Data = null;
+
+    // methods
+    public static ArrayPointer<T> operator ++(ArrayPointer<T> arr)
+    {
+        arr.Offset++;
+        return arr;
+    }
+
+    public static ArrayPointer<T> operator --(ArrayPointer<T> arr)
+    {
+        arr.Offset--;
+        return arr;
+    }
+
+    public static ArrayPointer<T> operator +(ArrayPointer<T> arr, int val)
+    {
+        arr.Offset += (uint)val;
+        return arr;
+    }
+
+    public static ArrayPointer<T> operator -(ArrayPointer<T> arr, int val)
+    {
+        arr.Offset -= (uint)val;
+        return arr;
+    }
+
+    public static ArrayPointer<T> operator +(ArrayPointer<T> arr, ArrayPointer<T> arr2)
+    {
+        arr.Offset += (uint)arr.Offset;
+        return arr;
+    }
+
+    public static ArrayPointer<T> operator -(ArrayPointer<T> arr, ArrayPointer<T> arr2)
+    {
+        arr.Offset -= (uint)arr.Offset;
+        return arr;
+    }
+
+    public static implicit operator int(ArrayPointer<T> arr)
+    {
+        return (int)arr.Offset;
+    }
+
+    public static implicit operator uint(ArrayPointer<T> arr)
+    {
+        return arr.Offset;
+    }
+
+    public static implicit operator T[](ArrayPointer<T> arr)
+    {
+        return arr.Data;
+    }
+
+    public static implicit operator T(ArrayPointer<T> arr)
+    {
+        return arr.Data[arr.Offset];
+    }
+}
 
 public class IMGHEAD
 {

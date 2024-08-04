@@ -8,23 +8,23 @@ namespace Ev3Core.Cmemory.Interfaces
     {
         RESULT cMemoryInit();
 
-        RESULT cMemoryOpen(PRGID PrgId, GBINDEX Size, object[][] pMemory);
+        RESULT cMemoryOpen(PRGID PrgId, GBINDEX Size, byte[][] pMemory);
 
         RESULT cMemoryClose(PRGID PrgId);
 
         RESULT cMemoryExit();
 
-        RESULT cMemoryMalloc(object[][] ppMemory, DATA32 Size, int memind = 0);
-        RESULT cMemoryMalloc(out object[] ppMemory, DATA32 Size);
+        RESULT cMemoryMalloc(byte[][] ppMemory, DATA32 Size, int memind = 0);
+        RESULT cMemoryMalloc(out byte[] ppMemory, DATA32 Size);
 
-        RESULT cMemoryRealloc(object[] pOldMemory, object[][] ppMemory, DATA32 Size, int memind = 0);
-        RESULT cMemoryRealloc(object[] pOldMemory, out object[] ppMemory, DATA32 Size);
+        RESULT cMemoryRealloc(byte[] pOldMemory, byte[][] ppMemory, DATA32 Size, int memind = 0);
+        RESULT cMemoryRealloc(byte[] pOldMemory, out byte[] ppMemory, DATA32 Size);
 
-        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory, int memind = 0);
-        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, out object[] pMemory);
+        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, byte[][] pMemory, int memind = 0);
+        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, out byte[] pMemory);
 
-        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, object[][] pMemory, int memind = 0);
-        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, out object[] pMemory);
+        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, byte[][] pMemory, int memind = 0);
+        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, out byte[] pMemory);
 
         DATA8 cMemoryGetCacheFiles();
 
@@ -62,7 +62,7 @@ namespace Ev3Core.Cmemory.Interfaces
 
         void cMemoryArrayAppend();
 
-        object[] cMemoryResize(PRGID PrgId, HANDLER Handle, DATA32 Elements);
+        byte[] cMemoryResize(PRGID PrgId, HANDLER Handle, DATA32 Elements);
 
         void cMemoryFileName();
 
@@ -91,7 +91,7 @@ namespace Ev3Core.Cmemory.Interfaces
 
     public class POOL
     {
-        public object[] pPool;
+        public byte[] pPool;
         public GBINDEX Size;
         public DATA8 Type;
     }
@@ -108,7 +108,7 @@ namespace Ev3Core.Cmemory.Interfaces
 
         public const int Sizeof = 16;
 
-		public static DESCR FromData(object[] data)
+		public static DESCR FromByteArray(byte[] data)
 		{
 			//TODO:!!!!
 			return new DESCR();
@@ -121,7 +121,7 @@ namespace Ev3Core.Cmemory.Interfaces
         public DATA8 Access;
         public char[] Filename = CommonHelper.Array1d<char>(vmFILENAMESIZE);
 
-        public static FDESCR FromData(object[] data)
+        public static FDESCR FromByteArray(byte[] data)
         {
             //TODO:!!!!
             return new FDESCR();

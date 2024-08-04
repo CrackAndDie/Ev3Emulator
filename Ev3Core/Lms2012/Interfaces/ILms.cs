@@ -40,9 +40,8 @@ namespace Ev3Core.Lms2012.Interfaces
 		void TstClose();
 		void Tst();
 
-		// was not presented in lms2012.h
-		object PrimParPointer(); // to get
-		void PrimParPointer(object data); // to set
+        // was not presented in lms2012.h
+        ArrayPointer<byte> PrimParPointer(); // to get
 		void PrimParAdvance();
 
         PRGID CurrentProgramId();
@@ -55,7 +54,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		void ProgramEnd(PRGID PrgId);
 		RESULT ValidateChar(ref DATA8 pChar, DATA8 Set);
 		RESULT ValidateString(DATA8[] pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
-		object[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
+        byte[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
 		void SetDispatchStatus(DSPSTAT DspStat);
 		void SetDispatchStatus(int DspStat);
 		void GetResourcePath(char[] pString, DATA8 MaxLength);
@@ -64,9 +63,7 @@ namespace Ev3Core.Lms2012.Interfaces
 
 
         IP GetObjectIp();
-		int GetObjectIpInd();
 		void SetObjectIp(IP Ip);
-		void SetObjectIpInd(int ind);
 
 		OBJSTAT ProgramStatus(PRGID PrgId);
 		OBJSTAT ProgramStatusChange(PRGID PrgId);
@@ -99,6 +96,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public ULONG RunTime;                    //!< Program run time [uS]
 
 		public IP pImage;                     //!< Pointer to start of image
+		public int pImageInd;                     //!< Pointer to start of image
 		public GP pData;                      //!< Pointer to start of data
 		public GP pGlobal;                    //!< Pointer to start of global bytes
 		public OBJHEAD[] pObjHead;                   //!< Pointer to start of object headers
@@ -476,7 +474,6 @@ namespace Ev3Core.Lms2012.Interfaces
 		public OBJHEAD[] pObjHead;                     //!< Pointer to start of object headers
 		public OBJ[][] pObjList;                     //!< Pointer to object pointer list
 
-		public int ObjectIpInd = 0;                     //!< Working object Ip index
 		public IP ObjectIp;                     //!< Working object Ip
 		public LP ObjectLocal;                  //!< Working object locals
 		public OBJID Objects;                      //!< No of objects in image
@@ -509,7 +506,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public ULONG Priority;                     //!< Object priority
 
 		public ULONG Value;
-		public HANDLER Handle;
+		public ArraySubset<byte> Handle;
 
 		public ERR[] Errors = CommonHelper.Array1d<ERR>(ERROR_BUFFER_SIZE);
 		public UBYTE ErrorIn;

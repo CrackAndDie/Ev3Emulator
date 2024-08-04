@@ -19,7 +19,7 @@ namespace Ev3Core.Cmemory
 			pFree = GH.VMInstance.MemoryFree;
 		}
 
-		public RESULT cMemoryMalloc(object[][] ppMemory, int Size, int memind = 0)
+		public RESULT cMemoryMalloc(byte[][] ppMemory, int Size, int memind = 0)
 		{
 			RESULT Result = RESULT.FAIL;
 			DATA32 Total = 0;
@@ -28,7 +28,7 @@ namespace Ev3Core.Cmemory
 			cMemoryGetUsage(ref Total, ref Free, 0);
 			if (((Size + (KB - 1)) / KB) < (Free - RESERVED_MEMORY))
 			{
-				ppMemory[memind] = new object[Size];
+				ppMemory[memind] = new byte[Size];
 				if (ppMemory[memind] != null)
 				{
 					Result = OK;
@@ -38,14 +38,14 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryMalloc(out object[] ppMemory, int Size)
+		public RESULT cMemoryMalloc(out byte[] ppMemory, int Size)
 		{
 			RESULT Result = RESULT.FAIL;
 			DATA32 Total = 0;
 			DATA32 Free = 0;
 
 			cMemoryGetUsage(ref Total, ref Free, 0);
-			ppMemory = new object[Size];
+			ppMemory = new byte[Size];
 			if (ppMemory != null)
 			{
 				Result = OK;
@@ -54,11 +54,11 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryRealloc(object[] pOldMemory, object[][] ppMemory, int Size, int memind = 0)
+		public RESULT cMemoryRealloc(byte[] pOldMemory, byte[][] ppMemory, int Size, int memind = 0)
 		{
 			RESULT Result = RESULT.FAIL;
 
-			ppMemory[memind] = new object[Size];
+			ppMemory[memind] = new byte[Size];
 			if (ppMemory[memind] != null)
 			{
 				Result = OK;
@@ -67,11 +67,11 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryRealloc(object[] pOldMemory, out object[] ppMemory, int Size)
+		public RESULT cMemoryRealloc(byte[] pOldMemory, out byte[] ppMemory, int Size)
 		{
 			RESULT Result = RESULT.FAIL;
 
-			ppMemory = new object[Size];
+			ppMemory = new byte[Size];
 			if (ppMemory != null)
 			{
 				Result = OK;
@@ -80,7 +80,7 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		RESULT cMemoryAlloc(PRGID PrgId, DATA8 Type, GBINDEX Size, object[][] pMemory, ref HANDLER pHandle, int memind = 0)
+		RESULT cMemoryAlloc(PRGID PrgId, DATA8 Type, GBINDEX Size, byte[][] pMemory, ref HANDLER pHandle, int memind = 0)
 		{
 			RESULT Result = RESULT.FAIL;
 			HANDLER TmpHandle;
@@ -112,9 +112,9 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		object[] cMemoryReallocate(PRGID PrgId, HANDLER Handle, GBINDEX Size)
+        byte[] cMemoryReallocate(PRGID PrgId, HANDLER Handle, GBINDEX Size)
 		{
-			object[] pTmp;
+            byte[] pTmp;
 
 			pTmp = null;
 			if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
@@ -138,7 +138,7 @@ namespace Ev3Core.Cmemory
 			return (pTmp);
 		}
 
-		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, object[][] pMemory, int memind = 0)
+		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, byte[][] pMemory, int memind = 0)
 		{
 			RESULT Result = RESULT.FAIL;
 
@@ -156,7 +156,7 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, out object[] pMemory)
+		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, out byte[] pMemory)
 		{
 			RESULT Result = RESULT.FAIL;
 
@@ -174,10 +174,10 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, object[][] pMemory, int memind = 0)
+		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, byte[][] pMemory, int memind = 0)
 		{
 			RESULT Result = RESULT.FAIL;
-			object[] pTmp;
+            byte[] pTmp;
 
 			if (cMemoryGetPointer(PrgId, Handle, out pTmp) == OK)
 			{
@@ -188,11 +188,11 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, out object[] pMemory)
+		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, out byte[] pMemory)
 		{
 			RESULT Result = RESULT.FAIL;
-			object[] pTmp;
-			pMemory = null
+            byte[] pTmp;
+			pMemory = null;
 
 			if (cMemoryGetPointer(PrgId, Handle, out pTmp) == OK)
 			{
@@ -214,7 +214,7 @@ namespace Ev3Core.Cmemory
 				{
 					if (GH.MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
 					{
-						pFDescr = FDESCR.FromData(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
+						pFDescr = FDESCR.FromByteArray(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
 						// TODO: wtf is here
 						//if ((pFDescr.Access) != 0)
 						//{
@@ -238,7 +238,7 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		void cMemoryFreePool(PRGID PrgId, object[] pMemory)
+		void cMemoryFreePool(PRGID PrgId, byte[] pMemory)
 		{
 			HANDLER TmpHandle;
 
@@ -323,7 +323,7 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryOpen(ushort PrgId, uint Size, object[][] pMemory)
+		public RESULT cMemoryOpen(ushort PrgId, uint Size, byte[][] pMemory)
 		{
 			RESULT Result = RESULT.FAIL;
 			HANDLER TmpHandle = 0;
@@ -362,23 +362,23 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public object[] cMemoryResize(ushort PrgId, short TmpHandle, int Elements)
+		public byte[] cMemoryResize(ushort PrgId, short TmpHandle, int Elements)
 		{
 			DATA32 Size;
-			object[] pTmp = null;
+            byte[] pTmp = null;
 
 			if (cMemoryGetPointer(PrgId, TmpHandle, out pTmp) == OK)
 			{
-				Size = Elements * (DESCR.FromData(pTmp)).ElementSize + DESCR.Sizeof;
+				Size = Elements * (DESCR.FromByteArray(pTmp)).ElementSize + DESCR.Sizeof;
 				pTmp = cMemoryReallocate(PrgId, TmpHandle, (GBINDEX)Size);
 				if (pTmp != null)
 				{
-					(DESCR.FromData(pTmp)).Elements = Elements;
+					(DESCR.FromByteArray(pTmp)).Elements = Elements;
 				}
 			}
 			if (pTmp != null)
 			{
-				pTmp = (DESCR.FromData(pTmp)).pArray.ToObjectArray();
+				pTmp = (DESCR.FromByteArray(pTmp)).pArray.ToByteArray();
 			}
 
 			return (pTmp);

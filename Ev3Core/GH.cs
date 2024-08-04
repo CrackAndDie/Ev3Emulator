@@ -25,6 +25,7 @@ namespace Ev3Core
         public readonly static ICompare Compare = new Compare();
         public readonly static IMath Math = new Math_();
         public readonly static IMove Move = new Move();
+        public readonly static Lms2012.Interfaces.ITimer Timer = new Timer_();
         public readonly static GLOBALS VMInstance = new GLOBALS();
 
         // c_memory
