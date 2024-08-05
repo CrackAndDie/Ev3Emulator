@@ -1,4 +1,5 @@
-﻿using Ev3Core.Lms2012.Interfaces;
+﻿using Ev3Core.Extensions;
+using Ev3Core.Lms2012.Interfaces;
 
 namespace Ev3Core.Lms2012
 {
@@ -6,14 +7,14 @@ namespace Ev3Core.Lms2012
     {
         public void cBranchJr()
         {
-            GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+            GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
         }
 
         public void cBranchJrFalse()
         {
-            if ((DATA8)GH.Lms.PrimParPointer() == (DATA8)0)
+            if ((DATA8)GH.Lms.PrimParPointer().GetDATA8() == (DATA8)0)
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -23,9 +24,9 @@ namespace Ev3Core.Lms2012
 
         public void cBranchJrTrue()
         {
-            if ((DATA8)GH.Lms.PrimParPointer() != (DATA8)0)
+            if ((DATA8)GH.Lms.PrimParPointer().GetDATA8() != (DATA8)0)
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -37,11 +38,11 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
 
             if (float.IsNaN(Tmp))
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -53,10 +54,10 @@ namespace Ev3Core.Lms2012
         {
             DATA8 Tmp;
 
-            Tmp = (DATA8)GH.Lms.PrimParPointer();
-            if (Tmp < (DATA8)GH.Lms.PrimParPointer())
+            Tmp = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+            if (Tmp < (DATA8)GH.Lms.PrimParPointer().GetDATA8())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -68,10 +69,10 @@ namespace Ev3Core.Lms2012
         {
             DATA16 Tmp;
 
-            Tmp = (DATA16)GH.Lms.PrimParPointer();
-            if (Tmp < (DATA16)GH.Lms.PrimParPointer())
+            Tmp = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+            if (Tmp < (DATA16)GH.Lms.PrimParPointer().GetDATA16())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -83,10 +84,10 @@ namespace Ev3Core.Lms2012
         {
             DATA32 Tmp;
 
-            Tmp = (DATA32)GH.Lms.PrimParPointer();
-            if (Tmp < (DATA32)GH.Lms.PrimParPointer())
+            Tmp = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+            if (Tmp < (DATA32)GH.Lms.PrimParPointer().GetDATA32())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -98,10 +99,10 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
-            if (Tmp < (DATAF)GH.Lms.PrimParPointer())
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
+            if (Tmp < (DATAF)GH.Lms.PrimParPointer().GetDATAF())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -113,10 +114,10 @@ namespace Ev3Core.Lms2012
         {
             DATA8 Tmp;
 
-            Tmp = (DATA8)GH.Lms.PrimParPointer();
-            if (Tmp > (DATA8)GH.Lms.PrimParPointer())
+            Tmp = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+            if (Tmp > (DATA8)GH.Lms.PrimParPointer().GetDATA8())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -128,10 +129,10 @@ namespace Ev3Core.Lms2012
         {
             DATA16 Tmp;
 
-            Tmp = (DATA16)GH.Lms.PrimParPointer();
-            if (Tmp > (DATA16)GH.Lms.PrimParPointer())
+            Tmp = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+            if (Tmp > (DATA16)GH.Lms.PrimParPointer().GetDATA16())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -143,10 +144,10 @@ namespace Ev3Core.Lms2012
         {
             DATA32 Tmp;
 
-            Tmp = (DATA32)GH.Lms.PrimParPointer();
-            if (Tmp > (DATA32)GH.Lms.PrimParPointer())
+            Tmp = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+            if (Tmp > (DATA32)GH.Lms.PrimParPointer().GetDATA32())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -158,10 +159,10 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
-            if (Tmp > (DATAF)GH.Lms.PrimParPointer())
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
+            if (Tmp > (DATAF)GH.Lms.PrimParPointer().GetDATAF())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -173,10 +174,10 @@ namespace Ev3Core.Lms2012
         {
             DATA8 Tmp;
 
-            Tmp = (DATA8)GH.Lms.PrimParPointer();
-            if (Tmp == (DATA8)GH.Lms.PrimParPointer())
+            Tmp = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+            if (Tmp == (DATA8)GH.Lms.PrimParPointer().GetDATA8())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -188,10 +189,10 @@ namespace Ev3Core.Lms2012
         {
             DATA16 Tmp;
 
-            Tmp = (DATA16)GH.Lms.PrimParPointer();
-            if (Tmp == (DATA16)GH.Lms.PrimParPointer())
+            Tmp = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+            if (Tmp == (DATA16)GH.Lms.PrimParPointer().GetDATA16())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -203,10 +204,10 @@ namespace Ev3Core.Lms2012
         {
             DATA32 Tmp;
 
-            Tmp = (DATA32)GH.Lms.PrimParPointer();
-            if (Tmp == (DATA32)GH.Lms.PrimParPointer())
+            Tmp = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+            if (Tmp == (DATA32)GH.Lms.PrimParPointer().GetDATA32())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -218,10 +219,10 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
-            if (Tmp == (DATAF)GH.Lms.PrimParPointer())
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
+            if (Tmp == (DATAF)GH.Lms.PrimParPointer().GetDATAF())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -233,10 +234,10 @@ namespace Ev3Core.Lms2012
         {
             DATA8 Tmp;
 
-            Tmp = (DATA8)GH.Lms.PrimParPointer();
-            if (Tmp != (DATA8)GH.Lms.PrimParPointer())
+            Tmp = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+            if (Tmp != (DATA8)GH.Lms.PrimParPointer().GetDATA8())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -248,10 +249,10 @@ namespace Ev3Core.Lms2012
         {
             DATA16 Tmp;
 
-            Tmp = (DATA16)GH.Lms.PrimParPointer();
-            if (Tmp != (DATA16)GH.Lms.PrimParPointer())
+            Tmp = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+            if (Tmp != (DATA16)GH.Lms.PrimParPointer().GetDATA16())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -263,10 +264,10 @@ namespace Ev3Core.Lms2012
         {
             DATA32 Tmp;
 
-            Tmp = (DATA32)GH.Lms.PrimParPointer();
-            if (Tmp != (DATA32)GH.Lms.PrimParPointer())
+            Tmp = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+            if (Tmp != (DATA32)GH.Lms.PrimParPointer().GetDATA32())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -278,10 +279,10 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
-            if (Tmp != (DATAF)GH.Lms.PrimParPointer())
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
+            if (Tmp != (DATAF)GH.Lms.PrimParPointer().GetDATAF())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -293,10 +294,10 @@ namespace Ev3Core.Lms2012
         {
             DATA8 Tmp;
 
-            Tmp = (DATA8)GH.Lms.PrimParPointer();
-            if (Tmp <= (DATA8)GH.Lms.PrimParPointer())
+            Tmp = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+            if (Tmp <= (DATA8)GH.Lms.PrimParPointer().GetDATA8())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -308,10 +309,10 @@ namespace Ev3Core.Lms2012
         {
             DATA16 Tmp;
 
-            Tmp = (DATA16)GH.Lms.PrimParPointer();
-            if (Tmp <= (DATA16)GH.Lms.PrimParPointer())
+            Tmp = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+            if (Tmp <= (DATA16)GH.Lms.PrimParPointer().GetDATA16())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -323,10 +324,10 @@ namespace Ev3Core.Lms2012
         {
             DATA32 Tmp;
 
-            Tmp = (DATA32)GH.Lms.PrimParPointer();
-            if (Tmp <= (DATA32)GH.Lms.PrimParPointer())
+            Tmp = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+            if (Tmp <= (DATA32)GH.Lms.PrimParPointer().GetDATA32())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -338,10 +339,10 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
-            if (Tmp <= (DATAF)GH.Lms.PrimParPointer())
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
+            if (Tmp <= (DATAF)GH.Lms.PrimParPointer().GetDATAF())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -353,10 +354,10 @@ namespace Ev3Core.Lms2012
         {
             DATA8 Tmp;
 
-            Tmp = (DATA8)GH.Lms.PrimParPointer();
-            if (Tmp >= (DATA8)GH.Lms.PrimParPointer())
+            Tmp = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+            if (Tmp >= (DATA8)GH.Lms.PrimParPointer().GetDATA8())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -368,10 +369,10 @@ namespace Ev3Core.Lms2012
         {
             DATA16 Tmp;
 
-            Tmp = (DATA16)GH.Lms.PrimParPointer();
-            if (Tmp >= (DATA16)GH.Lms.PrimParPointer())
+            Tmp = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+            if (Tmp >= (DATA16)GH.Lms.PrimParPointer().GetDATA16())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -383,10 +384,10 @@ namespace Ev3Core.Lms2012
         {
             DATA32 Tmp;
 
-            Tmp = (DATA32)GH.Lms.PrimParPointer();
-            if (Tmp >= (DATA32)GH.Lms.PrimParPointer())
+            Tmp = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+            if (Tmp >= (DATA32)GH.Lms.PrimParPointer().GetDATA32())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {
@@ -398,10 +399,10 @@ namespace Ev3Core.Lms2012
         {
             DATAF Tmp;
 
-            Tmp = (DATAF)GH.Lms.PrimParPointer();
-            if (Tmp >= (DATAF)GH.Lms.PrimParPointer())
+            Tmp = (DATAF)GH.Lms.PrimParPointer().GetDATAF();
+            if (Tmp >= (DATAF)GH.Lms.PrimParPointer().GetDATAF())
             {
-                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer());
+                GH.Lms.AdjustObjectIp((IMOFFS)GH.Lms.PrimParPointer().GetDATA32());
             }
             else
             {

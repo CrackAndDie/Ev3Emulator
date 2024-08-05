@@ -1,4 +1,5 @@
 ﻿using Ev3Core.Enums;
+using Ev3Core.Extensions;
 using Ev3Core.Lms2012.Interfaces;
 using static Ev3Core.Defines;
 
@@ -20,41 +21,38 @@ namespace Ev3Core.Lms2012
         {
             ULONG Time;
 
-            Time = (ULONG)GH.Lms.PrimParPointer();
+            Time = (ULONG)GH.Lms.PrimParPointer().GetULONG();
 
-            GH.Lms.PrimParPointer((ULONG)cTimerGetmS() + Time);
+            GH.Lms.PrimParPointer().SetULONG((ULONG)cTimerGetmS() + Time);
         }
 
         public void cTimerReady()
         {
             IP TmpIp;
-            int TmpIpInd;
             DSPSTAT DspStat = DSPSTAT.BUSYBREAK;
 
             TmpIp = GH.Lms.GetObjectIp();
-            TmpIpInd = GH.Lms.GetObjectIpInd();
 
-            if ((ULONG)GH.Lms.PrimParPointer() <= cTimerGetmS())
+            if ((ULONG)GH.Lms.PrimParPointer().GetULONG() <= cTimerGetmS())
             {
                 DspStat = DSPSTAT.NOBREAK;
             }
             if (DspStat == DSPSTAT.BUSYBREAK)
             { // Rewind IP
 
-                GH.Lms.SetObjectIp(TmpIp);
-                GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+                GH.Lms.SetObjectIp(TmpIp - 1);
             }
             GH.Lms.SetDispatchStatus(DspStat);
         }
 
         public void cTimerRead()
         {
-            GH.Lms.PrimParPointer((DATA32)(cTimerGetmS() - GH.VMInstance.Program[GH.Lms.CurrentProgramId()].StartTime));
+            GH.Lms.PrimParPointer().SetDATA32((DATA32)(cTimerGetmS() - GH.VMInstance.Program[GH.Lms.CurrentProgramId()].StartTime));
         }
 
         public void cTimerReaduS()
         {
-            GH.Lms.PrimParPointer((DATA32)cTimerGetuS());
+            GH.Lms.PrimParPointer().SetDATA32((DATA32)cTimerGetuS());
         }
     }
 }

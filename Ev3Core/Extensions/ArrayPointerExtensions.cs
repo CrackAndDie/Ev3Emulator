@@ -118,6 +118,28 @@ namespace Ev3Core.Extensions
         }
 
 		#region arrays shite
+		public static sbyte[] GetArrayDATA8(this ArrayPointer<byte> buf, bool updateOffset = false, uint tmpOffset = 0)
+		{
+			List<sbyte> tmp = new List<sbyte>();
+			for (int i = 0; i < (buf.Length - buf.Offset - tmpOffset); ++i)
+			{
+				tmp.Add(buf.GetDATA8(false, (uint)(i) + tmpOffset));
+			}
+			if (updateOffset) buf.Offset += (uint)(tmp.Count);
+			return tmp.ToArray();
+		}
+
+		public static byte[] GetArrayUBYTE(this ArrayPointer<byte> buf, bool updateOffset = false, uint tmpOffset = 0)
+		{
+			List<byte> tmp = new List<byte>();
+			for (int i = 0; i < (buf.Length - buf.Offset - tmpOffset); ++i)
+			{
+				tmp.Add(buf.GetUBYTE(false, (uint)(i) + tmpOffset));
+			}
+			if (updateOffset) buf.Offset += (uint)(tmp.Count);
+			return tmp.ToArray();
+		}
+
 		public static DATA16[] GetArrayDATA16(this ArrayPointer<byte> buf, bool updateOffset = false, uint tmpOffset = 0)
 		{
             List<DATA16> tmp = new List<short>();
