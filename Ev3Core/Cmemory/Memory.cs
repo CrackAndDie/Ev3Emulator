@@ -10,26 +10,26 @@ namespace Ev3Core.Cmemory
 {
 	public class Memory : IMemory
 	{
-		public void cMemoryGetUsage(ref int pTotal, ref int pFree, sbyte Force)
+		public void cMemoryGetUsage(VarPointer<int> pTotal, VarPointer<int> pFree, sbyte Force)
 		{
 			// TODO: do it normally if you want
 			GH.VMInstance.MemorySize = INSTALLED_MEMORY;
 			GH.VMInstance.MemoryFree = INSTALLED_MEMORY;
-			pTotal = GH.VMInstance.MemorySize;
-			pFree = GH.VMInstance.MemoryFree;
+			pTotal.Data = GH.VMInstance.MemorySize;
+			pFree.Data = GH.VMInstance.MemoryFree;
 		}
 
-		public RESULT cMemoryMalloc(byte[][] ppMemory, int Size, int memind = 0)
+		public RESULT cMemoryMalloc(ArrayPointer<byte> ppMemory, int Size)
 		{
 			RESULT Result = RESULT.FAIL;
-			DATA32 Total = 0;
-			DATA32 Free = 0;
+			VarPointer<DATA32> Total = new VarPointer<DATA32>(0);
+			VarPointer<DATA32> Free = new VarPointer<DATA32>(0);
 
-			cMemoryGetUsage(ref Total, ref Free, 0);
-			if (((Size + (KB - 1)) / KB) < (Free - RESERVED_MEMORY))
+			cMemoryGetUsage(Total, Free, 0);
+			if (((Size + (KB - 1)) / KB) < (Free.Data - RESERVED_MEMORY))
 			{
-				ppMemory[memind] = new byte[Size];
-				if (ppMemory[memind] != null)
+				ppMemory.Data = new byte[Size];
+				if (ppMemory != null)
 				{
 					Result = OK;
 				}
@@ -38,14 +38,11 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryMalloc(out byte[] ppMemory, int Size)
+		public RESULT cMemoryRealloc(ArrayPointer<UBYTE> pOldMemory, ArrayPointer<UBYTE> ppMemory, int Size)
 		{
 			RESULT Result = RESULT.FAIL;
-			DATA32 Total = 0;
-			DATA32 Free = 0;
 
-			cMemoryGetUsage(ref Total, ref Free, 0);
-			ppMemory = new byte[Size];
+			ppMemory.Data = new byte[Size];
 			if (ppMemory != null)
 			{
 				Result = OK;
@@ -54,38 +51,12 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryRealloc(byte[] pOldMemory, byte[][] ppMemory, int Size, int memind = 0)
-		{
-			RESULT Result = RESULT.FAIL;
-
-			ppMemory[memind] = new byte[Size];
-			if (ppMemory[memind] != null)
-			{
-				Result = OK;
-			}
-
-			return (Result);
-		}
-
-		public RESULT cMemoryRealloc(byte[] pOldMemory, out byte[] ppMemory, int Size)
-		{
-			RESULT Result = RESULT.FAIL;
-
-			ppMemory = new byte[Size];
-			if (ppMemory != null)
-			{
-				Result = OK;
-			}
-
-			return (Result);
-		}
-
-		RESULT cMemoryAlloc(PRGID PrgId, DATA8 Type, GBINDEX Size, byte[][] pMemory, ref HANDLER pHandle, int memind = 0)
+		RESULT cMemoryAlloc(PRGID PrgId, DATA8 Type, GBINDEX Size, ArrayPointer<UBYTE> pMemory, VarPointer<HANDLER> pHandle)
 		{
 			RESULT Result = RESULT.FAIL;
 			HANDLER TmpHandle;
 
-			pHandle = -1;
+			pHandle.Data = -1;
 
 			if ((PrgId < MAX_PROGRAMS) && (Size > 0) && (Size <= MAX_ARRAY_SIZE))
 			{
@@ -98,12 +69,12 @@ namespace Ev3Core.Cmemory
 				if (TmpHandle < MAX_HANDLES)
 				{
 
-					if (cMemoryMalloc(out GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool, (DATA32)Size) == OK)
+					if (cMemoryMalloc(GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool, (DATA32)Size) == OK)
 					{
-						pMemory[memind] = GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool;
+						pMemory.Data = GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool.Data;
 						GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Type = Type;
 						GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Size = Size;
-						pHandle = TmpHandle;
+						pHandle.Data = TmpHandle;
 						Result = OK;
 					}
 				}
@@ -112,16 +83,16 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-        byte[] cMemoryReallocate(PRGID PrgId, HANDLER Handle, GBINDEX Size)
+		ArrayPointer<UBYTE> cMemoryReallocate(PRGID PrgId, HANDLER Handle, GBINDEX Size)
 		{
-            byte[] pTmp;
+			ArrayPointer<UBYTE> pTmp;
 
-			pTmp = null;
+			pTmp = new ArrayPointer<byte>();
 			if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
 			{
 				if ((Size > 0) && (Size <= MAX_ARRAY_SIZE))
 				{
-					if (cMemoryRealloc(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool, out pTmp, (DATA32)Size) == OK)
+					if (cMemoryRealloc(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool, pTmp, (DATA32)Size) == OK)
 					{
 						GH.MemoryInstance.pPoolList[PrgId][Handle].pPool = pTmp;
 						GH.MemoryInstance.pPoolList[PrgId][Handle].Size = Size;
@@ -138,17 +109,17 @@ namespace Ev3Core.Cmemory
 			return (pTmp);
 		}
 
-		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, byte[][] pMemory, int memind = 0)
+		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, ArrayPointer<UBYTE> pMemory)
 		{
 			RESULT Result = RESULT.FAIL;
 
-			pMemory[memind] = null;
+			pMemory.Data = null;
 
 			if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
 			{
 				if (GH.MemoryInstance.pPoolList[PrgId][Handle].pPool != null)
 				{
-					pMemory[memind] = GH.MemoryInstance.pPoolList[PrgId][Handle].pPool;
+					pMemory.Data = GH.MemoryInstance.pPoolList[PrgId][Handle].pPool.Data;
 					Result = OK;
 				}
 			}
@@ -156,47 +127,14 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryGetPointer(ushort PrgId, short Handle, out byte[] pMemory)
+		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, ArrayPointer<UBYTE> pMemory)
 		{
 			RESULT Result = RESULT.FAIL;
+			ArrayPointer<UBYTE> pTmp = new ArrayPointer<byte>();
 
-			pMemory = null;
-
-			if ((PrgId < MAX_PROGRAMS) && (Handle >= 0) && (Handle < MAX_HANDLES))
+			if (cMemoryGetPointer(PrgId, Handle, pTmp) == OK)
 			{
-				if (GH.MemoryInstance.pPoolList[PrgId][Handle].pPool != null)
-				{
-					pMemory = GH.MemoryInstance.pPoolList[PrgId][Handle].pPool;
-					Result = OK;
-				}
-			}
-
-			return (Result);
-		}
-
-		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, byte[][] pMemory, int memind = 0)
-		{
-			RESULT Result = RESULT.FAIL;
-            byte[] pTmp;
-
-			if (cMemoryGetPointer(PrgId, Handle, out pTmp) == OK)
-			{
-				pMemory[memind] = pTmp;
-				Result = OK;
-			}
-
-			return (Result);
-		}
-
-		public RESULT cMemoryArraryPointer(ushort PrgId, short Handle, out byte[] pMemory)
-		{
-			RESULT Result = RESULT.FAIL;
-            byte[] pTmp;
-			pMemory = null;
-
-			if (cMemoryGetPointer(PrgId, Handle, out pTmp) == OK)
-			{
-				pMemory = pTmp;
+				pMemory.Data = pTmp.Data;
 				Result = OK;
 			}
 
@@ -214,7 +152,7 @@ namespace Ev3Core.Cmemory
 				{
 					if (GH.MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
 					{
-						pFDescr = FDESCR.FromByteArray(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
+						pFDescr = GH.MemoryInstance.pPoolList[PrgId][Handle].pPool.GetObject<FDESCR>(new FDESCR());
 						// TODO: wtf is here
 						//if ((pFDescr.Access) != 0)
 						//{
@@ -238,12 +176,12 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		void cMemoryFreePool(PRGID PrgId, byte[] pMemory)
+		void cMemoryFreePool(PRGID PrgId, ArrayPointer<UBYTE> pMemory)
 		{
 			HANDLER TmpHandle;
 
 			TmpHandle = 0;
-			while ((TmpHandle < MAX_HANDLES) && (GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool != pMemory))
+			while ((TmpHandle < MAX_HANDLES) && (GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool.Data != pMemory.Data))
 			{
 				TmpHandle++;
 			}
@@ -323,12 +261,12 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public RESULT cMemoryOpen(ushort PrgId, uint Size, byte[][] pMemory)
+		public RESULT cMemoryOpen(ushort PrgId, uint Size, ArrayPointer<UBYTE> pMemory)
 		{
 			RESULT Result = RESULT.FAIL;
-			HANDLER TmpHandle = 0;
+			VarPointer<HANDLER> TmpHandle = new VarPointer<short>(0);
 
-			Result = cMemoryAlloc(PrgId, POOL_TYPE_MEMORY, Size, pMemory, ref TmpHandle);
+			Result = cMemoryAlloc(PrgId, POOL_TYPE_MEMORY, Size, pMemory, TmpHandle);
 
 			return (Result);
 		}
@@ -347,9 +285,9 @@ namespace Ev3Core.Cmemory
 		{
 			RESULT Result = RESULT.FAIL;
 			FileInfo file;
-			char[] PrgNameBuf = new char[vmFILENAMESIZE];
+			ArrayPointer<UBYTE> PrgNameBuf = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
 
-			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToCharArray(), "/".ToCharArray(), vmLASTRUN_FILE_NAME.ToCharArray(), vmEXT_CONFIG.ToCharArray());
+			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), vmLASTRUN_FILE_NAME.ToArrayPointer(), vmEXT_CONFIG.ToArrayPointer());
 			file = new FileInfo(string.Concat(PrgNameBuf));
 			// TODO: wtf wtf wtf
 			//if (file != null)
@@ -362,29 +300,29 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		public byte[] cMemoryResize(ushort PrgId, short TmpHandle, int Elements)
+		public ArrayPointer<UBYTE> cMemoryResize(ushort PrgId, short TmpHandle, int Elements)
 		{
 			DATA32 Size;
-            byte[] pTmp = null;
+			ArrayPointer<UBYTE> pTmp = new ArrayPointer<byte>();
 
-			if (cMemoryGetPointer(PrgId, TmpHandle, out pTmp) == OK)
+			if (cMemoryGetPointer(PrgId, TmpHandle, pTmp) == OK)
 			{
-				Size = Elements * (DESCR.FromByteArray(pTmp)).ElementSize + DESCR.Sizeof;
+				Size = Elements * (pTmp.GetObject<DESCR>(new DESCR())).ElementSize + DESCR.Sizeof;
 				pTmp = cMemoryReallocate(PrgId, TmpHandle, (GBINDEX)Size);
 				if (pTmp != null)
 				{
-					(DESCR.FromByteArray(pTmp)).Elements = Elements;
+					(pTmp.GetObject<DESCR>(new DESCR())).Elements = Elements;
 				}
 			}
 			if (pTmp != null)
 			{
-				pTmp = (DESCR.FromByteArray(pTmp)).pArray.ToByteArray();
+				pTmp = new ArrayPointer<byte>((pTmp.GetObject<DESCR>(new DESCR())).pArray);
 			}
 
 			return (pTmp);
 		}
 
-		void FindName(char[] pSource, char[] pPath, char[] pName, char[] pExt)
+		void FindName(ArrayPointer<UBYTE> pSource, ArrayPointer<UBYTE> pPath, ArrayPointer<UBYTE> pName, ArrayPointer<UBYTE> pExt)
 		{
 			int Source = 0;
 			int Destination = 0;
@@ -410,7 +348,7 @@ namespace Ev3Core.Cmemory
 			}
 			if (pPath != null)
 			{
-				pPath[Destination] = (char)0;
+				pPath[Destination] = (byte)0;
 			}
 			Destination = 0;
 			while ((pSource.Length > Source) && (pSource[Source] != '.'))
@@ -424,7 +362,7 @@ namespace Ev3Core.Cmemory
 			}
 			if (pName != null)
 			{
-				pName[Destination] = (char)0;
+				pName[Destination] = (byte)0;
 			}
 			if (pExt != null)
 			{
@@ -435,22 +373,22 @@ namespace Ev3Core.Cmemory
 					Source++;
 					Destination++;
 				}
-				pExt[Destination] = (char)0;
+				pExt[Destination] = (byte)0;
 			}
 		}
 
-		public RESULT cMemoryCheckFilename(sbyte[] pFilename, sbyte[] pPath, sbyte[] pName, sbyte[] pExt)
+		public RESULT cMemoryCheckFilename(ArrayPointer<UBYTE> pFilename, ArrayPointer<UBYTE> pPath, ArrayPointer<UBYTE> pName, ArrayPointer<UBYTE> pExt)
 		{
 			RESULT Result = RESULT.FAIL;
-			char[] Path = new char[vmFILENAMESIZE];
-			char[] Name = new char[vmFILENAMESIZE];
-			char[] Ext = new char[vmFILENAMESIZE];
+			ArrayPointer<UBYTE> Path = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
+			ArrayPointer<UBYTE> Name = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
+			ArrayPointer<UBYTE> Ext = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
 
 			if (pFilename.Length < vmFILENAMESIZE)
 			{
 				if (GH.Lms.ValidateString(pFilename, vmCHARSET_FILENAME) == OK)
 				{
-					FindName(pFilename.ToCharArray(), Path, Name, Ext);
+					FindName(pFilename, Path, Name, Ext);
 					if (Path.Length < vmPATHSIZE)
 					{
 						if (pPath != null)
@@ -478,7 +416,7 @@ namespace Ev3Core.Cmemory
 
 			if (pFilename.Length < vmFILENAMESIZE)
 			{
-				FindName(pFilename.ToCharArray(), Path, Name, Ext);
+				FindName(pFilename, Path, Name, Ext);
 				if (Path.Length < vmPATHSIZE)
 				{
 					if (pPath != null)
@@ -514,14 +452,14 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		RESULT ConstructFilename(PRGID PrgId, char[] pFilename, char[] pName, char[] pDefaultExt)
+		RESULT ConstructFilename(PRGID PrgId, ArrayPointer<UBYTE> pFilename, ArrayPointer<UBYTE> pName, ArrayPointer<UBYTE> pDefaultExt)
 		{
 			RESULT Result = RESULT.FAIL;
-			char[] Path = new char[vmPATHSIZE];
-			char[] Name = new char[vmNAMESIZE];
-			char[] Ext = new char[vmEXTSIZE];
+			ArrayPointer<UBYTE> Path = new ArrayPointer<UBYTE>(new UBYTE[vmPATHSIZE]);
+			ArrayPointer<UBYTE> Name = new ArrayPointer<UBYTE>(new UBYTE[vmNAMESIZE]);
+			ArrayPointer<UBYTE> Ext = new ArrayPointer<UBYTE>(new UBYTE[vmEXTSIZE]);
 
-			Result = cMemoryCheckFilename(pFilename.ToSbyteArray(), Path.ToSbyteArray(), Name.ToSbyteArray(), Ext.ToSbyteArray());
+			Result = cMemoryCheckFilename(pFilename, Path, Name, Ext);
 
 			if (Result == OK)
 			{ // Filename OK
@@ -529,7 +467,7 @@ namespace Ev3Core.Cmemory
 				if (Path[0] == 0)
 				{ // Default path
 
-					CommonHelper.Snprintf(Path, 0, vmPATHSIZE, GH.MemoryInstance.PathList[PrgId].ToCharArray());
+					CommonHelper.Snprintf(Path, 0, vmPATHSIZE, GH.MemoryInstance.PathList[PrgId]);
 				}
 
 				if (Ext[0] == 0)
@@ -547,7 +485,7 @@ namespace Ev3Core.Cmemory
 		}
 
 
-		int FindDot(char[] pString)
+		int FindDot(ArrayPointer<UBYTE> pString)
 		{
 			int Result = -1;
 			int Pointer = 0;
@@ -564,7 +502,7 @@ namespace Ev3Core.Cmemory
 			return (Result);
 		}
 
-		void cMemoryDeleteCacheFile(char[] pFileName)
+		void cMemoryDeleteCacheFile(ArrayPointer<UBYTE> pFileName)
 		{
 			DATA8 Item;
 			DATA8 Tmp;
@@ -585,39 +523,36 @@ namespace Ev3Core.Cmemory
 			}
 			while (Item < (CACHE_DEEPT - 1))
 			{
-				CommonHelper.Strcpy(GH.MemoryInstance.Cache[Item], string.Concat(GH.MemoryInstance.Cache[Item + 1].ToCharArray()));
+				CommonHelper.Strcpy(GH.MemoryInstance.Cache[Item], string.Concat(GH.MemoryInstance.Cache[Item + 1]));
 				Item++;
 			}
 			GH.MemoryInstance.Cache[Item][0] = 0;
 		}
 
 
-		int cMemorySort(object[] ppFirst, object[] ppSecond)
+		int cMemorySort(ArrayPointer<UBYTE> ppFirst, ArrayPointer<UBYTE> ppSecond)
 		{
 			int Result;
 			int First, Second;
-			char[] pFirst;
-			char[] pSecond;
-
-			pFirst = CommonHelper.CastObjectArray<char>(ppFirst);
-			pSecond = CommonHelper.CastObjectArray<char>(ppSecond);
+			ArrayPointer<UBYTE> pFirst = ppFirst;
+			ArrayPointer<UBYTE> pSecond = ppSecond;
 
 			First = FindDot(pFirst);
 			Second = FindDot(pSecond);
 
 			if ((First >= 0) && (Second >= 0))
 			{
-				Result = CommonHelper.Strcmp(pFirst.Skip(First).ToArray().ToSbyteArray(), string.Concat(pSecond.Skip(Second).ToArray()));
+				Result = CommonHelper.Strcmp(pFirst.Copy(First), string.Concat(pSecond.Skip(Second).ToArray()));
 				if (Result == 0)
 				{
-					Result = CommonHelper.Strcmp(pFirst.ToSbyteArray(), string.Concat(pSecond));
+					Result = CommonHelper.Strcmp(pFirst, string.Concat(pSecond));
 				}
 			}
 			else
 			{
 				if ((First < 0) && (Second < 0))
 				{
-					Result = CommonHelper.Strcmp(pFirst.ToSbyteArray(), string.Concat(pSecond));
+					Result = CommonHelper.Strcmp(pFirst, string.Concat(pSecond));
 				}
 				else
 				{
@@ -657,7 +592,7 @@ namespace Ev3Core.Cmemory
 
 
 
-		public RESULT cMemoryCheckOpenWrite(sbyte[] pFileName)
+		public RESULT cMemoryCheckOpenWrite(ArrayPointer<UBYTE> pFileName)
 		{
 			throw new NotImplementedException();
 		}
@@ -686,12 +621,12 @@ namespace Ev3Core.Cmemory
 			throw new NotImplementedException();
 		}
 
-		public sbyte cMemoryFindFiles(sbyte[] pFolderName)
+		public sbyte cMemoryFindFiles(ArrayPointer<UBYTE> pFolderName)
 		{
 			throw new NotImplementedException();
 		}
 
-		public sbyte cMemoryFindSubFolders(sbyte[] pFolderName)
+		public sbyte cMemoryFindSubFolders(ArrayPointer<UBYTE> pFolderName)
 		{
 			throw new NotImplementedException();
 		}
@@ -701,77 +636,77 @@ namespace Ev3Core.Cmemory
 			throw new NotImplementedException();
 		}
 
-		public sbyte cMemoryGetCacheName(sbyte Item, sbyte MaxLength, sbyte[] pFileName, sbyte[] pName)
+		public sbyte cMemoryGetCacheName(sbyte Item, sbyte MaxLength, ArrayPointer<UBYTE> pFileName, ArrayPointer<UBYTE> pName)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetFolderItems(ushort PrgId, DirectoryInfo Handle, ref short pItems)
+		public RESULT cMemoryGetFolderItems(ushort PrgId, DirectoryInfo Handle, VarPointer<short> pItems)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetIcon(sbyte[] pFolderName, sbyte Item, int[] pImagePointer)
+		public RESULT cMemoryGetIcon(ArrayPointer<UBYTE> pFolderName, sbyte Item, ArrayPointer<UBYTE> pImagePointer)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetImage(sbyte[] pText, short Size, byte[] pBmp)
+		public RESULT cMemoryGetImage(ArrayPointer<UBYTE> pText, short Size, ArrayPointer<UBYTE> pBmp)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetItem(ushort PrgId, DirectoryInfo Handle, short Item, sbyte Length, sbyte[] pName, ref sbyte pType)
+		public RESULT cMemoryGetItem(ushort PrgId, DirectoryInfo Handle, short Item, sbyte Length, ArrayPointer<UBYTE> pName, VarPointer<sbyte> pType)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetItemIcon(ushort PrgId, DirectoryInfo Handle, short Item, ref FileInfo pHandle, int[] pImagePointer)
+		public RESULT cMemoryGetItemIcon(ushort PrgId, DirectoryInfo Handle, short Item, VarPointer<FileInfo> pHandle, ArrayPointer<UBYTE> pImagePointer)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetItemName(ushort PrgId, DirectoryInfo Handle, short Item, sbyte Length, sbyte[] pName, ref sbyte pType, ref sbyte pPriority)
+		public RESULT cMemoryGetItemName(ushort PrgId, DirectoryInfo Handle, short Item, sbyte Length, ArrayPointer<UBYTE> pName, VarPointer<sbyte> pType, VarPointer<sbyte> pPriority)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetItemText(ushort PrgId, DirectoryInfo Handle, short Item, sbyte Length, sbyte[] pText)
+		public RESULT cMemoryGetItemText(ushort PrgId, DirectoryInfo Handle, short Item, sbyte Length, ArrayPointer<UBYTE> pText)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemoryGetMediaName(sbyte[] pChar, sbyte[] pName)
-		{
-			throw new NotImplementedException();
-		}
-
-
-
-		public void cMemoryGetResourcePath(ushort PrgId, sbyte[] pString, sbyte MaxLength)
-		{
-			throw new NotImplementedException();
-		}
-
-		public sbyte cMemoryGetSubFolderName(sbyte Item, sbyte MaxLength, sbyte[] pFolderName, sbyte[] pSubFolderName)
+		public RESULT cMemoryGetMediaName(ArrayPointer<UBYTE> pChar, ArrayPointer<UBYTE> pName)
 		{
 			throw new NotImplementedException();
 		}
 
 
 
-
-
-
-
-
-
-		public RESULT cMemoryOpenFolder(ushort PrgId, sbyte Type, sbyte[] pFolderName, ref DirectoryInfo pHandle)
+		public void cMemoryGetResourcePath(ushort PrgId, ArrayPointer<UBYTE> pString, sbyte MaxLength)
 		{
 			throw new NotImplementedException();
 		}
 
-		public RESULT cMemorySetItemText(ushort PrgId, DirectoryInfo Handle, short Item, sbyte[] pText)
+		public sbyte cMemoryGetSubFolderName(sbyte Item, sbyte MaxLength, ArrayPointer<UBYTE> pFolderName, ArrayPointer<UBYTE> pSubFolderName)
+		{
+			throw new NotImplementedException();
+		}
+
+
+
+
+
+
+
+
+
+		public RESULT cMemoryOpenFolder(ushort PrgId, sbyte Type, ArrayPointer<UBYTE> pFolderName, VarPointer<DirectoryInfo> pHandle)
+		{
+			throw new NotImplementedException();
+		}
+
+		public RESULT cMemorySetItemText(ushort PrgId, DirectoryInfo Handle, short Item, ArrayPointer<UBYTE> pText)
 		{
 			throw new NotImplementedException();
 		}

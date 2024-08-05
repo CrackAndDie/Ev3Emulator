@@ -1,5 +1,6 @@
 ﻿using Ev3Core.Enums;
 using Ev3Core.Helpers;
+using System.IO;
 using static Ev3Core.Defines;
 
 namespace Ev3Core.Cmemory.Interfaces
@@ -8,47 +9,43 @@ namespace Ev3Core.Cmemory.Interfaces
     {
         RESULT cMemoryInit();
 
-        RESULT cMemoryOpen(PRGID PrgId, GBINDEX Size, byte[][] pMemory);
+        RESULT cMemoryOpen(PRGID PrgId, GBINDEX Size, ArrayPointer<UBYTE> pMemory);
 
         RESULT cMemoryClose(PRGID PrgId);
 
         RESULT cMemoryExit();
 
-        RESULT cMemoryMalloc(byte[][] ppMemory, DATA32 Size, int memind = 0);
-        RESULT cMemoryMalloc(out byte[] ppMemory, DATA32 Size);
+        RESULT cMemoryMalloc(ArrayPointer<UBYTE> ppMemory, DATA32 Size);
 
-        RESULT cMemoryRealloc(byte[] pOldMemory, byte[][] ppMemory, DATA32 Size, int memind = 0);
-        RESULT cMemoryRealloc(byte[] pOldMemory, out byte[] ppMemory, DATA32 Size);
+        RESULT cMemoryRealloc(ArrayPointer<UBYTE> pOldMemory, ArrayPointer<UBYTE> ppMemory, DATA32 Size);
 
-        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, byte[][] pMemory, int memind = 0);
-        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, out byte[] pMemory);
+        RESULT cMemoryGetPointer(PRGID PrgId, HANDLER Handle, ArrayPointer<UBYTE> pMemory);
 
-        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, byte[][] pMemory, int memind = 0);
-        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, out byte[] pMemory);
+        RESULT cMemoryArraryPointer(PRGID PrgId, HANDLER Handle, ArrayPointer<UBYTE> pMemory);
 
         DATA8 cMemoryGetCacheFiles();
 
-        DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, DATA8[] pFileName, DATA8[] pName);
+        DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, ArrayPointer<UBYTE> pFileName, ArrayPointer<UBYTE> pName);
 
-        DATA8 cMemoryFindSubFolders(DATA8[] pFolderName);
+        DATA8 cMemoryFindSubFolders(ArrayPointer<UBYTE> pFolderName);
 
-        DATA8 cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, DATA8[] pFolderName, DATA8[] pSubFolderName);
+        DATA8 cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, ArrayPointer<UBYTE> pFolderName, ArrayPointer<UBYTE> pSubFolderName);
 
-        DATA8 cMemoryFindFiles(DATA8[] pFolderName);
+        DATA8 cMemoryFindFiles(ArrayPointer<UBYTE> pFolderName);
 
-        void cMemoryGetResourcePath(PRGID PrgId, DATA8[] pString, DATA8 MaxLength);
+        void cMemoryGetResourcePath(PRGID PrgId, ArrayPointer<UBYTE> pString, DATA8 MaxLength);
 
-        RESULT cMemoryGetIcon(DATA8[] pFolderName, DATA8 Item, DATA32[] pImagePointer);
+        RESULT cMemoryGetIcon(ArrayPointer<UBYTE> pFolderName, DATA8 Item, ArrayPointer<UBYTE> pImagePointer);
 
-        RESULT cMemoryGetImage(DATA8[] pText, DATA16 Size, UBYTE[] pBmp);
+        RESULT cMemoryGetImage(ArrayPointer<UBYTE> pText, DATA16 Size, ArrayPointer<UBYTE> pBmp);
 
         DSPSTAT cMemoryCloseFile(PRGID PrgId, FileInfo Handle);
 
-        RESULT cMemoryCheckOpenWrite(DATA8[] pFileName);
+        RESULT cMemoryCheckOpenWrite(ArrayPointer<UBYTE> pFileName);
 
-        RESULT cMemoryCheckFilename(DATA8[] pFilename, DATA8[] pPath, DATA8[] pName, DATA8[] pExt);
+        RESULT cMemoryCheckFilename(ArrayPointer<UBYTE> pFilename, ArrayPointer<UBYTE> pPath, ArrayPointer<UBYTE> pName, ArrayPointer<UBYTE> pExt);
 
-        RESULT cMemoryGetMediaName(DATA8[] pChar, DATA8[] pName);
+        RESULT cMemoryGetMediaName(ArrayPointer<UBYTE> pChar, ArrayPointer<UBYTE> pName);
 
 
 
@@ -62,41 +59,41 @@ namespace Ev3Core.Cmemory.Interfaces
 
         void cMemoryArrayAppend();
 
-        byte[] cMemoryResize(PRGID PrgId, HANDLER Handle, DATA32 Elements);
+		ArrayPointer<UBYTE> cMemoryResize(PRGID PrgId, HANDLER Handle, DATA32 Elements);
 
         void cMemoryFileName();
 
 
 
-        RESULT cMemoryOpenFolder(PRGID PrgId, DATA8 Type, DATA8[] pFolderName, ref DirectoryInfo pHandle);
+        RESULT cMemoryOpenFolder(PRGID PrgId, DATA8 Type, ArrayPointer<UBYTE> pFolderName, VarPointer<DirectoryInfo> pHandle);
 
-        RESULT cMemoryGetFolderItems(PRGID PrgId, DirectoryInfo Handle, ref DATA16 pItems);
+        RESULT cMemoryGetFolderItems(PRGID PrgId, DirectoryInfo Handle, VarPointer<DATA16> pItems);
 
-        RESULT cMemoryGetItemName(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType, ref DATA8 pPriority);
+        RESULT cMemoryGetItemName(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, ArrayPointer<UBYTE> pName, VarPointer<DATA8> pType, VarPointer<DATA8> pPriority);
 
-        RESULT cMemoryGetItemIcon(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, ref FileInfo pHandle, DATA32[] pImagePointer);
+        RESULT cMemoryGetItemIcon(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, VarPointer<FileInfo> pHandle, ArrayPointer<UBYTE> pImagePointer);
 
-        RESULT cMemoryGetItemText(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, DATA8[] pText);
+        RESULT cMemoryGetItemText(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, ArrayPointer<UBYTE> pText);
 
-        RESULT cMemorySetItemText(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8[] pText);
+        RESULT cMemorySetItemText(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, ArrayPointer<UBYTE> pText);
 
-        RESULT cMemoryGetItem(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, DATA8[] pName, ref DATA8 pType);
+        RESULT cMemoryGetItem(PRGID PrgId, DirectoryInfo Handle, DATA16 Item, DATA8 Length, ArrayPointer<UBYTE> pName, VarPointer<DATA8> pType);
 
         void cMemoryCloseFolder(PRGID PrgId, DirectoryInfo pHandle);
 
-        void cMemoryGetUsage(ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
+        void cMemoryGetUsage(VarPointer<DATA32> pTotal, VarPointer<DATA32> pFree, DATA8 Force);
 
         void cMemoryUsage();
     }
 
     public class POOL
     {
-        public byte[] pPool;
+        public ArrayPointer<UBYTE> pPool = new ArrayPointer<byte>();
         public GBINDEX Size;
         public DATA8 Type;
     }
 
-    public class DESCR
+    public class DESCR : IByteCastable<DESCR>
     {
         public DATA32 Elements;
         public DATA32 UsedElements;
@@ -104,29 +101,39 @@ namespace Ev3Core.Cmemory.Interfaces
         public DATA8 Type;
         public DATA8 Free1;
         public DATA8 Free2;
-        public DATA8[] pArray; // Must be aligned
+        public UBYTE[] pArray; // Must be aligned
 
         public const int Sizeof = 16;
 
-		public static DESCR FromByteArray(byte[] data)
+		public DESCR GetObject(GP buff, bool updateOffset = false)
+		{
+            //TODO:!!!!
+            return this;
+		}
+
+		public void SetData(GP buff, bool updateOffset = false)
 		{
 			//TODO:!!!!
-			return new DESCR();
 		}
 	}
 
-    public class FDESCR
-    {
+    public class FDESCR : IByteCastable<FDESCR>
+	{
         public int hFile;
         public DATA8 Access;
         public char[] Filename = CommonHelper.Array1d<char>(vmFILENAMESIZE);
 
-        public static FDESCR FromByteArray(byte[] data)
-        {
+		public FDESCR GetObject(GP buff, bool updateOffset = false)
+		{
             //TODO:!!!!
-            return new FDESCR();
-        }
-    }
+            return this;
+		}
+
+		public void SetData(GP buff, bool updateOffset = false)
+		{
+			//TODO:!!!!
+		}
+	}
 
     public class MEMORY_GLOBALS
     {
@@ -138,10 +145,10 @@ namespace Ev3Core.Cmemory.Interfaces
         public DATA32 SyncTick;
 
         //DATA32  BytesUsed;
-        public DATA8[][] PathList = CommonHelper.Array2d<DATA8>(MAX_PROGRAMS, vmPATHSIZE);
-        public POOL[][] pPoolList = CommonHelper.Array2d<POOL>(MAX_PROGRAMS, MAX_HANDLES, true);
+        public ArrayPointer<ArrayPointer<UBYTE>> PathList = ArrayPointer<UBYTE>.From2d(CommonHelper.Array2d<UBYTE>(MAX_PROGRAMS, vmPATHSIZE));
+        public ArrayPointer<ArrayPointer<POOL>> pPoolList = ArrayPointer<POOL>.From2d(CommonHelper.Array2d<POOL>(MAX_PROGRAMS, MAX_HANDLES, true));
 
-        public DATA8[][] Cache = CommonHelper.Array2d<DATA8>(CACHE_DEEPT + 1, vmFILENAMESIZE);
+        public ArrayPointer<ArrayPointer<UBYTE>> Cache = ArrayPointer<UBYTE>.From2d(CommonHelper.Array2d<UBYTE>(CACHE_DEEPT + 1, vmFILENAMESIZE));
 
     }
 }

@@ -63,9 +63,16 @@ public abstract class IPointer<T>
 public class VarPointer<T> : IPointer<T>
 {
     public T Data = default(T);
+
+	public VarPointer() { }
+
+	public VarPointer(T data)
+	{
+		Data = data;
+	}
 }
 
-public class ArrayPointer<T> : IPointer<T>
+public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>
 {
     public uint Offset = 0;
     public T[] Data = null;
@@ -81,6 +88,46 @@ public class ArrayPointer<T> : IPointer<T>
     {
         Data = data;
         Offset = offset;
+    }
+
+    public static ArrayPointer<ArrayPointer<T>> From2d(T[][] arr, uint offset = 0)
+    {
+        List<ArrayPointer<T>> tmp = new List<ArrayPointer<T>>();
+        foreach (var a in arr)
+        {
+            tmp.Add(new ArrayPointer<T>(a, 0)); // is offset should be applied?
+        }
+        var ap = new ArrayPointer<ArrayPointer<T>>(tmp.ToArray(), offset);
+        return ap;
+    }
+
+    public void PutData(IEnumerable<T> data)
+    {
+        int i = 0;
+        foreach (var d in data)
+        {
+            if (i >= Data.Length)
+                return;
+
+            Data[i + Offset] = d;
+            i++;
+        }
+    }
+
+	public ArrayPointer<T> Copy(int offset = -1)
+	{
+		var n = new ArrayPointer<T>(Data, Offset);
+		if (offset >= 0)
+			n.Offset = (uint)offset;
+		return n;
+	}
+
+	public ArrayPointer<T> Copy(uint offset = uint.MaxValue)
+    {
+        var n = new ArrayPointer<T>(Data, Offset);
+        if (offset != uint.MaxValue)
+            n.Offset = offset;
+        return n;
     }
 
     // methods
@@ -134,7 +181,20 @@ public class ArrayPointer<T> : IPointer<T>
         }
     }
 
-    public static implicit operator int(ArrayPointer<T> arr)
+	public IEnumerator<T> GetEnumerator()
+	{
+		for (int i = (int)Offset; i < Data.Length; ++i)
+        {
+            yield return Data[i];
+        }
+	}
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+	{
+        return this.GetEnumerator();
+	}
+
+	public static implicit operator int(ArrayPointer<T> arr)
     {
         return (int)arr.Offset;
     }

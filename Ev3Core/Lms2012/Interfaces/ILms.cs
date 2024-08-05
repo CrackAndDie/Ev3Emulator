@@ -53,7 +53,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		DATA8 GetSleepMinutes();
 		void ProgramEnd(PRGID PrgId);
 		RESULT ValidateChar(ref DATA8 pChar, DATA8 Set);
-		RESULT ValidateString(DATA8[] pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
+		RESULT ValidateString(ArrayPointer<UBYTE> pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
         byte[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
 		void SetDispatchStatus(DSPSTAT DspStat);
 		void SetDispatchStatus(int DspStat);
