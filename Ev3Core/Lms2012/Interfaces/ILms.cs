@@ -52,7 +52,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		void SetSleepMinutes(DATA8 Minutes);
 		DATA8 GetSleepMinutes();
 		void ProgramEnd(PRGID PrgId);
-		RESULT ValidateChar(ref DATA8 pChar, DATA8 Set);
+		RESULT ValidateChar(VarPointer<UBYTE> pChar, DATA8 Set);
 		RESULT ValidateString(ArrayPointer<UBYTE> pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
         byte[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
 		void SetDispatchStatus(DSPSTAT DspStat);
@@ -68,8 +68,8 @@ namespace Ev3Core.Lms2012.Interfaces
 		OBJSTAT ProgramStatus(PRGID PrgId);
 		OBJSTAT ProgramStatusChange(PRGID PrgId);
 
-		DATA8 CheckUsbstick(ref DATA8 pChanged, ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
-		DATA8 CheckSdcard(ref DATA8 pChanged, ref DATA32 pTotal, ref DATA32 pFree, DATA8 Force);
+		DATA8 CheckUsbstick(VarPointer<DATA8> pChanged, VarPointer<DATA32> pTotal, VarPointer<DATA32> pFree, DATA8 Force);
+		DATA8 CheckSdcard(VarPointer<DATA8> pChanged, VarPointer<DATA32> pTotal, VarPointer<DATA32> pFree, DATA8 Force);
 	}
 
 	public class OBJ // Object
@@ -116,7 +116,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public LABEL[] Label = CommonHelper.Array1d<LABEL>(MAX_LABELS, true);           //!< Storage for labels
 		public UWORD Debug;                      //!< Debug flag
 
-		public DATA8[] Name = CommonHelper.Array1d<DATA8>(FILENAME_SIZE);           //!
+		public ArrayPointer<UBYTE> Name = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(FILENAME_SIZE));           //!
 	}
 
 	public class TYPES : ICloneable // if data type changes - remember to change "cInputTypeDataInit" !

@@ -6,10 +6,9 @@ namespace Ev3Core.Cui.Interfaces
 	{
 		RESULT dTerminalInit();
 
-		RESULT dTerminalRead(ref UBYTE pData);
+		RESULT dTerminalRead(VarPointer<byte> pData);
 
-		RESULT dTerminalWrite(UBYTE[] pData, UWORD Cnt);
-		RESULT dTerminalWrite(DATA8[] pData, SWORD Cnt);
+		RESULT dTerminalWrite(ArrayPointer<UBYTE> pData, UWORD Cnt);
 
 		RESULT dTerminalExit();
 	}

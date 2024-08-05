@@ -44,5 +44,10 @@ namespace Ev3Core.Extensions
         {
             return new ArrayPointer<byte>(ToByteArray(str.ToCharArray()));
         }
-    }
+
+		public static string AsString(this ArrayPointer<byte> arr)
+		{
+			return string.Concat(arr.Select(x => (char)x));
+		}
+	}
 }

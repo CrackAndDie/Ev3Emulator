@@ -118,7 +118,7 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>
 	{
 		var n = new ArrayPointer<T>(Data, Offset);
 		if (offset >= 0)
-			n.Offset = (uint)offset;
+			n.Offset += (uint)offset;
 		return n;
 	}
 
@@ -126,7 +126,7 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>
     {
         var n = new ArrayPointer<T>(Data, Offset);
         if (offset != uint.MaxValue)
-            n.Offset = offset;
+            n.Offset += offset;
         return n;
     }
 

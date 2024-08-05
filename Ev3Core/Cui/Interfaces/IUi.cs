@@ -70,7 +70,7 @@ namespace Ev3Core.Cui.Interfaces
         public DATA16 TextSpaceY;
         public DATA16 TextChars;
         public DATA16 TextLines;
-        public DATA8[][] TextLine = CommonHelper.Array2d<DATA8>(MAX_NOTIFY_LINES, MAX_NOTIFY_LINE_CHARS);
+        public ArrayPointer<ArrayPointer<UBYTE>> TextLine = ArrayPointer<UBYTE>.From2d(CommonHelper.Array2d<UBYTE>(MAX_NOTIFY_LINES, MAX_NOTIFY_LINE_CHARS));
         public DATA16 IconWidth;
         public DATA16 IconHeight;
         public DATA16 IconStartX;
@@ -185,17 +185,17 @@ namespace Ev3Core.Cui.Interfaces
         public DATA16 Chars;
         public DATA16 Lines;
 
-        public DirectoryInfo hFolders = null;
-        public DirectoryInfo hFiles = null;
+        public VarPointer<DirectoryInfo> hFolders = new VarPointer<DirectoryInfo>();
+        public VarPointer<DirectoryInfo> hFiles = new VarPointer<DirectoryInfo>();
 		public PRGID PrgId;
         public OBJID ObjId;
 
         public DATA16 OldFiles;
-        public DATA16 Folders;                      // Number of folders [0..DIR_DEEPT]
+        public VarPointer<DATA16> Folders;                      // Number of folders [0..DIR_DEEPT]
         public DATA16 OpenFolder;                   // Folder number open (0 = none) [0..DIR_DEEPT]
-        public DATA16 Files;                        // Number of files in open folder [0..DIR_DEEPT]
+        public VarPointer<DATA16> Files;                        // Number of files in open folder [0..DIR_DEEPT]
         public DATA16 ItemStart;                    // Item number at top of list (shown)
-        public DATA16 ItemPointer;                  // Item list pointer - folder or file
+        public VarPointer<DATA16> ItemPointer;                  // Item list pointer - folder or file
 
         public DATA8 NeedUpdate;                   // Flag set if returning without closing browser
 
@@ -203,11 +203,11 @@ namespace Ev3Core.Cui.Interfaces
 
         public DATA8 Usbstick;
 
-        public DATA8[] TopFolder = CommonHelper.Array1d<DATA8>(MAX_FILENAME_SIZE);
-        public DATA8[] SubFolder = CommonHelper.Array1d<DATA8>(MAX_FILENAME_SIZE);
-        public DATA8[] FullPath = CommonHelper.Array1d<DATA8>(MAX_FILENAME_SIZE);
-        public DATA8[] Filename = CommonHelper.Array1d<DATA8>(MAX_FILENAME_SIZE);
-        public DATA8[] Text = CommonHelper.Array1d<DATA8>(TEXTSIZE);
+        public ArrayPointer<UBYTE> TopFolder = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_FILENAME_SIZE));
+        public ArrayPointer<UBYTE> SubFolder = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_FILENAME_SIZE));
+        public ArrayPointer<UBYTE> FullPath = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_FILENAME_SIZE));
+        public ArrayPointer<UBYTE> Filename = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_FILENAME_SIZE));
+        public ArrayPointer<UBYTE> Text = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(TEXTSIZE));
     }
 
     public class TXTBOX
@@ -241,8 +241,8 @@ namespace Ev3Core.Cui.Interfaces
         public DATA16 ItemStart;                    // Item number at top of list (shown)
         public DATA16 ItemPointer;                  // Item list pointer - folder or file
 
-        public DATA8 Font;
-        public DATA8[] Text = CommonHelper.Array1d<DATA8>(TEXTSIZE);
+        public VarPointer<DATA8> Font = new VarPointer<sbyte>();;
+        public ArrayPointer<UBYTE> Text = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(TEXTSIZE));
     }
 
     public class UI_GLOBALS
@@ -344,27 +344,27 @@ namespace Ev3Core.Cui.Interfaces
 
         public DATA8 Font;
 
-        public IMGDATA[] ImageBuffer = CommonHelper.Array1d<IMGDATA>(IMAGEBUFFER_SIZE);
+        public ArrayPointer<UBYTE> ImageBuffer = new ArrayPointer<UBYTE>(CommonHelper.Array1d<IMGDATA>(IMAGEBUFFER_SIZE));
 
-        public DATA8[] KeyBuffer = CommonHelper.Array1d<DATA8>(KEYBUF_SIZE + 1);
+        public ArrayPointer<UBYTE> KeyBuffer = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(KEYBUF_SIZE + 1));
         public DATA8 KeyBufIn;
         public DATA8 Keys;
 
-        public DATA8[] UiWrBuffer = CommonHelper.Array1d<DATA8>(UI_WR_BUFFER_SIZE);
+        public ArrayPointer<UBYTE> UiWrBuffer = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(UI_WR_BUFFER_SIZE));
         public DATA16 UiWrBufferSize;
 
         public IMINDEX Point;
         public IMINDEX Size;
 
-        public char[] HwVers = CommonHelper.Array1d<char>(HWVERS_SIZE);
-        public char[] FwVers = CommonHelper.Array1d<char>(FWVERS_SIZE);
-        public char[] FwBuild = CommonHelper.Array1d<char>(FWBUILD_SIZE);
-        public char[] OsVers = CommonHelper.Array1d<char>(OSVERS_SIZE);
-        public char[] OsBuild = CommonHelper.Array1d<char>(OSBUILD_SIZE);
-        public char[] IpAddr = CommonHelper.Array1d<char>(IPADDR_SIZE);
+        public ArrayPointer<UBYTE> HwVers = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(HWVERS_SIZE));
+        public ArrayPointer<UBYTE> FwVers = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(FWVERS_SIZE));
+        public ArrayPointer<UBYTE> FwBuild = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(FWBUILD_SIZE));
+        public ArrayPointer<UBYTE> OsVers = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(OSVERS_SIZE));
+        public ArrayPointer<UBYTE> OsBuild = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(OSBUILD_SIZE));
+        public ArrayPointer<UBYTE> IpAddr = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(IPADDR_SIZE));
 
         public DATA8 Hw;
 
-        public IMGDATA[] Globals = CommonHelper.Array1d<IMGDATA>(MAX_COMMAND_GLOBALS);
+        public ArrayPointer<UBYTE> Globals = new ArrayPointer<UBYTE>(CommonHelper.Array1d<IMGDATA>(MAX_COMMAND_GLOBALS));
     }
 }

@@ -11,21 +11,15 @@ namespace Ev3Core.Cui
 			return RESULT.OK;
 		}
 
-		public RESULT dTerminalRead(ref byte pData)
+		public RESULT dTerminalRead(VarPointer<byte> pData)
 		{
 			GH.Ev3System.Logger.LogWarning("Terminal read called. WTF");
 			return RESULT.OK;
 		}
 
-		public RESULT dTerminalWrite(byte[] pData, ushort Cnt)
+		public RESULT dTerminalWrite(ArrayPointer<UBYTE> pData, ushort Cnt)
 		{
 			GH.Ev3System.Logger.LogWarning("Terminal write called. WTF");
-			return RESULT.OK;
-		}
-
-		public RESULT dTerminalWrite(sbyte[] pData, short Cnt)
-		{
-			GH.Ev3System.Logger.LogWarning("Terminal swrite called. WTF");
 			return RESULT.OK;
 		}
 

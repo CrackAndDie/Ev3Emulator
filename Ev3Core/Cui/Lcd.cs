@@ -41,7 +41,7 @@ namespace Ev3Core.Cui
 			dLcdExec(pLcd);
 		}
 
-		public void dLcdInit(byte[] pImage)
+		public void dLcdInit(ArrayPointer<UBYTE> pImage)
 		{
 			// TODO: 
 			GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
@@ -58,13 +58,13 @@ namespace Ev3Core.Cui
 			GH.Ev3System.Logger.LogWarning($"Tried to use unimplemented shite in: {System.Environment.StackTrace}");
 		}
 
-		public void dLcdScroll(byte[] pImage, short Y0)
+		public void dLcdScroll(ArrayPointer<UBYTE> pImage, short Y0)
 		{
 			CommonHelper.Memmove(pImage, pImage, (LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8), 0, ((LCD_WIDTH + 7) / 8) * Y0);
 			CommonHelper.Memset(pImage, 0, ((LCD_WIDTH + 7) / 8) * Y0, (LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8));
 		}
 
-		public void dLcdDrawPixel(byte[] pImage, sbyte Color, short X0, short Y0)
+		public void dLcdDrawPixel(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0)
 		{
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
 			{
@@ -79,7 +79,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdInversePixel(byte[] pImage, short X0, short Y0)
+		public void dLcdInversePixel(ArrayPointer<UBYTE> pImage, short X0, short Y0)
 		{
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
 			{
@@ -87,7 +87,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public sbyte dLcdReadPixel(byte[] pImage, short X0, short Y0)
+		public sbyte dLcdReadPixel(ArrayPointer<UBYTE> pImage, short X0, short Y0)
 		{
 			DATA8 Result = 0;
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
@@ -100,7 +100,7 @@ namespace Ev3Core.Cui
 			return (Result);
 		}
 
-		public void dLcdDrawLine(byte[] pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
+		public void dLcdDrawLine(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
 		{
 			DATA16 XLength;
 			DATA16 YLength;
@@ -150,7 +150,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdDrawDotLine(byte[] pImage, sbyte Color, short X0, short Y0, short X1, short Y1, short On, short Off)
+		public void dLcdDrawDotLine(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short X1, short Y1, short On, short Off)
 		{
 			DATA16 XLength;
 			DATA16 YLength;
@@ -224,7 +224,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdPlotPoints(byte[] pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
+		public void dLcdPlotPoints(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
 		{
 			dLcdDrawPixel(pImage, Color, (short)(X0 + X1), (short)(Y0 + Y1));
 			dLcdDrawPixel(pImage, Color, (short)(X0 - X1), (short)(Y0 + Y1));
@@ -236,7 +236,7 @@ namespace Ev3Core.Cui
 			dLcdDrawPixel(pImage, Color, (short)(X0 - Y1), (short)(Y0 - X1));
 		}
 
-		public void dLcdDrawCircle(byte[] pImage, sbyte Color, short X0, short Y0, short R)
+		public void dLcdDrawCircle(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short R)
 		{
 			short X = 0;
 			short Y = R;
@@ -269,7 +269,7 @@ namespace Ev3Core.Cui
 			return FontInfo[Font].FontWidth;
 		}
 
-		public void dLcdDrawChar(byte[] pImage, sbyte Color, short X0, short Y0, sbyte Font, sbyte Char)
+		public void dLcdDrawChar(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, sbyte Font, byte Char)
 		{
 			DATA16 CharWidth;
 			DATA16 CharHeight;
@@ -284,7 +284,7 @@ namespace Ev3Core.Cui
 
 			if ((Char >= FontInfo[Font].FontFirst) && (Char <= FontInfo[Font].FontLast))
 			{
-				Char -= FontInfo[Font].FontFirst;
+				Char -= (byte)FontInfo[Font].FontFirst;
 
 				CharByteIndex = (short)((Char % FontInfo[Font].FontHorz) * ((CharWidth + 7) / 8));
 				CharByteIndex += (short)((Char / FontInfo[Font].FontHorz) * ((CharWidth + 7) / 8) * CharHeight * FontInfo[Font].FontHorz);
@@ -402,7 +402,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdDrawText(byte[] pImage, sbyte Color, short X0, short Y0, sbyte Font, sbyte[] pText)
+		public void dLcdDrawText(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, sbyte Font, ArrayPointer<UBYTE> pText)
 		{
 			foreach (var ch in pText)
 			{
@@ -414,7 +414,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public byte[] dLcdGetIconBits(sbyte Type)
+		public ArrayPointer<UBYTE> dLcdGetIconBits(sbyte Type)
 		{
 			return IconInfo[Type].pIconBits;
 		}
@@ -434,7 +434,7 @@ namespace Ev3Core.Cui
 			return (short)(IconInfo[Type].IconSize / IconInfo[Type].IconHeight);
 		}
 
-		public void dLcdDrawPicture(byte[] pImage, sbyte Color, short X0, short Y0, short IconWidth, short IconHeight, byte[] pIconBits)
+		public void dLcdDrawPicture(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short IconWidth, short IconHeight, ArrayPointer<UBYTE> pIconBits)
 		{
 			DATA16 IconByteIndex;
 			DATA16 LcdByteIndex;
@@ -475,12 +475,12 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdDrawIcon(byte[] pImage, sbyte Color, short X0, short Y0, sbyte Type, sbyte No)
+		public void dLcdDrawIcon(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, sbyte Type, sbyte No)
 		{
 			DATA16 IconByteIndex;
 			DATA16 IconHeight;
 			DATA16 IconWidth;
-			UBYTE[] pIconBits;
+			ArrayPointer<UBYTE> pIconBits;
 
 			IconHeight = dLcdGetIconHeight(Type);
 			IconWidth = dLcdGetIconWidth(Type);
@@ -489,23 +489,23 @@ namespace Ev3Core.Cui
 			{
 				pIconBits = dLcdGetIconBits(Type);
 				IconByteIndex = (DATA16)(((DATA16)No * IconWidth * IconHeight) / 8);
-				dLcdDrawPicture(pImage, Color, X0, Y0, IconWidth, IconHeight, pIconBits.Skip(IconByteIndex).ToArray());
+				dLcdDrawPicture(pImage, Color, X0, Y0, IconWidth, IconHeight, pIconBits.Copy(IconByteIndex));
 			}
 		}
 
-		public void dLcdGetBitmapSize(byte[] pBitmap, ref short pWidth, ref short pHeight)
+		public void dLcdGetBitmapSize(ArrayPointer<UBYTE> pBitmap, VarPointer<short> pWidth, VarPointer<short> pHeight)
 		{
-			pWidth = 0;
-			pHeight = 0;
+			pWidth.Data = 0;
+			pHeight.Data = 0;
 
 			if (pBitmap != null && pBitmap.Length > 0)
 			{
-				pWidth = (DATA16)pBitmap[0];
-				pHeight = (DATA16)pBitmap[1];
+				pWidth.Data = (DATA16)pBitmap[0];
+				pHeight.Data = (DATA16)pBitmap[1];
 			}
 		}
 
-		public void dLcdDrawBitmap(byte[] pImage, sbyte Color, short X0, short Y0, byte[] pBitmap)
+		public void dLcdDrawBitmap(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, ArrayPointer<UBYTE> pBitmap)
 		{
 			DATA16 BitmapWidth;
 			DATA16 BitmapHeight;
@@ -639,7 +639,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdRect(byte[] pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
+		public void dLcdRect(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
 		{
 			X1--;
 			Y1--;
@@ -649,7 +649,7 @@ namespace Ev3Core.Cui
 			dLcdDrawLine(pImage, Color, X0, (short)(Y0 + Y1), X0, Y0);
 		}
 
-		public void dLcdFillRect(byte[] pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
+		public void dLcdFillRect(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
 		{
 			DATA16 StartX;
 			DATA16 MaxX;
@@ -668,7 +668,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdInverseRect(byte[] pImage, short X0, short Y0, short X1, short Y1)
+		public void dLcdInverseRect(ArrayPointer<UBYTE> pImage, short X0, short Y0, short X1, short Y1)
 		{
 			DATA16 StartX;
 			DATA16 MaxX;
@@ -687,7 +687,7 @@ namespace Ev3Core.Cui
 			}
 		}
 
-		public void dLcdPlotLines(byte[] pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
+		public void dLcdPlotLines(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short X1, short Y1)
 		{
 			dLcdDrawLine(pImage, Color, (short)(X0 - X1), (short)(Y0 + Y1), (short)(X0 + X1), (short)(Y0 + Y1));
 			dLcdDrawLine(pImage, Color, (short)(X0 - X1), (short)(Y0 - Y1), (short)(X0 + X1), (short)(Y0 - Y1));
@@ -695,7 +695,7 @@ namespace Ev3Core.Cui
 			dLcdDrawLine(pImage, Color, (short)(X0 - Y1), (short)(Y0 - X1), (short)(X0 + Y1), (short)(Y0 - X1));
 		}
 
-		public void dLcdDrawFilledCircle(byte[] pImage, sbyte Color, short X0, short Y0, short R)
+		public void dLcdDrawFilledCircle(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0, short R)
 		{
 			short X = 0;
 			short Y = R;
@@ -718,7 +718,7 @@ namespace Ev3Core.Cui
 			dLcdPlotLines(pImage, Color, X0, Y0, X, Y);
 		}
 
-		public sbyte dLcdCheckPixel(byte[] pImage, sbyte Color, short X0, short Y0)
+		public sbyte dLcdCheckPixel(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0)
 		{
 			DATA8 Result = 0;
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
@@ -731,7 +731,7 @@ namespace Ev3Core.Cui
 			return (Result);
 		}
 
-		public void dLcdFlodfill(byte[] pImage, sbyte Color, short X0, short Y0)
+		public void dLcdFlodfill(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0)
 		{
 			DATA16 X;
 			DATA16 Y;

@@ -2015,7 +2015,7 @@ namespace Ev3Core
 		#region c_ui.c
 		public const int CALL_INTERVAL = 400;  // [mS]
 
-		public static IMGDATA[] DownloadSuccesSound = { opINFO, LC0(GET_VOLUME), LV0(0), opSOUND, LC0(PLAY), LV0(0), LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, opSOUND_READY, opOBJECT_END };
+		public static ArrayPointer<UBYTE> DownloadSuccesSound = new ArrayPointer<UBYTE>( new byte[] { opINFO, LC0(GET_VOLUME), LV0(0), opSOUND, LC0(PLAY), LV0(0), LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, opSOUND_READY, opOBJECT_END });
 
 		public const int REAL_ANY_BUTTON = 6;
 		public const int REAL_NO_BUTTON = 7;
@@ -2094,16 +2094,16 @@ namespace Ev3Core
 		public const int MAX_KEYB_WIDTH = 12;
 		public const int MAX_KEYB_HEIGHT = 4;
 
-		public static Dictionary<int, sbyte[]> Delimiter = new Dictionary<int, sbyte[]>
+		public static Dictionary<int, byte[]> Delimiter = new Dictionary<int, byte[]>
 		{
-			[DEL_NONE] = new sbyte[0],
-			[DEL_TAB] = new sbyte[1] { (sbyte)'\t' },
-			[DEL_SPACE] = new sbyte[1] { (sbyte)' ' },
-			[DEL_RETURN] = new sbyte[1] { (sbyte)'\r' },
-			[DEL_COLON] = new sbyte[1] { (sbyte)':' },
-			[DEL_COMMA] = new sbyte[1] { (sbyte)',' },
-			[DEL_LINEFEED] = new sbyte[1] { (sbyte)'\n' },
-			[DEL_CRLF] = new sbyte[2] { (sbyte)'\r', (sbyte)'\n' },
+			[DEL_NONE] = new byte[0],
+			[DEL_TAB] = new byte[1] { (byte)'\t' },
+			[DEL_SPACE] = new byte[1] { (byte)' ' },
+			[DEL_RETURN] = new byte[1] { (byte)'\r' },
+			[DEL_COLON] = new byte[1] { (byte)':' },
+			[DEL_COMMA] = new byte[1] { (byte)',' },
+			[DEL_LINEFEED] = new byte[1] { (byte)'\n' },
+			[DEL_CRLF] = new byte[2] { (byte)'\r', (byte)'\n' },
 		};
 		#endregion
 
@@ -2139,7 +2139,7 @@ namespace Ev3Core
 		{
 			{ NORMAL_FONT, new FONTINFO()
 							{
-								pFontBits    = BmpHelper.GetBytesOf(BmpType.NormalFont),
+								pFontBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.NormalFont)),
 								FontHeight   = 9,
 								FontWidth    = 8,
 								FontHorz     = 16,
@@ -2148,7 +2148,7 @@ namespace Ev3Core
 							}},
 			{ SMALL_FONT, new FONTINFO()
 							{
-								pFontBits    = BmpHelper.GetBytesOf(BmpType.SmallFont),
+								pFontBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.SmallFont)),
 								FontHeight   = 8,
 								FontWidth    = 8,
 								FontHorz     = 16,
@@ -2157,7 +2157,7 @@ namespace Ev3Core
 							}},
 			{ LARGE_FONT, new FONTINFO()
 							{
-								pFontBits = BmpHelper.GetBytesOf(BmpType.LargeFont),
+								pFontBits = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.LargeFont)),
 								FontHeight = 16,
 								FontWidth = 16,
 								FontHorz = 16,
@@ -2166,7 +2166,7 @@ namespace Ev3Core
 							}},
 			{ TINY_FONT, new FONTINFO()
 							{
-								pFontBits = BmpHelper.GetBytesOf(BmpType.TinyFont),
+								pFontBits = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.TinyFont)),
 								FontHeight = 7,
 								FontWidth = 5,
 								FontHorz = 16,
@@ -2180,35 +2180,35 @@ namespace Ev3Core
 		{
 			{ NORMAL_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.NormalIcons),
+								pIconBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.NormalIcons)),
 								IconSize     = 420,
 								IconHeight   = 12,
 								IconWidth    = 24,
 							}},
 			{ SMALL_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.SmallIcons),
+								pIconBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.SmallIcons)),
 								IconSize     = 176,
 								IconHeight   = 8,
 								IconWidth    = 16,
 							}},
 			{ LARGE_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.LargeIcons),
+								pIconBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.LargeIcons)),
 								IconSize     = 616,
 								IconHeight   = 22,
 								IconWidth    = 24,
 							}},
 			{ MENU_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.MenuIcons),
+								pIconBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.MenuIcons)),
 								IconSize     = 132,
 								IconHeight   = 12,
 								IconWidth    = 16,
 							}},
 			{ ARROW_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.ArrowIcons),
+								pIconBits    = new ArrayPointer<UBYTE>(BmpHelper.GetBytesOf(BmpType.ArrowIcons)),
 								IconSize     = 36,
 								IconHeight   = 12,
 								IconWidth    = 8,
