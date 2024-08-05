@@ -15,7 +15,7 @@ namespace Ev3Core.Coutput.Interfaces
 
         RESULT cOutputExit();
 
-        void cOutputSetTypes(char[] pTypes);
+        void cOutputSetTypes(ArrayPointer<UBYTE> pTypes);
         void cOutputSetType();
         UBYTE cMotorGetBusyFlags();
         void cMotorSetBusyFlags(UBYTE Flags);
@@ -48,13 +48,13 @@ namespace Ev3Core.Coutput.Interfaces
         // Output Global variables
         //*****************************************************************************
 
-        public DATA8[] OutputType = CommonHelper.Array1d<DATA8>(OUTPUTS);
-        public OBJID[] Owner = CommonHelper.Array1d<OBJID>(OUTPUTS);
+        public ArrayPointer<UBYTE> OutputType = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(OUTPUTS));
+        public ArrayPointer<OBJID> Owner = new ArrayPointer<OBJID>(CommonHelper.Array1d<OBJID>(OUTPUTS));
 
         public int PwmFile;
         public int MotorFile;
 
-        public MOTORDATA[] MotorData = CommonHelper.Array1d<MOTORDATA>(OUTPUTS, true);
+        public ArrayPointer<MOTORDATA> MotorData = new ArrayPointer<MOTORDATA>(CommonHelper.Array1d<MOTORDATA>(OUTPUTS, true));
         public int pMotor = 0;
     }
 }

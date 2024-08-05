@@ -72,12 +72,12 @@ namespace Ev3Core.Coutput
 			return (Result);
 		}
 
-		public void cOutputSetTypes(char[] pTypes)
+		public void cOutputSetTypes(ArrayPointer<UBYTE> pTypes)
 		{
 			UBYTE[] TypeArr = new byte[5];
 
 			TypeArr[0] = opOUTPUT_SET_TYPE;
-			Array.Copy(TypeArr, 1, pTypes, 0, 4);
+			Array.Copy(TypeArr, 1, pTypes.GetSkipped(), 0, 4);
 
 			GH.Ev3System.OutputHandler.WritePwmData(TypeArr, 5);
 		}
@@ -171,18 +171,16 @@ namespace Ev3Core.Coutput
 		{
 			DATA8 Layer;
 			DATA8 No;
-			DATA8 Type;
+			UBYTE Type;
 			UBYTE Len;
 			DSPSTAT DspStat = DSPSTAT.NOBREAK;
 			IP TmpIp;
-			int TmpIpInd;
 
 			TmpIp = GH.Lms.GetObjectIp();
-			TmpIpInd = GH.Lms.GetObjectIpInd();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			No = (DATA8)GH.Lms.PrimParPointer();
-			Type = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			No = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Type = GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -222,8 +220,8 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (UBYTE)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -253,9 +251,9 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (UBYTE)GH.Lms.PrimParPointer();
-			Brake = (UBYTE)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
+			Brake = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -285,9 +283,9 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (UBYTE)GH.Lms.PrimParPointer();
-			Speed = (UBYTE)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
+			Speed = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -316,9 +314,9 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (UBYTE)GH.Lms.PrimParPointer();
-			Power = (UBYTE)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
+			Power = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -347,8 +345,8 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (UBYTE)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -380,10 +378,10 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			Polarity[0] = (UBYTE)opOUTPUT_POLARITY;
-			Polarity[1] = (UBYTE)GH.Lms.PrimParPointer();
-			Polarity[2] = (UBYTE)GH.Lms.PrimParPointer();
+			Polarity[1] = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
+			Polarity[2] = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (Layer == 0)
 			{
@@ -407,14 +405,14 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			StepPower.Cmd = opOUTPUT_STEP_POWER;
-			StepPower.Nos = (DATA8)GH.Lms.PrimParPointer();
-			StepPower.Power = (DATA8)GH.Lms.PrimParPointer();
-			StepPower.Step1 = (DATA32)GH.Lms.PrimParPointer();
-			StepPower.Step2 = (DATA32)GH.Lms.PrimParPointer();
-			StepPower.Step3 = (DATA32)GH.Lms.PrimParPointer();
-			StepPower.Brake = (DATA8)GH.Lms.PrimParPointer();
+			StepPower.Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			StepPower.Power = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			StepPower.Step1 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepPower.Step2 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepPower.Step3 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepPower.Brake = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -446,14 +444,14 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			TimePower.Cmd = opOUTPUT_TIME_POWER;
-			TimePower.Nos = (DATA8)GH.Lms.PrimParPointer();
-			TimePower.Power = (DATA8)GH.Lms.PrimParPointer();
-			TimePower.Time1 = (DATA32)GH.Lms.PrimParPointer();
-			TimePower.Time2 = (DATA32)GH.Lms.PrimParPointer();
-			TimePower.Time3 = (DATA32)GH.Lms.PrimParPointer();
-			TimePower.Brake = (DATA8)GH.Lms.PrimParPointer();
+			TimePower.Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			TimePower.Power = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			TimePower.Time1 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimePower.Time2 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimePower.Time3 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimePower.Brake = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -485,14 +483,14 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			StepSpeed.Cmd = opOUTPUT_STEP_SPEED;
-			StepSpeed.Nos = (DATA8)GH.Lms.PrimParPointer();
-			StepSpeed.Speed = (DATA8)GH.Lms.PrimParPointer();
-			StepSpeed.Step1 = (DATA32)GH.Lms.PrimParPointer();
-			StepSpeed.Step2 = (DATA32)GH.Lms.PrimParPointer();
-			StepSpeed.Step3 = (DATA32)GH.Lms.PrimParPointer();
-			StepSpeed.Brake = (DATA8)GH.Lms.PrimParPointer();
+			StepSpeed.Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			StepSpeed.Speed = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			StepSpeed.Step1 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepSpeed.Step2 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepSpeed.Step3 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepSpeed.Brake = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			if (0 == Layer)
 			{
 				GH.Ev3System.OutputHandler.WritePwmData(StepSpeed.ToByteArray(), STEPSPEED.Sizeof);
@@ -523,14 +521,14 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			TimeSpeed.Cmd = opOUTPUT_TIME_SPEED;
-			TimeSpeed.Nos = (DATA8)GH.Lms.PrimParPointer();
-			TimeSpeed.Speed = (DATA8)GH.Lms.PrimParPointer();
-			TimeSpeed.Time1 = (DATA32)GH.Lms.PrimParPointer();
-			TimeSpeed.Time2 = (DATA32)GH.Lms.PrimParPointer();
-			TimeSpeed.Time3 = (DATA32)GH.Lms.PrimParPointer();
-			TimeSpeed.Brake = (DATA8)GH.Lms.PrimParPointer();
+			TimeSpeed.Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			TimeSpeed.Speed = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			TimeSpeed.Time1 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimeSpeed.Time2 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimeSpeed.Time3 = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimeSpeed.Brake = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -562,13 +560,13 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			StepSync.Cmd = opOUTPUT_STEP_SYNC;
-			StepSync.Nos = (DATA8)GH.Lms.PrimParPointer();
-			StepSync.Speed = (DATA8)GH.Lms.PrimParPointer();
-			StepSync.Turn = (DATA16)GH.Lms.PrimParPointer();
-			StepSync.Step = (DATA32)GH.Lms.PrimParPointer();
-			StepSync.Brake = (DATA8)GH.Lms.PrimParPointer();
+			StepSync.Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			StepSync.Speed = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			StepSync.Turn = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+			StepSync.Step = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			StepSync.Brake = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -600,13 +598,13 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			TimeSync.Cmd = opOUTPUT_TIME_SYNC;
-			TimeSync.Nos = (DATA8)GH.Lms.PrimParPointer();
-			TimeSync.Speed = (DATA8)GH.Lms.PrimParPointer();
-			TimeSync.Turn = (DATA16)GH.Lms.PrimParPointer();
-			TimeSync.Time = (DATA32)GH.Lms.PrimParPointer();
-			TimeSync.Brake = (DATA8)GH.Lms.PrimParPointer();
+			TimeSync.Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			TimeSync.Speed = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			TimeSync.Turn = (DATA16)GH.Lms.PrimParPointer().GetDATA16();
+			TimeSync.Time = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
+			TimeSync.Brake = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -634,8 +632,8 @@ namespace Ev3Core.Coutput
 			DATA8 Speed = 0;
 			DATA32 Tacho = 0;
 
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			No = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			No = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -646,8 +644,8 @@ namespace Ev3Core.Coutput
 					Tacho = GH.OutputInstance.MotorData[No].TachoCounts;
 				}
 			}
-			GH.Lms.PrimParPointer((DATA8)Speed);
-			GH.Lms.PrimParPointer((DATA32)Tacho);
+			GH.Lms.PrimParPointer().SetDATA8((DATA8)Speed);
+			GH.Lms.PrimParPointer().SetDATA32((DATA32)Tacho);
 		}
 
 		public void cOutputReady()
@@ -655,7 +653,6 @@ namespace Ev3Core.Coutput
 			OBJID Owner;
 			DATA8 Layer, Tmp, Nos;
 			IP TmpIp;
-			int TmpIpInd;
 			DSPSTAT DspStat = DSPSTAT.NOBREAK;
 			UBYTE Bits;
 
@@ -665,10 +662,9 @@ namespace Ev3Core.Coutput
 			char[] BusyReturn = new char[10]; // Busy mask
 
 			TmpIp = GH.Lms.GetObjectIp();
-			TmpIpInd = GH.Lms.GetObjectIpInd();
 
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			Owner = GH.Lms.CallingObjectId();
 
 			if (0 == Layer)
@@ -702,8 +698,7 @@ namespace Ev3Core.Coutput
 			if (DspStat == DSPSTAT.BUSYBREAK)
 			{
 				// Rewind IP
-				GH.Lms.SetObjectIp(TmpIp);
-				GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+				GH.Lms.SetObjectIp(TmpIp - 1);
 			}
 			GH.Lms.SetDispatchStatus(DspStat);
 		}
@@ -717,8 +712,8 @@ namespace Ev3Core.Coutput
 
 			char[] BusyReturn = new char[20]; // Busy mask
 
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			Nos = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			Nos = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -734,7 +729,7 @@ namespace Ev3Core.Coutput
 			{
 				// TODO: daisy shite if you want
 			}
-			GH.Lms.PrimParPointer((DATA8)Busy);
+			GH.Lms.PrimParPointer().SetDATA8((DATA8)Busy);
 		}
 
 		public void cOutputClrCount()
@@ -748,9 +743,9 @@ namespace Ev3Core.Coutput
 
 			TmpIp = GH.Lms.GetObjectIp();
 			Len = 0;
-			Layer = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 			ClrCnt[0] = opOUTPUT_CLR_COUNT;
-			ClrCnt[1] = (UBYTE)GH.Lms.PrimParPointer();
+			ClrCnt[1] = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
 			if (0 == Layer)
 			{
@@ -778,8 +773,8 @@ namespace Ev3Core.Coutput
 			DATA8 No;
 			DATA32 Tacho = 0;
 
-			Layer = (DATA8)GH.Lms.PrimParPointer();
-			No = (DATA8)GH.Lms.PrimParPointer();
+			Layer = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
+			No = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 
 			if (0 == Layer)
 			{
@@ -789,7 +784,7 @@ namespace Ev3Core.Coutput
 					Tacho = GH.OutputInstance.MotorData[No].TachoSensor;
 				}
 			}
-			GH.Lms.PrimParPointer((DATA32)Tacho);
+			GH.Lms.PrimParPointer().SetDATA32((DATA32)Tacho);
 		}
 	}
 }
