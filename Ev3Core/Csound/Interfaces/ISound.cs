@@ -45,7 +45,7 @@ namespace Ev3Core.Csound.Interfaces
         public SWORD Index;
         public SWORD Step;
         public UBYTE BytesToWrite;
-        public char[] PathBuffer = new char[MAX_FILENAME_SIZE];
-        public UBYTE[] SoundData = new UBYTE[SOUND_FILE_BUFFER_SIZE + 1]; // Add up for CMD
+        public ArrayPointer<UBYTE> PathBuffer = new ArrayPointer<UBYTE>(new byte[MAX_FILENAME_SIZE]);
+        public ArrayPointer<UBYTE> SoundData = new ArrayPointer<UBYTE>(new UBYTE[SOUND_FILE_BUFFER_SIZE + 1]); // Add up for CMD
     }
 }

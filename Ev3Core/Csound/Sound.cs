@@ -160,7 +160,7 @@ namespace Ev3Core.Csound
 
 		public void cSoundEntry()
 		{
-			int Cmd;
+			byte Cmd;
 			UWORD Temp1;
 			UBYTE Loop = 0;
 			UWORD Frequency;
@@ -168,17 +168,17 @@ namespace Ev3Core.Csound
 
 			UWORD BytesToWrite;
 			UWORD BytesWritten = 0;
-			DATA8[] SoundData = new DATA8[SOUND_FILE_BUFFER_SIZE + 1]; // Add up for CMD
+			ArrayPointer<UBYTE> SoundData = new ArrayPointer<UBYTE>(new UBYTE[SOUND_FILE_BUFFER_SIZE + 1]); // Add up for CMD
 
-			DATA8[] pFileName;
-			char[] PathName = new char[MAX_FILENAME_SIZE];
+			ArrayPointer<UBYTE> pFileName = new ArrayPointer<UBYTE>();
+			ArrayPointer<UBYTE> PathName = new ArrayPointer<UBYTE>(new byte[MAX_FILENAME_SIZE]);
 			UBYTE Tmp1;
 			UBYTE Tmp2;
 
 
-			Cmd = (DATA8)GH.Lms.PrimParPointer();
+			Cmd = (UBYTE)GH.Lms.PrimParPointer().GetUBYTE();
 
-			SoundData[0] = (sbyte)Cmd; // General for all commands :-)
+			SoundData[0] = Cmd; // General for all commands :-)
 			BytesToWrite = 0;
 
 
@@ -188,7 +188,7 @@ namespace Ev3Core.Csound
 				case TONE:
 					GH.SoundInstance.Sound.Status = BUSY;
 					GH.SoundInstance.SoundOwner = (sbyte)GH.Lms.CallingObjectId();
-					Temp1 = (ushort)(DATA8)GH.Lms.PrimParPointer();   // Volume level
+					Temp1 = (ushort)(DATA8)GH.Lms.PrimParPointer().GetDATA8();   // Volume level
 
 					// Scale the volume from 1-100% into 13 level steps
 					// Could be linear but prepared for speaker and -box adjustments... :-)
@@ -283,12 +283,12 @@ namespace Ev3Core.Csound
 					else
 						SoundData[1] = 0;
 
-					Frequency = (ushort)(DATA16)GH.Lms.PrimParPointer();
-					Duration = (ushort)(DATA16)GH.Lms.PrimParPointer();
-					SoundData[2] = (DATA8)(Frequency);
-					SoundData[3] = (DATA8)(Frequency >> 8);
-					SoundData[4] = (DATA8)(Duration);
-					SoundData[5] = (DATA8)(Duration >> 8);
+					Frequency = (ushort)(DATA16)GH.Lms.PrimParPointer().GetDATA16();
+					Duration = (ushort)(DATA16)GH.Lms.PrimParPointer().GetDATA16();
+					SoundData[2] = (UBYTE)(Frequency);
+					SoundData[3] = (UBYTE)(Frequency >> 8);
+					SoundData[4] = (UBYTE)(Duration);
+					SoundData[5] = (UBYTE)(Duration >> 8);
 					BytesToWrite = 6;
 					GH.SoundInstance.cSoundState = SOUND_TONE_PLAYING;
 					break;
@@ -327,7 +327,7 @@ namespace Ev3Core.Csound
 					GH.SoundInstance.Sound.Status = BUSY;
 					GH.SoundInstance.SoundOwner = (sbyte)GH.Lms.CallingObjectId();
 
-					Temp1 = (ushort)(DATA8)GH.Lms.PrimParPointer();  // Volume level
+					Temp1 = (ushort)(DATA8)GH.Lms.PrimParPointer().GetDATA8();  // Volume level
 														// Scale the volume from 1-100% into 1 - 8 level steps
 														// Could be linear but prepared for speaker and -box adjustments... :-)
 					if (Temp1 > 0)
@@ -389,21 +389,21 @@ namespace Ev3Core.Csound
 					BytesToWrite = 2;
 
 					// Get filename
-					pFileName = (DATA8[])GH.Lms.PrimParPointer();
+					pFileName = GH.Lms.PrimParPointer();
 
 					if (pFileName != null) // We should have a valid filename
 					{
 						// Get Path and concatenate
 
-						PathName[0] = (char)0;
+						PathName[0] = 0;
 						if (pFileName[0] != '.')
 						{
 							GH.Lms.GetResourcePath(PathName, MAX_FILENAME_SIZE);
-							CommonHelper.Sprintf<char>(GH.SoundInstance.PathBuffer, 0, PathName, pFileName.ToCharArray(), ".rsf".ToCharArray());
+							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, 0, PathName, pFileName, ".rsf".ToArrayPointer());
 						}
 						else
 						{
-							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, 0, pFileName.ToCharArray(), ".rsf".ToCharArray());
+							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, 0, pFileName, ".rsf".ToArrayPointer());
 						}
 
 						// Open SoundFile
@@ -455,7 +455,7 @@ namespace Ev3Core.Csound
 
 			if (BytesToWrite > 0)
 			{
-				BytesWritten = GH.Ev3System.SoundHandler.PlayChunk(SoundData.ToByteArray(), (byte)BytesToWrite);
+				BytesWritten = GH.Ev3System.SoundHandler.PlayChunk(SoundData, (byte)BytesToWrite);
 
 				if (GH.SoundInstance.cSoundState == SOUND_SETUP_FILE)  // The one and only situation
 				{
@@ -477,22 +477,20 @@ namespace Ev3Core.Csound
 		{
 			if (GH.SoundInstance.Sound.Status == BUSY)
 			{
-				GH.Lms.PrimParPointer((DATA8)1);
+				GH.Lms.PrimParPointer().SetDATA8((DATA8)1);
 			}
 			else
 			{
-				GH.Lms.PrimParPointer((DATA8)0);
+				GH.Lms.PrimParPointer().SetDATA8((DATA8)0);
 			}
 		}
 
 		public void cSoundReady()
 		{
 			IP TmpIp;
-			int TmpIpInd;
 			DSPSTAT DspStat = DSPSTAT.NOBREAK;
 
 			TmpIp = GH.Lms.GetObjectIp();
-			TmpIpInd = GH.Lms.GetObjectIpInd();
 
 			if (GH.SoundInstance.Sound.Status == BUSY)
 			{ // If BUSY check for OVERRULED
@@ -500,8 +498,7 @@ namespace Ev3Core.Csound
 				{ // Rewind IP and set status
 					DspStat = DSPSTAT.BUSYBREAK; // break the interpreter and waits busy
 					GH.Lms.SetDispatchStatus(DspStat);
-					GH.Lms.SetObjectIp(TmpIp);
-					GH.Lms.SetObjectIpInd(TmpIpInd - 1);
+					GH.Lms.SetObjectIp(TmpIp - 1);
 				}
 			}
 		}
