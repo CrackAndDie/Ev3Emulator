@@ -130,11 +130,9 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>, ICloneable
         return n;
     }
 
-	public object Clone(uint offset = uint.MaxValue)
+	public object Clone()
 	{
 		var n = new ArrayPointer<T>((T[])Data.Clone(), Offset);
-		if (offset != uint.MaxValue)
-			n.Offset += offset;
 		return n;
 	}
 
@@ -211,7 +209,7 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>, ICloneable
         return this.GetEnumerator();
 	}
 
-	public static implicit operator int(ArrayPointer<T> arr)
+    public static implicit operator int(ArrayPointer<T> arr)
     {
         return (int)arr.Offset;
     }

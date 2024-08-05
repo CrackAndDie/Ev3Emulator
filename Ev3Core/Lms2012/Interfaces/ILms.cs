@@ -6,6 +6,8 @@ namespace Ev3Core.Lms2012.Interfaces
 {
 	public interface ILms
 	{
+        int Main();
+
 		void Error();
 		void Nop();
 		void ObjectStop();
@@ -71,14 +73,27 @@ namespace Ev3Core.Lms2012.Interfaces
 		DATA8 CheckSdcard(VarPointer<DATA8> pChanged, VarPointer<DATA32> pTotal, VarPointer<DATA32> pFree, DATA8 Force);
 	}
 
-	public class OBJ // Object
+	public class OBJ : IByteCastable<OBJ> // Object
 	{
 		public IP Ip;                           //!< Object instruction pointer
 		public LP pLocal;                       //!< Local variable pointer
 		public UWORD ObjStatus;                    //!< Object status
 		public (OBJID CallerId, TRIGGER TriggerCount) u;                   //!< Caller id used for SUBCALL to save object id to return to
 		public ArrayPointer<UBYTE> Local;                      //!< Poll of bytes used for local variables
-	}
+
+		public const int Sizeof = 18;
+
+        public OBJ GetObject(GP buff, bool updateOffset = false)
+        {
+			// TODO: impl
+			return this;
+        }
+
+        public void SetData(GP buff, bool updateOffset = false)
+        {
+            // TODO: impl
+        }
+    }
 
 	public class BRKP
 	{
@@ -98,8 +113,10 @@ namespace Ev3Core.Lms2012.Interfaces
 		public int pImageInd;                     //!< Pointer to start of image
 		public GP pData;                      //!< Pointer to start of data
 		public GP pGlobal;                    //!< Pointer to start of global bytes
-		public ArrayPointer<OBJHEAD> pObjHead;                   //!< Pointer to start of object headers
-		public ArrayPointer<ArrayPointer<OBJ>> pObjList;                   //!< Pointer to object pointer list
+		public ArrayPointer<byte> pObjHead;                   //!< Pointer to start of object headers
+		public ArrayPointer<OBJHEAD> pObjHeadReal;                   //!< Pointer to start of object headers
+		public ArrayPointer<byte> pObjList;                   //!< Pointer to object pointer list
+		public ArrayPointer<OBJ> pObjListReal;                   //!< Pointer to object pointer list
 		public IP ObjectIp;                   //!< Working object Ip
 		public LP ObjectLocal;                //!< Working object locals
 
@@ -458,9 +475,9 @@ namespace Ev3Core.Lms2012.Interfaces
 	public class GLOBALS
 	{
 		public NONVOL NonVol = new NONVOL();
-		public DATA8[] FirstProgram = CommonHelper.Array1d<DATA8>(MAX_FILENAME_SIZE);
+		public ArrayPointer<UBYTE> FirstProgram = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(MAX_FILENAME_SIZE));
 
-		public char[] PrintBuffer = CommonHelper.Array1d<char>(PRINTBUFFERSIZE + 1);
+		public ArrayPointer<byte> PrintBuffer = new ArrayPointer<byte>(CommonHelper.Array1d<byte>(PRINTBUFFERSIZE + 1));
 		public DATA8 TerminalEnabled;
 
 		public PRGID FavouritePrg;
@@ -471,7 +488,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public IP pImage;                       //!< Pointer to start of image
 		public GP pGlobal;                      //!< Pointer to start of global bytes
 		public OBJHEAD[] pObjHead;                     //!< Pointer to start of object headers
-		public OBJ[][] pObjList;                     //!< Pointer to object pointer list
+		public ArrayPointer<OBJ> pObjList;                     //!< Pointer to object pointer list
 
 		public IP ObjectIp;                     //!< Working object Ip
 		public LP ObjectLocal;                  //!< Working object locals

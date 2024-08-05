@@ -441,7 +441,27 @@ namespace Ev3Core
 		#endregion
 
 		#region lms2012.c
-		public const int IDX_BACK_BUTTON = BACK_BUTTON - 1;
+		private static ArrayPointer<UBYTE> _uiImage = null;
+        public static ArrayPointer<UBYTE> UiImage
+		{
+			get
+			{
+                if (_uiImage != null)
+                {
+					return _uiImage;
+                }
+				List<UBYTE> tmp = new List<byte>();
+				tmp.AddRange(PROGRAMHeader(0, 1, 0));// VersionInfo,Objects,GlobalBytes
+                tmp.AddRange(VMTHREADHeader(0, 1));// OffsetToInstructions,LocalBytes             
+				tmp.Add(opFILE); tmp.Add(LC0(LOAD_IMAGE)); tmp.Add(LC0(GUI_SLOT)); tmp.Add(GV0(0)); tmp.Add(LV0(4)); tmp.Add(LV0(0));
+                tmp.Add(opPROGRAM_START); tmp.Add(LC0(GUI_SLOT)); tmp.Add(LC0(0)); tmp.Add(LV0(0)); tmp.Add(LC0(0));
+                tmp.Add(opOBJECT_END);
+                _uiImage = new ArrayPointer<UBYTE>(tmp.ToArray());
+                return _uiImage;
+			}
+		}
+
+        public const int IDX_BACK_BUTTON = BACK_BUTTON - 1;
 		public const int PRIMDISPATHTABLE_SIZE = 256;
 
 		// not a define but i don't care

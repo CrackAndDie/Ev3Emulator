@@ -9,6 +9,7 @@ using Ev3Core.Csound;
 using Ev3Core.Csound.Interfaces;
 using Ev3Core.Cui;
 using Ev3Core.Cui.Interfaces;
+using Ev3Core.Enums;
 using Ev3Core.Interfaces;
 using Ev3Core.Lms2012;
 using Ev3Core.Lms2012.Interfaces;
@@ -26,7 +27,9 @@ namespace Ev3Core
         public readonly static IMath Math = new Math_();
         public readonly static IMove Move = new Move();
         public readonly static Lms2012.Interfaces.ITimer Timer = new Timer_();
+        public readonly static IValidate Validate = new Validate();
         public readonly static GLOBALS VMInstance = new GLOBALS();
+        public readonly static VALIDATE_GLOBALS ValidateInstance = new VALIDATE_GLOBALS();
 
         // c_memory
         public readonly static IMemory Memory = new Cmemory.Memory();
@@ -58,5 +61,10 @@ namespace Ev3Core
 		// c_input
 		public readonly static IInput Input = new Input();
 		public readonly static INPUT_GLOBALS InputInstance = new INPUT_GLOBALS();
+
+        public static void Main()
+        {
+            Lms.Main();
+        }
 	}
 }

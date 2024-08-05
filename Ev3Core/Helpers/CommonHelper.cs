@@ -134,25 +134,26 @@ namespace Ev3Core.Helpers
 			return 0;
 		}
 
-		public static void Memmove(ArrayPointer<UBYTE> a, ArrayPointer<UBYTE> b, int num, int aP = 0, int bP = 0)
+		public static void Memmove(ArrayPointer<UBYTE> a, ArrayPointer<UBYTE> b, int num)
 		{
 			for (int i = 0; i < num; ++i)
 			{
-				a[i + aP] = b[i + bP];
+				a[i] = b[i];
 			}
 		}
 
-		public static void Memset(ArrayPointer<UBYTE> a, byte val, int num, int aP = 0)
+		public static void Memset(ArrayPointer<UBYTE> a, byte val, int num)
 		{
-			for (int i = aP; i < aP + num; ++i)
+			for (int i = 0; i < num; ++i)
 			{
 				a[i] = val;
 			}
 		}
 
-		public static int Snprintf(ArrayPointer<UBYTE> dst, int dstBeg, int max, params ArrayPointer<UBYTE>[] data)
+		public static int Snprintf(ArrayPointer<UBYTE> dst, int max, params ArrayPointer<UBYTE>[] data)
 		{
-			foreach (var dt in data)
+			int dstBeg = 0;
+            foreach (var dt in data)
 			{
 				int dtIndexer = 0;
 				for (int i = dstBeg; i < Math.Min(Math.Min(dst.Length, dstBeg + max), dt.Length); ++i)
@@ -165,9 +166,10 @@ namespace Ev3Core.Helpers
 			return 0; // idk what to return
 		}
 
-		public static int Sprintf(ArrayPointer<UBYTE> dst, int dstBeg, params ArrayPointer<UBYTE>[] data)
+		public static int Sprintf(ArrayPointer<UBYTE> dst, params ArrayPointer<UBYTE>[] data)
 		{
-			foreach (var dt in data)
+            int dstBeg = 0;
+            foreach (var dt in data)
 			{
 				int dtIndexer = 0;
 				for (int i = dstBeg; i < Math.Min(dst.Length, dt.Length); ++i)
