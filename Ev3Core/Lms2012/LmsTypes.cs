@@ -72,7 +72,7 @@ public class VarPointer<T> : IPointer<T>
 	}
 }
 
-public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>
+public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>, ICloneable
 {
     public uint Offset = 0;
     public T[] Data = null;
@@ -130,11 +130,19 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>
         return n;
     }
 
-    /// <summary>
-    /// Returns an an original array COPY! with first "offset" elements skipped
-    /// </summary>
-    /// <returns>A COPIED part of the original array</returns>
-    public T[] GetSkipped()
+	public object Clone(uint offset = uint.MaxValue)
+	{
+		var n = new ArrayPointer<T>((T[])Data.Clone(), Offset);
+		if (offset != uint.MaxValue)
+			n.Offset += offset;
+		return n;
+	}
+
+	/// <summary>
+	/// Returns an an original array COPY! with first "offset" elements skipped
+	/// </summary>
+	/// <returns>A COPIED part of the original array</returns>
+	public T[] GetSkipped()
     {
         return Data.Skip((int)Offset).ToArray();
 	}

@@ -2090,7 +2090,7 @@ namespace Ev3Core.Cinput
 								{
 									Length = Tmp;
 								}
-								pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length));
+								pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
 							}
 							if (pDestination != null)
 							{
@@ -2134,7 +2134,7 @@ namespace Ev3Core.Cinput
 								{
 									Length = Tmp;
 								}
-								pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length));
+								pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
 							}
 							if (pDestination != null)
 							{
@@ -2247,7 +2247,7 @@ namespace Ev3Core.Cinput
 												{
 													Length = Tmp;
 												}
-												pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length));
+												pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
 											}
 											if (pDestination != null)
 											{
@@ -2520,7 +2520,7 @@ namespace Ev3Core.Cinput
 
 						if (GH.VMInstance.Handle >= 0)
 						{
-							pRdData = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)RdLng));
+							pRdData = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)RdLng);
 						}
 						if (pRdData != null)
 						{
@@ -2855,7 +2855,7 @@ namespace Ev3Core.Cinput
 				Data32 = (DATA32)NoOfPorts;
 				if (Data32 > MIN_ARRAY_ELEMENTS)
 				{
-					pValues = CommonHelper.CastObjectArray< DATAF > (GH.Lms.VmMemoryResize(GH.VMInstance.Handle, Data32));
+					pValues = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, Data32);
 				}
 			}
 			if (pValues != null)

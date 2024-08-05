@@ -1,6 +1,5 @@
 ﻿using Ev3Core.Enums;
 using Ev3Core.Helpers;
-using System.Runtime.Intrinsics.X86;
 using static Ev3Core.Defines;
 
 namespace Ev3Core.Lms2012.Interfaces
@@ -54,7 +53,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		void ProgramEnd(PRGID PrgId);
 		RESULT ValidateChar(VarPointer<UBYTE> pChar, DATA8 Set);
 		RESULT ValidateString(ArrayPointer<UBYTE> pString, DATA8 Set); // pay attention to this shite. strings are immutable in c#
-        byte[] VmMemoryResize(HANDLER Handle, DATA32 Elements);
+		ArrayPointer<UBYTE> VmMemoryResize(HANDLER Handle, DATA32 Elements);
 		void SetDispatchStatus(DSPSTAT DspStat);
 		void SetDispatchStatus(int DspStat);
 		void GetResourcePath(ArrayPointer<UBYTE> pString, DATA8 MaxLength);
@@ -78,7 +77,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public LP pLocal;                       //!< Local variable pointer
 		public UWORD ObjStatus;                    //!< Object status
 		public (OBJID CallerId, TRIGGER TriggerCount) u;                   //!< Caller id used for SUBCALL to save object id to return to
-		public VARDATA[] Local;                      //!< Poll of bytes used for local variables
+		public ArrayPointer<UBYTE> Local;                      //!< Poll of bytes used for local variables
 	}
 
 	public class BRKP
@@ -99,8 +98,8 @@ namespace Ev3Core.Lms2012.Interfaces
 		public int pImageInd;                     //!< Pointer to start of image
 		public GP pData;                      //!< Pointer to start of data
 		public GP pGlobal;                    //!< Pointer to start of global bytes
-		public OBJHEAD[] pObjHead;                   //!< Pointer to start of object headers
-		public OBJ[][] pObjList;                   //!< Pointer to object pointer list
+		public ArrayPointer<OBJHEAD> pObjHead;                   //!< Pointer to start of object headers
+		public ArrayPointer<ArrayPointer<OBJ>> pObjList;                   //!< Pointer to object pointer list
 		public IP ObjectIp;                   //!< Working object Ip
 		public LP ObjectLocal;                //!< Working object locals
 
@@ -146,7 +145,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		{
 			return new TYPES()
 			{
-				Name = (SBYTE[])Name.Clone(),
+				Name = (ArrayPointer<UBYTE>)Name.Clone(),
 				Type = Type,
 				Connection = Connection,
 				Mode = Mode,
@@ -164,7 +163,7 @@ namespace Ev3Core.Lms2012.Interfaces
 				InvalidTime = InvalidTime,
 				IdValue = IdValue,
 				Pins = Pins,
-				Symbol = (SBYTE[])Symbol.Clone(),
+				Symbol = (ArrayPointer<UBYTE>)Symbol.Clone(),
 				Align = Align,
 			};
 		}
@@ -506,7 +505,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public ULONG Priority;                     //!< Object priority
 
 		public ULONG Value;
-		public ArraySubset<byte> Handle;
+		public ArrayPointer<UBYTE> Handle;
 
 		public ERR[] Errors = CommonHelper.Array1d<ERR>(ERROR_BUFFER_SIZE);
 		public UBYTE ErrorIn;
