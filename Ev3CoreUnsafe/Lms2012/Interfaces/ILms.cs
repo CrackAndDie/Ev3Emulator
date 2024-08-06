@@ -282,22 +282,27 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		public ANALOG()
 		{
-			InPin1 = CommonHelper.Pointer1d<DATA16>(INPUTS);
-			InPin6 = CommonHelper.Pointer1d<DATA16>(INPUTS);
-			OutPin5 = CommonHelper.Pointer1d<DATA16>(OUTPUTS);
-			Pin1 = CommonHelper.Pointer2d<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);
-			Pin6 = CommonHelper.Pointer2d<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);
-			Actual = CommonHelper.Pointer1d<UWORD>(INPUTS);
-			LogIn = CommonHelper.Pointer1d<UWORD>(INPUTS);
-			LogOut = CommonHelper.Pointer1d<UWORD>(INPUTS);
-			NxtCol = CommonHelper.Pointer1d<COLORSTRUCT>(INPUTS, true);
-			OutPin5Low = CommonHelper.Pointer1d<DATA16>(OUTPUTS);
-			Updated = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			InDcm = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			InConn = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			OutDcm = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
-			OutConn = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
-		}
+			Init();
+        }
+
+		public void Init()
+		{
+            InPin1 = CommonHelper.Pointer1d<DATA16>(INPUTS);
+            InPin6 = CommonHelper.Pointer1d<DATA16>(INPUTS);
+            OutPin5 = CommonHelper.Pointer1d<DATA16>(OUTPUTS);
+            Pin1 = CommonHelper.Pointer2d<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);
+            Pin6 = CommonHelper.Pointer2d<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);
+            Actual = CommonHelper.Pointer1d<UWORD>(INPUTS);
+            LogIn = CommonHelper.Pointer1d<UWORD>(INPUTS);
+            LogOut = CommonHelper.Pointer1d<UWORD>(INPUTS);
+            NxtCol = CommonHelper.Pointer1d<COLORSTRUCT>(INPUTS, true);
+            OutPin5Low = CommonHelper.Pointer1d<DATA16>(OUTPUTS);
+            Updated = CommonHelper.Pointer1d<DATA8>(INPUTS);
+            InDcm = CommonHelper.Pointer1d<DATA8>(INPUTS);
+            InConn = CommonHelper.Pointer1d<DATA8>(INPUTS);
+            OutDcm = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
+            OutConn = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
+        }
 	}
 
 	public unsafe struct UART
@@ -440,9 +445,14 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		public UI()
 		{
-			Pressed = CommonHelper.Pointer1d<DATA8>(BUTTONS);
-		}
-	}
+			Init();
+        }
+
+        public void Init()
+        {
+            Pressed = CommonHelper.Pointer1d<DATA8>(BUTTONS);
+        }
+    }
 
 	public unsafe struct LCD
 	{
@@ -450,8 +460,13 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		public LCD()
 		{
-			Lcd = CommonHelper.Pointer1d<UBYTE>(LCD_BUFFER_SIZE);
-		}
+			Init();
+        }
+
+		public void Init()
+		{
+            Lcd = CommonHelper.Pointer1d<UBYTE>(LCD_BUFFER_SIZE);
+        }
 	}
 
 	public unsafe struct SOUND

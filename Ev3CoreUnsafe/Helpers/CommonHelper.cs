@@ -60,7 +60,13 @@ namespace Ev3CoreUnsafe.Helpers
 			return result;
 		}
 
-		public unsafe static T* Pointer1d<T>(int a, bool inst = false) where T : new()
+        public unsafe static T* PointerStruct<T>() where T : new()
+        {
+            T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(Unsafe.SizeOf<T>(), true)[0]);
+            return inst;
+        }
+
+        public unsafe static T* Pointer1d<T>(int a, bool inst = false) where T : new()
 		{
 			T* arr = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(a, true)[0]);
 

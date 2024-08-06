@@ -1,4 +1,6 @@
-﻿namespace Ev3CoreUnsafe.Cui.Interfaces
+﻿using Ev3CoreUnsafe.Lms2012.Interfaces;
+
+namespace Ev3CoreUnsafe.Cui.Interfaces
 {
 	public interface ILcd
 	{

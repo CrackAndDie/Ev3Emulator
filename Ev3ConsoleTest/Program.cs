@@ -40,27 +40,27 @@ namespace Ev3ConsoleTest
             //Console.WriteLine(text);
             //Console.ReadKey();
 
-            //var entry = GC.AllocateArray<byte>(10, pinned: true);
+            var entry = GC.AllocateArray<byte>(10, pinned: true);
+            var entryPtr = (byte*)Unsafe.AsPointer(ref entry[0]);
+            void* tst = (void*)entryPtr;
+            float* tstF = (float*)tst;
+            tstF[0] = 1.23f;
+            int a = 0;
+
+            //         byte mmm = 2;
+            //var entry = GC.AllocateArray<byte>(16, pinned: true);
             //var entryPtr = (byte*)Unsafe.AsPointer(ref entry[0]);
             //void* tst = (void*)entryPtr;
-            //float* tstF = (float*)tst;
-            //tstF[0] = 1.23f;
+            //B* tstF = (B*)tst;
+            //         // tstF->x = &mmm;
+            //         tstF->y = 3;
+            //         tstF->z = 4;
+            //         int sma = Unsafe.SizeOf<A>();
+            //         int sm = Unsafe.SizeOf<B>();
             //int a = 0;
 
-   //         byte mmm = 2;
-			//var entry = GC.AllocateArray<byte>(16, pinned: true);
-			//var entryPtr = (byte*)Unsafe.AsPointer(ref entry[0]);
-			//void* tst = (void*)entryPtr;
-			//B* tstF = (B*)tst;
-   //         // tstF->x = &mmm;
-   //         tstF->y = 3;
-   //         tstF->z = 4;
-   //         int sma = Unsafe.SizeOf<A>();
-   //         int sm = Unsafe.SizeOf<B>();
-			//int a = 0;
-
-			//A* tstA = (A*)tst;
-		}
+            //A* tstA = (A*)tst;
+        }
 
         private static string GetText(byte[] data, string path)
         {
