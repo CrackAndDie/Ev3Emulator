@@ -399,11 +399,11 @@ namespace Ev3Core.Csound
 						if (pFileName[0] != '.')
 						{
 							GH.Lms.GetResourcePath(PathName, MAX_FILENAME_SIZE);
-							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, 0, PathName, pFileName, ".rsf".ToArrayPointer());
+							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, PathName, pFileName, ".rsf".ToArrayPointer());
 						}
 						else
 						{
-							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, 0, pFileName, ".rsf".ToArrayPointer());
+							CommonHelper.Sprintf(GH.SoundInstance.PathBuffer, pFileName, ".rsf".ToArrayPointer());
 						}
 
 						// Open SoundFile

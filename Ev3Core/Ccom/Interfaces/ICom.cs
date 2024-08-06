@@ -521,7 +521,7 @@ namespace Ev3Core.Ccom.Interfaces
 		// Com Global variables
 		//*****************************************************************************
 		[Obsolete]
-		public IMGDATA[] Image = CommonHelper.Array1d<IMGDATA>(IMGHEAD.SizeOf + OBJHEAD.SizeOf + USB_CMD_IN_REP_SIZE - 6); // must be aligned // TODO: check it properly
+		public IMGDATA[] Image = CommonHelper.Array1d<IMGDATA>(IMGHEAD.Sizeof + OBJHEAD.Sizeof + USB_CMD_IN_REP_SIZE - 6); // must be aligned // TODO: check it properly
 		public DATA32 Alignment;
 		public UBYTE[] Globals = CommonHelper.Array1d<UBYTE>(MAX_COMMAND_GLOBALS);
 		public UBYTE CommandReady;

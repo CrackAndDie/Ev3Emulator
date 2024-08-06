@@ -60,8 +60,8 @@ namespace Ev3Core.Cui
 
 		public void dLcdScroll(ArrayPointer<UBYTE> pImage, short Y0)
 		{
-			CommonHelper.Memmove(pImage, pImage, (LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8), 0, ((LCD_WIDTH + 7) / 8) * Y0);
-			CommonHelper.Memset(pImage, 0, ((LCD_WIDTH + 7) / 8) * Y0, (LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8));
+			CommonHelper.Memmove(pImage, pImage.Copy(((LCD_WIDTH + 7) / 8) * Y0), (LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8));
+			CommonHelper.Memset(pImage.Copy((LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8)), 0, ((LCD_WIDTH + 7) / 8) * Y0);
 		}
 
 		public void dLcdDrawPixel(ArrayPointer<UBYTE> pImage, sbyte Color, short X0, short Y0)

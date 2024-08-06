@@ -187,8 +187,8 @@ namespace Ev3Core.Cinput
 
 						IicStr.Type = Type;
 						IicStr.Mode = Mode;
-						CommonHelper.Snprintf(IicStr.Manufacturer, 0, IIC_NAME_LENGTH + 1, GH.InputInstance.IicString[Index].Manufacturer);
-						CommonHelper.Snprintf(IicStr.SensorType, 0, IIC_NAME_LENGTH + 1, GH.InputInstance.IicString[Index].SensorType);
+						CommonHelper.Snprintf(IicStr.Manufacturer, IIC_NAME_LENGTH + 1, GH.InputInstance.IicString[Index].Manufacturer);
+						CommonHelper.Snprintf(IicStr.SensorType, IIC_NAME_LENGTH + 1, GH.InputInstance.IicString[Index].SensorType);
 						IicStr.SetupLng = GH.InputInstance.IicString[Index].SetupLng;
 						IicStr.SetupString = GH.InputInstance.IicString[Index].SetupString;
 						IicStr.PollLng = GH.InputInstance.IicString[Index].PollLng;
@@ -449,7 +449,7 @@ namespace Ev3Core.Cinput
 			{
 				GH.InputInstance.TypeData[Index] = TypeDefault[Index];
 
-				CommonHelper.Snprintf(GH.InputInstance.TypeData[Index].Name, 0, TYPE_NAME_LENGTH + 1, TypeDefault[Index].Name);
+				CommonHelper.Snprintf(GH.InputInstance.TypeData[Index].Name, TYPE_NAME_LENGTH + 1, TypeDefault[Index].Name);
 
 				if (GH.InputInstance.TypeData[Index].Type == TYPE_NONE)
 				{
@@ -464,7 +464,7 @@ namespace Ev3Core.Cinput
 			}
 
 			//  printf("Search start\r\n");
-			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), TYPEDATE_FILE_NAME.ToArrayPointer(), EXT_CONFIG.ToArrayPointer());
+			CommonHelper.Snprintf(PrgNameBuf, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), TYPEDATE_FILE_NAME.ToArrayPointer(), EXT_CONFIG.ToArrayPointer());
 
 			if (cInputInsertTypeData(PrgNameBuf) == OK)
 			{
@@ -473,7 +473,7 @@ namespace Ev3Core.Cinput
 
 			for (Index = TYPE_THIRD_PARTY_START; Index <= TYPE_THIRD_PARTY_END; Index++)
 			{
-				CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), TYPEDATE_FILE_NAME.ToArrayPointer(), Index.ToString("00").ToArrayPointer(), EXT_CONFIG.ToArrayPointer());
+				CommonHelper.Snprintf(PrgNameBuf, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), TYPEDATE_FILE_NAME.ToArrayPointer(), Index.ToString("00").ToArrayPointer(), EXT_CONFIG.ToArrayPointer());
 				if (cInputInsertTypeData(PrgNameBuf) == OK)
 				{
 					TypeDataFound = 1;
@@ -691,7 +691,7 @@ namespace Ev3Core.Cinput
 		void cInputSetDeviceType(DATA8 Device, UBYTE Type, UBYTE Mode, int Line)
 		{
 			UWORD Index;
-			char[] Buf = new char[INPUTS * 2 + 1];
+			ArrayPointer<byte> Buf = new ArrayPointer<byte>(new byte[INPUTS * 2 + 1]);
 			UWORD TypeIndex;
 			DATA8 Layer = 0;
 			DATA8 Port = 0;
@@ -758,12 +758,12 @@ namespace Ev3Core.Cinput
 							for (Index = 0; Index < INPUTS; Index++)
 							{ // Initialise pin setup string to do nothing
 
-								Buf[Index] = '-';
+								Buf[Index] = (byte)'-';
 							}
-							Buf[Index] = (char)0;
+							Buf[Index] = (byte)0;
 
 							// insert "pins" in setup string
-							Buf[Device] = (char)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Pins;
+							Buf[Device] = (byte)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Pins;
 
 							// write setup string to "Device Connection Manager" driver
 							if (GH.InputInstance.DcmFile >= MIN_HANDLE)
@@ -810,9 +810,9 @@ namespace Ev3Core.Cinput
 							for (Index = 0; Index < OUTPUT_PORTS; Index++)
 							{ // build setup string "type" for output
 
-								Buf[Index] = (char)GH.InputInstance.DeviceType[Index + INPUT_DEVICES];
+								Buf[Index] = (byte)GH.InputInstance.DeviceType[Index + INPUT_DEVICES];
 							}
-							Buf[Index] = (char)0;
+							Buf[Index] = (byte)0;
 							GH.Output.cOutputSetTypes(Buf);
 						}
 					}
@@ -846,7 +846,7 @@ namespace Ev3Core.Cinput
 			int File;
 			ArrayPointer<UBYTE> PrgNameBuf = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
 
-			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), vmCALDATA_FILE_NAME.ToArrayPointer(), vmEXT_CONFIG.ToArrayPointer());
+			CommonHelper.Snprintf(PrgNameBuf, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), vmCALDATA_FILE_NAME.ToArrayPointer(), vmEXT_CONFIG.ToArrayPointer());
 			// TODO: calibration
 			//File = open(PrgNameBuf, O_RDONLY);
 			//if (File >= MIN_HANDLE)

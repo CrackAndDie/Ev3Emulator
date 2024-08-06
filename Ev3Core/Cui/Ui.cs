@@ -1735,7 +1735,7 @@ namespace Ev3Core.Cui
 							pQ.IconStartX += 32;
 						}
 
-						CommonHelper.Snprintf(pQ.TextLine[Line], 0, MAX_NOTIFY_LINE_CHARS, pText);
+						CommonHelper.Snprintf(pQ.TextLine[Line], MAX_NOTIFY_LINE_CHARS, pText);
 						Line++;
 						pQ.TextLines++;
 
@@ -2753,7 +2753,7 @@ namespace Ev3Core.Cui
 											Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders.Data, Item.Data, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
 											pType.Data = TYPE_SDCARD;
 
-											CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+											CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 										}
 										else
 										{
@@ -2764,7 +2764,7 @@ namespace Ev3Core.Cui
 												Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders.Data, Item.Data, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
 												pType.Data = TYPE_USBSTICK;
 
-												CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+												CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 											}
 											else
 											{
@@ -2933,7 +2933,7 @@ namespace Ev3Core.Cui
 							Item.Data = (short)(pB.ItemPointer.Data - pB.OpenFolder);
 							Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFiles.Data, Item.Data, Lng, pB.FullPath, pType);
 
-							CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+							CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 						}
 						else
 						{ // Folder selected
@@ -2968,7 +2968,7 @@ namespace Ev3Core.Cui
 									GH.Memory.cMemoryGetItemName(pB.PrgId, pB.hFolders.Data, Item.Data, MAX_FILENAME_SIZE, pB.Filename, pType, Priority);
 									Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders.Data, Item.Data, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
 
-									CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath, "/".ToArrayPointer(), pB.Filename);
+									CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath, "/".ToArrayPointer(), pB.Filename);
 									pType.Data = TYPE_BYTECODE;
 								}
 								break;
@@ -2985,7 +2985,7 @@ namespace Ev3Core.Cui
 										Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders.Data, Item.Data, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
 										pType.Data = TYPE_SDCARD;
 
-										CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+										CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 									}
 									else
 									{
@@ -2996,7 +2996,7 @@ namespace Ev3Core.Cui
 											Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFolders.Data, Item.Data, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pType);
 											pType.Data = TYPE_USBSTICK;
 
-											CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+											CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 										}
 										else
 										{
@@ -3016,7 +3016,7 @@ namespace Ev3Core.Cui
 
 									pType.Data = GH.Memory.cMemoryGetCacheName((sbyte)Item.Data, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB.FullPath, pB.Filename);
 
-									CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+									CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 									Result = OK;
 								}
 								break;
@@ -3031,7 +3031,7 @@ namespace Ev3Core.Cui
 
 										Result = GH.Memory.cMemoryGetItem(pB.PrgId, pB.hFiles.Data, Item.Data, Lng, pB.FullPath, pType);
 
-										CommonHelper.Snprintf(pAnswer, 0, Lng, pB.FullPath);
+										CommonHelper.Snprintf(pAnswer, Lng, pB.FullPath);
 										Result = OK;
 									}
 								}
@@ -3580,7 +3580,7 @@ namespace Ev3Core.Cui
 				{
 					Lng = (sbyte)((DATA8)(Point - Start) + 1);
 				}
-				CommonHelper.Snprintf(pLine, 0, Lng, pText.Copy(Start));
+				CommonHelper.Snprintf(pLine, Lng, pText.Copy(Start));
 			}
 		}
 
@@ -4147,7 +4147,7 @@ namespace Ev3Core.Cui
 							{
 								Color = -1;
 							}
-							CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, LCD_BUFFER_SIZE, 0);
+							CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, LCD_BUFFER_SIZE);
 
 							GH.UiInstance.ScreenBusy = 1;
 						}
@@ -4619,7 +4619,7 @@ namespace Ev3Core.Cui
 									}
 
 									Tmp = (short)(((((DATA16)Lng))) * CharWidth);
-									CommonHelper.Snprintf(GBuffer, 0, Length, pUnit);
+									CommonHelper.Snprintf(GBuffer, Length, pUnit);
 									GH.Lcd.dLcdDrawText(GH.UiInstance.pLcd.Lcd, Color, (short)(X + Tmp), Y, SMALL_FONT, GBuffer);
 
 								}
@@ -4724,7 +4724,7 @@ namespace Ev3Core.Cui
 
 						if (GH.VMInstance.Handle >= 0)
 						{
-							pAnswer = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pAnswer = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 
 						if (Blocked == 0)
@@ -4759,7 +4759,7 @@ namespace Ev3Core.Cui
 
 						if (GH.VMInstance.Handle >= 0)
 						{
-							pAnswer = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pAnswer = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 
 						if (Blocked == 0)
@@ -4847,7 +4847,7 @@ namespace Ev3Core.Cui
 									{
 										Color = -1;
 									}
-									CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, Y1, Y);
+									CommonHelper.Memset(GH.UiInstance.pLcd.Lcd.Copy(Y), (byte)Color, Y1);
 								}
 								else
 								{
@@ -4859,7 +4859,7 @@ namespace Ev3Core.Cui
 									for (Tmp = Y; Tmp < Y1; Tmp++)
 									{
 										Y3 = (short)(Tmp * ((LCD_WIDTH + 7) / 8));
-										CommonHelper.Memset(GH.UiInstance.pLcd.Lcd, (byte)Color, Y2, Y3);
+										CommonHelper.Memset(GH.UiInstance.pLcd.Lcd.Copy(Y3), (byte)Color, Y2);
 										Color = (sbyte)~Color;
 									}
 								}
@@ -5116,14 +5116,14 @@ namespace Ev3Core.Cui
 						if (GH.UiInstance.Keys != 0)
 						{
 							Length = (DATA32)GH.Lms.PrimParPointer().GetDATA32();
-							pImage = (IMGHEAD)GH.Lms.PrimParPointer().GetObject<IMGHEAD>(new IMGHEAD());
+							pImage = (IMGHEAD)IMGHEAD.GetObject(GH.Lms.PrimParPointer());
 
 							// TODO: WARNING: code shite changes
 							pImgHead = pImage;
-							pObjHead = (OBJHEAD)GH.Lms.PrimParPointer().GetObject<OBJHEAD>(new OBJHEAD());
+							pObjHead = (OBJHEAD)OBJHEAD.GetObject(GH.Lms.PrimParPointer());
 							pDestination = GH.Lms.PrimParPointer();
 
-							if (Length > (IMGHEAD.SizeOf + OBJHEAD.SizeOf))
+							if (Length > (IMGHEAD.Sizeof + OBJHEAD.Sizeof))
 							{
 
 								pImgHead.Sign[0] = (byte)'l';
@@ -5135,15 +5135,15 @@ namespace Ev3Core.Cui
 								pImgHead.NumberOfObjects = 1;
 								pImgHead.GlobalBytes = 0;
 
-								pObjHead.OffsetToInstructions = new ArrayPointer<byte>(new byte[] { IMGHEAD.SizeOf + OBJHEAD.SizeOf });
+								pObjHead.OffsetToInstructions = new ArrayPointer<byte>(new byte[] { IMGHEAD.Sizeof + OBJHEAD.Sizeof });
 								pObjHead.OwnerObjectId = 0;
 								pObjHead.TriggerCount = 0;
 								pObjHead.LocalBytes = MAX_COMMAND_LOCALS;
 
 								pSource = GH.UiInstance.KeyBuffer;
-								Size.Data = IMGHEAD.SizeOf + OBJHEAD.SizeOf;
+								Size.Data = IMGHEAD.Sizeof + OBJHEAD.Sizeof;
 
-								Length -= IMGHEAD.SizeOf + OBJHEAD.SizeOf;
+								Length -= IMGHEAD.Sizeof + OBJHEAD.Sizeof;
 								Length--;
 								int pSourceInd = 0;
 								int pDestInd = 0;
@@ -5196,11 +5196,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination, 0, Lng, GH.UiInstance.HwVers);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.HwVers);
 						}
 					}
 					break;
@@ -5217,11 +5217,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination, 0, Lng, GH.UiInstance.FwVers);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.FwVers);
 						}
 					}
 					break;
@@ -5238,11 +5238,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination,0, Lng, GH.UiInstance.FwBuild);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.FwBuild);
 						}
 					}
 					break;
@@ -5259,11 +5259,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination, 0, Lng, GH.UiInstance.OsVers);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.OsVers);
 						}
 					}
 					break;
@@ -5280,11 +5280,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination, 0, Lng, GH.UiInstance.OsBuild);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.OsBuild);
 						}
 					}
 					break;
@@ -5305,11 +5305,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination,0, Lng, GH.UiInstance.ImageBuffer);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.ImageBuffer);
 						}
 					}
 					break;
@@ -5326,11 +5326,11 @@ namespace Ev3Core.Cui
 							{
 								Lng = Data8.Data;
 							}
-							pDestination = CommonHelper.CastObjectArray<DATA8>(GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng));
+							pDestination = GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
 						}
 						if (pDestination != null)
 						{
-							CommonHelper.Snprintf(pDestination,0, Lng, GH.UiInstance.IpAddr);
+							CommonHelper.Snprintf(pDestination, Lng, GH.UiInstance.IpAddr);
 						}
 
 					}
@@ -5548,11 +5548,11 @@ namespace Ev3Core.Cui
 						Data8 = (DATA8)GH.Lms.PrimParPointer().GetDATA8();
 						if (Data8 != DATA8_NAN)
 						{
-							CommonHelper.Snprintf(Buffer, 0, 7, new ArrayPointer<byte>(new byte[] { (byte)Data8 }));
+							CommonHelper.Snprintf(Buffer, 7, new ArrayPointer<byte>(new byte[] { (byte)Data8 }));
 						}
 						else
 						{
-							CommonHelper.Snprintf(Buffer, 0, 7, new ArrayPointer<byte>(new byte[] { (byte)'n', (byte)'a', (byte)'n' }));
+							CommonHelper.Snprintf(Buffer, 7, new ArrayPointer<byte>(new byte[] { (byte)'n', (byte)'a', (byte)'n' }));
 						}
 						cUiWriteString(Buffer);
 
@@ -5571,7 +5571,7 @@ namespace Ev3Core.Cui
 						}
 						else
 						{
-							CommonHelper.Snprintf(Buffer, 0, 7, new ArrayPointer<byte>(new byte[] { (byte)'n', (byte)'a', (byte)'n' }));
+							CommonHelper.Snprintf(Buffer, 7, new ArrayPointer<byte>(new byte[] { (byte)'n', (byte)'a', (byte)'n' }));
 						}
 						cUiWriteString(Buffer);
 
@@ -5590,7 +5590,7 @@ namespace Ev3Core.Cui
 						}
 						else
 						{
-							CommonHelper.Snprintf(Buffer, 0, 7, new ArrayPointer<byte>(new byte[] { (byte)'n', (byte)'a', (byte)'n' }));
+							CommonHelper.Snprintf(Buffer, 7, new ArrayPointer<byte>(new byte[] { (byte)'n', (byte)'a', (byte)'n' }));
 						}
 
 						cUiWriteString(Buffer);

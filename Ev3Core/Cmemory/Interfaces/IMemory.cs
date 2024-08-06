@@ -1,4 +1,5 @@
 ﻿using Ev3Core.Enums;
+using Ev3Core.Extensions;
 using Ev3Core.Helpers;
 using System.IO;
 using static Ev3Core.Defines;
@@ -93,46 +94,174 @@ namespace Ev3Core.Cmemory.Interfaces
         public DATA8 Type;
     }
 
-    public class DESCR : IByteCastable<DESCR>
+    public class DESCR : IByteArrayCastable
     {
-        public DATA32 Elements;
-        public DATA32 UsedElements;
-        public DATA8 ElementSize;
-        public DATA8 Type;
-        public DATA8 Free1;
-        public DATA8 Free2;
-        public UBYTE[] pArray; // Must be aligned
-
-        public const int Sizeof = 16;
-
-		public DESCR GetObject(GP buff, bool updateOffset = false)
+        public DATA32 Elements
 		{
-            //TODO:!!!!
-            return this;
+			get
+			{
+				return CurrentPointer.GetDATA32(false, 0);
+			}
+			set
+			{
+				CurrentPointer.SetDATA32(value, false, 0);
+			}
+		}
+		public DATA32 UsedElements
+		{
+			get
+			{
+				return CurrentPointer.GetDATA32(false, 4);
+			}
+			set
+			{
+				CurrentPointer.SetDATA32(value, false, 4);
+			}
+		}
+		public DATA8 ElementSize
+		{
+			get
+			{
+				return CurrentPointer.GetDATA8(false, 8);
+			}
+			set
+			{
+				CurrentPointer.SetDATA8(value, false, 8);
+			}
+		}
+		public DATA8 Type
+		{
+			get
+			{
+				return CurrentPointer.GetDATA8(false, 9);
+			}
+			set
+			{
+				CurrentPointer.SetDATA8(value, false, 9);
+			}
+		}
+		public DATA8 Free1
+		{
+			get
+			{
+				return CurrentPointer.GetDATA8(false, 10);
+			}
+			set
+			{
+				CurrentPointer.SetDATA8(value, false, 10);
+			}
+		}
+		public DATA8 Free2
+		{
+			get
+			{
+				return CurrentPointer.GetDATA8(false, 11);
+			}
+			set
+			{
+				CurrentPointer.SetDATA8(value, false, 11);
+			}
+		}
+		private ArrayPointer<UBYTE> _parray = new ArrayPointer<byte>(); // Must be aligned
+		public ArrayPointer<UBYTE> pArray // Must be aligned
+		{
+			get
+			{
+				var off = CurrentPointer.GetULONG(false, 12);
+				return new ArrayPointer<byte>(_parray.Data, off);
+			}
+			set
+			{
+				_parray.Data = value.Data;
+				CurrentPointer.SetULONG(value.Offset, false, 12);
+			}
+		} 
+
+		public const int Sizeof = 16;
+
+		public static DESCR GetObject(ArrayPointer<byte> arr, int tmpOffset = 0)
+		{
+			var el = new DESCR();
+			el.CurrentPointer = arr.Copy(tmpOffset);
+			return el;
 		}
 
-		public void SetData(GP buff, bool updateOffset = false)
+		public static ArrayPointer<DESCR> GetArray(ArrayPointer<byte> arr, int tmpOffset = 0)
 		{
-			//TODO:!!!!
+			List<DESCR> tmp = new List<DESCR>();
+			for (int i = 0; i < arr.Length / Sizeof; ++i)
+			{
+				var el = new DESCR();
+				el.CurrentPointer = arr.Copy(tmpOffset + (i * Sizeof));
+				tmp.Add(el);
+			}
+			return new ArrayPointer<DESCR>(tmp.ToArray());
 		}
+
+		public GP CurrentPointer { get; set; } = new ArrayPointer<byte>(new byte[Sizeof]);
 	}
 
-    public class FDESCR : IByteCastable<FDESCR>
+    public class FDESCR : IByteArrayCastable
 	{
-        public int hFile;
-        public DATA8 Access;
-        public char[] Filename = CommonHelper.Array1d<char>(vmFILENAMESIZE);
-
-		public FDESCR GetObject(GP buff, bool updateOffset = false)
+        public int hFile
 		{
-            //TODO:!!!!
-            return this;
+			get
+			{
+				return CurrentPointer.GetDATA32(false, 0);
+			}
+			set
+			{
+				CurrentPointer.SetDATA32(value, false, 0);
+			}
+		}
+		public DATA8 Access
+		{
+			get
+			{
+				return CurrentPointer.GetDATA8(false, 4);
+			}
+			set
+			{
+				CurrentPointer.SetDATA8(value, false, 4);
+			}
+		}
+		private ArrayPointer<byte> _filename = new ArrayPointer<byte>(CommonHelper.Array1d<byte>(vmFILENAMESIZE));
+        public ArrayPointer<byte> Filename
+        {
+			get
+			{
+				var off = CurrentPointer.GetULONG(false, 5); // isn't aligned?
+				return new ArrayPointer<byte>(_filename.Data, off);
+			}
+			set
+			{
+				_filename.Data = value.Data;
+				CurrentPointer.SetULONG(value.Offset, false, 5); // isn't aligned?
+			}
 		}
 
-		public void SetData(GP buff, bool updateOffset = false)
+		public const int Sizeof = 9;
+
+		public static FDESCR GetObject(ArrayPointer<byte> arr, int tmpOffset = 0)
 		{
-			//TODO:!!!!
+			var el = new FDESCR();
+			el.CurrentPointer = arr.Copy(tmpOffset);
+			return el;
 		}
+
+		public static ArrayPointer<FDESCR> GetArray(ArrayPointer<byte> arr, int tmpOffset = 0)
+		{
+			List<FDESCR> tmp = new List<FDESCR>();
+			for (int i = 0; i < arr.Length / Sizeof; ++i)
+			{
+				var el = new FDESCR();
+				el.CurrentPointer = arr.Copy(tmpOffset + (i * Sizeof));
+				tmp.Add(el);
+			}
+			return new ArrayPointer<FDESCR>(tmp.ToArray());
+		}
+
+		public GP CurrentPointer { get; set; } = new ArrayPointer<byte>(new byte[Sizeof]);
 	}
 
     public class MEMORY_GLOBALS

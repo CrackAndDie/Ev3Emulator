@@ -152,7 +152,7 @@ namespace Ev3Core.Cmemory
 				{
 					if (GH.MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
 					{
-						pFDescr = GH.MemoryInstance.pPoolList[PrgId][Handle].pPool.GetObject<FDESCR>(new FDESCR());
+						pFDescr = FDESCR.GetObject(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
 						// TODO: wtf is here
 						//if ((pFDescr.Access) != 0)
 						//{
@@ -287,7 +287,7 @@ namespace Ev3Core.Cmemory
 			FileInfo file;
 			ArrayPointer<UBYTE> PrgNameBuf = new ArrayPointer<UBYTE>(new byte[vmFILENAMESIZE]);
 
-			CommonHelper.Snprintf(PrgNameBuf, 0, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), vmLASTRUN_FILE_NAME.ToArrayPointer(), vmEXT_CONFIG.ToArrayPointer());
+			CommonHelper.Snprintf(PrgNameBuf, vmFILENAMESIZE, vmSETTINGS_DIR.ToArrayPointer(), "/".ToArrayPointer(), vmLASTRUN_FILE_NAME.ToArrayPointer(), vmEXT_CONFIG.ToArrayPointer());
 			file = new FileInfo(string.Concat(PrgNameBuf));
 			// TODO: wtf wtf wtf
 			//if (file != null)
@@ -307,16 +307,16 @@ namespace Ev3Core.Cmemory
 
 			if (cMemoryGetPointer(PrgId, TmpHandle, pTmp) == OK)
 			{
-				Size = Elements * (pTmp.GetObject<DESCR>(new DESCR())).ElementSize + DESCR.Sizeof;
+				Size = Elements * DESCR.GetObject(pTmp).ElementSize + DESCR.Sizeof;
 				pTmp = cMemoryReallocate(PrgId, TmpHandle, (GBINDEX)Size);
 				if (pTmp != null)
 				{
-					(pTmp.GetObject<DESCR>(new DESCR())).Elements = Elements;
+					DESCR.GetObject(pTmp).Elements = Elements;
 				}
 			}
 			if (pTmp != null)
 			{
-				pTmp = new ArrayPointer<byte>((pTmp.GetObject<DESCR>(new DESCR())).pArray);
+				pTmp = new ArrayPointer<byte>(DESCR.GetObject(pTmp).pArray);
 			}
 
 			return (pTmp);
@@ -467,17 +467,17 @@ namespace Ev3Core.Cmemory
 				if (Path[0] == 0)
 				{ // Default path
 
-					CommonHelper.Snprintf(Path, 0, vmPATHSIZE, GH.MemoryInstance.PathList[PrgId]);
+					CommonHelper.Snprintf(Path, vmPATHSIZE, GH.MemoryInstance.PathList[PrgId]);
 				}
 
 				if (Ext[0] == 0)
 				{ // Default extension
 
-					CommonHelper.Snprintf(Ext, 0, vmEXTSIZE, pDefaultExt);
+					CommonHelper.Snprintf(Ext, vmEXTSIZE, pDefaultExt);
 				}
 
 				// Construct filename for open
-				CommonHelper.Snprintf(pName, 0, vmFILENAMESIZE, Path, Name, Ext);
+				CommonHelper.Snprintf(pName, vmFILENAMESIZE, Path, Name, Ext);
 
 			}
 

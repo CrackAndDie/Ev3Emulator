@@ -1,4 +1,5 @@
 ﻿using Ev3Core.Enums;
+using Ev3Core.Extensions;
 using Ev3Core.Helpers;
 using static Ev3Core.Defines;
 
@@ -73,27 +74,97 @@ namespace Ev3Core.Lms2012.Interfaces
 		DATA8 CheckSdcard(VarPointer<DATA8> pChanged, VarPointer<DATA32> pTotal, VarPointer<DATA32> pFree, DATA8 Force);
 	}
 
-	public class OBJ : IByteCastable<OBJ> // Object
+	public class OBJ : IByteArrayCastable // Object
 	{
-		public IP Ip;                           //!< Object instruction pointer
-		public LP pLocal;                       //!< Local variable pointer
-		public UWORD ObjStatus;                    //!< Object status
-		public (OBJID CallerId, TRIGGER TriggerCount) u;                   //!< Caller id used for SUBCALL to save object id to return to
-		public ArrayPointer<UBYTE> Local;                      //!< Poll of bytes used for local variables
+		private IP _ip = new IP();
+		public IP Ip  //!< Object instruction pointer
+		{
+			get
+			{
+				var off = CurrentPointer.GetULONG(false, 0);
+				return new ArrayPointer<byte>(_ip.Data, off);
+			}
+			set
+			{
+				_ip.Data = value.Data;
+				CurrentPointer.SetULONG(value.Offset, false, 0);
+			}
+		}                            
+		private LP _plocal = new LP();
+		public LP pLocal  //!< Local variable pointer
+		{
+			get
+			{
+				var off = CurrentPointer.GetULONG(false, 4);
+				return new ArrayPointer<byte>(_plocal.Data, off);
+			}
+			set
+			{
+				_plocal.Data = value.Data;
+				CurrentPointer.SetULONG(value.Offset, false, 4);
+			}
+		}                        
+		public UWORD ObjStatus  //!< Object status
+		{
+			get
+			{
+				return CurrentPointer.GetUWORD(false, 8);
+			}
+			set
+			{
+				CurrentPointer.SetUWORD(value, false, 8);
+			}
+		}                    
+		public (OBJID CallerId, TRIGGER TriggerCount) u //!< Caller id used for SUBCALL to save object id to return to
+		{
+			get
+			{
+				return (CurrentPointer.GetUWORD(false, 10), CurrentPointer.GetUWORD(false, 12));
+			}
+			set
+			{
+				CurrentPointer.SetUWORD(value.CallerId, false, 10);
+				CurrentPointer.SetUWORD(value.TriggerCount, false, 12);
+			}
+		}                      
+		private ArrayPointer<UBYTE> _local = new ArrayPointer<UBYTE>();
+		public ArrayPointer<UBYTE> Local  //!< Poll of bytes used for local variables
+		{
+			get
+			{
+				var off = CurrentPointer.GetULONG(false, 14);
+				return new ArrayPointer<byte>(_local.Data, off);
+			}
+			set
+			{
+				_local.Data = value.Data;
+				CurrentPointer.SetULONG(value.Offset, false, 14);
+			}
+		}                       
 
 		public const int Sizeof = 18;
 
-        public OBJ GetObject(GP buff, bool updateOffset = false)
-        {
-			// TODO: impl
-			return this;
-        }
+		public static OBJ GetObject(ArrayPointer<byte> arr, int tmpOffset = 0)
+		{
+			var el = new OBJ();
+			el.CurrentPointer = arr.Copy(tmpOffset);
+			return el;
+		}
 
-        public void SetData(GP buff, bool updateOffset = false)
-        {
-            // TODO: impl
-        }
-    }
+		public static ArrayPointer<OBJ> GetArray(ArrayPointer<byte> arr, int tmpOffset = 0)
+		{
+			List<OBJ> tmp = new List<OBJ>();
+			for (int i = 0; i < arr.Length / Sizeof; ++i)
+			{
+				var el = new OBJ();
+				el.CurrentPointer = arr.Copy(tmpOffset + (i * Sizeof));
+				tmp.Add(el);
+			}
+			return new ArrayPointer<OBJ>(tmp.ToArray());
+		}
+
+		public GP CurrentPointer { get; set; } = new ArrayPointer<byte>(new byte[Sizeof]);
+	}
 
 	public class BRKP
 	{
@@ -113,10 +184,8 @@ namespace Ev3Core.Lms2012.Interfaces
 		public int pImageInd;                     //!< Pointer to start of image
 		public GP pData;                      //!< Pointer to start of data
 		public GP pGlobal;                    //!< Pointer to start of global bytes
-		public ArrayPointer<byte> pObjHead;                   //!< Pointer to start of object headers
-		public ArrayPointer<OBJHEAD> pObjHeadReal;                   //!< Pointer to start of object headers
-		public ArrayPointer<byte> pObjList;                   //!< Pointer to object pointer list
-		public ArrayPointer<OBJ> pObjListReal;                   //!< Pointer to object pointer list
+		public ArrayPointer<OBJHEAD> pObjHead;                   //!< Pointer to start of object headers
+		public ArrayPointer<OBJ> pObjList;                   //!< Pointer to object pointer list
 		public IP ObjectIp;                   //!< Working object Ip
 		public LP ObjectLocal;                //!< Working object locals
 
@@ -487,7 +556,7 @@ namespace Ev3Core.Lms2012.Interfaces
 		public ULONG InstrCnt;                     //!< Instruction counter (performance test)
 		public IP pImage;                       //!< Pointer to start of image
 		public GP pGlobal;                      //!< Pointer to start of global bytes
-		public OBJHEAD[] pObjHead;                     //!< Pointer to start of object headers
+		public ArrayPointer<OBJHEAD> pObjHead;                     //!< Pointer to start of object headers
 		public ArrayPointer<OBJ> pObjList;                     //!< Pointer to object pointer list
 
 		public IP ObjectIp;                     //!< Working object Ip

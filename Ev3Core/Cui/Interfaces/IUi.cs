@@ -241,7 +241,7 @@ namespace Ev3Core.Cui.Interfaces
         public DATA16 ItemStart;                    // Item number at top of list (shown)
         public DATA16 ItemPointer;                  // Item list pointer - folder or file
 
-        public VarPointer<DATA8> Font = new VarPointer<sbyte>();;
+        public VarPointer<DATA8> Font = new VarPointer<sbyte>();
         public ArrayPointer<UBYTE> Text = new ArrayPointer<UBYTE>(CommonHelper.Array1d<UBYTE>(TEXTSIZE));
     }
 

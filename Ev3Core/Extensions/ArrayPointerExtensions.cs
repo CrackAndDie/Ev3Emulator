@@ -107,16 +107,6 @@ namespace Ev3Core.Extensions
             //if (updateOffset) buf.Offset += 4;
         }
 
-        public static T GetObject<T>(this ArrayPointer<byte> buf, IByteCastable<T> inst, bool updateOffset = false)
-        {
-            return inst.GetObject(buf, updateOffset);
-        }
-
-        public static void SetObject<T>(this ArrayPointer<byte> buf, IByteCastable<T> inst, bool updateOffset = false)
-        {
-            inst.SetData(buf, updateOffset);
-        }
-
 		#region arrays shite
 		public static sbyte[] GetArrayDATA8(this ArrayPointer<byte> buf, bool updateOffset = false, uint tmpOffset = 0)
 		{

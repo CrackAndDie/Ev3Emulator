@@ -41,10 +41,9 @@ global using CMDSIZE = ushort;
 global using MSGCNT = ushort;
 using Ev3Core.Extensions;
 
-public interface IByteCastable<T>
+public interface IByteArrayCastable
 {
-    T GetObject(ArrayPointer<byte> buff, bool updateOffset = false);
-    void SetData(ArrayPointer<byte> buff, bool updateOffset = false);
+    ArrayPointer<byte> CurrentPointer { get; set; }
 }
 
 public abstract class IPointer<T>
@@ -79,7 +78,7 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>, ICloneable
 
     public int Length
     {
-        get { return Data.Skip((int)Offset).ToArray().Length; }
+        get { return (int)(Data.Length - Offset); }
     }
 
     public ArrayPointer() { }
@@ -235,52 +234,96 @@ public class ArrayPointer<T> : IPointer<T>, IEnumerable<T>, ICloneable
     }
 }
 
-public class IMGHEAD : IByteCastable<IMGHEAD>
+public class IMGHEAD : IByteArrayCastable
 {
-    public UBYTE[] Sign = new UBYTE[4];                      //!< Place holder for the file type identifier
-    public IMINDEX ImageSize;                    //!< Image size
-    public UWORD VersionInfo;                  //!< Version identifier
-    public OBJID NumberOfObjects;              //!< Total number of objects in image
-    public GBINDEX GlobalBytes;                  //!< Number of bytes to allocate for global variables
+    public UBYTE[] Sign //!< Place holder for the file type identifier
+	{
+		get
+		{
+			var e1 = CurrentPointer.GetUBYTE(false, 0);
+			var e2 = CurrentPointer.GetUBYTE(false, 1);
+			var e3 = CurrentPointer.GetUBYTE(false, 2);
+			var e4 = CurrentPointer.GetUBYTE(false, 3);
+			return new UBYTE[4] { e1, e2, e3, e4 };
+		}
+		set
+		{
+			CurrentPointer.SetUBYTE(value[0], false, 0);
+			CurrentPointer.SetUBYTE(value[1], false, 1);
+			CurrentPointer.SetUBYTE(value[2], false, 2);
+			CurrentPointer.SetUBYTE(value[3], false, 3);
+		}
+	}                       
+	public IMINDEX ImageSize  //!< Image size
+	{
+		get
+		{
+			return CurrentPointer.GetULONG(false, 4);
+		}
+		set
+		{
+			CurrentPointer.SetULONG(value, false, 4);
+		}
+	}                     
+	public UWORD VersionInfo  //!< Version identifier
+	{
+		get
+		{
+			return CurrentPointer.GetUWORD(false, 8);
+		}
+		set
+		{
+			CurrentPointer.SetUWORD(value, false, 8);
+		}
+	}                  
+	public OBJID NumberOfObjects  //!< Total number of objects in image
+	{
+		get
+		{
+			return CurrentPointer.GetUWORD(false, 10);
+		}
+		set
+		{
+			CurrentPointer.SetUWORD(value, false, 10);
+		}
+	}            
+	public GBINDEX GlobalBytes  //!< Number of bytes to allocate for global variables
+	{
+		get
+		{
+			return CurrentPointer.GetULONG(false, 12);
+		}
+		set
+		{
+			CurrentPointer.SetULONG(value, false, 12);
+		}
+	}                  
 
-    public const int SizeOf = 16;
+	public const int Sizeof = 16;
 
-    public IMGHEAD()
+	public static IMGHEAD GetObject(ArrayPointer<byte> arr, int tmpOffset = 0)
+	{
+		var el = new IMGHEAD();
+		el.CurrentPointer = arr.Copy(tmpOffset);
+		return el;
+	}
+
+	public static ArrayPointer<IMGHEAD> GetArray(ArrayPointer<byte> arr, int tmpOffset = 0)
+	{
+		List<IMGHEAD> tmp = new List<IMGHEAD>();
+		for (int i = 0; i < arr.Length / Sizeof; ++i)
+		{
+			var el = new IMGHEAD();
+			el.CurrentPointer = arr.Copy(tmpOffset + (i * Sizeof));
+			tmp.Add(el);
+		}
+		return new ArrayPointer<IMGHEAD>(tmp.ToArray());
+	}
+
+	public GP CurrentPointer { get; set; } = new ArrayPointer<byte>(new byte[Sizeof]);
+
+	public IMGHEAD()
     {
-    }
-
-    public IMGHEAD GetObject(GP buff, bool updateOffset = false)
-    {
-        var prevOffset = buff.Offset;
-
-        Sign[0] = buff.GetUBYTE(true);
-        Sign[1] = buff.GetUBYTE(true);
-        Sign[2] = buff.GetUBYTE(true);
-        Sign[3] = buff.GetUBYTE(true);
-        ImageSize = buff.GetULONG(true);
-        VersionInfo = buff.GetUWORD(true);
-        NumberOfObjects = buff.GetUWORD(true);
-        GlobalBytes = buff.GetULONG(true);
-
-        if (!updateOffset) buff.Offset = prevOffset;
-
-        return this;
-    }
-
-    public void SetData(GP buff, bool updateOffset = false)
-    {
-        var prevOffset = buff.Offset;
-
-        buff.SetUBYTE(Sign[0], true);
-        buff.SetUBYTE(Sign[1], true);
-        buff.SetUBYTE(Sign[2], true);
-        buff.SetUBYTE(Sign[3], true);
-        buff.SetULONG(ImageSize, true);
-        buff.SetUWORD(VersionInfo, true);
-        buff.SetUWORD(NumberOfObjects, true);
-        buff.SetULONG(GlobalBytes, true);
-
-        if (!updateOffset) buff.Offset = prevOffset;
     }
 }
 
@@ -297,69 +340,119 @@ public class IMGHEAD : IByteCastable<IMGHEAD>
 /*! \struct OBJHEAD
  *          Object header used for all types of objects (VMTHREAD, SUBCALL, BLOCK and ALIAS)
  */
-public class OBJHEAD : IByteCastable<OBJHEAD>                  // Object header
+public class OBJHEAD : IByteArrayCastable                  // Object header
 {
-    public IP OffsetToInstructions;         //!< Offset to instructions from image start
-    public OBJID OwnerObjectId;                //!< Used by BLOCK's to hold the owner id
-    public TRIGGER TriggerCount;                 //!< Used to determine how many triggers needed before the BLOCK object is activated
-    public LBINDEX LocalBytes;                   //!< Number of bytes to allocate for local variables
+    private IP _offsetToInstructions = new IP();         //!< Offset to instructions from image start
+    public IP OffsetToInstructions 
+    { 
+        get
+        {
+            var off = CurrentPointer.GetULONG(false, 0);
+			return new ArrayPointer<byte>(_offsetToInstructions.Data, off);
+        }
+        set
+        {
+			_offsetToInstructions.Data = value.Data;
+			CurrentPointer.SetULONG(value.Offset, false, 0);
+		}
+    }         
+    public OBJID OwnerObjectId //!< Used by BLOCK's to hold the owner id
+	{ 
+        get 
+        {
+            return CurrentPointer.GetUWORD(false, 4);
+		} 
+        set 
+        {
+			CurrentPointer.SetUWORD(value, false, 4);
+		}
+    }                
+    public TRIGGER TriggerCount //!< Used to determine how many triggers needed before the BLOCK object is activated
+	{ 
+        get 
+        {
+			return CurrentPointer.GetUWORD(false, 6);
+		} 
+        set 
+        {
+			CurrentPointer.SetUWORD(value, false, 6);
+		} 
+    }                 
+    public LBINDEX LocalBytes  //!< Number of bytes to allocate for local variables
+	{
+		get
+		{
+			return CurrentPointer.GetULONG(false, 8);
+		}
+		set
+		{
+			CurrentPointer.SetULONG(value, false, 8);
+		}
+	}                  
 
-	public const int SizeOf = 12;
+	public const int Sizeof = 12;
 
-    public OBJHEAD GetObject(GP buff, bool updateOffset = false)
+	public static OBJHEAD GetObject(ArrayPointer<byte> arr, int tmpOffset = 0)
+	{
+		var el = new OBJHEAD();
+		el.CurrentPointer = arr.Copy(tmpOffset);
+		return el;
+	}
+
+	public static ArrayPointer<OBJHEAD> GetArray(ArrayPointer<byte> arr, int tmpOffset = 0)
     {
-        var prevOffset = buff.Offset;
+        List<OBJHEAD> tmp = new List<OBJHEAD>();
+        for (int i = 0; i < arr.Length / Sizeof; ++i)
+        {
+            var el = new OBJHEAD();
+            el.CurrentPointer = arr.Copy(tmpOffset + (i * Sizeof));
+            tmp.Add(el);
+		}
+        return new ArrayPointer<OBJHEAD>(tmp.ToArray());
+	}
 
-        OffsetToInstructions = new IP();
-        OffsetToInstructions.Offset = buff.GetULONG(true); // it is OffsetToInstructions
-        OwnerObjectId = buff.GetUWORD(true);
-        TriggerCount = buff.GetUWORD(true);
-        LocalBytes = buff.GetULONG(true);
-
-        if (!updateOffset) buff.Offset = prevOffset;
-
-        return this;
-    }
-
-    public void SetData(GP buff, bool updateOffset = false)
-    {
-        var prevOffset = buff.Offset;
-
-        buff.SetULONG(OffsetToInstructions.Offset, true);
-        buff.SetUWORD(OwnerObjectId, true);
-        buff.SetUWORD(TriggerCount, true);
-        buff.SetULONG(LocalBytes, true);
-
-        if (!updateOffset) buff.Offset = prevOffset;
-    }
+	public GP CurrentPointer { get; set; } = new ArrayPointer<byte>(new byte[Sizeof]);
 }
 
 /*! \struct LABEL
  *          Label data hold information used for labels
  */
-public class LABEL : IByteCastable<LABEL>
+public class LABEL : IByteArrayCastable
 {
-	public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
+	public IMINDEX Addr
+	{
+		get
+		{
+			return CurrentPointer.GetULONG(false, 0);
+		}
+		set
+		{
+			CurrentPointer.SetULONG(value, false, 0);
+		}
+	}                          //!< Offset to breakpoint address from image start
 
-    public LABEL GetObject(GP buff, bool updateOffset = false)
-    {
-        var prevOffset = buff.Offset;
+	public const int Sizeof = 4;
 
-        Addr = buff.GetULONG(true);
+	public static LABEL GetObject(ArrayPointer<byte> arr, int tmpOffset = 0)
+	{
+		var el = new LABEL();
+		el.CurrentPointer = arr.Copy(tmpOffset);
+		return el;
+	}
 
-        if (!updateOffset) buff.Offset = prevOffset;
+	public static ArrayPointer<LABEL> GetArray(ArrayPointer<byte> arr, int tmpOffset = 0)
+	{
+		List<LABEL> tmp = new List<LABEL>();
+		for (int i = 0; i < arr.Length / Sizeof; ++i)
+		{
+			var el = new LABEL();
+			el.CurrentPointer = arr.Copy(tmpOffset + (i * Sizeof));
+			tmp.Add(el);
+		}
+		return new ArrayPointer<LABEL>(tmp.ToArray());
+	}
 
-        return this;
-    }
-
-    public void SetData(GP buff, bool updateOffset = false)
-    {
-        var prevOffset = buff.Offset;
-
-        buff.SetULONG(Addr, true);
-
-        if (!updateOffset) buff.Offset = prevOffset;
-    }
+	public GP CurrentPointer { get; set; } = new ArrayPointer<byte>(new byte[Sizeof]);
 }
 
 // bytecodes.c
