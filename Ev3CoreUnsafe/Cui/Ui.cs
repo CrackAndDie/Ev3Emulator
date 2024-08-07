@@ -297,7 +297,7 @@ namespace Ev3CoreUnsafe.Cui
         }
 
 
-        public RESULT cUiInit()
+        public unsafe RESULT cUiInit()
         {
             RESULT Result = OK;
             UI* pUiTmp;
@@ -310,8 +310,7 @@ namespace Ev3CoreUnsafe.Cui
             int Start;
             int Sid;
 
-
-            cUiAlive();
+			cUiAlive();
 
             GH.UiInstance.ReadyForWarnings = 0;
             GH.UiInstance.UpdateState = 0;

@@ -421,7 +421,7 @@ namespace Ev3CoreUnsafe
 		public const int UART_NACK_MODE_INFO = 2;
 		public const int UART_CLEAR_CHANGED = 3;
 
-        public const int IIC_PORT_CHANGED = 0x01;    //!< Input port changed
+		public const int IIC_PORT_CHANGED = 0x01;    //!< Input port changed
 		public const int IIC_DATA_READY = 0x08;     //!< Data is ready
 		public const int IIC_WRITE_REQUEST = 0x10;     //!< Write request
 
@@ -440,247 +440,247 @@ namespace Ev3CoreUnsafe
 		#endregion
 
 		#region lms2012.c
-		private static ArrayPointer<UBYTE> _uiImage = null;
-        public static ArrayPointer<UBYTE> UiImage
+		private unsafe static UBYTE* _uiImage = null;
+		public unsafe static UBYTE* UiImage
 		{
 			get
 			{
-                if (_uiImage != null)
-                {
+				if (_uiImage != null)
+				{
 					return _uiImage;
-                }
+				}
 				List<UBYTE> tmp = new List<byte>();
 				tmp.AddRange(PROGRAMHeader(0, 1, 0));// VersionInfo,Objects,GlobalBytes
-                tmp.AddRange(VMTHREADHeader(0, 1));// OffsetToInstructions,LocalBytes             
+				tmp.AddRange(VMTHREADHeader(0, 1));// OffsetToInstructions,LocalBytes             
 				tmp.Add(opFILE); tmp.Add(LC0(LOAD_IMAGE)); tmp.Add(LC0(GUI_SLOT)); tmp.Add(GV0(0)); tmp.Add(LV0(4)); tmp.Add(LV0(0));
-                tmp.Add(opPROGRAM_START); tmp.Add(LC0(GUI_SLOT)); tmp.Add(LC0(0)); tmp.Add(LV0(0)); tmp.Add(LC0(0));
-                tmp.Add(opOBJECT_END);
-                _uiImage = new ArrayPointer<UBYTE>(tmp.ToArray());
-                return _uiImage;
+				tmp.Add(opPROGRAM_START); tmp.Add(LC0(GUI_SLOT)); tmp.Add(LC0(0)); tmp.Add(LV0(0)); tmp.Add(LC0(0));
+				tmp.Add(opOBJECT_END);
+				_uiImage = tmp.ToArray().AsPointer();
+				return _uiImage;
 			}
 		}
 
-        public const int IDX_BACK_BUTTON = BACK_BUTTON - 1;
+		public const int IDX_BACK_BUTTON = BACK_BUTTON - 1;
 		public const int PRIMDISPATHTABLE_SIZE = 256;
 
 		// not a define but i don't care
 		public static Dictionary<int, Action> PrimDispatchTabel = new Dictionary<int, Action>()
 		{
-            [opERROR] = GH.Lms.Error,
-            [opNOP] = GH.Lms.Nop,
-            [opPROGRAM_STOP] = GH.Lms.ProgramStop,
-            [opPROGRAM_START] = GH.Lms.ProgramStart,
-            [opOBJECT_STOP] = GH.Lms.ObjectStop,
-            [opOBJECT_START] = GH.Lms.ObjectStart,
-            [opOBJECT_TRIG] = GH.Lms.ObjectTrig,
-            [opOBJECT_WAIT] = GH.Lms.ObjectWait,
-            [opRETURN] = GH.Lms.ObjectReturn,
-            [opCALL] = GH.Lms.ObjectCall,
-            [opOBJECT_END] = GH.Lms.ObjectEnd,
-            [opSLEEP] = GH.Lms.Sleep,
-            [opPROGRAM_INFO] = GH.Lms.ProgramInfo,
-            [opLABEL] = GH.Lms.DefLabel,
-            [opPROBE] = GH.Lms.Probe,
-            [opDO] = GH.Lms.Do,
-            [opADD8] = GH.Math.cMathAdd8,
-            [opADD16] = GH.Math.cMathAdd16,
-            [opADD32] = GH.Math.cMathAdd32,
-            [opADDF] = GH.Math.cMathAddF,
-            [opSUB8] = GH.Math.cMathSub8,
-            [opSUB16] = GH.Math.cMathSub16,
-            [opSUB32] = GH.Math.cMathSub32,
-            [opSUBF] = GH.Math.cMathSubF,
-            [opMUL8] = GH.Math.cMathMul8,
-            [opMUL16] = GH.Math.cMathMul16,
-            [opMUL32] = GH.Math.cMathMul32,
-            [opMULF] = GH.Math.cMathMulF,
-            [opDIV8] = GH.Math.cMathDiv8,
-            [opDIV16] = GH.Math.cMathDiv16,
-            [opDIV32] = GH.Math.cMathDiv32,
-            [opDIVF] = GH.Math.cMathDivF,
-            [opOR8] = GH.Math.cMathOr8,
-            [opOR16] = GH.Math.cMathOr16,
-            [opOR32] = GH.Math.cMathOr32,
+			[opERROR] = GH.Lms.Error,
+			[opNOP] = GH.Lms.Nop,
+			[opPROGRAM_STOP] = GH.Lms.ProgramStop,
+			[opPROGRAM_START] = GH.Lms.ProgramStart,
+			[opOBJECT_STOP] = GH.Lms.ObjectStop,
+			[opOBJECT_START] = GH.Lms.ObjectStart,
+			[opOBJECT_TRIG] = GH.Lms.ObjectTrig,
+			[opOBJECT_WAIT] = GH.Lms.ObjectWait,
+			[opRETURN] = GH.Lms.ObjectReturn,
+			[opCALL] = GH.Lms.ObjectCall,
+			[opOBJECT_END] = GH.Lms.ObjectEnd,
+			[opSLEEP] = GH.Lms.Sleep,
+			[opPROGRAM_INFO] = GH.Lms.ProgramInfo,
+			[opLABEL] = GH.Lms.DefLabel,
+			[opPROBE] = GH.Lms.Probe,
+			[opDO] = GH.Lms.Do,
+			[opADD8] = GH.Math.cMathAdd8,
+			[opADD16] = GH.Math.cMathAdd16,
+			[opADD32] = GH.Math.cMathAdd32,
+			[opADDF] = GH.Math.cMathAddF,
+			[opSUB8] = GH.Math.cMathSub8,
+			[opSUB16] = GH.Math.cMathSub16,
+			[opSUB32] = GH.Math.cMathSub32,
+			[opSUBF] = GH.Math.cMathSubF,
+			[opMUL8] = GH.Math.cMathMul8,
+			[opMUL16] = GH.Math.cMathMul16,
+			[opMUL32] = GH.Math.cMathMul32,
+			[opMULF] = GH.Math.cMathMulF,
+			[opDIV8] = GH.Math.cMathDiv8,
+			[opDIV16] = GH.Math.cMathDiv16,
+			[opDIV32] = GH.Math.cMathDiv32,
+			[opDIVF] = GH.Math.cMathDivF,
+			[opOR8] = GH.Math.cMathOr8,
+			[opOR16] = GH.Math.cMathOr16,
+			[opOR32] = GH.Math.cMathOr32,
 
-            [opAND8] = GH.Math.cMathAnd8,
-            [opAND16] = GH.Math.cMathAnd16,
-            [opAND32] = GH.Math.cMathAnd32,
+			[opAND8] = GH.Math.cMathAnd8,
+			[opAND16] = GH.Math.cMathAnd16,
+			[opAND32] = GH.Math.cMathAnd32,
 
-            [opXOR8] = GH.Math.cMathXor8,
-            [opXOR16] = GH.Math.cMathXor16,
-            [opXOR32] = GH.Math.cMathXor32,
+			[opXOR8] = GH.Math.cMathXor8,
+			[opXOR16] = GH.Math.cMathXor16,
+			[opXOR32] = GH.Math.cMathXor32,
 
-            [opRL8] = GH.Math.cMathRl8,
-            [opRL16] = GH.Math.cMathRl16,
-            [opRL32] = GH.Math.cMathRl32,
-            [opINIT_BYTES] = GH.Move.cMoveInitBytes,
-            [opMOVE8_8] = GH.Move.cMove8to8,
-            [opMOVE8_16] = GH.Move.cMove8to16,
-            [opMOVE8_32] = GH.Move.cMove8to32,
-            [opMOVE8_F] = GH.Move.cMove8toF,
-            [opMOVE16_8] = GH.Move.cMove16to8,
-            [opMOVE16_16] = GH.Move.cMove16to16,
-            [opMOVE16_32] = GH.Move.cMove16to32,
-            [opMOVE16_F] = GH.Move.cMove16toF,
-            [opMOVE32_8] = GH.Move.cMove32to8,
-            [opMOVE32_16] = GH.Move.cMove32to16,
-            [opMOVE32_32] = GH.Move.cMove32to32,
-            [opMOVE32_F] = GH.Move.cMove32toF,
-            [opMOVEF_8] = GH.Move.cMoveFto8,
-            [opMOVEF_16] = GH.Move.cMoveFto16,
-            [opMOVEF_32] = GH.Move.cMoveFto32,
-            [opMOVEF_F] = GH.Move.cMoveFtoF,
-            [opJR] = GH.Branch.cBranchJr,
-            [opJR_FALSE] = GH.Branch.cBranchJrFalse,
-            [opJR_TRUE] = GH.Branch.cBranchJrTrue,
-            [opJR_NAN] = GH.Branch.cBranchJrNan,
-            [opCP_LT8] = GH.Compare.cCompareLt8,
-            [opCP_LT16] = GH.Compare.cCompareLt16,
-            [opCP_LT32] = GH.Compare.cCompareLt32,
-            [opCP_LTF] = GH.Compare.cCompareLtF,
-            [opCP_GT8] = GH.Compare.cCompareGt8,
-            [opCP_GT16] = GH.Compare.cCompareGt16,
-            [opCP_GT32] = GH.Compare.cCompareGt32,
-            [opCP_GTF] = GH.Compare.cCompareGtF,
-            [opCP_EQ8] = GH.Compare.cCompareEq8,
-            [opCP_EQ16] = GH.Compare.cCompareEq16,
-            [opCP_EQ32] = GH.Compare.cCompareEq32,
-            [opCP_EQF] = GH.Compare.cCompareEqF,
-            [opCP_NEQ8] = GH.Compare.cCompareNEq8,
-            [opCP_NEQ16] = GH.Compare.cCompareNEq16,
-            [opCP_NEQ32] = GH.Compare.cCompareNEq32,
-            [opCP_NEQF] = GH.Compare.cCompareNEqF,
-            [opCP_LTEQ8] = GH.Compare.cCompareLtEq8,
-            [opCP_LTEQ16] = GH.Compare.cCompareLtEq16,
-            [opCP_LTEQ32] = GH.Compare.cCompareLtEq32,
-            [opCP_LTEQF] = GH.Compare.cCompareLtEqF,
-            [opCP_GTEQ8] = GH.Compare.cCompareGtEq8,
-            [opCP_GTEQ16] = GH.Compare.cCompareGtEq16,
-            [opCP_GTEQ32] = GH.Compare.cCompareGtEq32,
-            [opCP_GTEQF] = GH.Compare.cCompareGtEqF,
-            [opSELECT8] = GH.Compare.cCompareSelect8,
-            [opSELECT16] = GH.Compare.cCompareSelect16,
-            [opSELECT32] = GH.Compare.cCompareSelect32,
-            [opSELECTF] = GH.Compare.cCompareSelectF,
-            [opSYSTEM] = GH.Lms.System,
-            [opPORT_CNV_OUTPUT] = GH.Lms.PortCnvOutput,
-            [opPORT_CNV_INPUT] = GH.Lms.PortCnvInput,
-            [opNOTE_TO_FREQ] = GH.Lms.NoteToFreq,
+			[opRL8] = GH.Math.cMathRl8,
+			[opRL16] = GH.Math.cMathRl16,
+			[opRL32] = GH.Math.cMathRl32,
+			[opINIT_BYTES] = GH.Move.cMoveInitBytes,
+			[opMOVE8_8] = GH.Move.cMove8to8,
+			[opMOVE8_16] = GH.Move.cMove8to16,
+			[opMOVE8_32] = GH.Move.cMove8to32,
+			[opMOVE8_F] = GH.Move.cMove8toF,
+			[opMOVE16_8] = GH.Move.cMove16to8,
+			[opMOVE16_16] = GH.Move.cMove16to16,
+			[opMOVE16_32] = GH.Move.cMove16to32,
+			[opMOVE16_F] = GH.Move.cMove16toF,
+			[opMOVE32_8] = GH.Move.cMove32to8,
+			[opMOVE32_16] = GH.Move.cMove32to16,
+			[opMOVE32_32] = GH.Move.cMove32to32,
+			[opMOVE32_F] = GH.Move.cMove32toF,
+			[opMOVEF_8] = GH.Move.cMoveFto8,
+			[opMOVEF_16] = GH.Move.cMoveFto16,
+			[opMOVEF_32] = GH.Move.cMoveFto32,
+			[opMOVEF_F] = GH.Move.cMoveFtoF,
+			[opJR] = GH.Branch.cBranchJr,
+			[opJR_FALSE] = GH.Branch.cBranchJrFalse,
+			[opJR_TRUE] = GH.Branch.cBranchJrTrue,
+			[opJR_NAN] = GH.Branch.cBranchJrNan,
+			[opCP_LT8] = GH.Compare.cCompareLt8,
+			[opCP_LT16] = GH.Compare.cCompareLt16,
+			[opCP_LT32] = GH.Compare.cCompareLt32,
+			[opCP_LTF] = GH.Compare.cCompareLtF,
+			[opCP_GT8] = GH.Compare.cCompareGt8,
+			[opCP_GT16] = GH.Compare.cCompareGt16,
+			[opCP_GT32] = GH.Compare.cCompareGt32,
+			[opCP_GTF] = GH.Compare.cCompareGtF,
+			[opCP_EQ8] = GH.Compare.cCompareEq8,
+			[opCP_EQ16] = GH.Compare.cCompareEq16,
+			[opCP_EQ32] = GH.Compare.cCompareEq32,
+			[opCP_EQF] = GH.Compare.cCompareEqF,
+			[opCP_NEQ8] = GH.Compare.cCompareNEq8,
+			[opCP_NEQ16] = GH.Compare.cCompareNEq16,
+			[opCP_NEQ32] = GH.Compare.cCompareNEq32,
+			[opCP_NEQF] = GH.Compare.cCompareNEqF,
+			[opCP_LTEQ8] = GH.Compare.cCompareLtEq8,
+			[opCP_LTEQ16] = GH.Compare.cCompareLtEq16,
+			[opCP_LTEQ32] = GH.Compare.cCompareLtEq32,
+			[opCP_LTEQF] = GH.Compare.cCompareLtEqF,
+			[opCP_GTEQ8] = GH.Compare.cCompareGtEq8,
+			[opCP_GTEQ16] = GH.Compare.cCompareGtEq16,
+			[opCP_GTEQ32] = GH.Compare.cCompareGtEq32,
+			[opCP_GTEQF] = GH.Compare.cCompareGtEqF,
+			[opSELECT8] = GH.Compare.cCompareSelect8,
+			[opSELECT16] = GH.Compare.cCompareSelect16,
+			[opSELECT32] = GH.Compare.cCompareSelect32,
+			[opSELECTF] = GH.Compare.cCompareSelectF,
+			[opSYSTEM] = GH.Lms.System,
+			[opPORT_CNV_OUTPUT] = GH.Lms.PortCnvOutput,
+			[opPORT_CNV_INPUT] = GH.Lms.PortCnvInput,
+			[opNOTE_TO_FREQ] = GH.Lms.NoteToFreq,
 
-            [opJR_LT8] = GH.Branch.cBranchJrLt8,
-            [opJR_LT16] = GH.Branch.cBranchJrLt16,
-            [opJR_LT32] = GH.Branch.cBranchJrLt32,
-            [opJR_LTF] = GH.Branch.cBranchJrLtF,
-            [opJR_GT8] = GH.Branch.cBranchJrGt8,
-            [opJR_GT16] = GH.Branch.cBranchJrGt16,
-            [opJR_GT32] = GH.Branch.cBranchJrGt32,
-            [opJR_GTF] = GH.Branch.cBranchJrGtF,
-            [opJR_EQ8] = GH.Branch.cBranchJrEq8,
-            [opJR_EQ16] = GH.Branch.cBranchJrEq16,
-            [opJR_EQ32] = GH.Branch.cBranchJrEq32,
-            [opJR_EQF] = GH.Branch.cBranchJrEqF,
-            [opJR_NEQ8] = GH.Branch.cBranchJrNEq8,
-            [opJR_NEQ16] = GH.Branch.cBranchJrNEq16,
-            [opJR_NEQ32] = GH.Branch.cBranchJrNEq32,
-            [opJR_NEQF] = GH.Branch.cBranchJrNEqF,
-            [opJR_LTEQ8] = GH.Branch.cBranchJrLtEq8,
-            [opJR_LTEQ16] = GH.Branch.cBranchJrLtEq16,
-            [opJR_LTEQ32] = GH.Branch.cBranchJrLtEq32,
-            [opJR_LTEQF] = GH.Branch.cBranchJrLtEqF,
-            [opJR_GTEQ8] = GH.Branch.cBranchJrGtEq8,
-            [opJR_GTEQ16] = GH.Branch.cBranchJrGtEq16,
-            [opJR_GTEQ32] = GH.Branch.cBranchJrGtEq32,
-            [opJR_GTEQF] = GH.Branch.cBranchJrGtEqF,
-            [opINFO] = GH.Lms.Info,
-            [opSTRINGS] = GH.Lms.Strings,
-            [opMEMORY_WRITE] = GH.Lms.MemoryWrite,
-            [opMEMORY_READ] = GH.Lms.MemoryRead,
-            [opUI_FLUSH] = GH.Ui.cUiFlush,
-            [opUI_READ] = GH.Ui.cUiRead,
-            [opUI_WRITE] = GH.Ui.cUiWrite,
-            [opUI_BUTTON] = GH.Ui.cUiButton,
-            [opUI_DRAW] = GH.Ui.cUiDraw,
-            [opTIMER_WAIT] = GH.Timer.cTimerWait,
-            [opTIMER_READY] = GH.Timer.cTimerReady,
-            [opTIMER_READ] = GH.Timer.cTimerRead,
-            [opBP0] = GH.Lms.BreakPoint,
-            [opBP1] = GH.Lms.BreakPoint,
-            [opBP2] = GH.Lms.BreakPoint,
-            [opBP3] = GH.Lms.BreakPoint,
-            [opBP_SET] = GH.Lms.BreakSet,
-            [opMATH] = GH.Math.cMath,
-            [opRANDOM] = GH.Lms.Random,
-            [opTIMER_READ_US] = GH.Timer.cTimerReaduS,
-            [opKEEP_ALIVE] = GH.Ui.cUiKeepAlive,
-            [opCOM_READ] = GH.Com.cComRead,
-            [opCOM_WRITE] = GH.Com.cComWrite,
-            [opSOUND] = GH.Sound.cSoundEntry,
-            [opSOUND_TEST] = GH.Sound.cSoundTest,
-            [opSOUND_READY] = GH.Sound.cSoundReady,
-            [opINPUT_SAMPLE] = GH.Input.cInputSample,
-            [opINPUT_DEVICE_LIST] = GH.Input.cInputDeviceList,
-            [opINPUT_DEVICE] = GH.Input.cInputDevice,
-            [opINPUT_READ] = GH.Input.cInputRead,
-            [opINPUT_TEST] = GH.Input.cInputTest,
-            [opINPUT_READY] = GH.Input.cInputReady,
-            [opINPUT_READSI] = GH.Input.cInputReadSi,
-            [opINPUT_READEXT] = GH.Input.cInputReadExt,
-            [opINPUT_WRITE] = GH.Input.cInputWrite,
-            [opOUTPUT_SET_TYPE] = GH.Output.cOutputSetType,
-            [opOUTPUT_RESET] = GH.Output.cOutputReset,
-            [opOUTPUT_STOP] = GH.Output.cOutputStop,
-            [opOUTPUT_POWER] = GH.Output.cOutputPower,
-            [opOUTPUT_SPEED] = GH.Output.cOutputSpeed,
-            [opOUTPUT_START] = GH.Output.cOutputStart,
-            [opOUTPUT_POLARITY] = GH.Output.cOutputPolarity,
-            [opOUTPUT_READ] = GH.Output.cOutputRead,
-            [opOUTPUT_TEST] = GH.Output.cOutputTest,
-            [opOUTPUT_READY] = GH.Output.cOutputReady,
-            [opOUTPUT_STEP_POWER] = GH.Output.cOutputStepPower,
-            [opOUTPUT_TIME_POWER] = GH.Output.cOutputTimePower,
-            [opOUTPUT_STEP_SPEED] = GH.Output.cOutputStepSpeed,
-            [opOUTPUT_TIME_SPEED] = GH.Output.cOutputTimeSpeed,
-            [opOUTPUT_STEP_SYNC] = GH.Output.cOutputStepSync,
-            [opOUTPUT_TIME_SYNC] = GH.Output.cOutputTimeSync,
-            [opOUTPUT_CLR_COUNT] = GH.Output.cOutputClrCount,
-            [opOUTPUT_GET_COUNT] = GH.Output.cOutputGetCount,
-            [opOUTPUT_PRG_STOP] = GH.Output.cOutputPrgStop,
-            [opFILE] = GH.Memory.cMemoryFile,
-            [opARRAY] = GH.Memory.cMemoryArray,
-            [opARRAY_WRITE] = GH.Memory.cMemoryArrayWrite,
-            [opARRAY_READ] = GH.Memory.cMemoryArrayRead,
-            [opARRAY_APPEND] = GH.Memory.cMemoryArrayAppend,
-            [opMEMORY_USAGE] = GH.Memory.cMemoryUsage,
-            [opFILENAME] = GH.Memory.cMemoryFileName,
-            [opREAD8] = GH.Move.cMoveRead8,
-            [opREAD16] = GH.Move.cMoveRead16,
-            [opREAD32] = GH.Move.cMoveRead32,
-            [opREADF] = GH.Move.cMoveReadF,
-            [opWRITE8] = GH.Move.cMoveWrite8,
-            [opWRITE16] = GH.Move.cMoveWrite16,
-            [opWRITE32] = GH.Move.cMoveWrite32,
-            [opWRITEF] = GH.Move.cMoveWriteF,
-            [opCOM_READY] = GH.Com.cComReady,
-            [opCOM_READDATA] = GH.Lms.Error,
-            [opCOM_WRITEDATA] = GH.Lms.Error,
-            [opCOM_GET] = GH.Com.cComGet,
-            [opCOM_SET] = GH.Com.cComSet,
-            [opCOM_TEST] = GH.Com.cComTest,
-            [opCOM_REMOVE] = GH.Com.cComRemove,
-            [opCOM_WRITEFILE] = GH.Com.cComWriteFile,
-            [opMAILBOX_OPEN] = GH.Com.cComOpenMailBox,
-            [opMAILBOX_WRITE] = GH.Com.cComWriteMailBox,
-            [opMAILBOX_READ] = GH.Com.cComReadMailBox,
-            [opMAILBOX_TEST] = GH.Com.cComTestMailBox,
-            [opMAILBOX_READY] = GH.Com.cComReadyMailBox,
-            [opMAILBOX_CLOSE] = GH.Com.cComCloseMailBox,
+			[opJR_LT8] = GH.Branch.cBranchJrLt8,
+			[opJR_LT16] = GH.Branch.cBranchJrLt16,
+			[opJR_LT32] = GH.Branch.cBranchJrLt32,
+			[opJR_LTF] = GH.Branch.cBranchJrLtF,
+			[opJR_GT8] = GH.Branch.cBranchJrGt8,
+			[opJR_GT16] = GH.Branch.cBranchJrGt16,
+			[opJR_GT32] = GH.Branch.cBranchJrGt32,
+			[opJR_GTF] = GH.Branch.cBranchJrGtF,
+			[opJR_EQ8] = GH.Branch.cBranchJrEq8,
+			[opJR_EQ16] = GH.Branch.cBranchJrEq16,
+			[opJR_EQ32] = GH.Branch.cBranchJrEq32,
+			[opJR_EQF] = GH.Branch.cBranchJrEqF,
+			[opJR_NEQ8] = GH.Branch.cBranchJrNEq8,
+			[opJR_NEQ16] = GH.Branch.cBranchJrNEq16,
+			[opJR_NEQ32] = GH.Branch.cBranchJrNEq32,
+			[opJR_NEQF] = GH.Branch.cBranchJrNEqF,
+			[opJR_LTEQ8] = GH.Branch.cBranchJrLtEq8,
+			[opJR_LTEQ16] = GH.Branch.cBranchJrLtEq16,
+			[opJR_LTEQ32] = GH.Branch.cBranchJrLtEq32,
+			[opJR_LTEQF] = GH.Branch.cBranchJrLtEqF,
+			[opJR_GTEQ8] = GH.Branch.cBranchJrGtEq8,
+			[opJR_GTEQ16] = GH.Branch.cBranchJrGtEq16,
+			[opJR_GTEQ32] = GH.Branch.cBranchJrGtEq32,
+			[opJR_GTEQF] = GH.Branch.cBranchJrGtEqF,
+			[opINFO] = GH.Lms.Info,
+			[opSTRINGS] = GH.Lms.Strings,
+			[opMEMORY_WRITE] = GH.Lms.MemoryWrite,
+			[opMEMORY_READ] = GH.Lms.MemoryRead,
+			[opUI_FLUSH] = GH.Ui.cUiFlush,
+			[opUI_READ] = GH.Ui.cUiRead,
+			[opUI_WRITE] = GH.Ui.cUiWrite,
+			[opUI_BUTTON] = GH.Ui.cUiButton,
+			[opUI_DRAW] = GH.Ui.cUiDraw,
+			[opTIMER_WAIT] = GH.Timer.cTimerWait,
+			[opTIMER_READY] = GH.Timer.cTimerReady,
+			[opTIMER_READ] = GH.Timer.cTimerRead,
+			[opBP0] = GH.Lms.BreakPoint,
+			[opBP1] = GH.Lms.BreakPoint,
+			[opBP2] = GH.Lms.BreakPoint,
+			[opBP3] = GH.Lms.BreakPoint,
+			[opBP_SET] = GH.Lms.BreakSet,
+			[opMATH] = GH.Math.cMath,
+			[opRANDOM] = GH.Lms.Random,
+			[opTIMER_READ_US] = GH.Timer.cTimerReaduS,
+			[opKEEP_ALIVE] = GH.Ui.cUiKeepAlive,
+			[opCOM_READ] = GH.Com.cComRead,
+			[opCOM_WRITE] = GH.Com.cComWrite,
+			[opSOUND] = GH.Sound.cSoundEntry,
+			[opSOUND_TEST] = GH.Sound.cSoundTest,
+			[opSOUND_READY] = GH.Sound.cSoundReady,
+			[opINPUT_SAMPLE] = GH.Input.cInputSample,
+			[opINPUT_DEVICE_LIST] = GH.Input.cInputDeviceList,
+			[opINPUT_DEVICE] = GH.Input.cInputDevice,
+			[opINPUT_READ] = GH.Input.cInputRead,
+			[opINPUT_TEST] = GH.Input.cInputTest,
+			[opINPUT_READY] = GH.Input.cInputReady,
+			[opINPUT_READSI] = GH.Input.cInputReadSi,
+			[opINPUT_READEXT] = GH.Input.cInputReadExt,
+			[opINPUT_WRITE] = GH.Input.cInputWrite,
+			[opOUTPUT_SET_TYPE] = GH.Output.cOutputSetType,
+			[opOUTPUT_RESET] = GH.Output.cOutputReset,
+			[opOUTPUT_STOP] = GH.Output.cOutputStop,
+			[opOUTPUT_POWER] = GH.Output.cOutputPower,
+			[opOUTPUT_SPEED] = GH.Output.cOutputSpeed,
+			[opOUTPUT_START] = GH.Output.cOutputStart,
+			[opOUTPUT_POLARITY] = GH.Output.cOutputPolarity,
+			[opOUTPUT_READ] = GH.Output.cOutputRead,
+			[opOUTPUT_TEST] = GH.Output.cOutputTest,
+			[opOUTPUT_READY] = GH.Output.cOutputReady,
+			[opOUTPUT_STEP_POWER] = GH.Output.cOutputStepPower,
+			[opOUTPUT_TIME_POWER] = GH.Output.cOutputTimePower,
+			[opOUTPUT_STEP_SPEED] = GH.Output.cOutputStepSpeed,
+			[opOUTPUT_TIME_SPEED] = GH.Output.cOutputTimeSpeed,
+			[opOUTPUT_STEP_SYNC] = GH.Output.cOutputStepSync,
+			[opOUTPUT_TIME_SYNC] = GH.Output.cOutputTimeSync,
+			[opOUTPUT_CLR_COUNT] = GH.Output.cOutputClrCount,
+			[opOUTPUT_GET_COUNT] = GH.Output.cOutputGetCount,
+			[opOUTPUT_PRG_STOP] = GH.Output.cOutputPrgStop,
+			[opFILE] = GH.Memory.cMemoryFile,
+			[opARRAY] = GH.Memory.cMemoryArray,
+			[opARRAY_WRITE] = GH.Memory.cMemoryArrayWrite,
+			[opARRAY_READ] = GH.Memory.cMemoryArrayRead,
+			[opARRAY_APPEND] = GH.Memory.cMemoryArrayAppend,
+			[opMEMORY_USAGE] = GH.Memory.cMemoryUsage,
+			[opFILENAME] = GH.Memory.cMemoryFileName,
+			[opREAD8] = GH.Move.cMoveRead8,
+			[opREAD16] = GH.Move.cMoveRead16,
+			[opREAD32] = GH.Move.cMoveRead32,
+			[opREADF] = GH.Move.cMoveReadF,
+			[opWRITE8] = GH.Move.cMoveWrite8,
+			[opWRITE16] = GH.Move.cMoveWrite16,
+			[opWRITE32] = GH.Move.cMoveWrite32,
+			[opWRITEF] = GH.Move.cMoveWriteF,
+			[opCOM_READY] = GH.Com.cComReady,
+			[opCOM_READDATA] = GH.Lms.Error,
+			[opCOM_WRITEDATA] = GH.Lms.Error,
+			[opCOM_GET] = GH.Com.cComGet,
+			[opCOM_SET] = GH.Com.cComSet,
+			[opCOM_TEST] = GH.Com.cComTest,
+			[opCOM_REMOVE] = GH.Com.cComRemove,
+			[opCOM_WRITEFILE] = GH.Com.cComWriteFile,
+			[opMAILBOX_OPEN] = GH.Com.cComOpenMailBox,
+			[opMAILBOX_WRITE] = GH.Com.cComWriteMailBox,
+			[opMAILBOX_READ] = GH.Com.cComReadMailBox,
+			[opMAILBOX_TEST] = GH.Com.cComTestMailBox,
+			[opMAILBOX_READY] = GH.Com.cComReadyMailBox,
+			[opMAILBOX_CLOSE] = GH.Com.cComCloseMailBox,
 
-            [opTST] = GH.Lms.Tst
-        };
-        #endregion
+			[opTST] = GH.Lms.Tst
+		};
+		#endregion
 
-        #region bytecodes.h
-        /*! \page system System Configuration
+		#region bytecodes.h
+		/*! \page system System Configuration
  *
  *  <hr size="1"/>
  *
@@ -690,7 +690,7 @@ namespace Ev3CoreUnsafe
  *  \verbatim
  */
 
-        public const float BYTECODE_VERSION = 0.50f;
+		public const float BYTECODE_VERSION = 0.50f;
 
 		// HARDWARE
 
@@ -1834,10 +1834,60 @@ namespace Ev3CoreUnsafe
 
 		#region c_com.c
 		public const int FS_IDLE = 0;
-        #endregion
+		#endregion
 
-        #region c_bt.c
-        public const string LEGO_BUNDLE_SEED_ID = "9RNK8ZF528";
+		#region c_bt.h
+		public const string NONVOL_BT_DATA = "settings/nonvolbt";
+
+		public const int MAX_DEV_TABLE_ENTRIES = 30;
+		public const int BT_CH_OFFSET = 2;
+		public const int MAX_NAME_SIZE = 32;
+		public const int MAX_BT_NAME_SIZE = 248;
+
+		public const int MAX_BUNDLE_ID_SIZE = 24;
+		public const int MAX_BUNDLE_SEED_ID_SIZE = 11;
+
+		// was enums
+		public const int BT_SLAVE_CH0 = 0;
+		public const int BT_HOST_CH0 = 1;
+		public const int BT_HOST_CH1 = 2;
+		public const int BT_HOST_CH2 = 3;
+		public const int BT_HOST_CH3 = 4;
+		public const int BT_HOST_CH4 = 5;
+		public const int BT_HOST_CH5 = 6;
+		public const int BT_HOST_CH6 = 7;
+		public const int NO_OF_BT_CHS = 8;
+
+		// Defines related to Device List
+		public const int DEV_EMPTY = 0x00;
+		public const int DEV_KNOWN = 0x01;
+
+		public const int READ_BUF_EMPTY = 0;
+		public const int READ_BUF_FULL = 1;
+
+		public const int SCAN_OFF = 0;
+		public const int SCAN_INQ_STATE = 1;
+		public const int SCAN_NAME_STATE = 2;
+
+		// Defines related to Channels
+		public const int CH_CONNECTING = 0;
+		public const int CH_FREE = 1;
+		public const int CH_CONNECTED = 2;
+
+		// Defines related to BtInstance.HciSocket.Busy
+		public const int HCI_IDLE = 0x00;
+		public const int HCI_ONOFF = 0x01;
+		public const int HCI_VISIBLE = 0x02;
+		public const int HCI_NAME = 0x04;
+		public const int HCI_SCAN = 0x08;
+		public const int HCI_CONNECT = 0x10;
+		public const int HCI_DISCONNECT = 0x20;
+		public const int HCI_RESTART = 0x40;
+		public const int HCI_FAIL = 0x80;
+		#endregion
+
+		#region c_bt.c
+		public const string LEGO_BUNDLE_SEED_ID = "9RNK8ZF528";
 		public const string LEGO_BUNDLE_ID = "com.lego.lms";
 
 
@@ -1861,6 +1911,102 @@ namespace Ev3CoreUnsafe
 		public const int MODE2 = 1;
 		#endregion
 
+		#region c_daisy.h
+		public const int DAISY_COMMAND_REPLY = 0x0A;   //  Daisy command, reply required
+		public const int DAISY_COMMAND_NO_REPLY = 0x8A;   //  Daisy command, reply not required
+
+		/*
+		  Byte 5:   Daisy sub Command. see following defines
+		*/
+
+		public const int DAISY_CHAIN_DOWNSTREAM = 0xA0;  //  Write down into the branch of DaisyChained Bricks
+		public const int DAISY_CHAIN_UPSTREAM = 0xA1;  //  Data packet from port expanding (DaisyChained) downstream Bricks
+		public const int DAISY_CHAIN_INFO = 0xA2;  //  Sensor information packet (max. 54 bytes)
+		public const int DAISY_UNLOCK_SLAVE = 0xA3; //  Ask the slave to start pushing data upstream
+		public const int DAISY_SET_TYPE = 0xA4;//  Set mode/type downstream (no reply needed - status via array)
+		public const int DAISY_CHAIN_DOWNSTREAM_WITH_BUSY = 0XA5;  //  Payload also includes Magic Cookies (4 pcs)
+
+		public const int DAISY_REPLY = 0x08;  //  Daisy command reply
+		public const int DAISY_REPLY_ERROR = 0x09;   //  Daisy command reply error
+
+		public const int DAISY_VENDOR_ID = 0x0694;     // LEGO Group
+		public const int DAISY_PRODUCT_ID = 0x0005;        // EV3, the 5'th USB device
+		public const int INTERFACE_NUMBER = 0;                   // One and only
+
+		public const int DIR_IN = 0x80;                          // USB EP direction
+		public const int DIR_OUT = 0x00;                              // -
+		public const int DAISY_INT_EP_ADR = 0x01;                 // HW specific
+
+		public const int DAISY_INTERRUPT_EP_IN = DIR_IN + DAISY_INT_EP_ADR;       // Interrupt endpoint used for UPSTREAM
+		public const int DAISY_INTERRUPT_EP_OUT = DIR_OUT + DAISY_INT_EP_ADR;    // Interrupt endpoint used for DOWNSTREAM
+
+		public const int DAISY_MAX_EP_IN_SIZE = 64;                                                    // FULL speed record size
+		public const int DAISY_MAX_EP_OUT_SIZE = 64;                                                    // FULL speed record size
+		public const int DAISY_DEFAULT_MAX_EP_SIZE = DAISY_MAX_EP_OUT_SIZE;
+		public const int DAISY_UPSTREAM_DATA_LENGTH = DAISY_DEFAULT_MAX_EP_SIZE;
+		public const int DAISY_DEFAULT_TIMEOUT = 1000;                                                // Timeout set to 1 sec by default
+		public const int NO_USER_DATA = 0;                                                               // No user data embedded in transfer
+		public const int DAISY_MAX_INPUT_PER_LAYER = 4;                   // Hardware size
+		public const int DAISY_MAX_OUTPUT_PER_LAYER = 4;                    // -
+		public const int DAISY_MAX_SENSORS_PER_LAYER = (DAISY_MAX_INPUT_PER_LAYER + DAISY_MAX_OUTPUT_PER_LAYER); // Total per layer
+		public const int DAISY_MAX_LAYER_DEPT = 4;                          // Max layer depth
+
+		public const int DEVICE_MAX_DATA = 32;                                // Max data size
+		public const int BUSYFLAGS = 16;                                   // Motor busyflags (grand total)
+		public const int DEVICE_MAX_INCL_BUSYFLAGS = (DEVICE_MAX_DATA + BUSYFLAGS);
+
+		public const string SLAVE_PROD_ID = "0005";
+		public const string SLAVE_VENDOR_ID = "0694";
+
+		public const int SIZEOF_DAISY_POLL = 6;
+		public const int SIZEOF_UNLOCK_REPLY = 7;
+		public const int SIZEOF_DAISY_READ = 8;
+		public const int SIZEOF_DAISY_WRITE = 6;
+
+		public const int SIZEOF_DAISY_DEVICE_DATA_PROLOG = 11;
+		public const int SIZEOF_REPLY_DAISY_READ = (DAISY_DEFAULT_MAX_EP_SIZE - sizeof(CMDSIZE));
+		public const int DAISY_DEVICE_PAYLOAD_SIZE = (DEVICE_MAX_DATA + 4);  // Status, Type, Mode, DeviceData, CheckSum
+		public const int DAISY_DEVICE_CHKSUM_SIZE = 1;
+		public const int DAISY_MAX_INPUT_SENSOR_INDEX = 3;
+		public const int DAISY_SENSOR_OUTPUT_OFFSET = 12;
+		public const int DAISY_SENSOR_DATA_SIZE = (SIZEOF_DAISY_DEVICE_DATA_PROLOG + DEVICE_MAX_DATA + DAISY_DEVICE_CHKSUM_SIZE - sizeof(CMDSIZE));
+		public const int BUSYFLAGS_START_POS = (SIZEOF_DAISY_DEVICE_DATA_PROLOG + DEVICE_MAX_DATA + DAISY_DEVICE_CHKSUM_SIZE);
+
+		public const int SIZEOF_DAISY_INFO = 6;
+		public const int SIZEOF_DAISY_INFO_READ = (DAISY_DEFAULT_MAX_EP_SIZE - SIZEOF_DAISY_INFO);
+
+		public const int LAYER_POS = 6;
+		public const int SENSOR_POS = (LAYER_POS + 1);
+
+
+		public const int DAISY_MAX_DATASIZE = DAISY_DEFAULT_MAX_EP_SIZE;
+		public const int DAISY_DATA_PACKET = (DAISY_DEFAULT_MAX_EP_SIZE - sizeof(CMDSIZE));
+
+		public const int PAYLOAD_OFFSET = 4;
+
+		public const int LAYER_POS_DOWN = (STAT + 1);
+		public const int SENSOR_POS_DOWN = (LAYER_POS_DOWN + 1);
+		public const int TYPE_POS_DOWN = (SENSOR_POS_DOWN + 1);
+		public const int MODE_POS_DOWN = (TYPE_POS_DOWN + 1);
+
+		public const int LAYER_POS_TO_SLAVE = (STAT);
+		public const int SENSOR_POS_TO_SLAVE = (LAYER_POS_TO_SLAVE + 1);
+		public const int TYPE_POS_TO_SLAVE = (SENSOR_POS_TO_SLAVE + 1);
+		public const int MODE_POS_TO_SLAVE = (TYPE_POS_TO_SLAVE + 1);
+
+		public const int CHECKSUM_POS = (DAISY_DEVICE_PAYLOAD_SIZE - 1);
+
+		public const int BUSYTIME = 25000;        // [uS]
+		public const int DAISY_PRIORITY_COUNT = 2;    // 1:3
+		public const int DAISY_PUSH_NOT_UNLOCKED = 0x55;
+
+		public const int TIME_TO_CHECK_FOR_DAISY_DOWNSTREAM = 2000;   //16000
+		public const string DAISY_SLAVE_SEARCH_STRING = "ID 0694:0005 Lego Group";
+
+		// remove is when add daisy enums
+		public const int STAT = 6;
+		#endregion
+
 		#region c_i2c.c
 		public const int WRITE_DATA = 0x2A;    // Also referred to as 0x54
 		public const int READ_STATUS = 0x2A;    // Also referred to as 0x55
@@ -1869,11 +2015,11 @@ namespace Ev3CoreUnsafe
 
 		/* Bluetooth pins needs to be synchronized with pins in d_bt.c */
 		public const int CTS_PIC = 0;
-        public const int PIC_RST = 1;
-        public const int PIC_EN = 2;
-        public const int BLUETOOTH_PINS = 3;
+		public const int PIC_RST = 1;
+		public const int PIC_EN = 2;
+		public const int BLUETOOTH_PINS = 3;
 
-        public const int SET = 0;
+		public const int SET = 0;
 		public const int CLEAR = 1;
 		public const int HIIMP = 2;
 
@@ -1889,10 +2035,10 @@ namespace Ev3CoreUnsafe
 		public const int MIN_MSG_LEN = 6;
 		public const uint SLEEPuS = ((ULONG)(1000));
 		public const uint SEC_1 = (((ULONG)(1000000)) / SLEEPuS);
-        #endregion
+		#endregion
 
-        #region c_wifi.h
-        public const string WIFI_PERSISTENT_PATH = vmSETTINGS_DIR;        // FileSys guidance ;-)
+		#region c_wifi.h
+		public const string WIFI_PERSISTENT_PATH = vmSETTINGS_DIR;        // FileSys guidance ;-)
 		public const string WIFI_PERSISTENT_FILENAME = "WiFiConnections.dat";// Persistent storage for KNOWN connections
 
 		public const int MAC_ADDRESS_LENGTH = 18;  // xx:xx:xx:xx:xx:xx + /0x00

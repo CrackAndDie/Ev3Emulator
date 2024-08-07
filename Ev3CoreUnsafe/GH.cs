@@ -1,4 +1,9 @@
-﻿using Ev3CoreUnsafe.Cui;
+﻿using Ev3CoreUnsafe.Ccom.Interfaces;
+using Ev3CoreUnsafe.Cinput.Interfaces;
+using Ev3CoreUnsafe.Cmemory.Interfaces;
+using Ev3CoreUnsafe.Coutput.Interfaces;
+using Ev3CoreUnsafe.Csound.Interfaces;
+using Ev3CoreUnsafe.Cui;
 using Ev3CoreUnsafe.Cui.Interfaces;
 using Ev3CoreUnsafe.Interfaces;
 using Ev3CoreUnsafe.Lms2012.Interfaces;

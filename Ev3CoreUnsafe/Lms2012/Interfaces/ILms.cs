@@ -4,107 +4,109 @@ using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Lms2012.Interfaces
 {
-	public interface ILms
+	public unsafe interface ILms
 	{
-		unsafe void PrimParAdvance();                    // Dummy get parameter
+		int Main();
 
-		unsafe void* PrimParPointer();                    // Get pointer to primitives and system calls parameters
+		void PrimParAdvance();                    // Dummy get parameter
 
-		unsafe IP GetImageStart();                     // Get pointer to start of image
+		void* PrimParPointer();                    // Get pointer to primitives and system calls parameters
 
-		unsafe void SetDispatchStatus(DSPSTAT Status);       // Set dispatch status (result from executing byte code)
+		IP GetImageStart();                     // Get pointer to start of image
 
-		unsafe void SetInstructions(ULONG Instructions);     // Set number of instructions before VMThread change
+		void SetDispatchStatus(DSPSTAT Status);       // Set dispatch status (result from executing byte code)
 
-		unsafe PRGID CurrentProgramId();                  // Get current program id
+		void SetInstructions(ULONG Instructions);     // Set number of instructions before VMThread change
 
-		unsafe OBJSTAT ProgramStatus(PRGID PrgId);              // Get program status
+		PRGID CurrentProgramId();                  // Get current program id
 
-		unsafe OBJSTAT ProgramStatusChange(PRGID PrgId);        // Get program status change
+		OBJSTAT ProgramStatus(PRGID PrgId);              // Get program status
 
-		unsafe void ProgramEnd(PRGID PrgId);
+		OBJSTAT ProgramStatusChange(PRGID PrgId);        // Get program status change
 
-		unsafe OBJID CallingObjectId();                   // Get calling objects id
+		void ProgramEnd(PRGID PrgId);
 
-		unsafe void AdjustObjectIp(IMOFFS Value);            // Adjust IP
+		OBJID CallingObjectId();                   // Get calling objects id
 
-		unsafe IP GetObjectIp();                       // Get IP
+		void AdjustObjectIp(IMOFFS Value);            // Adjust IP
 
-		unsafe void SetObjectIp(IP Ip);                      // Set IP
+		IP GetObjectIp();                       // Get IP
 
-		unsafe ULONG GetTimeUS();                         // Get uS
+		void SetObjectIp(IP Ip);                      // Set IP
 
-		unsafe ULONG GetTimeMS();                         // Get mS
+		ULONG GetTimeUS();                         // Get uS
 
-		unsafe ULONG GetTime();                           // Get actual program time
+		ULONG GetTimeMS();                         // Get mS
 
-		unsafe ULONG CurrentObjectIp();                   // Get current object ip
+		ULONG GetTime();                           // Get actual program time
 
-		unsafe void VmPrint(char* pString);                  // print string
+		ULONG CurrentObjectIp();                   // Get current object ip
 
-		unsafe void SetTerminalEnable(DATA8 Value);          // Terminal enable/disable
+		void VmPrint(char* pString);                  // print string
 
-		unsafe DATA8 GetTerminalEnable();                 // Get terminal enable state
+		void SetTerminalEnable(DATA8 Value);          // Terminal enable/disable
 
-		unsafe void GetResourcePath(char* pString, DATA8 MaxLength);// Get resource path
+		DATA8 GetTerminalEnable();                 // Get terminal enable state
 
-		unsafe void* VmMemoryResize(HANDLER Handle, DATA32 Elements);
+		void GetResourcePath(char* pString, DATA8 MaxLength);// Get resource path
 
-		unsafe void SetVolumePercent(DATA8 Volume);
+		void* VmMemoryResize(HANDLER Handle, DATA32 Elements);
 
-		unsafe DATA8 GetVolumePercent();
+		void SetVolumePercent(DATA8 Volume);
 
-		unsafe void SetSleepMinutes(DATA8 Minutes);
+		DATA8 GetVolumePercent();
 
-		unsafe DATA8 GetSleepMinutes();
+		void SetSleepMinutes(DATA8 Minutes);
 
-		unsafe DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals); // Execute byte code stream (C-call)
+		DATA8 GetSleepMinutes();
 
-		unsafe DATA8 CheckSdcard(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force);
+		DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals); // Execute byte code stream (C-call)
 
-		unsafe DATA8 CheckUsbstick(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force);
+		DATA8 CheckSdcard(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force);
 
-		unsafe void SetUiUpdate();
+		DATA8 CheckUsbstick(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force);
 
-		unsafe RESULT ValidateChar(DATA8* pChar, DATA8 Set);
+		void SetUiUpdate();
 
-		unsafe RESULT ValidateString(DATA8* pString, DATA8 Set);
+		RESULT ValidateChar(DATA8* pChar, DATA8 Set);
 
-		unsafe ERR LogErrorGet();
+		RESULT ValidateString(DATA8* pString, DATA8 Set);
+
+		ERR LogErrorGet();
 
 		// in lms2012.c
-		unsafe void Error();
-		unsafe void Nop();
-		unsafe void ObjectStop();
-		unsafe void ObjectStart();
-		unsafe void ObjectTrig();
-		unsafe void ObjectWait();
-		unsafe void ObjectCall();
-		unsafe void ObjectReturn();
-		unsafe void ObjectEnd();
-		unsafe void ProgramStart();
-		unsafe void ProgramStop();
-		unsafe void Sleep();
-		unsafe void ProgramInfo();
-		unsafe void DefLabel();
-		unsafe void Do();
-		unsafe void Probe();
-		unsafe void BreakPoint();
-		unsafe void BreakSet();
-		unsafe void Random();
-		unsafe void Info();
-		unsafe void Strings();
-		unsafe void MemoryWrite();
-		unsafe void MemoryRead();
-		unsafe void cBranchJr();
-		unsafe void PortCnvOutput();
-		unsafe void PortCnvInput();
-		unsafe void NoteToFreq();
-		unsafe void System();
-		unsafe void Monitor();
+		void Error();
+		void Nop();
+		void ObjectStop();
+		void ObjectStart();
+		void ObjectTrig();
+		void ObjectWait();
+		void ObjectCall();
+		void ObjectReturn();
+		void ObjectEnd();
+		void ProgramStart();
+		void ProgramStop();
+		void Sleep();
+		void ProgramInfo();
+		void DefLabel();
+		void Do();
+		void Probe();
+		void BreakPoint();
+		void BreakSet();
+		void Random();
+		void Info();
+		void Strings();
+		void MemoryWrite();
+		void MemoryRead();
+		void cBranchJr();
+		void PortCnvOutput();
+		void PortCnvInput();
+		void NoteToFreq();
+		void System();
+		void Monitor();
 
-		unsafe void TstClose();
-		unsafe void Tst();
+		void TstClose();
+		void Tst();
 	}
 
 	/*! \page memorylayout Memory Layout
@@ -638,6 +640,10 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		public GLOBALS()
 		{
+			NonVol = *CommonHelper.PointerStruct<NONVOL>();
+			LcdBuffer = *CommonHelper.PointerStruct<LCD>();
+			Analog = *CommonHelper.PointerStruct<ANALOG>();
+
 			FirstProgram = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
 			PrintBuffer = CommonHelper.Pointer1d<DATA8>(PRINTBUFFERSIZE + 1);
 			Program = CommonHelper.Pointer1d<PRG>(MAX_PROGRAMS, true);

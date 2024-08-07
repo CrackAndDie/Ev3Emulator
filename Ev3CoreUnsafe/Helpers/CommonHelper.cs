@@ -62,7 +62,8 @@ namespace Ev3CoreUnsafe.Helpers
 
         public unsafe static T* PointerStruct<T>() where T : new()
         {
-            T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(Unsafe.SizeOf<T>(), true)[0]);
+            // T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(Unsafe.SizeOf<T>(), true)[0]);
+            T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(1, true)[0]);
             return inst;
         }
 
