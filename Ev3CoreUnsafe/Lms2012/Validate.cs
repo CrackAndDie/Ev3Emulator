@@ -27,7 +27,7 @@ namespace Ev3CoreUnsafe.Lms2012
 				Size = 0;
 				Length = CommonHelper.snprintf(&Buf[Size], Lng - Size, $"  {CommonHelper.GetString(OpCodes[OpCode].Name)},");
 				Size += Length;
-				Size += snprintf(&Buf[Size], Lng - Size, "%*.*s", 3 + OPCODE_NAMESIZE - Length, 3 + OPCODE_NAMESIZE - Length, "");
+				Size += CommonHelper.snprintf(&Buf[Size], Lng - Size, new string(' ', 3 + OPCODE_NAMESIZE - Length));
 
 				// Get opcode parameter types
 				Pars = OpCodes[OpCode].Pars;
@@ -316,7 +316,7 @@ namespace Ev3CoreUnsafe.Lms2012
 								//***************************************************************************
 								if ((LineLength + 10) >= 80)
 								{
-									// GH.printf("\r\n%*.*s", Indent, Indent, ""); // TODO: haha wtf https://programmersought.com/article/798511701578/
+									GH.printf($"\r\n{new string(' ', Indent)}");
 									LineLength = Indent;
 								}
 								Value = (ULONG)0;
@@ -426,7 +426,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 															if ((LineLength + 5) >= 80)
 															{
-																// GH.printf("\r\n%*.*s", Indent, Indent, ""); // TODO: haha wtf https://programmersought.com/article/798511701578/
+																GH.printf($"\r\n{new string(' ', Indent)}");
 																LineLength = Indent;
 															}
 
@@ -458,7 +458,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 														if ((LineLength + 2) >= 80)
 														{
-															// GH.printf("\r\n%*.*s", Indent, Indent, ""); // TODO: haha wtf https://programmersought.com/article/798511701578/
+															GH.printf($"\r\n{new string(' ', Indent)}");
 															LineLength = Indent;
 														}
 														LineLength += GH.printf("0");
@@ -584,7 +584,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 							if ((LineLength + 10) >= 80)
 							{
-								// GH.printf("\r\n%*.*s", Indent, Indent, ""); // TODO: haha wtf https://programmersought.com/article/798511701578/
+								GH.printf($"\r\n{new string(' ', Indent)}"); 
 								LineLength = Indent;
 							}
 							Value = (ULONG)0;
@@ -697,7 +697,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 														if ((LineLength + 5) >= 80)
 														{
-															// GH.printf("\r\n%*.*s", Indent, Indent, ""); // TODO: haha wtf https://programmersought.com/article/798511701578/
+															GH.printf($"\r\n{new string(' ', Indent)}"); 
 															LineLength = Indent;
 														}
 
@@ -729,7 +729,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 													if ((LineLength + 2) >= 80)
 													{
-														// GH.printf("\r\n%*.*s", Indent, Indent, ""); // TODO: haha wtf https://programmersought.com/article/798511701578/
+														GH.printf($"\r\n{new string(' ', Indent)}"); 
 														LineLength = Indent;
 													}
 													LineLength += GH.printf("0");
