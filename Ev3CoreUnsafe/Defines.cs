@@ -985,6 +985,30 @@ namespace Ev3CoreUnsafe
 		public const int PARS = (PAR + 0x04);  //!< DATAS  parameter
 		public const int PARV = (PAR + 0x05);  //!< Parameter type variable
 
+		public static Dictionary<int, string> ParTypeNames = new Dictionary<int, string>()
+		{
+			[DATA_8]   = "DATA8",
+			[DATA_16]  = "DATA16",
+			[DATA_32]  = "DATA32",
+			[DATA_F]   = "DATAF",
+			[DATA_S]   = "STRING",
+			[DATA_V]   = "UNKNOWN",
+		};
+
+		public static Dictionary<int, DATA32> ParMin = new Dictionary<int, DATA32>()
+		{
+			[DATA_8]   = DATA8_MIN,
+			[DATA_16]  = DATA16_MIN,
+			[DATA_32]  = DATA32_MIN,
+		};
+
+		public static Dictionary<int, DATA32> ParMax = new Dictionary<int, DATA32>()
+		{
+			[DATA_8]   = DATA8_MAX,
+			[DATA_16]  = DATA16_MAX,
+			[DATA_32]  = DATA32_MAX,
+		};
+
 		// TODO: check it out. wtf is going on here
 		//public const byte FILENAME_SUBP = 12;
 		public const byte TST_SUBP = 6;

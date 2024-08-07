@@ -1,6 +1,6 @@
 ﻿namespace Ev3CoreUnsafe.Enums
 {
-	public enum OP
+	public enum OP : byte
 	{
 		//  \endverbatim \ref VM \verbatim
 		//                                        0000....

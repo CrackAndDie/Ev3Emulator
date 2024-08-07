@@ -97,5 +97,47 @@ namespace Ev3CoreUnsafe.Helpers
 			}
 			return arr;
 		}
+
+		public unsafe static string GetString<T>(T* buf)
+		{
+			List<char> arr = new List<char>();
+			while ((char)(object)*buf != '\0')
+			{
+				arr.Add((char)(object)*buf);
+				buf++;
+			}
+			return string.Concat(arr);
+		}
+
+		// c shite
+		public unsafe static int snprintf(DATA8* buf, int count, params string[] strs)
+		{
+			int curr = 0;
+			bool brakeOut = false;
+			foreach (var str in strs)
+			{
+				foreach (var c in str)
+				{
+					if (curr++ > count)
+					{
+						brakeOut = true;
+						break;
+					}
+
+					// probably no need to add nullterm to the buf (yes, tested)
+					if (c == '\0')
+						continue;
+
+					buf[0] = (sbyte)c;
+					buf++;
+				}
+
+				if (brakeOut)
+					break;
+			}
+
+			buf[0] = (sbyte)'\0';
+			return curr;
+		}
 	}
 }

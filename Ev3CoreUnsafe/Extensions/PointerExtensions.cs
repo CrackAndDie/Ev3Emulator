@@ -13,5 +13,16 @@ namespace Ev3CoreUnsafe.Extensions
 			}
 			return p;
 		}
+
+		public unsafe static DATA8* AsSbytePointer(this string str)
+		{
+			var p = (DATA8*)Unsafe.AsPointer(ref GC.AllocateArray<DATA8>(str.Length + 1, true)[0]);
+			for (int i = 0; i < str.Length; ++i)
+			{
+				p[i] = (sbyte)str[i];
+			}
+			p[str.Length] = (sbyte)'\0';
+			return p;
+		}
 	}
 }

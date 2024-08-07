@@ -6,6 +6,7 @@ using Ev3CoreUnsafe.Csound.Interfaces;
 using Ev3CoreUnsafe.Cui;
 using Ev3CoreUnsafe.Cui.Interfaces;
 using Ev3CoreUnsafe.Interfaces;
+using Ev3CoreUnsafe.Lms2012;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
 
 namespace Ev3CoreUnsafe
@@ -59,6 +60,13 @@ namespace Ev3CoreUnsafe
         public static void Main()
         {
             Lms.Main();
+        }
+
+        // other shite
+        public static int printf(string ln)
+        {
+            Ev3System.Logger.LogInfo(ln);
+            return ln.Length;
         }
     }
 }
