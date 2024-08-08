@@ -3386,7 +3386,7 @@ namespace Ev3CoreUnsafe.Cui
 
                                     Item = (*pB).ItemPointer;
 
-                                    *pType = GH.Memory.cMemoryGetCacheName((sbyte)Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (char*)(*pB).FullPath, (char*)(*pB).Filename);
+                                    *pType = GH.Memory.cMemoryGetCacheName((sbyte)Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, (*pB).Filename);
                                     CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                     Result = OK;
                                     GH.printf($"Select folder {Item}\r\n");
@@ -3635,7 +3635,7 @@ namespace Ev3CoreUnsafe.Cui
 
                                     case BROWSE_CACHE:
                                         {
-                                            TmpType = GH.Memory.cMemoryGetCacheName((sbyte)Item, (sbyte)(*pB).Chars, (char*)(*pB).FullPath, (char*)(*pB).Filename);
+                                            TmpType = GH.Memory.cMemoryGetCacheName((sbyte)Item, (sbyte)(*pB).Chars, (*pB).FullPath, (*pB).Filename);
                                             GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
                                         }
                                         break;

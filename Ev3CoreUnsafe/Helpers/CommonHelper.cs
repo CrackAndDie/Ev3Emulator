@@ -7,7 +7,25 @@ namespace Ev3CoreUnsafe.Helpers
 {
 	public static class CommonHelper
 	{
-		public static T[][] Array2d<T>(int a, int b, bool inst = false) where T : new()
+        public static long DirSize(DirectoryInfo d)
+        {
+            long size = 0;
+            // Add file sizes.
+            FileInfo[] fis = d.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                size += fi.Length;
+            }
+            // Add subdirectory sizes.
+            DirectoryInfo[] dis = d.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += DirSize(di);
+            }
+            return size;
+        }
+
+        public static T[][] Array2d<T>(int a, int b, bool inst = false) where T : new()
 		{
 			T[][] arr = new T[a][];
 			for (int i = 0; i < arr.GetLength(0); i++)
@@ -140,6 +158,14 @@ namespace Ev3CoreUnsafe.Helpers
 				values[i] = p[i];
 			}
 			return values;
+		}
+
+		public unsafe static void CopyToPointer(byte* dst, byte[] src)
+		{
+			for (int i = 0; i < src.Length; i++)
+			{
+				dst[i] = src[i];
+			}
 		}
 
 		// c shite

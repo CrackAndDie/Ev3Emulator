@@ -55,8 +55,10 @@ namespace Ev3CoreUnsafe.Cmemory
 		{
 			RESULT Result = RESULT.FAIL;
 
-			* ppMemory = realloc(pOldMemory, (int)Size);
-			if (*ppMemory != null)
+#warning THE OLD MEMORY IS NOT CLEARED
+            //*ppMemory = realloc(pOldMemory, (int)Size);
+            *ppMemory = Unsafe.AsPointer<byte>(ref GC.AllocateArray<byte>(Size, true)[0]);
+            if (*ppMemory != null)
 			{
 				Result = OK;
 			}
@@ -90,13 +92,13 @@ namespace Ev3CoreUnsafe.Cmemory
 						GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Size = Size;
 						*pHandle = TmpHandle;
 						Result = OK;
-						GH.printf("  Malloc P=%1u H=%1u T=%1u S=%8lu A=%8p\r\n", (unsigned int)PrgId,(unsigned int)TmpHandle,(unsigned int)Type,(unsigned long)Size,GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool);
+						GH.printf($"  Malloc P={(uint)PrgId} H={(uint)TmpHandle} T={(uint)Type} S={(ulong)Size} A={(long)GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool}\r\n");
 					}
 				}
 			}
 			if (Result != OK)
 			{
-				GH.printf("  Malloc error P=%1u S=%8lu\r\n", (unsigned int)PrgId,(unsigned long)Size);
+				GH.printf($"  Malloc error P={(uint)PrgId} S={(ulong)Size}\r\n");
 			}
 
 			return (Result);
@@ -126,11 +128,11 @@ namespace Ev3CoreUnsafe.Cmemory
 			}
 			if (pTmp != null)
 			{
-				GH.printf("  Reallocate  P=%1u H=%1u     S=%8lu A=%8p\r\n", (unsigned int)PrgId,(unsigned int)Handle,(unsigned long)Size,GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
+				GH.printf($"  Reallocate  P={(uint)PrgId} H={(uint)Handle}     S={(ulong)Size} A={(long)GH.MemoryInstance.pPoolList[PrgId][Handle].pPool}\r\n");
 			}
 			else
 			{
-				GH.printf("  Reallocate error P=%1u H=%1u S=%8lu\r\n", (unsigned int)PrgId,(unsigned int)Handle,(unsigned long)Size);
+				GH.printf($"  Reallocate error P={(uint)PrgId} H={(uint)Handle} S={(ulong)Size}\r\n");
 			}
 
 			return (pTmp);
@@ -153,7 +155,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			}
 			if (Result != OK)
 			{
-				GH.printf("  Get pointer error P=%1u H=%1u\r\n", (unsigned int)PrgId,(unsigned int)Handle);
+				GH.printf($"  Get pointer error P={(uint)PrgId} H={(uint)Handle}\r\n");
 			}
 
 			return (Result);
@@ -187,27 +189,29 @@ namespace Ev3CoreUnsafe.Cmemory
 					if (GH.MemoryInstance.pPoolList[PrgId][Handle].Type == POOL_TYPE_FILE)
 					{
 						pFDescr = (FDESCR*)GH.MemoryInstance.pPoolList[PrgId][Handle].pPool;
-						if (((*pFDescr).Access))
-						{
-							(*pFDescr).Access = 0;
-							close((*pFDescr).hFile);
-							sync();
-							Result = DSPSTAT.NOBREAK;
-						}
-						GH.printf("  Close file %d\r\n", (*pFDescr).hFile);
+						// TODO: not really closed
+						//if (((*pFDescr).Access))
+						//{
+						//	(*pFDescr).Access = 0;
+						//	close((*pFDescr).hFile);
+						//	sync();
+						//	Result = DSPSTAT.NOBREAK;
+						//}
+						GH.printf($"  Close file {CommonHelper.GetString((*pFDescr).Filename)}\r\n");
 					}
 					else
 					{
 						Result = DSPSTAT.NOBREAK;
 					}
 
-					GH.printf("  Free   P=%1u H=%1u T=%1u S=%8lu A=%8p\r\n", (unsigned int)PrgId,(unsigned int)Handle,(unsigned int)GH.MemoryInstance.pPoolList[PrgId][Handle].Type,(unsigned long)GH.MemoryInstance.pPoolList[PrgId][Handle].Size,GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
-					free(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
-					GH.MemoryInstance.pPoolList[PrgId][Handle].pPool = null;
+					GH.printf($"  Free   P={(uint)PrgId} H={(uint)Handle} T={(uint)GH.MemoryInstance.pPoolList[PrgId][Handle].Type} S={(ulong)GH.MemoryInstance.pPoolList[PrgId][Handle].Size} A={(long)GH.MemoryInstance.pPoolList[PrgId][Handle].pPool}\r\n");
+#warning THE OLD MEMORY IS NOT CLEARED
+                    // free(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
+                    GH.MemoryInstance.pPoolList[PrgId][Handle].pPool = null;
 					GH.MemoryInstance.pPoolList[PrgId][Handle].Size = 0;
 
 				}
-			}
+            }
 
 			return (Result);
 		}
@@ -264,26 +268,27 @@ namespace Ev3CoreUnsafe.Cmemory
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 
 			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
-			File = open(PrgNameBuf, O_RDONLY);
-			if (File >= MIN_HANDLE)
-			{
-				if (read(File, GH.MemoryInstance.Cache, sizeof(GH.MemoryInstance.Cache)) != sizeof(GH.MemoryInstance.Cache))
-				{
-					close(File);
-					File = -1;
-				}
-				else
-				{
-					close(File);
-				}
-			}
-			if (File < 0)
-			{
-				for (Tmp = 0; Tmp < CACHE_DEEPT; Tmp++)
-				{
-					GH.MemoryInstance.Cache[Tmp][0] = 0;
-				}
-			}
+#warning NOT CACHED
+			//File = open(PrgNameBuf, O_RDONLY);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	if (read(File, GH.MemoryInstance.Cache, sizeof(GH.MemoryInstance.Cache)) != sizeof(GH.MemoryInstance.Cache))
+			//	{
+			//		close(File);
+			//		File = -1;
+			//	}
+			//	else
+			//	{
+			//		close(File);
+			//	}
+			//}
+			//if (File < 0)
+			//{
+			//	for (Tmp = 0; Tmp < CACHE_DEEPT; Tmp++)
+			//	{
+			//		GH.MemoryInstance.Cache[Tmp][0] = 0;
+			//	}
+			//}
 
 			for (TmpPrgId = 0; TmpPrgId < MAX_PROGRAMS; TmpPrgId++)
 			{
@@ -331,15 +336,16 @@ namespace Ev3CoreUnsafe.Cmemory
 		{
 			RESULT Result = RESULT.FAIL;
 			int File;
-			char PrgNameBuf[vmFILENAMESIZE];
+			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 
-			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
-			File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, FILEPERMISSIONS);
-			if (File >= MIN_HANDLE)
-			{
-				write(File, GH.MemoryInstance.Cache, sizeof(GH.MemoryInstance.Cache));
-				close(File);
-			}
+			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmLASTRUN_FILE_NAME}{vmEXT_CONFIG}");
+#warning NOT CACHED
+			//File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, FILEPERMISSIONS);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	write(File, GH.MemoryInstance.Cache, sizeof(GH.MemoryInstance.Cache));
+			//	close(File);
+			//}
 
 			Result = OK;
 
@@ -361,7 +367,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					(*(DESCR*)pTmp).Elements = Elements;
 				}
 
-				GH.printf("  Resize P=%1u H=%1u T=%1u S=%8lu A=%8p\r\n", (uint)PrgId,(uint)TmpHandle,(uint)GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Type,(ulong)GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Size,GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool);
+				GH.printf($"  Resize P={(uint)PrgId} H={(uint)TmpHandle} T={(uint)GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Type} S={(ulong)GH.MemoryInstance.pPoolList[PrgId][TmpHandle].Size} A={(long)GH.MemoryInstance.pPoolList[PrgId][TmpHandle].pPool}\r\n");
 			}
 			if (pTmp != null)
 			{
@@ -417,7 +423,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			if (pExt != null)
 			{
 				Destination = 0;
-				while (pSource[Source])
+				while (pSource[Source] != 0)
 				{
 					pExt[Destination] = pSource[Source];
 					Source++;
@@ -431,13 +437,13 @@ namespace Ev3CoreUnsafe.Cmemory
 		public RESULT cMemoryCheckFilename(DATA8* pFilename, DATA8* pPath, DATA8* pName, DATA8* pExt)
 		{
 			RESULT Result = RESULT.FAIL;
-			char Path[vmFILENAMESIZE];
-			char Name[vmFILENAMESIZE];
-			char Ext[vmFILENAMESIZE];
+			DATA8* Path = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
+            DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
+            DATA8* Ext = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 
-			if (CommonHelper.strlen(pFilename) < vmFILENAMESIZE)
+            if (CommonHelper.strlen(pFilename) < vmFILENAMESIZE)
 			{
-				if (ValidateString((DATA8*)pFilename, vmCHARSET_FILENAME) == OK)
+				if (GH.Lms.ValidateString((DATA8*)pFilename, vmCHARSET_FILENAME) == OK)
 				{
 					FindName(pFilename, Path, Name, Ext);
 					if (CommonHelper.strlen(Path) < vmPATHSIZE)
@@ -466,7 +472,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			}
 			if (Result != OK)
 			{
-				GH.printf("Filename error in [%s]\r\n", pFilename);
+				GH.printf($"Filename error in [{CommonHelper.GetString(pFilename)}]\r\n");
 				GH.Ev3System.Logger.LogError($"An error occured with number {FILE_NAME_ERROR} in {Environment.StackTrace}");
 			}
 
@@ -509,7 +515,7 @@ namespace Ev3CoreUnsafe.Cmemory
 		}
 
 
-		public int FindDot(char* pString)
+		public int FindDot(DATA8* pString)
 		{
 			int Result = -1;
 			int Pointer = 0;
@@ -531,7 +537,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			DATA8 Item;
 			DATA8 Tmp;
 
-			GH.printf("DEL_CACHE_FILE %s\r\n", pFileName);
+			GH.printf($"DEL_CACHE_FILE {CommonHelper.GetString(pFileName)}\r\n");
 
 			Item = 0;
 			Tmp = 0;
@@ -560,15 +566,19 @@ namespace Ev3CoreUnsafe.Cmemory
 		{
 			int Result;
 			int First, Second;
-			char* pFirst;
-			char* pSecond;
+			DATA8* pFirst;
+            DATA8* pSecond;
 
 			// uncomment anime
 			// pFirst = (*(const struct dirent **)ppFirst)->d_name;
 			// uncomment anime
 			// pSecond = (*(const struct dirent **)ppSecond)->d_name;
 
-			First = FindDot(pFirst);
+			// TODO: probably shite
+			pFirst = (DATA8*)ppFirst;
+            pSecond = (DATA8*)ppSecond;
+
+            First = FindDot(pFirst);
 			Second = FindDot(pSecond);
 
 			if ((First >= 0) && (Second >= 0))
@@ -609,65 +619,64 @@ namespace Ev3CoreUnsafe.Cmemory
 			int Items;
 			DATA8 Folders = 0;
 
+            DirectoryInfo directory = new DirectoryInfo(CommonHelper.GetString(pFolderName));
+            DirectoryInfo[] directories = directory.GetDirectories();
 
-			Items = scandir(pFolderName, &NameList, 0, (int(*)(const void*,const void*))cMemorySort);
+            Items = directories.Length;
 			if (Items >= 0)
 			{
-				while (Items--)
+				while (Items-- != 0)
 				{
-					if ((*NameList[Items]).d_name[0] != '.')
+					if ((directories[Items]).Name[0] != '.')
 					{
-						if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
+						if (((directories[Items]).Name[0] != 'C') || ((directories[Items]).Name[1] != 'V') || ((directories[Items]).Name[2] != 'S'))
 						{
 							Folders++;
 						}
 					}
-					free(NameList[Items]);
 				}
-				free(NameList);
 			}
 
 			return (Folders);
 		}
 
-
 		public DATA8 cMemoryFindType(DATA8* pExt)
 		{
 			DATA8 Result = 0;
 
-			if (pExt[0])
+			if (pExt[0] != 0)
 			{
-				if (CommonHelper.strcmp(pExt, EXT_SOUND) == 0)
+				if (CommonHelper.strcmp(pExt, EXT_SOUND.AsSbytePointer()) == 0)
 				{
 					Result = TYPE_SOUND;
 				}
 				else
 				{
-					if (CommonHelper.strcmp(pExt, EXT_GRAPHICS) == 0)
+					if (CommonHelper.strcmp(pExt, EXT_GRAPHICS.AsSbytePointer()) == 0)
 					{
 						Result = TYPE_GRAPHICS;
 					}
 					else
 					{
-						if (CommonHelper.strcmp(pExt, EXT_BYTECODE) == 0)
+						if (CommonHelper.strcmp(pExt, EXT_BYTECODE.AsSbytePointer()) == 0)
 						{
 							Result = TYPE_BYTECODE;
 						}
 						else
 						{
-							if (CommonHelper.strcmp(pExt, EXT_DATALOG) == 0)
+							if (CommonHelper.strcmp(pExt, EXT_DATALOG.AsSbytePointer()) == 0)
 							{
 								Result = TYPE_DATALOG;
 							}
 							else
 							{
-								if (CommonHelper.strcmp(pExt, EXT_PROGRAM) == 0)
+								if (CommonHelper.strcmp(pExt, EXT_PROGRAM.AsSbytePointer()) == 0)
 								{
 									Result = TYPE_PROGRAM;
 								}
 								else
 								{
-									if (CommonHelper.strcmp(pExt, EXT_TEXT) == 0)
+									if (CommonHelper.strcmp(pExt, EXT_TEXT.AsSbytePointer()) == 0)
 									{
 										Result = TYPE_TEXT;
 									}
@@ -701,45 +710,47 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			pSubFolderName[0] = 0;
 
-			Items = scandir(pFolderName, &NameList, 0, (int(*)(const void*,const void*))cMemorySort);
+            DirectoryInfo directory = new DirectoryInfo(CommonHelper.GetString(pFolderName));
+            DirectoryInfo[] directories = directory.GetDirectories();
+
+            Items = directories.Length;
 			Tmp = 0;
 
 			if (Items >= 0)
 			{
 				while (Tmp < Items)
 				{
-					if ((*NameList[Tmp]).d_name[0] != '.')
+					if ((directories[Tmp]).Name[0] != '.')
 					{
-						if (((*NameList[Tmp]).d_name[0] != 'C') || ((*NameList[Tmp]).d_name[1] != 'V') || ((*NameList[Tmp]).d_name[2] != 'S'))
+						if (((directories[Tmp]).Name[0] != 'C') || ((directories[Tmp]).Name[1] != 'V') || ((directories[Tmp]).Name[2] != 'S'))
 						{
 							Folders++;
 							if (Item == Folders)
 							{
 								Char = 0;
-								while (((*NameList[Tmp]).d_name[Char]) && ((*NameList[Tmp]).d_name[Char] != '.'))
+								while (((directories[Tmp]).Name.AsSbytePointer()[Char] != 0) && ((directories[Tmp]).Name.AsSbytePointer()[Char] != '.'))
 								{
 									Char++;
 								}
-								if ((*NameList[Tmp]).d_name[Char] == '.')
+								if ((directories[Tmp]).Name[Char] == '.')
 								{
-									Filetype = cMemoryFindType(&(*NameList[Tmp]).d_name[Char]);
+									Filetype = cMemoryFindType(&(directories[Tmp]).Name.AsSbytePointer()[Char]);
 
 									// delete extension
-									(*NameList[Tmp]).d_name[Char] = 0;
-									CommonHelper.snprintf(pSubFolderName, (int)MaxLength, "%s", (*NameList[Tmp]).d_name);
+									var tmpAnime = (directories[Tmp]).Name.AsSbytePointer();
+                                    tmpAnime[Char] = 0;
+									CommonHelper.snprintf(pSubFolderName, (int)MaxLength, CommonHelper.GetString(tmpAnime));
 								}
 								else
 								{ // must be a folder or file without extension
-									CommonHelper.snprintf(pSubFolderName, (int)MaxLength, "%s", (*NameList[Tmp]).d_name);
+									CommonHelper.snprintf(pSubFolderName, (int)MaxLength, (directories[Tmp]).Name);
 									Filetype = TYPE_FOLDER;
 								}
 							}
 						}
 					}
-					free(NameList[Tmp]);
 					Tmp++;
 				}
-				free(NameList);
 			}
 
 			return (Filetype);
@@ -750,7 +761,6 @@ namespace Ev3CoreUnsafe.Cmemory
 		{
 			// uncomment anime
 			// struct dirent *d;
-			DIR* dir;
 			DATA8* buf = CommonHelper.Pointer1d<DATA8>(256);
 			DATA8 DeleteOk = 1;
 
@@ -761,29 +771,9 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			if (DeleteOk != 0)
 			{
-				dir = opendir(pFolderName);
-
-				if (dir != null)
-				{
-					while ((d = readdir(dir)))
-					{
-						GH.printf("%s\r\n", d->d_name);
-
-						CommonHelper.sprintf(buf, "%s/%s", pFolderName, d->d_name);
-						remove(buf);
-						cMemoryDeleteCacheFile(buf);
-					}
-					closedir(dir);
-					remove(pFolderName);
-				}
-				else
-				{
-					cMemoryDeleteCacheFile(pFolderName);
-					remove(pFolderName);
-				}
+				Directory.Delete(CommonHelper.GetString(pFolderName), true);
 			}
 		}
-
 
 		public DATA32 cMemoryFindSize(DATA8* pFolderName, DATA32* pFiles)
 		{
@@ -793,30 +783,13 @@ namespace Ev3CoreUnsafe.Cmemory
 			int Items;
 			DATA32 Size = 0;
 
-			*pFiles = 0;
-			if (stat(pFolderName, &Status) == 0)
-			{
-				Size += (DATA32)Status.st_size;
+            DirectoryInfo directory = new DirectoryInfo(CommonHelper.GetString(pFolderName));
 
-				Items = scandir(pFolderName, &NameList, 0, (int(*)(const void*,const void*))cMemorySort);
-				if (Items >= 0)
-				{
-					*pFiles = (DATA32)Items;
-
-					while (Items--)
-					{
-						stat((*NameList[Items]).d_name, &Status);
-						Size += (DATA32)Status.st_size;
-						free(NameList[Items]);
-					}
-					free(NameList);
-				}
-			}
-			Size = (Size + (KB - 1)) / KB;
+            *pFiles = directory.GetFiles().Length + directory.GetDirectories().Length;
+			Size = (int)(CommonHelper.DirSize(directory) / KB);
 
 			return (Size);
 		}
-
 
 		public DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, DATA8* pFileName, DATA8* pName)
 		{
@@ -830,11 +803,11 @@ namespace Ev3CoreUnsafe.Cmemory
 			{
 				if ((long)GH.MemoryInstance.Cache[Item - 1] != 0)
 				{
-					CommonHelper.snprintf(Filename, vmFILENAMESIZE, "%s", GH.MemoryInstance.Cache[Item - 1]);
+					CommonHelper.snprintf(Filename, vmFILENAMESIZE, CommonHelper.GetString(GH.MemoryInstance.Cache[Item - 1]));
 
 					if (cMemoryCheckFilename(Filename, Path, Name, Ext) == OK)
 					{
-						CommonHelper.snprintf(pFileName, MaxLength, "%s", Filename);
+						CommonHelper.snprintf(pFileName, MaxLength, CommonHelper.GetString(Filename));
 						if (MaxLength >= 2)
 						{
 							if (CommonHelper.strlen(Name) >= MaxLength)
@@ -842,7 +815,7 @@ namespace Ev3CoreUnsafe.Cmemory
 								Name[MaxLength - 1] = 0;
 								Name[MaxLength - 2] = 0x7F;
 							}
-							CommonHelper.snprintf(pName, MaxLength, "%s", Name);
+							CommonHelper.snprintf(pName, MaxLength, CommonHelper.GetString(Name));
 							Result = cMemoryFindType(Ext);
 						}
 					}
@@ -877,21 +850,22 @@ namespace Ev3CoreUnsafe.Cmemory
 			int Items;
 			DATA8 Files = 0;
 
-			Items = scandir(pFolderName, &NameList, 0, alphasort);
+            DirectoryInfo directory = new DirectoryInfo(CommonHelper.GetString(pFolderName));
+            FileInfo[] files = directory.GetFiles();
+
+            Items = files.Length;
 			if (Items >= 0)
 			{
-				while (Items--)
+				while (Items-- != 0)
 				{
-					if ((*NameList[Items]).d_name[0] != '.')
+					if ((files[Items]).Name[0] != '.')
 					{
-						if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
+						if (((files[Items]).Name[0] != 'C') || ((files[Items]).Name[1] != 'V') || ((files[Items]).Name[2] != 'S'))
 						{
 							Files++;
 						}
 					}
-					free(NameList[Items]);
 				}
-				free(NameList);
 			}
 
 			return (Files);
@@ -900,11 +874,11 @@ namespace Ev3CoreUnsafe.Cmemory
 
 		public void cMemoryGetResourcePath(PRGID PrgId, DATA8* pString, DATA8 MaxLength)
 		{
-			CommonHelper.snprintf(pString, MaxLength, "%s", GH.MemoryInstance.PathList[PrgId]);
+			CommonHelper.snprintf(pString, MaxLength, CommonHelper.GetString(GH.MemoryInstance.PathList[PrgId]));
 		}
 
 
-		public RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, DATA32* pImagePointer)
+		public RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, long* pImagePointer)
 		{
 			RESULT Result = RESULT.FAIL;
 
@@ -914,7 +888,6 @@ namespace Ev3CoreUnsafe.Cmemory
 			PRGID TmpPrgId;
 			DATA8* PrgNamePath = CommonHelper.Pointer1d<DATA8>(SUBFOLDERNAME_SIZE);
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
-			LFILE* pFile;
 
 			TmpPrgId = GH.Lms.CurrentProgramId();
 
@@ -922,25 +895,20 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			if (PrgNamePath[0] != 0)
 			{
-				CommonHelper.snprintf(PrgNameBuf, MAX_FILENAME_SIZE, "%s%s/icon%s", pFolderName, PrgNamePath, EXT_GRAPHICS);
+				CommonHelper.snprintf(PrgNameBuf, MAX_FILENAME_SIZE, $"{CommonHelper.GetString(pFolderName)}{CommonHelper.GetString(PrgNamePath)}/icon{EXT_GRAPHICS}");
 
-				pFile = fopen(PrgNameBuf, "rb");
+				var pFile = File.ReadAllBytes(CommonHelper.GetString(PrgNameBuf));
 				if (null != pFile)
 				{
-					fseek(pFile, 0, SEEK_END);
-					ISize = ftell(pFile);
-					rewind(pFile);
-
-					// allocate memory to contain the whole file:
-					if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
+                    ISize = pFile.Length;
+                    // allocate memory to contain the whole file:
+                    if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
 					{
-						if (ISize == fread(pImage, 1, ISize, pFile))
-						{
-							*pImagePointer = (DATA32)pImage;
-							Result = OK;
-						}
+						CommonHelper.CopyToPointer(pImage, pFile);
+
+						*pImagePointer = (DATA32)pImage;
+						Result = OK;
 					}
-					fclose(pFile);
 				}
 			}
 

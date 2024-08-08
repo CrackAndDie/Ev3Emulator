@@ -34,7 +34,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 
 		void cMemoryGetResourcePath(PRGID PrgId, DATA8* pString, DATA8 MaxLength);
 
-		RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, DATA32* pImagePointer);
+		RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, long* pImagePointer);
 
 		RESULT cMemoryGetImage(DATA8* pText, DATA16 Size, UBYTE* pBmp);
 
@@ -105,6 +105,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 
 	public unsafe struct FDESCR
 	{
+		[Obsolete("Do not use handler, just open and close")]
 		public int hFile;
 		public DATA8 Access;
 		public fixed DATA8 Filename[vmFILENAMESIZE];
@@ -123,6 +124,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 		public DATA8** PathList;
 		public POOL** pPoolList;
 
+		[Obsolete("Programs are not cached here")]
 		public DATA8** Cache;
 
 		public MEMORY_GLOBALS()
