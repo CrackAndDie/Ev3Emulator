@@ -79,8 +79,8 @@ namespace Ev3ConsoleTest
 			//ma->y = 3;
 			//m->y = 3;
 
-			var a = 3132.424f;
-			var stt = a.ToString("0.00");
+			var a = -1;
+			ushort b = (ushort)a;
 
 			var a3 = sizeof(TYPES);
 		}

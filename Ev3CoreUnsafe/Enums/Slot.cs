@@ -34,6 +34,6 @@ namespace Ev3CoreUnsafe
 		public const int SLOTS = 5;                                //!< Maximum slots supported by the VM
 
 		// ONLY VALID IN opPROGRAM_STOP
-		public const int CURRENT_SLOT = -1;
+		public const int CURRENT_SLOT = ushort.MaxValue; // it was -1
 	}
 }

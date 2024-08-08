@@ -24,15 +24,15 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 
 		DATA8 cMemoryGetCacheFiles();
 
-		DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, char* pFileName, char* pName);
+		DATA8 cMemoryGetCacheName(DATA8 Item, DATA8 MaxLength, DATA8* pFileName, DATA8* pName);
 
-		DATA8 cMemoryFindSubFolders(char* pFolderName);
+		DATA8 cMemoryFindSubFolders(DATA8* pFolderName);
 
-		DATA8 cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, char* pFolderName, char* pSubFolderName);
+		DATA8 cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, DATA8* pFolderName, DATA8* pSubFolderName);
 
-		DATA8 cMemoryFindFiles(char* pFolderName);
+		DATA8 cMemoryFindFiles(DATA8* pFolderName);
 
-		void cMemoryGetResourcePath(PRGID PrgId, char* pString, DATA8 MaxLength);
+		void cMemoryGetResourcePath(PRGID PrgId, DATA8* pString, DATA8 MaxLength);
 
 		RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, DATA32* pImagePointer);
 
@@ -40,11 +40,11 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 
 		DSPSTAT cMemoryCloseFile(PRGID PrgId, HANDLER Handle);
 
-		RESULT cMemoryCheckOpenWrite(char* pFileName);
+		RESULT cMemoryCheckOpenWrite(DATA8* pFileName);
 
-		RESULT cMemoryCheckFilename(char* pFilename, char* pPath, char* pName, char* pExt);
+		RESULT cMemoryCheckFilename(DATA8* pFilename, DATA8* pPath, DATA8* pName, DATA8* pExt);
 
-		RESULT cMemoryGetMediaName(char* pChar, char* pName);
+		RESULT cMemoryGetMediaName(DATA8* pChar, DATA8* pName);
 
 
 
@@ -135,6 +135,29 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 			PathList = CommonHelper.Pointer2d<DATA8>(MAX_PROGRAMS, vmPATHSIZE);
 			pPoolList = CommonHelper.Pointer2d<POOL>(MAX_PROGRAMS, MAX_HANDLES, true);
 			Cache = CommonHelper.Pointer2d<DATA8>(CACHE_DEEPT + 1, vmFILENAMESIZE);
+		}
+	}
+
+	// c_memory.c
+	[Obsolete("DO NOT CAST IT FROM BYTE ARRAY")]
+	public unsafe struct FOLDER
+	{
+		public DATA8* pDir; // path
+		public DATA16 Entries;
+		public DATA8 Type;
+		public DATA8 Sort;
+		public fixed DATA8 Folder[MAX_FILENAME_SIZE];
+		public DATA8** Entry;
+		public fixed DATA8 Priority[DIR_DEEPT];
+
+		public FOLDER()
+		{
+			Init();
+		}
+
+		public void Init()
+		{
+			Entry = CommonHelper.Pointer2d<DATA8>(DIR_DEEPT, FILENAME_SIZE);
 		}
 	}
 }
