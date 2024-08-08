@@ -410,20 +410,9 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE MacSize;
-		public UBYTE* Mac;
+		public fixed UBYTE Mac[13];
 		public UBYTE PinSize;
-		public UBYTE* Pin;
-
-		public BLUETOOTH_PIN()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Mac = CommonHelper.Pointer1d<UBYTE>(13);
-			Pin = CommonHelper.Pointer1d<UBYTE>(7);
-		}
+		public fixed UBYTE Pin[7];
 	}
 
 	public unsafe struct RPLY_BLUETOOTH_PIN
@@ -434,20 +423,9 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE Status;
 		public UBYTE MacSize;
-		public UBYTE* Mac;
+		public fixed UBYTE Mac[13];
 		public UBYTE PinSize;
-		public UBYTE* Pin;
-
-		public RPLY_BLUETOOTH_PIN()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Mac = CommonHelper.Pointer1d<UBYTE>(13);
-			Pin = CommonHelper.Pointer1d<UBYTE>(7);
-		}
+		public fixed UBYTE Pin[7];
 	}
 
 	public unsafe struct BUNDLE_ID
@@ -488,7 +466,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 
 	public unsafe struct FIL
 	{
-		public DATA8* Name;         //!< File name
+		public fixed DATA8 Name[vmFILENAMESIZE];         //!< File name
 							 // struct dirent   **namelist;
 		public ULONG Size;                         //!< File size
 		public int File;
@@ -496,22 +474,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public ULONG Length;                       //!< Total down load length
 		public ULONG Pointer;                      //!<
 		public UWORD State;
-
-		public FIL()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Name = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
-		}
 	}
 
 
 	public unsafe struct TXBUF
 	{
-		public UBYTE* Buf;
+		public fixed UBYTE Buf[1024];
 		public ULONG MsgLen;
 		public ULONG BlockLen;
 		public ULONG SendBytes;
@@ -523,62 +491,30 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE SubState;
 		public UBYTE Writing;
 		public DATA8* pDir; // just a path
-		public UBYTE* Folder;
-
-		public TXBUF()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Buf = CommonHelper.Pointer1d<UBYTE>(1024);
-			Folder = CommonHelper.Pointer1d<UBYTE>(vmFILENAMESIZE);
-		}
+		public fixed UBYTE Folder[vmFILENAMESIZE];
 	}
 
 	public unsafe struct RXBUF
 	{
-		public UBYTE* Buf;
+		public fixed UBYTE Buf[1024];
 		public ULONG MsgLen;
 		public ULONG RxBytes;
 		public ULONG BufSize;
 		public FIL* pFile;
 		public UBYTE FileHandle;
 		public UBYTE State;
-
-		public RXBUF()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Buf = CommonHelper.Pointer1d<UBYTE>(1024);
-		}
 	}
 
 	public unsafe struct MAILBOX
 	{
-		public UBYTE* Name;
+		public fixed UBYTE Name[50];
 		public UBYTE Status;
 		public UBYTE FifoSize;
 		public UBYTE Type;
 		public UWORD DataSize;
 		public UWORD ReadCnt;
 		public UWORD WriteCnt;
-		public ULONG* Content;
-
-		public MAILBOX()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Name = CommonHelper.Pointer1d<UBYTE>(50);
-			Content = CommonHelper.Pointer1d<ULONG>((MAILBOX_CONTENT_SIZE / 4) + 1);
-		}
+		public fixed ULONG Content[(MAILBOX_CONTENT_SIZE / 4) + 1];
 	}
 
 	public unsafe delegate UWORD ChannelFunc(UBYTE* data, UWORD len);

@@ -107,17 +107,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 	{
 		public int hFile;
 		public DATA8 Access;
-		public DATA8* Filename;
-
-		public FDESCR()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Filename = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
-		}
+		public fixed DATA8 Filename[vmFILENAMESIZE];
 	}
 
 	public unsafe struct MEMORY_GLOBALS

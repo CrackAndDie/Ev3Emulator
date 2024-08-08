@@ -1,4 +1,5 @@
 ﻿using Ev3CoreUnsafe.Helpers;
+using System.Runtime.InteropServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Ccom.Interfaces
@@ -72,60 +73,30 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 	// Buffer to read into from the socket
 	public unsafe struct READBUF
 	{
-		public UBYTE* Buf;
+		public fixed UBYTE Buf[1024];
 		public UWORD InPtr;
 		public UWORD OutPtr;
 		public UWORD Status;
-
-		public READBUF()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Buf = CommonHelper.Pointer1d<UBYTE>(1024);
-		}
 	}
 
 	// Buffer to write into from the socket
 	public unsafe struct WRITEBUF
 	{
-		public UBYTE* Buf;
+		public fixed UBYTE Buf[1024];
 		public UWORD InPtr;
 		public UWORD OutPtr;
-
-		public WRITEBUF()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Buf = CommonHelper.Pointer1d<UBYTE>(1024);
-		}
 	}
 
 	// Buffer to fill complete message into from READBUF
 	// only one Messages can fit into this buffer
 	public unsafe struct MSGBUF
 	{
-		public UBYTE* Buf;
+		public fixed UBYTE Buf[1024];
 		public UWORD InPtr;
 		public UWORD MsgLen;
 		public UWORD RemMsgLen;
 		public UWORD Status;
 		public UBYTE LargeMsg;
-
-		public MSGBUF()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Buf = CommonHelper.Pointer1d<UBYTE>(1024);
-		}
 	}
 
 	// Control socket
@@ -151,45 +122,22 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 
 	public unsafe struct DEVICELIST
 	{
-		public DATA8* Name;
+		public fixed DATA8 Name[MAX_BT_NAME_SIZE];
 		public UWORD ConnHandle;
-		public UBYTE* DevClass;
-		public UBYTE* Passkey;
+		public fixed UBYTE DevClass[3];
+		public fixed UBYTE Passkey[6];
 		public UBYTE Connected;
 		public UBYTE ChNo;
 		public UBYTE Status;
-
-		public DEVICELIST()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Name = CommonHelper.Pointer1d<DATA8>(MAX_BT_NAME_SIZE);
-			DevClass = CommonHelper.Pointer1d<UBYTE>(3);
-			Passkey = CommonHelper.Pointer1d<UBYTE>(6);
-		}
 	}
 
 	public unsafe struct SEARCHLIST
 	{
-		public DATA8* Name;
-		public UBYTE* DevClass;
+		public fixed DATA8 Name[MAX_BT_NAME_SIZE];
+		public fixed UBYTE DevClass[3];
 		public UBYTE Connected;
 		public UBYTE Parred;
 		public UBYTE ChNo;
-
-		public SEARCHLIST()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Name = CommonHelper.Pointer1d<DATA8>(MAX_BT_NAME_SIZE);
-			DevClass = CommonHelper.Pointer1d<UBYTE>(3);
-		}
 	}
 
 	public unsafe struct BTCH
@@ -213,54 +161,26 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 			MsgBuf = *CommonHelper.PointerStruct<MSGBUF>();
 			BtSocket = *CommonHelper.PointerStruct<BTSOCKET>();
 			BtSocket = *CommonHelper.PointerStruct<BTSOCKET>();
-
-			// inits
-			WriteBuf.Init();
-			ReadBuf.Init();
-			MsgBuf.Init();
 		}
 	}
 
 	public unsafe struct NONVOLBT
 	{
-		public DEVICELIST* DevList;
+		public fixed UBYTE DevList[262 * MAX_DEV_TABLE_ENTRIES]; // 262 - is sizeof(DEVICELIST)
 		public UBYTE DevListEntries;
 		public UBYTE Visible;
 		public UBYTE On;
 		public UBYTE DecodeMode;
-		public UBYTE* BundleID;
-		public UBYTE* BundleSeedID;
-
-		public NONVOLBT()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			DevList = CommonHelper.Pointer1d<DEVICELIST>(MAX_DEV_TABLE_ENTRIES, true);
-			BundleID = CommonHelper.Pointer1d<UBYTE>(MAX_BUNDLE_ID_SIZE);
-			BundleSeedID = CommonHelper.Pointer1d<UBYTE>(MAX_BUNDLE_SEED_ID_SIZE);
-		}
+		public fixed UBYTE BundleID[MAX_BUNDLE_ID_SIZE];
+		public fixed UBYTE BundleSeedID[MAX_BUNDLE_SEED_ID_SIZE];
 	}
 
 	public unsafe struct INCOMMING
 	{
 		public ULONG Passkey;
 		public UWORD ConnHandle;
-		public DATA8* Name;
-		public UBYTE* DevClass;
-
-		public INCOMMING()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Name = CommonHelper.Pointer1d<DATA8>(MAX_BT_NAME_SIZE);
-			DevClass = CommonHelper.Pointer1d<UBYTE>(3);
-		}
+		public fixed DATA8 Name[MAX_BT_NAME_SIZE];
+		public fixed UBYTE DevClass[3];
 	}
 
 	public unsafe struct OUTGOING
@@ -271,18 +191,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 	public unsafe struct TRUSTED_DEV
 	{
 		public UBYTE PinLen;
-		public UBYTE* Pin;
+		public fixed UBYTE Pin[10];
 		public UBYTE Status;
-
-		public TRUSTED_DEV()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Pin = CommonHelper.Pointer1d<UBYTE>(10);
-		}
 	}
 
 	public unsafe struct BT_GLOBALS
@@ -335,12 +245,6 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 			OutGoing = *CommonHelper.PointerStruct<OUTGOING>();
 			TrustedDev = *CommonHelper.PointerStruct<TRUSTED_DEV>();
 			NonVol = *CommonHelper.PointerStruct<NONVOLBT>();
-
-			Mode2Buf.Init();
-			Mode2WriteBuf.Init();
-			Incoming.Init();
-			TrustedDev.Init();
-			NonVol.Init();
 
 			BtCh = CommonHelper.Pointer1d<BTCH>(NO_OF_BT_CHS, true);
 			SearchList = CommonHelper.Pointer1d<SEARCHLIST>(MAX_DEV_TABLE_ENTRIES, true);

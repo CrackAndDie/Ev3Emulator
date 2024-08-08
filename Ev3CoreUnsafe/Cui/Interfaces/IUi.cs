@@ -44,7 +44,14 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATAF* pVal;
 		public DATA16* pOffset;
 		public DATA16* pSpan;
-		public DATAF** Buffer;
+		public fixed DATAF Buffer0[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer1[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer2[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer3[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer4[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer5[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer6[GRAPH_BUFFER_SIZE];
+		public fixed DATAF Buffer7[GRAPH_BUFFER_SIZE];
 		public DATA16 Pointer;
 		public DATA16 GraphStartX;
 		public DATA16 GraphSizeX;
@@ -55,11 +62,6 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATAF Value;
 		public DATAF Inc;
 		public DATA8 Down;
-
-		public GRAPH()
-		{
-			Buffer = CommonHelper.Pointer2d<DATAF>(GRAPH_BUFFERS, GRAPH_BUFFER_SIZE);
-		}
 	}
 
 	public unsafe struct NOTIFY
@@ -76,7 +78,14 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA16 TextSpaceY;
 		public DATA16 TextChars;
 		public DATA16 TextLines;
-		public DATA8** TextLine;
+		public fixed DATA8 TextLine0[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine1[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine2[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine3[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine4[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine5[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine6[MAX_NOTIFY_LINE_CHARS];
+		public fixed DATA8 TextLine7[MAX_NOTIFY_LINE_CHARS];
 		public DATA16 IconWidth;
 		public DATA16 IconHeight;
 		public DATA16 IconStartX;
@@ -89,16 +98,6 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA16 YesNoStartY;
 		public DATA8 Font;
 		public DATA8 NeedUpdate;
-
-		public NOTIFY()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			TextLine = CommonHelper.Pointer2d<DATA8>(MAX_NOTIFY_LINES, MAX_NOTIFY_LINE_CHARS);
-		}
 	}
 
 	public unsafe struct IQUESTION
@@ -218,25 +217,11 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 Sdcard;
 		public DATA8 Usbstick;
 
-		public DATA8* TopFolder;
-		public DATA8* SubFolder;
-		public DATA8* FullPath;
-		public DATA8* Filename;
-		public DATA8* Text;
-
-		public BROWSER()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			TopFolder = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
-			SubFolder = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
-			FullPath = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
-			Filename = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
-			Text = CommonHelper.Pointer1d<DATA8>(TEXTSIZE);
-		}
+		public fixed DATA8 TopFolder[MAX_FILENAME_SIZE];
+		public fixed DATA8 SubFolder[MAX_FILENAME_SIZE];
+		public fixed DATA8 FullPath[MAX_FILENAME_SIZE];
+		public fixed DATA8 Filename[MAX_FILENAME_SIZE];
+		public fixed DATA8 Text[TEXTSIZE];
 	}
 
 	public unsafe struct TXTBOX
@@ -271,17 +256,7 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA16 ItemPointer;                  // Item list pointer - folder or file
 
 		public DATA8 Font;
-		public DATA8* Text;
-
-		public TXTBOX()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Text = CommonHelper.Pointer1d<DATA8>(TEXTSIZE);
-		}
+		public fixed DATA8 Text[TEXTSIZE];
 	}
 
 	public unsafe struct UI_GLOBALS
@@ -310,10 +285,11 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public GRAPH Graph;
 		public TXTBOX Txtbox;
 
-		public int PowerFile;
-		public int UiFile;
-		public int AdcFile;
-		public int DispFile;
+		// redirected
+		//public int PowerFile;
+		//public int UiFile;
+		//public int AdcFile;
+		//public int DispFile;
 
 		public ULONG SleepTimer;
 
@@ -427,16 +403,6 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 			Keyboard = *CommonHelper.PointerStruct<KEYB>();
 			Graph = *CommonHelper.PointerStruct<GRAPH>();
 			Txtbox = *CommonHelper.PointerStruct<TXTBOX>();
-
-			// inits
-			LcdSafe.Init();
-			LcdSave.Init();
-			LcdBuffer.Init();
-			UiSafe.Init();
-			Analog.Init();
-			Notify.Init();
-			Browser.Init();
-			Txtbox.Init();
 
 			// LCD* a = (LCD*)Unsafe.AsPointer<LCD>(ref LcdBuffer);
 

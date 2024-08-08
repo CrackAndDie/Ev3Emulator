@@ -39,22 +39,13 @@ global using HANDLER = short;
 global using CMDSIZE = ushort;
 global using MSGCNT = ushort;
 
-using System.Runtime.CompilerServices;
-using Ev3CoreUnsafe.Helpers;
-
-
 public unsafe struct IMGHEAD 
 {
-	public UBYTE* Sign;   //!< Place holder for the file type identifier                  
+	public fixed UBYTE Sign[4];   //!< Place holder for the file type identifier                  
 	public IMINDEX ImageSize;  //!< Image size                  
 	public UWORD VersionInfo;  //!< Version identifier                 
 	public OBJID NumberOfObjects;  //!< Total number of objects in image          
 	public GBINDEX GlobalBytes;  //!< Number of bytes to allocate for global variables
-
-	public IMGHEAD()
-    {
-		Sign = CommonHelper.Pointer1d<UBYTE>(4, false);
-	}
 }
 
 /*! \page imagelayout

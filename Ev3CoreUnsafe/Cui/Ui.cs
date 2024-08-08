@@ -1,7 +1,9 @@
 ﻿using Ev3CoreUnsafe.Cui.Interfaces;
 using Ev3CoreUnsafe.Enums;
+using Ev3CoreUnsafe.Extensions;
 using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using static Ev3CoreUnsafe.Defines;
 
@@ -217,13 +219,15 @@ namespace Ev3CoreUnsafe.Cui
 
         public void cUiInitTemp()
         {
-            // TODO: probably no need
-        }
+			// TODO: probably no need
+			GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
+		}
 
         public void cUiExitTemp()
         {
-            // TODO: probably no need
-        }
+			// TODO: probably no need
+			GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
+		}
 
         public void cUiDownloadSuccesSound()
         {
@@ -243,7 +247,6 @@ namespace Ev3CoreUnsafe.Cui
             }
         }
 
-
         public void cUiButtonFlush()
         {
             DATA8 Button;
@@ -254,40 +257,36 @@ namespace Ev3CoreUnsafe.Cui
             }
         }
 
-
         public void cUiSetLed(DATA8 State)
         {
             DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(2);
 
             GH.UiInstance.LedState = State;
 
-            if (GH.UiInstance.UiFile >= MIN_HANDLE)
+            if (GH.UiInstance.Warnlight != 0)
             {
-                if (GH.UiInstance.Warnlight)
+                if ((State == LED_GREEN_FLASH) || (State == LED_RED_FLASH) || (State == LED_ORANGE_FLASH))
                 {
-                    if ((State == LED_GREEN_FLASH) || (State == LED_RED_FLASH) || (State == LED_ORANGE_FLASH))
-                    {
-                        Buffer[0] = LED_ORANGE_FLASH + '0';
-                    }
-                    else
-                    {
-                        if ((State == LED_GREEN_PULSE) || (State == LED_RED_PULSE) || (State == LED_ORANGE_PULSE))
-                        {
-                            Buffer[0] = LED_ORANGE_PULSE + '0';
-                        }
-                        else
-                        {
-                            Buffer[0] = LED_ORANGE + '0';
-                        }
-                    }
+                    Buffer[0] = LED_ORANGE_FLASH + '0';
                 }
                 else
                 {
-                    Buffer[0] = (sbyte)(GH.UiInstance.LedState + '0');
+                    if ((State == LED_GREEN_PULSE) || (State == LED_RED_PULSE) || (State == LED_ORANGE_PULSE))
+                    {
+                        Buffer[0] = LED_ORANGE_PULSE + '0';
+                    }
+                    else
+                    {
+                        Buffer[0] = LED_ORANGE + '0';
+                    }
                 }
-                Buffer[1] = 0;
-                write(GH.UiInstance.UiFile, Buffer, 2);
             }
+            else
+            {
+                Buffer[0] = (sbyte)(GH.UiInstance.LedState + '0');
+            }
+            Buffer[1] = 0;
+            GH.Ev3System.LedHandler.SetLed(CommonHelper.GetArray(Buffer, 2));
         }
 
 
@@ -325,10 +324,10 @@ namespace Ev3CoreUnsafe.Cui
 
             GH.UiInstance.ScreenBusy = 0;
             GH.UiInstance.ScreenBlocked = 0;
-            GH.UiInstance.ScreenPrgId = -1;
-            GH.UiInstance.ScreenObjId = -1;
+            GH.UiInstance.ScreenPrgId = ushort.MaxValue;
+            GH.UiInstance.ScreenObjId = ushort.MaxValue;
 
-            GH.UiInstance.PowerInitialized = 0;
+			GH.UiInstance.PowerInitialized = 0;
             GH.UiInstance.ShutDown = 0;
 
             GH.UiInstance.PowerShutdown = 0;
@@ -358,118 +357,54 @@ namespace Ev3CoreUnsafe.Cui
 
             Result = GH.Terminal.dTerminalInit();
 
-            GH.UiInstance.PowerFile = open(POWER_DEVICE_NAME, O_RDWR);
-            GH.UiInstance.UiFile = open(UI_DEVICE_NAME, O_RDWR | O_SYNC);
-            GH.UiInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
 
             GH.Lcd.dLcdInit((*GH.UiInstance.pLcd).Lcd);
 
             Hw = 0;
-            if (GH.UiInstance.UiFile >= MIN_HANDLE)
-            {
-                pUiTmp = (UI*)mmap(0, sizeof(UI), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.UiInstance.UiFile, 0);
+			GH.UiInstance.pUi = CommonHelper.PointerStruct<UI>();
+			CommonHelper.snprintf(GH.UiInstance.HwVers, HWVERS_SIZE, "V13.37");
+            CommonHelper.sscanf(&GH.UiInstance.HwVers[1], "%f", &Hw);
+			GH.Ev3System.Logger.LogError($"A error {nameof(UI_DEVICE_FILE_NOT_FOUND)} occured in {Environment.StackTrace}");
 
-                if (pUiTmp == MAP_FAILED)
-                {
-                    LogErrorNumber(UI_SHARED_MEMORY);
-                    Result = RESULT.FAIL;
-                }
-                else
-                {
-                    GH.UiInstance.pUi = pUiTmp;
-                }
-
-                read(GH.UiInstance.UiFile, GH.UiInstance.HwVers, HWVERS_SIZE);
-                sscanf(&GH.UiInstance.HwVers[1], "%f", &Hw);
-            }
-            else
-            {
-                LogErrorNumber(UI_DEVICE_FILE_NOT_FOUND);
-                Result = RESULT.FAIL;
-            }
             Hw *= (DATAF)10;
             GH.UiInstance.Hw = (DATA8)Hw;
-
-            if (GH.UiInstance.AdcFile >= MIN_HANDLE)
-            {
-                pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.UiInstance.AdcFile, 0);
-
-                if (pAdcTmp == MAP_FAILED)
-                {
-                    LogErrorNumber(ANALOG_SHARED_MEMORY);
-                    Result = RESULT.FAIL;
-                }
-                else
-                {
-                    GH.UiInstance.pAnalog = pAdcTmp;
-                }
-            }
-            else
-            {
-                LogErrorNumber(ANALOG_DEVICE_FILE_NOT_FOUND);
-                Result = RESULT.FAIL;
-            }
+			GH.UiInstance.pAnalog = CommonHelper.PointerStruct<ANALOG>();
+			GH.Ev3System.Logger.LogError($"A error {nameof(ANALOG_DEVICE_FILE_NOT_FOUND)} occured in {Environment.StackTrace}");
 
             if (SPECIALVERS < '0')
             {
-                snprintf(GH.UiInstance.FwVers, FWVERS_SIZE, "V%4.2f", VERS);
+				CommonHelper.snprintf(GH.UiInstance.FwVers, FWVERS_SIZE, $"V{VERS.ToString("F2", CultureInfo.InvariantCulture)}");
             }
             else
             {
-                snprintf(GH.UiInstance.FwVers, FWVERS_SIZE, "V%4.2f%c", VERS, SPECIALVERS);
+                CommonHelper.snprintf(GH.UiInstance.FwVers, FWVERS_SIZE, $"V{VERS.ToString("F2", CultureInfo.InvariantCulture)}{SPECIALVERS}");
             }
 
-
-            //            snprintf(Buffer, 32, "%s %s", __DATE__, __TIME__);
-            //            strptime((const char*)Buffer,(const char*)"%B %d %Y %H:%M:%S",(struct tm*)&tm);
-            //strftime(GH.UiInstance.FwBuild, FWBUILD_SIZE, "%y%m%d%H%M", &tm);
+			var __DATE__ = "Jul 27 2012";
+			var __TIME__ = "21:06:19";
+			CommonHelper.snprintf(Buffer, 32, $"{__DATE__} {__TIME__}");
+			CommonHelper.snprintf(GH.UiInstance.FwBuild, FWBUILD_SIZE, "1207272106");
 
             // TODO: ...
             //pOs = (struct utsname*)OsBuf;
             //uname(pOs);
 
-            //snprintf(GH.UiInstance.OsVers, OSVERS_SIZE, "%s %s", (*pOs).sysname, (*pOs).release);
+            CommonHelper.snprintf(GH.UiInstance.OsVers, OSVERS_SIZE, "PIVO 322");
 
-            //sprintf((char*)GH.UiInstance.OsBuild, "?");
+			CommonHelper.snprintf(GH.UiInstance.OsBuild, OSBUILD_SIZE, "1207272106");
 
-            //Lng = strlen((*pOs).version) - 9;
-            //if (Lng > 0)
-            //{
-            //    (*pOs).version[Lng++] = ' ';
-            //    (*pOs).version[Lng++] = ' ';
-            //    (*pOs).version[Lng++] = ' ';
-            //    (*pOs).version[Lng++] = ' ';
+			// TODO: ...
+			//  GH.UiInstance.IpAddr[0] = 0;
+			//Sid = socket(AF_INET, SOCK_DGRAM, 0);
+			//Sifr.ifr_addr.sa_family = AF_INET;
+			//CommonHelper.strncpy(Sifr.ifr_name, "eth0", IFNAMSIZ - 1);
+			//if (ioctl(Sid, SIOCGIFADDR, &Sifr) >= 0)
+			//{
+			//    CommonHelper.snprintf(GH.UiInstance.IpAddr, IPADDR_SIZE, "%s", inet_ntoa(((struct sockaddr_in *)&Sifr.ifr_addr)->sin_addr));
+			//  }
+			//  close(Sid);
 
-            //    Lng = strlen((*pOs).version);
-            //    Tmp = 0;
-            //    Start = 0;
-
-            //    while ((Start < Lng) && (Tmp == 0))
-            //    {
-            //        if (strptime((const char*)&(*pOs).version[Start],(const char*)"%B %d %H:%M:%S %Y",(struct tm*)&tm) != null)
-            //      {
-            //    Tmp = 1;
-            //}
-            //Start++;
-            //    }
-            //    if (Tmp)
-            //{
-            //    strftime((char*)GH.UiInstance.OsBuild, OSBUILD_SIZE, "%y%m%d%H%M", &tm);
-            //}
-            //  }
-
-            // TODO: ...
-            //  GH.UiInstance.IpAddr[0] = 0;
-            //Sid = socket(AF_INET, SOCK_DGRAM, 0);
-            //Sifr.ifr_addr.sa_family = AF_INET;
-            //strncpy(Sifr.ifr_name, "eth0", IFNAMSIZ - 1);
-            //if (ioctl(Sid, SIOCGIFADDR, &Sifr) >= 0)
-            //{
-            //    snprintf(GH.UiInstance.IpAddr, IPADDR_SIZE, "%s", inet_ntoa(((struct sockaddr_in *)&Sifr.ifr_addr)->sin_addr));
-            //  }
-            //  close(Sid);
-
-            cUiButtonClr();
+			cUiButtonClr();
 
             GH.UiInstance.BattIndicatorHigh = BATT_INDICATOR_HIGH;
             GH.UiInstance.BattIndicatorLow = BATT_INDICATOR_LOW;
@@ -479,26 +414,26 @@ namespace Ev3CoreUnsafe.Cui
             GH.UiInstance.BattShutdownLow = BATT_SHUTDOWN_LOW;
 
             GH.UiInstance.Accu = 0;
-            if (GH.UiInstance.PowerFile >= MIN_HANDLE)
-            {
-                read(GH.UiInstance.PowerFile, Buffer, 2);
-                if (Buffer[0] == '1')
-                {
-                    GH.UiInstance.Accu = 1;
-                    GH.UiInstance.BattIndicatorHigh = ACCU_INDICATOR_HIGH;
-                    GH.UiInstance.BattIndicatorLow = ACCU_INDICATOR_LOW;
-                    GH.UiInstance.BattWarningHigh = ACCU_WARNING_HIGH;
-                    GH.UiInstance.BattWarningLow = ACCU_WARNING_LOW;
-                    GH.UiInstance.BattShutdownHigh = ACCU_SHUTDOWN_HIGH;
-                    GH.UiInstance.BattShutdownLow = ACCU_SHUTDOWN_LOW;
-                }
-            }
+            // TODO: powerfile handler
+            //if (GH.UiInstance.PowerFile >= MIN_HANDLE)
+            //{
+            //    read(GH.UiInstance.PowerFile, Buffer, 2);
+            //    if (Buffer[0] == '1')
+            //    {
+            //        GH.UiInstance.Accu = 1;
+            //        GH.UiInstance.BattIndicatorHigh = ACCU_INDICATOR_HIGH;
+            //        GH.UiInstance.BattIndicatorLow = ACCU_INDICATOR_LOW;
+            //        GH.UiInstance.BattWarningHigh = ACCU_WARNING_HIGH;
+            //        GH.UiInstance.BattWarningLow = ACCU_WARNING_LOW;
+            //        GH.UiInstance.BattShutdownHigh = ACCU_SHUTDOWN_HIGH;
+            //        GH.UiInstance.BattShutdownLow = ACCU_SHUTDOWN_LOW;
+            //    }
+            //}
 
             cUiInitTemp();
 
             return (Result);
         }
-
 
         public RESULT cUiOpen()
         {
@@ -517,7 +452,6 @@ namespace Ev3CoreUnsafe.Cui
 
             return (Result);
         }
-
 
         public RESULT cUiClose()
         {
@@ -546,23 +480,6 @@ namespace Ev3CoreUnsafe.Cui
             cUiExitTemp();
 
             Result = GH.Terminal.dTerminalExit();
-
-            if (GH.UiInstance.AdcFile >= MIN_HANDLE)
-            {
-                munmap(GH.UiInstance.pAnalog, sizeof(ANALOG));
-                close(GH.UiInstance.AdcFile);
-            }
-
-            if (GH.UiInstance.UiFile >= MIN_HANDLE)
-            {
-                munmap(GH.UiInstance.pUi, sizeof(UI));
-                close(GH.UiInstance.UiFile);
-            }
-
-            if (GH.UiInstance.PowerFile >= MIN_HANDLE)
-            {
-                close(GH.UiInstance.PowerFile);
-            }
 
             Result = OK;
 
@@ -609,9 +526,9 @@ namespace Ev3CoreUnsafe.Cui
 
                 // Check virtual buttons (hardware, direct command, PC)
 
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVE)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVE) != 0)
                 {
-                    if (!(GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED))
+                    if ((GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED) == 0)
                     { // Button activated
 
                         GH.UiInstance.Activated = BUTTON_SET;
@@ -644,7 +561,7 @@ namespace Ev3CoreUnsafe.Cui
 
                     if (GH.UiInstance.ButtonTimer[Button] >= LONG_PRESS_TIME)
                     {
-                        if (!(GH.UiInstance.ButtonState[Button] & BUTTON_LONG_LATCH))
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONG_LATCH) == 0)
                         { // Only once
 
                             GH.UiInstance.ButtonState[Button] |= BUTTON_LONG_LATCH;
@@ -660,7 +577,7 @@ namespace Ev3CoreUnsafe.Cui
                 }
                 else
                 {
-                    if ((GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED))
+                    if ((GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED) != 0)
                     { // Button released
 
                         GH.UiInstance.ButtonState[Button] &= ~BUTTON_PRESSED;
@@ -676,7 +593,7 @@ namespace Ev3CoreUnsafe.Cui
         {
             UBYTE Key;
 
-            if (GH.Lms.GetTerminalEnable())
+            if (GH.Lms.GetTerminalEnable() != 0)
             {
 
                 if (GH.Terminal.dTerminalRead(&Key) == OK)
@@ -698,7 +615,7 @@ namespace Ev3CoreUnsafe.Cui
                         case (byte)'\r':
                         case (byte)'\n':
                             {
-                                if (GH.UiInstance.KeyBufIn)
+                                if (GH.UiInstance.KeyBufIn != 0)
                                 {
                                     GH.UiInstance.Keys = GH.UiInstance.KeyBufIn;
                                     GH.UiInstance.KeyBufIn = 0;
@@ -742,11 +659,13 @@ namespace Ev3CoreUnsafe.Cui
             DATA8 Data8;
 
             Data8 = State;
-            if (GH.UiInstance.PowerFile >= MIN_HANDLE)
-            {
-                write(GH.UiInstance.PowerFile, &Data8, 1);
-            }
-        }
+			// TODO: powerfile handler
+			//if (GH.UiInstance.PowerFile >= MIN_HANDLE)
+			//{
+			//    write(GH.UiInstance.PowerFile, &Data8, 1);
+			//}
+			GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
+		}
 
 
         public UBYTE AtoN(DATA8 Char)
@@ -773,11 +692,11 @@ namespace Ev3CoreUnsafe.Cui
 
         public void cUiFlushBuffer()
         {
-            if (GH.UiInstance.UiWrBufferSize)
+            if (GH.UiInstance.UiWrBufferSize != 0)
             {
-                if (GH.Lms.GetTerminalEnable())
+                if (GH.Lms.GetTerminalEnable() != 0)
                 {
-                    GH.Terminal.dTerminalWrite((UBYTE*)GH.UiInstance.UiWrBuffer, GH.UiInstance.UiWrBufferSize);
+                    GH.Terminal.dTerminalWrite((UBYTE*)GH.UiInstance.UiWrBuffer, (ushort)GH.UiInstance.UiWrBufferSize);
                 }
                 GH.UiInstance.UiWrBufferSize = 0;
             }
@@ -786,7 +705,7 @@ namespace Ev3CoreUnsafe.Cui
 
         public void cUiWriteString(DATA8* pString)
         {
-            while (*pString)
+            while (*pString != 0)
             {
                 GH.UiInstance.UiWrBuffer[GH.UiInstance.UiWrBufferSize] = *pString;
                 if (++GH.UiInstance.UiWrBufferSize >= UI_WR_BUFFER_SIZE)
@@ -820,7 +739,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (Press)
+                if (Press != 0)
                 {
                     GH.UiInstance.ButtonState[Button] |= BUTTON_ACTIVE;
                 }
@@ -833,7 +752,7 @@ namespace Ev3CoreUnsafe.Cui
             {
                 if (Button == REAL_ANY_BUTTON)
                 {
-                    if (Press)
+                    if (Press != 0)
                     {
                         for (Button = 0; Button < BUTTONS; Button++)
                         {
@@ -860,7 +779,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED) != 0)
                 {
                     Result = 1;
                 }
@@ -871,7 +790,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     for (Button = 0; Button < BUTTONS; Button++)
                     {
-                        if (GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED)
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_PRESSED) != 0)
                         {
                             Result = 1;
                         }
@@ -891,7 +810,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
                 {
                     Result = 1;
                 }
@@ -902,7 +821,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     for (Button = 0; Button < BUTTONS; Button++)
                     {
-                        if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED)
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
                         {
                             Result = 1;
                         }
@@ -915,7 +834,7 @@ namespace Ev3CoreUnsafe.Cui
                         Result = 1;
                         for (Button = 0; Button < BUTTONS; Button++)
                         {
-                            if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED)
+                            if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
                             {
                                 Result = 0;
                             }
@@ -936,7 +855,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
                 {
                     GH.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVATED;
                     Result = 1;
@@ -948,7 +867,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     for (Button = 0; Button < BUTTONS; Button++)
                     {
-                        if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED)
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
                         {
                             GH.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVATED;
                             Result = 1;
@@ -962,7 +881,7 @@ namespace Ev3CoreUnsafe.Cui
                         Result = 1;
                         for (Button = 0; Button < BUTTONS; Button++)
                         {
-                            if (GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED)
+                            if ((GH.UiInstance.ButtonState[Button] & BUTTON_ACTIVATED) != 0)
                             {
                                 GH.UiInstance.ButtonState[Button] &= ~BUTTON_ACTIVATED;
                                 Result = 0;
@@ -971,7 +890,7 @@ namespace Ev3CoreUnsafe.Cui
                     }
                 }
             }
-            if (Result)
+            if (Result != 0)
             {
                 GH.UiInstance.Click = 1;
             }
@@ -988,7 +907,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_BUMBED)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_BUMBED) != 0)
                 {
                     GH.UiInstance.ButtonState[Button] &= ~BUTTON_BUMBED;
                     Result = 1;
@@ -1000,7 +919,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     for (Button = 0; Button < BUTTONS; Button++)
                     {
-                        if (GH.UiInstance.ButtonState[Button] & BUTTON_BUMBED)
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_BUMBED) != 0)
                         {
                             GH.UiInstance.ButtonState[Button] &= ~BUTTON_BUMBED;
                             Result = 1;
@@ -1014,7 +933,7 @@ namespace Ev3CoreUnsafe.Cui
                         Result = 1;
                         for (Button = 0; Button < BUTTONS; Button++)
                         {
-                            if (GH.UiInstance.ButtonState[Button] & BUTTON_BUMBED)
+                            if ((GH.UiInstance.ButtonState[Button] & BUTTON_BUMBED) != 0)
                             {
                                 GH.UiInstance.ButtonState[Button] &= ~BUTTON_BUMBED;
                                 Result = 0;
@@ -1036,7 +955,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
                 {
                     Result = 1;
                 }
@@ -1047,7 +966,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     for (Button = 0; Button < BUTTONS; Button++)
                     {
-                        if (GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS)
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
                         {
                             Result = 1;
                         }
@@ -1060,7 +979,7 @@ namespace Ev3CoreUnsafe.Cui
                         Result = 1;
                         for (Button = 0; Button < BUTTONS; Button++)
                         {
-                            if (GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS)
+                            if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
                             {
                                 Result = 0;
                             }
@@ -1081,7 +1000,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Button < BUTTONS)
             {
-                if (GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS)
+                if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
                 {
                     GH.UiInstance.ButtonState[Button] &= ~BUTTON_LONGPRESS;
                     Result = 1;
@@ -1093,7 +1012,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     for (Button = 0; Button < BUTTONS; Button++)
                     {
-                        if (GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS)
+                        if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
                         {
                             GH.UiInstance.ButtonState[Button] &= ~BUTTON_LONGPRESS;
                             Result = 1;
@@ -1107,7 +1026,7 @@ namespace Ev3CoreUnsafe.Cui
                         Result = 1;
                         for (Button = 0; Button < BUTTONS; Button++)
                         {
-                            if (GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS)
+                            if ((GH.UiInstance.ButtonState[Button] & BUTTON_LONGPRESS) != 0)
                             {
                                 GH.UiInstance.ButtonState[Button] &= ~BUTTON_LONGPRESS;
                                 Result = 0;
@@ -1116,7 +1035,7 @@ namespace Ev3CoreUnsafe.Cui
                     }
                 }
             }
-            if (Result)
+            if (Result != 0)
             {
                 GH.UiInstance.Click = 1;
             }
@@ -1129,11 +1048,11 @@ namespace Ev3CoreUnsafe.Cui
         {
             DATA16 Result = 0;
 
-            if (cUiTestShortPress(LEFT_BUTTON))
+            if (cUiTestShortPress(LEFT_BUTTON) != 0)
             {
                 Result = -1;
             }
-            if (cUiTestShortPress(RIGHT_BUTTON))
+            if (cUiTestShortPress(RIGHT_BUTTON) != 0)
             {
                 Result = 1;
             }
@@ -1146,11 +1065,11 @@ namespace Ev3CoreUnsafe.Cui
         {
             DATA16 Result = 0;
 
-            if (cUiGetShortPress(LEFT_BUTTON))
+            if (cUiGetShortPress(LEFT_BUTTON) != 0)
             {
                 Result = -1;
             }
-            if (cUiGetShortPress(RIGHT_BUTTON))
+            if (cUiGetShortPress(RIGHT_BUTTON) != 0)
             {
                 Result = 1;
             }
@@ -1163,11 +1082,11 @@ namespace Ev3CoreUnsafe.Cui
         {
             DATA16 Result = 0;
 
-            if (cUiGetShortPress(UP_BUTTON))
+            if (cUiGetShortPress(UP_BUTTON) != 0)
             {
                 Result = -1;
             }
-            if (cUiGetShortPress(DOWN_BUTTON))
+            if (cUiGetShortPress(DOWN_BUTTON) != 0)
             {
                 Result = 1;
             }
@@ -1193,7 +1112,7 @@ namespace Ev3CoreUnsafe.Cui
 
         public void cUiUpdateCnt()
         {
-            if (GH.UiInstance.PowerInitialized)
+            if (GH.UiInstance.PowerInitialized != 0)
             {
                 GH.UiInstance.CinCnt *= (DATAF)(AVR_CIN - 1);
                 GH.UiInstance.CoutCnt *= (DATAF)(AVR_COUT - 1);
@@ -1240,8 +1159,8 @@ namespace Ev3CoreUnsafe.Cui
                 GH.UiInstance.Imotor = 0;
 
             }
-            GH.UiInstance.Vbatt = 7.0;
-            GH.UiInstance.Ibatt = 5.0;
+            GH.UiInstance.Vbatt = 7.0f;
+            GH.UiInstance.Ibatt = 5.0f;
         }
 
         public void cUiUpdateTopline()
@@ -1251,27 +1170,27 @@ namespace Ev3CoreUnsafe.Cui
             DATA8 BtStatus;
             DATA8 WifiStatus;
             DATA8 TmpStatus;
-            DATA8 Name[NAME_LENGTH + 1];
+            DATA8* Name = CommonHelper.Pointer1d<DATA8>(NAME_LENGTH + 1);
 
-            char TempBuf[10];
+			DATA8* TempBuf = CommonHelper.Pointer1d<DATA8>(10);
             DATA32 Total;
             DATA32 Free;
 
-            if (GH.UiInstance.TopLineEnabled)
+            if (GH.UiInstance.TopLineEnabled != 0)
             {
                 // Clear top line
-                LCDClearTopline(GH.UiInstance.pLcd);
+                LCDClearTopline((byte*)GH.UiInstance.pLcd);
 
                 // Show BT status
                 TmpStatus = 0;
-                BtStatus = GH.Com.cComGetBtStatus();
+                BtStatus = (sbyte)GH.Com.cComGetBtStatus();
                 if (BtStatus > 0)
                 {
                     TmpStatus = 1;
                     BtStatus >>= 1;
                     if ((BtStatus >= 0) && (BtStatus < TOP_BT_ICONS))
                     {
-                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 0, 1, SMALL_ICON, TopLineBtIconMap[BtStatus]);
+                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 0, 1, SMALL_ICON, (sbyte)TopLineBtIconMap[BtStatus]);
                     }
                 }
                 if (GH.UiInstance.BtOn != TmpStatus)
@@ -1282,14 +1201,14 @@ namespace Ev3CoreUnsafe.Cui
 
                 // Show WIFI status
                 TmpStatus = 0;
-                WifiStatus = GH.Com.cComGetWifiStatus();
+                WifiStatus = (sbyte)GH.Com.cComGetWifiStatus();
                 if (WifiStatus > 0)
                 {
                     TmpStatus = 1;
                     WifiStatus >>= 1;
                     if ((WifiStatus >= 0) && (WifiStatus < TOP_WIFI_ICONS))
                     {
-                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 16, 1, SMALL_ICON, TopLineWifiIconMap[WifiStatus]);
+                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 16, 1, SMALL_ICON, (sbyte)TopLineWifiIconMap[WifiStatus]);
                     }
                 }
                 if (GH.UiInstance.WiFiOn != TmpStatus)
@@ -1298,7 +1217,7 @@ namespace Ev3CoreUnsafe.Cui
                     GH.UiInstance.UiUpdate = 1;
                 }
 
-                snprintf(TempBuf, 10, "%4.1f", GH.UiInstance.Tbatt);
+                CommonHelper.snprintf(TempBuf, 10, $"{GH.UiInstance.Tbatt.ToString("F1", CultureInfo.InvariantCulture)}");
                 GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 32, 1, SMALL_FONT, (DATA8*)TempBuf);
 
                 // Show brick name
@@ -1306,7 +1225,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 X1 = GH.Lcd.dLcdGetFontWidth(SMALL_FONT);
                 X2 = (short)(LCD_WIDTH / X1);
-                X2 -= strlen((char*)Name);
+                X2 -= (short)CommonHelper.strlen(Name);
                 X2 /= 2;
                 X2 *= X1;
                 GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X2, 1, SMALL_FONT, Name);
@@ -1345,12 +1264,12 @@ namespace Ev3CoreUnsafe.Cui
                 X2 = 102;
                 for (V = 0; V < 7; V++)
                 {
-                    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X2 + (V * 6), 5);
-                    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X2 + (V * 6), 4);
+                    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 + (V * 6)), 5);
+                    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 + (V * 6)), 4);
 
-                    if ((GH.VMInstance.Status & (0x40 >> V)))
+                    if ((GH.VMInstance.Status & (0x40 >> V)) != 0)
                     {
-                        GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1 + (V * 6), 2, 5, 6);
+                        GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X1 + (V * 6)), 2, 5, 6);
                     }
                 }
 
@@ -1359,9 +1278,9 @@ namespace Ev3CoreUnsafe.Cui
                 X2 = (short)((LCD_WIDTH - X1) / X1);
 
                 // Show USB status
-                if (GH.Com.cComGetUsbStatus())
+                if (GH.Com.cComGetUsbStatus() != 0)
                 {
-                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (X2 - 1) * X1, 1, SMALL_ICON, SICON_USB);
+                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)((X2 - 1) * X1), 1, SMALL_ICON, SICON_USB);
                 }
 
                 // Show battery
@@ -1376,7 +1295,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     V = 0;
                 }
-                GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X2 * X1, 1, SMALL_ICON, TopLineBattIconMap[V]);
+                GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 * X1), 1, SMALL_ICON, (sbyte)TopLineBattIconMap[V]);
 
 
                 // Show bottom line
@@ -1395,7 +1314,8 @@ namespace Ev3CoreUnsafe.Cui
         public void cUiRunScreen()
         { // 100mS
 
-            if (GH.UiInstance.ScreenBlocked == 0)
+			var ani1 = BmpHelper.Get(BmpType.Ani1x);
+			if (GH.UiInstance.ScreenBlocked == 0)
             {
                 switch (GH.UiInstance.RunScreenEnabled)
                 {
@@ -1428,10 +1348,11 @@ namespace Ev3CoreUnsafe.Cui
                             cUiUpdateLcd();
 
 
-                            // Enable top line
+							// Enable top line
 
-                            // Draw fixed image
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 39, mindstorms_width, mindstorms_height, (UBYTE*)mindstorms_bits);
+							// Draw fixed image
+							var mind = BmpHelper.Get(BmpType.Mindstorms);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 39, mind.Width, mind.Height, (UBYTE*)mind.Data.AsPointer());
                             cUiUpdateLcd();
 
                             // Draw user program name
@@ -1443,12 +1364,12 @@ namespace Ev3CoreUnsafe.Cui
 
                             GH.UiInstance.RunScreenEnabled++;
 
-                            if (GH.UiInstance.RunLedEnabled)
+                            if (GH.UiInstance.RunLedEnabled != 0)
                             {
                                 cUiSetLed(LED_GREEN_PULSE);
                             }
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani1x_width, Ani1x_height, (UBYTE*)Ani1x_bits);
+                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani1.Width, ani1.Height, (UBYTE*)ani1.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenTimer = GH.UiInstance.MilliSeconds;
@@ -1461,12 +1382,12 @@ namespace Ev3CoreUnsafe.Cui
                     case 4:
                         { //   0mS -> Ani1
 
-                            if (GH.UiInstance.RunLedEnabled)
+                            if (GH.UiInstance.RunLedEnabled != 0)
                             {
                                 cUiSetLed(LED_GREEN_PULSE);
                             }
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani1x_width, Ani1x_height, (UBYTE*)Ani1x_bits);
+                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani1.Width, ani1.Height, (UBYTE*)ani1.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenTimer = GH.UiInstance.MilliSeconds;
@@ -1505,7 +1426,8 @@ namespace Ev3CoreUnsafe.Cui
                     case 9:
                         { // 500mS -> Ani2
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani2x_width, Ani2x_height, (UBYTE*)Ani2x_bits);
+							var ani2 = BmpHelper.Get(BmpType.Ani2x);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani2.Width, ani2.Height, (UBYTE*)ani2.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1515,7 +1437,8 @@ namespace Ev3CoreUnsafe.Cui
                     case 10:
                         { // 600mS -> Ani3
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani3x_width, Ani3x_height, (UBYTE*)Ani3x_bits);
+							var ani3 = BmpHelper.Get(BmpType.Ani3x);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani3.Width, ani3.Height, (UBYTE*)ani3.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1525,7 +1448,8 @@ namespace Ev3CoreUnsafe.Cui
                     case 11:
                         { // 700ms -> Ani4
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani4x_width, Ani4x_height, (UBYTE*)Ani4x_bits);
+							var ani4 = BmpHelper.Get(BmpType.Ani4x);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani4.Width, ani4.Height, (UBYTE*)ani4.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1535,7 +1459,8 @@ namespace Ev3CoreUnsafe.Cui
                     case 12:
                         { // 800ms -> Ani5
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani5x_width, Ani5x_height, (UBYTE*)Ani5x_bits);
+							var ani5 = BmpHelper.Get(BmpType.Ani5x);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani5.Width, ani5.Height, (UBYTE*)ani5.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1545,7 +1470,8 @@ namespace Ev3CoreUnsafe.Cui
                     default:
                         { // 900ms -> Ani6
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, Ani6x_width, Ani6x_height, (UBYTE*)Ani6x_bits);
+							var ani6 = BmpHelper.Get(BmpType.Ani6x);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani6.Width, ani6.Height, (UBYTE*)ani6.Data.AsPointer());
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled = 4;
@@ -1603,7 +1529,9 @@ namespace Ev3CoreUnsafe.Cui
             DATAF I;
             DATAF Slope;
 
-            I = GH.UiInstance.Ibatt + GH.UiInstance.Imotor;
+			var pop3 = BmpHelper.Get(BmpType.POP3);
+
+			I = GH.UiInstance.Ibatt + GH.UiInstance.Imotor;
 
             if (I > LOAD_BREAK_EVEN)
             {
@@ -1614,11 +1542,11 @@ namespace Ev3CoreUnsafe.Cui
                 Slope = LOAD_SLOPE_DOWN;
             }
 
-            GH.UiInstance.Iintegrated += (I - LOAD_BREAK_EVEN) * (Slope * (DATAF)Time / 1000.0);
+            GH.UiInstance.Iintegrated += (float)((I - LOAD_BREAK_EVEN) * (Slope * (DATAF)Time / 1000.0));
 
             if (GH.UiInstance.Iintegrated < 0.0)
             {
-                GH.UiInstance.Iintegrated = 0.0;
+                GH.UiInstance.Iintegrated = 0.0f;
             }
             if (GH.UiInstance.Iintegrated > LOAD_SHUTDOWN_FAIL)
             {
@@ -1674,7 +1602,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 case 2:
                     {
-                        LCDCopy((LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(GH.UiInstance.LcdSave));
+                        LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(LCD));
                         GH.UiInstance.PowerState++;
                     }
                     break;
@@ -1684,12 +1612,12 @@ namespace Ev3CoreUnsafe.Cui
                         X = 16;
                         Y = 52;
 
-                        GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X, Y, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+                        GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X, Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
 
-                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X + 48, Y + 10, LARGE_ICON, WARNSIGN);
-                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X + 72, Y + 10, LARGE_ICON, WARN_POWER);
-                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X + 5, Y + 39, X + 138, Y + 39);
-                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X + 56, Y + 40, LARGE_ICON, YES_SEL);
+                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X + 48), (short)(Y + 10), LARGE_ICON, WARNSIGN);
+                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X + 72), (short)(Y + 10), LARGE_ICON, WARN_POWER);
+                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X + 5), (short)(Y + 39), (short)(X + 138), (short)(Y + 39));
+                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X + 56), (short)(Y + 40), LARGE_ICON, YES_SEL);
                         GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
                         cUiButtonFlush();
                         GH.UiInstance.PowerState++;
@@ -1704,7 +1632,7 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 GH.UiInstance.ScreenBlocked = 0;
                             }
-                            LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), Unsafe.SizeOf<GH.UiInstance.LcdSafe>());
+                            LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
                             GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
                             GH.UiInstance.PowerState++;
                         }
@@ -1733,15 +1661,17 @@ namespace Ev3CoreUnsafe.Cui
             {
                 GH.UiInstance.TempTimer += CALL_INTERVAL;
                 GH.UiInstance.Tbatt = new_bat_temp(GH.UiInstance.Vbatt, (GH.UiInstance.Ibatt * (DATAF)1.1));
-                char Buffer[250];
+                sbyte* Buffer = CommonHelper.Pointer1d<sbyte>(250);
                 int BufferSize;
 
-                if (TempFile >= MIN_HANDLE)
-                {
-                    BufferSize = snprintf(Buffer, 250, "%8.1f,%9.6f,%9.6f,%11.6f\r\n", (float)GH.UiInstance.MilliSeconds / (float)1000, GH.UiInstance.Vbatt, GH.UiInstance.Ibatt, GH.UiInstance.Tbatt);
-                    write(TempFile, Buffer, BufferSize);
-                }
-            }
+				// TODO: wtf
+				//if (TempFile >= MIN_HANDLE)
+				//{
+				//    BufferSize = CommonHelper.snprintf(Buffer, 250, $"{CommonHelper.GetString((float)((float)GH.UiInstance.MilliSeconds / (float)1000), 8, 1)}, {CommonHelper.GetString(GH.UiInstance.Vbatt, 9, 6)}, {CommonHelper.GetString(GH.UiInstance.Ibatt, 9, 6)}, {CommonHelper.GetString(GH.UiInstance.Tbatt, 11, 6)}%11.6f\r\n");
+				//    write(TempFile, Buffer, BufferSize);
+				//}
+				GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
+			}
 
             if (GH.UiInstance.Tbatt >= TEMP_SHUTDOWN_WARNING)
             {
@@ -1787,14 +1717,14 @@ namespace Ev3CoreUnsafe.Cui
 
             GH.UiInstance.SleepTimer += Time;
 
-            if (GH.UiInstance.Activated & BUTTON_ALIVE)
+            if ((GH.UiInstance.Activated & BUTTON_ALIVE) != 0)
             {
                 GH.UiInstance.Activated &= ~BUTTON_ALIVE;
                 cUiAlive();
             }
             Timeout = (ULONG)GH.Lms.GetSleepMinutes();
 
-            if (Timeout)
+            if (Timeout != 0)
             {
                 if (GH.UiInstance.SleepTimer >= (Timeout * 60000L))
                 {
@@ -1810,8 +1740,9 @@ namespace Ev3CoreUnsafe.Cui
             DATA8 Tmp;
 
             GH.UiInstance.MilliSeconds += (ULONG)Time;
+			var pop3 = BmpHelper.Get(BmpType.POP3);
 
-            cUiUpdateButtons(Time);
+			cUiUpdateButtons((short)Time);
             cUiUpdateInput();
             cUiUpdateCnt();
 
@@ -1819,9 +1750,9 @@ namespace Ev3CoreUnsafe.Cui
             {
                 GH.UiInstance.UpdateStateTimer = GH.UiInstance.MilliSeconds;
 
-                if (!GH.UiInstance.Event)
+                if (GH.UiInstance.Event == 0)
                 {
-                    GH.UiInstance.Event = cComGetEvent();
+                    GH.UiInstance.Event = GH.Com.cComGetEvent();
                 }
 
                 switch (GH.UiInstance.UpdateState++)
@@ -1829,13 +1760,13 @@ namespace Ev3CoreUnsafe.Cui
                     case 0:
                         { //  50 mS
 
-                            if (GH.UiInstance.ReadyForWarnings)
+                            if (GH.UiInstance.ReadyForWarnings != 0)
                             {
                                 cUiCheckPower(400);
                             }
-                            if (GH.UiInstance.ReadyForWarnings)
+                            if (GH.UiInstance.ReadyForWarnings != 0)
                             {
-                                if (!GH.UiInstance.Accu)
+                                if (GH.UiInstance.Accu == 0)
                                 {
                                     cUiCheckTemp();
                                 }
@@ -1854,7 +1785,7 @@ namespace Ev3CoreUnsafe.Cui
                         { // 150 mS
 
                             cUiCheckAlive(400);
-                            if (GH.UiInstance.ReadyForWarnings)
+                            if (GH.UiInstance.ReadyForWarnings != 0)
                             {
                                 cUiCheckMemory();
                             }
@@ -1871,7 +1802,7 @@ namespace Ev3CoreUnsafe.Cui
                     case 4:
                         { // 250 mS
 
-                            if (GH.UiInstance.ReadyForWarnings)
+                            if (GH.UiInstance.ReadyForWarnings != 0)
                             {
                                 cUiCheckVoltage();
                             }
@@ -1907,10 +1838,10 @@ namespace Ev3CoreUnsafe.Cui
 
                 }
 
-                if (GH.UiInstance.Warning)
+                if (GH.UiInstance.Warning != 0)
                 { // Some warning present
 
-                    if (!GH.UiInstance.Warnlight)
+                    if (GH.UiInstance.Warnlight == 0)
                     { // If not on - turn orange light on
 
                         GH.UiInstance.Warnlight = 1;
@@ -1920,7 +1851,7 @@ namespace Ev3CoreUnsafe.Cui
                 else
                 { // No warning
 
-                    if (GH.UiInstance.Warnlight)
+                    if (GH.UiInstance.Warnlight != 0)
                     { // If orange light on - turn it off
 
                         GH.UiInstance.Warnlight = 0;
@@ -1934,18 +1865,18 @@ namespace Ev3CoreUnsafe.Cui
                 // Find warnings that has not been showed
                 Tmp = (sbyte)(Warning & ~GH.UiInstance.WarningShowed);
 
-                if (Tmp)
+                if (Tmp != 0)
                 { // Show popup
 
-                    if (!GH.UiInstance.ScreenBusy)
+                    if (GH.UiInstance.ScreenBusy == 0)
                     { // Wait on screen
 
                         if (GH.UiInstance.ScreenBlocked == 0)
                         {
-                            LCDCopy((LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(GH.UiInstance.LcdSave));
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+                            LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(LCD));
+                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
 
-                            if (Tmp & WARNING_TEMP)
+                            if ((Tmp & WARNING_TEMP) != 0)
                             {
                                 GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X1, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
                                 GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X2, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_POWER);
@@ -1954,7 +1885,7 @@ namespace Ev3CoreUnsafe.Cui
                             }
                             else
                             {
-                                if (Tmp & WARNING_CURRENT)
+                                if ((Tmp & WARNING_CURRENT) != 0)
                                 {
                                     GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X1, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
                                     GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X2, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_POWER);
@@ -1963,7 +1894,7 @@ namespace Ev3CoreUnsafe.Cui
                                 }
                                 else
                                 {
-                                    if (Tmp & WARNING_VOLTAGE)
+                                    if ((Tmp & WARNING_VOLTAGE) != 0)
                                     {
                                         GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
                                         GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_BATT);
@@ -1971,7 +1902,7 @@ namespace Ev3CoreUnsafe.Cui
                                     }
                                     else
                                     {
-                                        if (Tmp & WARNING_MEMORY)
+                                        if ((Tmp & WARNING_MEMORY) != 0)
                                         {
                                             GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
                                             GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, WARN_MEMORY);
@@ -1979,7 +1910,7 @@ namespace Ev3CoreUnsafe.Cui
                                         }
                                         else
                                         {
-                                            if (Tmp & WARNING_DSPSTAT)
+                                            if ((Tmp & WARNING_DSPSTAT) != 0)
                                             {
                                                 GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_ICON_X, vmPOP3_ABS_WARN_ICON_Y, LARGE_ICON, WARNSIGN);
                                                 GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_WARN_SPEC_ICON_X, vmPOP3_ABS_WARN_SPEC_ICON_Y, LARGE_ICON, PROGRAM_ERROR);
@@ -2003,40 +1934,40 @@ namespace Ev3CoreUnsafe.Cui
 
                 // Find warnings that have been showed but not confirmed
                 Tmp = GH.UiInstance.WarningShowed;
-                Tmp &= ~GH.UiInstance.WarningConfirmed;
+                Tmp &= (sbyte)~GH.UiInstance.WarningConfirmed;
 
-                if (Tmp)
+                if (Tmp != 0)
                 {
-                    if (cUiGetShortPress(ENTER_BUTTON))
+                    if (cUiGetShortPress(ENTER_BUTTON) != 0)
                     {
                         GH.UiInstance.ScreenBlocked = 0;
-                        LCDCopy((LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), Unsafe.SizeOf<GH.UiInstance.LcdSafe>());
+                        LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
                         GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
-                        if (Tmp & WARNING_TEMP)
+                        if ((Tmp & WARNING_TEMP) != 0)
                         {
                             GH.UiInstance.WarningConfirmed |= WARNING_TEMP;
                         }
                         else
                         {
-                            if (Tmp & WARNING_CURRENT)
+                            if ((Tmp & WARNING_CURRENT) != 0)
                             {
                                 GH.UiInstance.WarningConfirmed |= WARNING_CURRENT;
                             }
                             else
                             {
-                                if (Tmp & WARNING_VOLTAGE)
+                                if ((Tmp & WARNING_VOLTAGE) != 0)
                                 {
                                     GH.UiInstance.WarningConfirmed |= WARNING_VOLTAGE;
                                 }
                                 else
                                 {
-                                    if (Tmp & WARNING_MEMORY)
+                                    if ((Tmp & WARNING_MEMORY) != 0)
                                     {
                                         GH.UiInstance.WarningConfirmed |= WARNING_MEMORY;
                                     }
                                     else
                                     {
-                                        if (Tmp & WARNING_DSPSTAT)
+                                        if ((Tmp & WARNING_DSPSTAT) != 0)
                                         {
                                             GH.UiInstance.WarningConfirmed |= WARNING_DSPSTAT;
                                             GH.UiInstance.Warning &= ~WARNING_DSPSTAT;
@@ -2057,8 +1988,8 @@ namespace Ev3CoreUnsafe.Cui
                 Tmp &= GH.UiInstance.WarningShowed;
                 Tmp &= GH.UiInstance.WarningConfirmed;
 
-                GH.UiInstance.WarningShowed &= ~Tmp;
-                GH.UiInstance.WarningConfirmed &= ~Tmp;
+                GH.UiInstance.WarningShowed &= (sbyte)~Tmp;
+                GH.UiInstance.WarningConfirmed &= (sbyte)~Tmp;
             }
         }
 
@@ -2077,22 +2008,23 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 AvailableY;
             DATA16 UsedY;
 
-            pQ = &GH.UiInstance.Notify;
+			var pop3 = BmpHelper.Get(BmpType.POP3);
+			pQ = (NOTIFY*)Unsafe.AsPointer<NOTIFY>(ref GH.UiInstance.Notify);
 
             if (*pState == 0)
             {
                 *pState = 1;
                 (*pQ).ScreenStartX = X;
                 (*pQ).ScreenStartY = Y;
-                (*pQ).ScreenWidth = POP3_width;
-                (*pQ).ScreenHeight = POP3_height;
+                (*pQ).ScreenWidth = pop3.Width;
+                (*pQ).ScreenHeight = pop3.Height;
                 (*pQ).IconStartY = (short)((*pQ).ScreenStartY + 10);
                 (*pQ).IconWidth = GH.Lcd.dLcdGetIconWidth(LARGE_ICON);
                 (*pQ).IconHeight = GH.Lcd.dLcdGetIconHeight(LARGE_ICON);
                 (*pQ).IconSpaceX = (*pQ).IconWidth;
 
                 (*pQ).YesNoStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
-                (void)((*pQ).YesNoStartX -= ((*pQ).IconWidth + 8) / 2);
+                (*pQ).YesNoStartX -= (short)(((*pQ).IconWidth + 8) / 2);
                 (*pQ).YesNoStartX = cUiAlignX((*pQ).YesNoStartX);
                 (*pQ).YesNoStartY = (short)((*pQ).ScreenStartY + 40);
 
@@ -2115,20 +2047,20 @@ namespace Ev3CoreUnsafe.Cui
                     (*pQ).NoOfIcons++;
                 }
 
-              // Find no of text lines
-              (*pQ).TextLines = 0;
-                if (pText[0])
+                // Find no of text lines
+                (*pQ).TextLines = 0;
+                if (pText[0] != 0)
                 {
                     (*pQ).IconStartX = (short)((*pQ).ScreenStartX + 8);
                     (*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
 
                     AvailableX = (*pQ).ScreenWidth;
-                    AvailableX -= (((*pQ).IconStartX - (*pQ).ScreenStartX)) * 2;
+                    AvailableX -= (short)((((*pQ).IconStartX - (*pQ).ScreenStartX)) * 2);
 
-                    AvailableX -= (*pQ).NoOfIcons * (*pQ).IconSpaceX;
+                    AvailableX -= (short)((*pQ).NoOfIcons * (*pQ).IconSpaceX);
 
 
-                    (*pQ).NoOfChars = strlen((char*)pText);
+                    (*pQ).NoOfChars = (short)CommonHelper.strlen(pText);
 
 
                     (*pQ).Font = SMALL_FONT;
@@ -2145,7 +2077,7 @@ namespace Ev3CoreUnsafe.Cui
                             (*pQ).IconStartX += 32;
                         }
 
-                        snprintf((char*)(*pQ).TextLine[Line], MAX_NOTIFY_LINE_CHARS, "%s", pText);
+                        CommonHelper.snprintf((sbyte*)(*pQ).GetTextline(Line), MAX_NOTIFY_LINE_CHARS, CommonHelper.GetString(pText));
                         Line++;
                         (*pQ).TextLines++;
 
@@ -2163,18 +2095,18 @@ namespace Ev3CoreUnsafe.Cui
 
                         CharIn = 0;
 
-                        while ((pText[CharIn]) && (Line < MAX_NOTIFY_LINES))
+                        while ((pText[CharIn] != (sbyte)'\0') && (Line < MAX_NOTIFY_LINES))
                         {
                             CharOut = 0;
                             UsedX = 0;
-                            while ((pText[CharIn]) && (CharOut < MAX_NOTIFY_LINE_CHARS) && (UsedX < (AvailableX - (*pQ).FontWidth)))
+                            while ((pText[CharIn] != 0) && (CharOut < MAX_NOTIFY_LINE_CHARS) && (UsedX < (AvailableX - (*pQ).FontWidth)))
                             {
                                 Character = pText[CharIn];
                                 if (Character == '_')
                                 {
                                     Character = (sbyte)' ';
                                 }
-                              (*pQ).TextLine[Line][CharOut] = Character;
+                                (*pQ).GetTextline(Line)[CharOut] = Character;
                                 CharIn++;
                                 CharOut++;
                                 UsedX += (*pQ).FontWidth;
@@ -2188,11 +2120,11 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 CharIn++;
                             }
-                          (*pQ).TextLine[Line][CharOut] = 0;
+                            (*pQ).GetTextline(Line)[CharOut] = 0;
                             Line++;
                         }
 
-                      (*pQ).TextLines = Line;
+                        (*pQ).TextLines = Line;
 
                         (*pQ).TextStartX = (short)((*pQ).IconStartX + ((*pQ).NoOfIcons * (*pQ).IconSpaceX) + (*pQ).FontWidth);
                         (*pQ).TextSpaceY = (short)(GH.Lcd.dLcdGetFontHeight((*pQ).Font) + 1);
@@ -2215,22 +2147,22 @@ namespace Ev3CoreUnsafe.Cui
                 else
                 {
                     (*pQ).IconStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
-                    (void)((*pQ).IconStartX -= ((*pQ).IconWidth + 8) / 2);
-                    (void)((*pQ).IconStartX -= ((*pQ).NoOfIcons / 2) * (*pQ).IconWidth);
+                    (*pQ).IconStartX -= (short)(((*pQ).IconWidth + 8) / 2);
+                    (*pQ).IconStartX -= (short)(((*pQ).NoOfIcons / 2) * (*pQ).IconWidth);
                     (*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
                     (*pQ).TextStartY = (short)((*pQ).ScreenStartY + 8);
                 }
 
-              (*pQ).NeedUpdate = 1;
+                (*pQ).NeedUpdate = 1;
             }
 
 
-            if ((*pQ).NeedUpdate)
+            if ((*pQ).NeedUpdate != 0)
             {
                 //* UPDATE ***************************************************************************************************
                 (*pQ).NeedUpdate = 0;
 
-                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, POP3_width, POP3_height, (UBYTE*)POP3_bits);
+                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
 
                 X2 = (*pQ).IconStartX;
 
@@ -2254,7 +2186,7 @@ namespace Ev3CoreUnsafe.Cui
                 Y2 = (*pQ).TextStartY;
                 while (Line < (*pQ).TextLines)
                 {
-                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).TextStartX, Y2, (*pQ).Font, (*pQ).TextLine[Line]);
+                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).TextStartX, Y2, (*pQ).Font, (*pQ).GetTextline(Line));
                     Y2 += (*pQ).TextSpaceY;
                     Line++;
                 }
@@ -2267,7 +2199,7 @@ namespace Ev3CoreUnsafe.Cui
                 GH.UiInstance.ScreenBusy = 0;
             }
 
-            if (cUiGetShortPress(ENTER_BUTTON))
+            if (cUiGetShortPress(ENTER_BUTTON) != 0)
             {
                 cUiButtonFlush();
                 Result = OK;
@@ -2284,14 +2216,15 @@ namespace Ev3CoreUnsafe.Cui
             TQUESTION* pQ;
             DATA16 Inc;
 
-            pQ = &GH.UiInstance.Question;
+            pQ = (TQUESTION*)Unsafe.AsPointer<TQUESTION>(ref GH.UiInstance.Question);
+			var pop3 = BmpHelper.Get(BmpType.POP3);
 
-            Inc = cUiGetHorz();
+			Inc = cUiGetHorz();
             if (Inc != 0)
             {
                 (*pQ).NeedUpdate = 1;
 
-                *pAnswer += Inc;
+                *pAnswer += (sbyte)Inc;
 
                 if (*pAnswer > 1)
                 {
@@ -2328,14 +2261,14 @@ namespace Ev3CoreUnsafe.Cui
             }
 
 
-            if ((*pQ).NeedUpdate)
+            if ((*pQ).NeedUpdate != 0)
             {
                 //* UPDATE ***************************************************************************************************
                 (*pQ).NeedUpdate = 0;
 
-                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, POP3_width, POP3_height, (UBYTE*)POP3_bits);
-                (*pQ).ScreenWidth = POP3_width;
-                (*pQ).ScreenHeight = POP3_height;
+                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
+                (*pQ).ScreenWidth = pop3.Width;
+                (*pQ).ScreenHeight = pop3.Height;
 
                 (*pQ).IconStartX = (short)((*pQ).ScreenStartX + ((*pQ).ScreenWidth / 2));
                 if ((*pQ).NoOfIcons > 1)
@@ -2344,7 +2277,7 @@ namespace Ev3CoreUnsafe.Cui
                 }
                 else
                 {
-                    (*pQ).IconStartX -= (*pQ).IconWidth / 2;
+                    (*pQ).IconStartX -= (short)((*pQ).IconWidth / 2);
                 }
                 (*pQ).IconStartX = cUiAlignX((*pQ).IconStartX);
                 (*pQ).IconSpaceX = (*pQ).IconWidth;
@@ -2372,7 +2305,7 @@ namespace Ev3CoreUnsafe.Cui
                     case 2:
                         {
                             GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX, (*pQ).IconStartY, LARGE_ICON, Icon1);
-                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX + (*pQ).IconSpaceX, (*pQ).IconStartY, LARGE_ICON, Icon2);
+                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pQ).IconStartX + (*pQ).IconSpaceX), (*pQ).IconStartY, LARGE_ICON, Icon2);
                         }
                         break;
 
@@ -2381,12 +2314,12 @@ namespace Ev3CoreUnsafe.Cui
                 if (*pAnswer == 0)
                 {
                     GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, NO_SEL);
-                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, LARGE_ICON, YES_NOTSEL);
+                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pQ).YesNoStartX + (*pQ).YesNoSpaceX), (*pQ).YesNoStartY, LARGE_ICON, YES_NOTSEL);
                 }
                 else
                 {
                     GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX, (*pQ).YesNoStartY, LARGE_ICON, NO_NOTSEL);
-                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).YesNoStartX + (*pQ).YesNoSpaceX, (*pQ).YesNoStartY, LARGE_ICON, YES_SEL);
+                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pQ).YesNoStartX + (*pQ).YesNoSpaceX), (*pQ).YesNoStartY, LARGE_ICON, YES_SEL);
                 }
 
                 GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).LineStartX, (*pQ).LineStartY, (*pQ).LineEndX, (*pQ).LineStartY);
@@ -2394,13 +2327,13 @@ namespace Ev3CoreUnsafe.Cui
                 cUiUpdateLcd();
                 GH.UiInstance.ScreenBusy = 0;
             }
-            if (cUiGetShortPress(ENTER_BUTTON))
+            if (cUiGetShortPress(ENTER_BUTTON) != 0)
             {
                 cUiButtonFlush();
                 Result = OK;
                 *pState = 0;
             }
-            if (cUiGetShortPress(BACK_BUTTON))
+            if (cUiGetShortPress(BACK_BUTTON) != 0)
             {
                 cUiButtonFlush();
                 Result = OK;
@@ -2422,15 +2355,16 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 Loop;
             DATA8 Icon;
 
-            pQ = &GH.UiInstance.IconQuestion;
+			var pop2 = BmpHelper.Get(BmpType.POP2);
+			pQ = (IQUESTION*)Unsafe.AsPointer<IQUESTION>(ref GH.UiInstance.IconQuestion);
 
-            if (*pState == 0)
+			if (*pState == 0)
             {
                 *pState = 1;
                 (*pQ).ScreenStartX = X;
                 (*pQ).ScreenStartY = Y;
-                (*pQ).ScreenWidth = POP2_width;
-                (*pQ).ScreenHeight = POP2_height;
+                (*pQ).ScreenWidth = pop2.Width;
+                (*pQ).ScreenHeight = pop2.Height;
                 (*pQ).IconWidth = GH.Lcd.dLcdGetIconWidth(LARGE_ICON);
                 (*pQ).IconHeight = GH.Lcd.dLcdGetIconHeight(LARGE_ICON);
                 (*pQ).Frame = 2;
@@ -2439,16 +2373,16 @@ namespace Ev3CoreUnsafe.Cui
                 (*pQ).PointerX = 0;
 
                 TmpIcons = (*pQ).Icons;
-                while (TmpIcons)
+                while (TmpIcons != 0)
                 {
-                    if (TmpIcons & 1)
+                    if ((TmpIcons & 1) != 0)
                     {
                         (*pQ).NoOfIcons++;
                     }
                     TmpIcons >>= 1;
                 }
 
-                if ((*pQ).NoOfIcons)
+                if ((*pQ).NoOfIcons != 0)
                 {
                     (*pQ).IconStartY = (short)((*pQ).ScreenStartY + (((*pQ).ScreenHeight - (*pQ).IconHeight) / 2));
 
@@ -2467,16 +2401,16 @@ namespace Ev3CoreUnsafe.Cui
                     (*pQ).SelectSpaceX = (*pQ).IconSpaceX;
                 }
 
-                printf("Shown icons %d -> 0x%08X\r\n", (*pQ).NoOfIcons, (*pQ).Icons);
+                GH.printf($"Shown icons {(*pQ).NoOfIcons} -> 0x{(*pQ).Icons}\r\n");
 
                 (*pQ).NeedUpdate = 1;
             }
 
-            if ((*pQ).NoOfIcons)
+            if ((*pQ).NoOfIcons != 0)
             {
                 // Check for move pointer
                 Tmp = cUiGetHorz();
-                if (Tmp)
+                if (Tmp != 0)
                 {
                     (*pQ).PointerX += Tmp;
 
@@ -2495,14 +2429,14 @@ namespace Ev3CoreUnsafe.Cui
                 }
             }
 
-            if ((*pQ).NeedUpdate)
+            if ((*pQ).NeedUpdate != 0)
             {
                 //* UPDATE ***************************************************************************************************
                 (*pQ).NeedUpdate = 0;
 
-                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, POP2_width, POP2_height, (UBYTE*)POP2_bits);
-                (*pQ).ScreenWidth = POP2_width;
-                (*pQ).ScreenHeight = POP2_height;
+				GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop2.Width, pop2.Height, (UBYTE*)pop2.Data.AsPointer());
+                (*pQ).ScreenWidth = pop2.Width;
+                (*pQ).ScreenHeight = pop2.Height;
 
                 // Show icons
                 Loop = 0;
@@ -2510,27 +2444,27 @@ namespace Ev3CoreUnsafe.Cui
                 TmpIcons = (*pQ).Icons;
                 while (Loop < (*pQ).NoOfIcons)
                 {
-                    while (!(TmpIcons & 1))
+                    while ((TmpIcons & 1) == 0)
                     {
                         Icon++;
                         TmpIcons >>= 1;
                     }
-                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).IconStartX + (*pQ).IconSpaceX * Loop, (*pQ).IconStartY, LARGE_ICON, Icon);
+                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pQ).IconStartX + (*pQ).IconSpaceX * Loop), (*pQ).IconStartY, LARGE_ICON, Icon);
                     Loop++;
                     Icon++;
                     TmpIcons >>= 1;
                 }
 
                 // Show selection
-                GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pQ).SelectStartX + (*pQ).SelectSpaceX * (*pQ).PointerX, (*pQ).SelectStartY, (*pQ).SelectWidth, (*pQ).SelectHeight);
+                GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)((*pQ).SelectStartX + (*pQ).SelectSpaceX * (*pQ).PointerX), (*pQ).SelectStartY, (*pQ).SelectWidth, (*pQ).SelectHeight);
 
                 // Update screen
                 cUiUpdateLcd();
                 GH.UiInstance.ScreenBusy = 0;
             }
-            if (cUiGetShortPress(ENTER_BUTTON))
+            if (cUiGetShortPress(ENTER_BUTTON) != 0)
             {
-                if ((*pQ).NoOfIcons)
+                if ((*pQ).NoOfIcons != 0)
                 {
                     Mask = 0x00000001;
                     TmpIcons = (*pQ).Icons;
@@ -2538,13 +2472,13 @@ namespace Ev3CoreUnsafe.Cui
 
                     do
                     {
-                        if (TmpIcons & Mask)
+                        if ((TmpIcons & Mask) != 0)
                         {
                             Loop--;
                         }
                         Mask <<= 1;
                     }
-                    while (Loop && Mask);
+                    while ((Loop != 0 && Mask != 0));
                     Mask >>= 1;
                     *pIcons = Mask;
                 }
@@ -2555,9 +2489,9 @@ namespace Ev3CoreUnsafe.Cui
                 cUiButtonFlush();
                 Result = OK;
                 *pState = 0;
-                printf("Selecting icon %d -> 0x%08X\r\n", (*pQ).PointerX, *pIcons);
+                GH.printf($"Selecting icon {(*pQ).PointerX} -> 0x{*pIcons}\r\n");
             }
-            if (cUiGetShortPress(BACK_BUTTON))
+            if (cUiGetShortPress(BACK_BUTTON) != 0)
             {
                 *pIcons = 0;
                 cUiButtonFlush();
@@ -2582,44 +2516,44 @@ namespace Ev3CoreUnsafe.Cui
             DATA8 TmpChar;
             DATA8 SelectedChar = 0;
 
-            //            Value    Marking
-            //  table  >  0x20  -> normal rect
-            //  table  =  0x20  -> spacebar
-            //  table  =  0     -> end
-            //  table  =  0x01  -> num
-            //  table  =  0x02  -> cap
-            //  table  =  0x03  -> non cap
-            //  table  =  0x04  -> big cap
-            //  table  =  0x08  -> backspace
-            //  table  =  0x0D  -> enter
-            //
+			//            Value    Marking
+			//  table  >  0x20  -> normal rect
+			//  table  =  0x20  -> spacebar
+			//  table  =  0     -> end
+			//  table  =  0x01  -> num
+			//  table  =  0x02  -> cap
+			//  table  =  0x03  -> non cap
+			//  table  =  0x04  -> big cap
+			//  table  =  0x08  -> backspace
+			//  table  =  0x0D  -> enter
+			//
 
 
-            DATA8 KeyboardLayout[MAX_KEYB_DEEPT][MAX_KEYB_HEIGHT][MAX_KEYB_WIDTH] =
-  {
-                {
-                    { 'Q','W','E','R','T','Y','U','I','O','P',  0x08,0x00 },
-      { 0x03,'A','S','D','F','G','H','J','K','L',  0x0D,0x00 },
-      { 0x01,'Z','X','C','V','B','N','M',0x0D,0x0D,0x0D,0x00 },
-      { ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',  0x0D,0x00 }
-                },
-    {
-                    { 'q','w','e','r','t','y','u','i','o','p',  0x08,0x00 },
-      { 0x02,'a','s','d','f','g','h','j','k','l',  0x0D,0x00 },
-      { 0x01,'z','x','c','v','b','n','m',0x0D,0x0D,0x0D,0x00 },
-      { ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',  0x0D,0x00 }
-                },
-    {
-                    { '1','2','3','4','5','6','7','8','9','0',  0x08,0x00 },
-      { 0x04,'+','-','=','<','>','/','\\','*',':', 0x0D,0x00 },
-      { 0x04,'(',')','_','.','@','!','?',0x0D,0x0D,0x0D,0x00 },
-      { ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',  0x0D,0x00 }
-                }
-            };
+			DATA8[][][] KeyboardLayout = new DATA8[MAX_KEYB_DEEPT][][];
+			DATA8[][] lay1 = new DATA8[MAX_KEYB_HEIGHT][];
+			DATA8[][] lay2 = new DATA8[MAX_KEYB_HEIGHT][];
+			DATA8[][] lay3 = new DATA8[MAX_KEYB_HEIGHT][];
 
-            pK = &GH.UiInstance.Keyboard;
+			lay1[0] = new DATA8[MAX_KEYB_WIDTH] { (DATA8)'Q', (DATA8)'W', (DATA8)'E', (DATA8)'R', (DATA8)'T', (DATA8)'Y', (DATA8)'U', (DATA8)'I', (DATA8)'O', (DATA8)'P', 0x08, 0x00 };
+			lay1[1] = new DATA8[MAX_KEYB_WIDTH] { 0x03, (DATA8)'A', (DATA8)'S', (DATA8)'D', (DATA8)'F', (DATA8)'G', (DATA8)'H', (DATA8)'J', (DATA8)'K', (DATA8)'L', 0x0D, 0x00 };
+			lay1[2] = new DATA8[MAX_KEYB_WIDTH] { 0x01, (DATA8)'Z', (DATA8)'X', (DATA8)'C', (DATA8)'V', (DATA8)'B', (DATA8)'N', (DATA8)'M', 0x0D, 0x0D, 0x0D, 0x00 };
+			lay1[3] = new DATA8[MAX_KEYB_WIDTH] { (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', 0x0D, 0x00 };
 
-            if (*pCharSet != 0)
+			lay2[0] = new DATA8[MAX_KEYB_WIDTH] { (DATA8)'q', (DATA8)'w', (DATA8)'e', (DATA8)'r', (DATA8)'t', (DATA8)'y', (DATA8)'u', (DATA8)'i', (DATA8)'o', (DATA8)'p', 0x08, 0x00 };
+			lay2[1] = new DATA8[MAX_KEYB_WIDTH] { 0x03, (DATA8)'a', (DATA8)'s', (DATA8)'d', (DATA8)'f', (DATA8)'g', (DATA8)'h', (DATA8)'j', (DATA8)'k', (DATA8)'l', 0x0D, 0x00 };
+			lay2[2] = new DATA8[MAX_KEYB_WIDTH] { 0x01, (DATA8)'z', (DATA8)'x', (DATA8)'c', (DATA8)'v', (DATA8)'b', (DATA8)'n', (DATA8)'m', 0x0D, 0x0D, 0x0D, 0x00 };
+			lay2[3] = new DATA8[MAX_KEYB_WIDTH] { (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', 0x0D, 0x00 };
+
+			lay3[0] = new DATA8[MAX_KEYB_WIDTH] { (DATA8)'1', (DATA8)'2', (DATA8)'3', (DATA8)'4', (DATA8)'5', (DATA8)'6', (DATA8)'7', (DATA8)'8', (DATA8)'9', (DATA8)'0', 0x08, 0x00 };
+			lay3[1] = new DATA8[MAX_KEYB_WIDTH] { 0x04, (DATA8)'+', (DATA8)'-', (DATA8)'=', (DATA8)'<', (DATA8)'>', (DATA8)'/', (DATA8)'\\', (DATA8)'*', (DATA8)':', 0x0D, 0x00 };
+			lay3[2] = new DATA8[MAX_KEYB_WIDTH] { 0x04, (DATA8)'(', (DATA8)')', (DATA8)'_', (DATA8)'.', (DATA8)'@', (DATA8)'!', (DATA8)'?', 0x0D, 0x0D, 0x0D, 0x00 };
+			lay3[3] = new DATA8[MAX_KEYB_WIDTH] { (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', (DATA8)' ', 0x0D, 0x00 };
+
+			KeyboardLayout[0] = lay1; KeyboardLayout[1] = lay2; KeyboardLayout[2] = lay3;
+
+			pK = (KEYB*)Unsafe.AsPointer<KEYB>(ref GH.UiInstance.Keyboard);
+
+			if (*pCharSet != 0)
             {
                 (*pK).CharSet = *pCharSet;
                 *pCharSet = 0;
@@ -2628,13 +2562,13 @@ namespace Ev3CoreUnsafe.Cui
 
                 if ((Icon >= 0) && (Icon < N_ICON_NOS))
                 {
-                    (*pK).IconStartX = cUiAlignX((*pK).ScreenStartX + 7);
+                    (*pK).IconStartX = cUiAlignX((short)((*pK).ScreenStartX + 7));
                     (*pK).IconStartY = (short)((*pK).ScreenStartY + 4);
                     (*pK).TextStartX = (short)((*pK).IconStartX + GH.Lcd.dLcdGetIconWidth(NORMAL_ICON));
                 }
                 else
                 {
-                    (*pK).TextStartX = cUiAlignX((*pK).ScreenStartX + 9);
+                    (*pK).TextStartX = cUiAlignX((short)((*pK).ScreenStartX + 9));
                 }
               (*pK).TextStartY = (short)((*pK).ScreenStartY + 7);
                 (*pK).StringStartX = (short)((*pK).ScreenStartX + 8);
@@ -2651,7 +2585,7 @@ namespace Ev3CoreUnsafe.Cui
                 (*pK).NeedUpdate = 1;
             }
 
-            Width = strlen((char*)KeyboardLayout[(*pK).Layout][(*pK).PointerY]) - 1;
+            Width = (short)(CommonHelper.strlen(KeyboardLayout[(*pK).Layout][(*pK).PointerY].AsPointer()) - 1);
             Height = MAX_KEYB_HEIGHT - 1;
 
             Inc = cUiGetHorz();
@@ -2678,12 +2612,12 @@ namespace Ev3CoreUnsafe.Cui
 
             TmpChar = KeyboardLayout[(*pK).Layout][(*pK).PointerY][(*pK).PointerX];
 
-            if (cUiGetShortPress(BACK_BUTTON))
+            if (cUiGetShortPress(BACK_BUTTON) != 0)
             {
                 SelectedChar = 0x0D;
                 pAnswer[0] = 0;
             }
-            if (cUiGetShortPress(ENTER_BUTTON))
+            if (cUiGetShortPress(ENTER_BUTTON) != 0)
             {
                 SelectedChar = TmpChar;
 
@@ -2715,8 +2649,8 @@ namespace Ev3CoreUnsafe.Cui
 
                     case 0x08:
                         {
-                            Tmp = (DATA16)strlen((char*)pAnswer);
-                            if (Tmp)
+                            Tmp = (DATA16)CommonHelper.strlen(pAnswer);
+                            if (Tmp != 0)
                             {
                                 Tmp--;
                                 pAnswer[Tmp] = 0;
@@ -2733,7 +2667,7 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             if (GH.Lms.ValidateChar(&SelectedChar, (*pK).CharSet) == OK)
                             {
-                                Tmp = (DATA16)strlen((char*)pAnswer);
+                                Tmp = (DATA16)CommonHelper.strlen(pAnswer);
                                 pAnswer[Tmp] = SelectedChar;
                                 if (++Tmp >= Lng)
                                 {
@@ -2759,7 +2693,7 @@ namespace Ev3CoreUnsafe.Cui
                 (*pK).NeedUpdate = 1;
             }
 
-            if ((*pK).NeedUpdate)
+            if ((*pK).NeedUpdate != 0)
             {
                 //* UPDATE ***************************************************************************************************
                 (*pK).NeedUpdate = 0;
@@ -2768,19 +2702,22 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     case 0:
                         {
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyboardc_width, keyboardc_height, (UBYTE*)keyboardc_bits);
+							var keyc = BmpHelper.Get(BmpType.KeyboardCap);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyc.Width, keyc.Height, (UBYTE*)keyc.Data.AsPointer());
                         }
                         break;
 
                     case 1:
                         {
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyboards_width, keyboards_height, (UBYTE*)keyboards_bits);
+							var keys = BmpHelper.Get(BmpType.KeyboardSmp);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keys.Width, keys.Height, (UBYTE*)keys.Data.AsPointer());
                         }
                         break;
 
                     case 2:
                         {
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyboardn_width, keyboardn_height, (UBYTE*)keyboardn_bits);
+							var keyn = BmpHelper.Get(BmpType.KeyboardNum);
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyn.Width, keyn.Height, (UBYTE*)keyn.Data.AsPointer());
                         }
                         break;
 
@@ -2789,21 +2726,21 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pK).IconStartX, (*pK).IconStartY, NORMAL_ICON, Icon);
                 }
-                if (pText[0])
+                if (pText[0] != 0)
                 {
                     GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pK).TextStartX, (*pK).TextStartY, SMALL_FONT, pText);
                 }
 
 
                 X4 = 0;
-                X3 = strlen((char*)pAnswer);
+                X3 = (short)CommonHelper.strlen(pAnswer);
                 if (X3 > 15)
                 {
                     X4 = (short)(X3 - 15);
                 }
 
                 GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX, (*pK).StringStartY, NORMAL_FONT, &pAnswer[X4]);
-                dLcdDrawChar((*GH.UiInstance.pLcd).Lcd, Color, (*pK).StringStartX + (X3 - X4) * 8, (*pK).StringStartY, NORMAL_FONT, '_');
+                GH.Lcd.dLcdDrawChar((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pK).StringStartX + (X3 - X4) * 8), (*pK).StringStartY, NORMAL_FONT, (sbyte)'_');
 
 
 
@@ -2816,19 +2753,19 @@ namespace Ev3CoreUnsafe.Cui
                     case 0x02:
                     case 0x03:
                         {
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX - 8, SY, (*pK).KeybWidth + 8, (*pK).KeybHeight);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)(SX - 8), SY, (short)((*pK).KeybWidth + 8), (*pK).KeybHeight);
                         }
                         break;
 
                     case 0x04:
                         {
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX - 8, (*pK).KeybStartY + 1 * (*pK).KeybSpaceY, (*pK).KeybWidth + 8, (*pK).KeybHeight * 2 + 1);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)(SX - 8), (short)((*pK).KeybStartY + 1 * (*pK).KeybSpaceY), (short)((*pK).KeybWidth + 8), (short)((*pK).KeybHeight * 2 + 1));
                         }
                         break;
 
                     case 0x08:
                         {
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX + 2, SY, (*pK).KeybWidth + 5, (*pK).KeybHeight);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)(SX + 2), SY, (short)((*pK).KeybWidth + 5), (*pK).KeybHeight);
                         }
                         break;
 
@@ -2836,22 +2773,22 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             SX = (short)((*pK).KeybStartX + 112);
                             SY = (short)((*pK).KeybStartY + 1 * (*pK).KeybSpaceY);
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX, SY, (*pK).KeybWidth + 5, (*pK).KeybSpaceY + 1);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX, SY, (short)((*pK).KeybWidth + 5), (short)((*pK).KeybSpaceY + 1));
                             SX = (short)((*pK).KeybStartX + 103);
                             SY = (short)((*pK).KeybStartY + 1 + 2 * (*pK).KeybSpaceY);
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX, SY, (*pK).KeybWidth + 14, (*pK).KeybSpaceY * 2 - 4);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX, SY, (short)((*pK).KeybWidth + 14), (short)((*pK).KeybSpaceY * 2 - 4));
                         }
                         break;
 
                     case 0x20:
                         {
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pK).KeybStartX + 11, SY + 1, (*pK).KeybWidth + 68, (*pK).KeybHeight - 3);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)((*pK).KeybStartX + 11), (short)(SY + 1), (short)((*pK).KeybWidth + 68), (short)((*pK).KeybHeight - 3));
                         }
                         break;
 
                     default:
                         {
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, SX + 1, SY, (*pK).KeybWidth, (*pK).KeybHeight);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)(SX + 1), SY, (*pK).KeybWidth, (*pK).KeybHeight);
                         }
                         break;
 
@@ -2920,51 +2857,51 @@ namespace Ev3CoreUnsafe.Cui
             {
                 case 5:
                     {
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                     }
                     break;
 
                 case 6:
                     {
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 4, Tmp);
-                        Tmp++;
-                        Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 4), Tmp);
                         Tmp++;
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 1, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 4, Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                         Tmp++;
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 2, Tmp);
-                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, X + 3, Tmp);
+                        Tmp++;
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 1), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 4), Tmp);
+                        Tmp++;
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 2), Tmp);
+                        GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + 3), Tmp);
                     }
                     break;
 
@@ -3045,7 +2982,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     Result = OK;
                     *pType = 0;
-                    printf("Browser interrupted\r\n");
+                    GH.printf("Browser interrupted\r\n");
                 }
             }
 
@@ -3068,7 +3005,7 @@ namespace Ev3CoreUnsafe.Cui
                 (*pB).ObjId = 0;
                 //    pAnswer[0]          =  0;
                 *pType = 0;
-                printf("Restarting browser\r\n");
+                GH.printf("Restarting browser\r\n");
             }
 
             if (((*pB).PrgId == 0) && ((*pB).ObjId == 0))
@@ -3098,7 +3035,7 @@ namespace Ev3CoreUnsafe.Cui
                 (*pB).IconStartY = (short)((*pB).ScreenStartY + (*pB).LineSpace / 2);
 
                 // calculate start of text
-                (*pB).TextStartX = cUiAlignX((*pB).ScreenStartX + (*pB).IconWidth);
+                (*pB).TextStartX = cUiAlignX((short)((*pB).ScreenStartX + (*pB).IconWidth));
                 (*pB).TextStartY = (short)((*pB).ScreenStartY + ((*pB).LineHeight - (*pB).CharHeight) / 2);
 
                 // Calculate selection barBrowser
@@ -3115,7 +3052,7 @@ namespace Ev3CoreUnsafe.Cui
                 (*pB).ScrollHeight = (short)((*pB).ScreenHeight - 2);
                 (*pB).ScrollSpan = (short)((*pB).ScrollHeight - (*pB).NobHeight);
 
-                strncpy((char*)(*pB).TopFolder, (char*)pAnswer, MAX_FILENAME_SIZE);
+                CommonHelper.strncpy((*pB).TopFolder, pAnswer, MAX_FILENAME_SIZE);
 
                 (*pB).PrgId = PrgId;
                 (*pB).ObjId = ObjId;
@@ -3135,16 +3072,16 @@ namespace Ev3CoreUnsafe.Cui
                 //* CTRL *****************************************************************************************************
 
 
-                if (GH.UiInstance.UiUpdate)
+                if (GH.UiInstance.UiUpdate != 0)
                 {
                     GH.UiInstance.UiUpdate = 0;
-                    printf("Refreshing browser\r\n");
+                    GH.printf("Refreshing browser\r\n");
 
-                    if ((*pB).hFiles)
+                    if ((*pB).hFiles != 0)
                     {
                         GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
                     }
-                    if ((*pB).hFolders)
+                    if ((*pB).hFolders != 0)
                     {
                         GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
                     }
@@ -3160,31 +3097,31 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 if (GH.Memory.cMemoryOpenFolder(PrgId, TYPE_FOLDER, (*pB).TopFolder, &(*pB).hFolders) == OK)
                                 {
-                                    printf("\r\n%d %d Opening browser in %s\r\n", PrgId, ObjId, (char*)(*pB).TopFolder);
+                                    GH.printf($"\r\n{PrgId} {ObjId} Opening browser in {CommonHelper.GetString((*pB).TopFolder)}\r\n");
                                     //******************************************************************************************************
-                                    if ((*pB).OpenFolder)
+                                    if ((*pB).OpenFolder != 0)
                                     {
                                         GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, (*pB).OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).SubFolder, &TmpType);
-                                        printf("Open  folder %3d (%s)\r\n", (*pB).OpenFolder, (*pB).SubFolder);
-                                        if (strcmp((char*)(*pB).SubFolder, SDCARD_FOLDER) == 0)
+                                        GH.printf($"Open  folder {(*pB).OpenFolder} ({CommonHelper.GetString((*pB).SubFolder)})\r\n");
+                                        if (CommonHelper.strcmp((*pB).SubFolder, SDCARD_FOLDER.AsSbytePointer()) == 0)
                                         {
                                             Item = (*pB).ItemPointer;
                                             GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
                                             Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
                                             *pType = TYPE_SDCARD;
 
-                                            snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                                            CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                         }
                                         else
                                         {
-                                            if (strcmp((char*)(*pB).SubFolder, USBSTICK_FOLDER) == 0)
+                                            if (CommonHelper.strcmp((*pB).SubFolder, USBSTICK_FOLDER.AsSbytePointer()) == 0)
                                             {
                                                 Item = (*pB).ItemPointer;
                                                 GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
                                                 Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
                                                 *pType = TYPE_USBSTICK;
 
-                                                snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                                                CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                             }
                                             else
                                             {
@@ -3197,7 +3134,7 @@ namespace Ev3CoreUnsafe.Cui
                                 }
                                 else
                                 {
-                                    printf("\r\n%d %d Open error\r\n", PrgId, ObjId);
+                                    GH.printf($"\r\n{PrgId} {ObjId} Open error\r\n");
                                     (*pB).PrgId = 0;
                                     (*pB).ObjId = 0;
                                 }
@@ -3213,12 +3150,12 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 if (GH.Memory.cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, (*pB).TopFolder, &(*pB).hFiles) == OK)
                                 {
-                                    printf("\r\n%d %d Opening browser in %s\r\n", PrgId, ObjId, (char*)(*pB).TopFolder);
+                                    GH.printf($"\r\n{PrgId} {ObjId} Opening browser in {CommonHelper.GetString((*pB).TopFolder)}\r\n");
 
                                 }
                                 else
                                 {
-                                    printf("\r\n%d %d Open error\r\n", PrgId, ObjId);
+                                    GH.printf($"\r\n{PrgId} {ObjId} Open error\r\n");
                                     (*pB).PrgId = 0;
                                     (*pB).ObjId = 0;
                                 }
@@ -3228,7 +3165,7 @@ namespace Ev3CoreUnsafe.Cui
                     }
                 }
 
-                if (strstr((char*)(*pB).SubFolder, SDCARD_FOLDER) != null)
+                if (CommonHelper.strstr((*pB).SubFolder, SDCARD_FOLDER.AsSbytePointer()) != null)
                 {
                     (*pB).Sdcard = 1;
                 }
@@ -3237,7 +3174,7 @@ namespace Ev3CoreUnsafe.Cui
                     (*pB).Sdcard = 0;
                 }
 
-                if (strstr((char*)(*pB).SubFolder, USBSTICK_FOLDER) != null)
+                if (CommonHelper.strstr((*pB).SubFolder, USBSTICK_FOLDER.AsSbytePointer()) != null)
                 {
                     (*pB).Usbstick = 1;
                 }
@@ -3256,7 +3193,7 @@ namespace Ev3CoreUnsafe.Cui
                             TmpResult = GH.Memory.cMemoryGetFolderItems((*pB).PrgId, (*pB).hFolders, &(*pB).Folders);
 
                             // Collect files in folder
-                            if (((*pB).OpenFolder) && (TmpResult == OK))
+                            if (((*pB).OpenFolder != 0) && (TmpResult == OK))
                             {
                                 TmpResult = GH.Memory.cMemoryGetFolderItems((*pB).PrgId, (*pB).hFiles, &(*pB).Files);
                             }
@@ -3279,17 +3216,17 @@ namespace Ev3CoreUnsafe.Cui
 
                 if (((*pB).OpenFolder != 0) && ((*pB).OpenFolder == (*pB).ItemPointer))
                 {
-                    if (cUiGetShortPress(BACK_BUTTON))
+                    if (cUiGetShortPress(BACK_BUTTON) != 0)
                     {
                         // Close folder
-                        printf("Close folder %3d\r\n", (*pB).OpenFolder);
+                        GH.printf($"Close folder {(*pB).OpenFolder}\r\n");
 
                         GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
                         if ((*pB).ItemPointer > (*pB).OpenFolder)
                         {
                             (*pB).ItemPointer -= (*pB).Files;
                         }
-                      (*pB).OpenFolder = 0;
+                        (*pB).OpenFolder = 0;
                         (*pB).Files = 0;
                     }
                 }
@@ -3298,21 +3235,21 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     if ((*pB).OpenFolder == 0)
                     {
-                        if (cUiGetShortPress(BACK_BUTTON))
+                        if (cUiGetShortPress(BACK_BUTTON) != 0)
                         {
                             // Collapse sdcard
-                            printf("Collapse sdcard\r\n");
-                            if ((*pB).hFiles)
+                            GH.printf("Collapse sdcard\r\n");
+                            if ((*pB).hFiles != 0)
                             {
                                 GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
                             }
-                            if ((*pB).hFolders)
+                            if ((*pB).hFolders != 0)
                             {
                                 GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
                             }
-                          (*pB).PrgId = 0;
+                            (*pB).PrgId = 0;
                             (*pB).ObjId = 0;
-                            strcpy((char*)pAnswer, vmPRJS_DIR);
+                            CommonHelper.strcpy(pAnswer, vmPRJS_DIR.AsSbytePointer());
                             *pType = 0;
                             (*pB).SubFolder[0] = 0;
                         }
@@ -3322,21 +3259,21 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     if ((*pB).OpenFolder == 0)
                     {
-                        if (cUiGetShortPress(BACK_BUTTON))
+                        if (cUiGetShortPress(BACK_BUTTON) != 0)
                         {
                             // Collapse usbstick
-                            printf("Collapse usbstick\r\n");
-                            if ((*pB).hFiles)
+                            GH.printf("Collapse usbstick\r\n");
+                            if ((*pB).hFiles != 0)
                             {
                                 GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
                             }
-                            if ((*pB).hFolders)
+                            if ((*pB).hFolders != 0)
                             {
                                 GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
                             }
-                          (*pB).PrgId = 0;
+                            (*pB).PrgId = 0;
                             (*pB).ObjId = 0;
-                            strcpy((char*)pAnswer, vmPRJS_DIR);
+                            CommonHelper.strcpy(pAnswer, vmPRJS_DIR.AsSbytePointer());
                             *pType = 0;
                             (*pB).SubFolder[0] = 0;
                         }
@@ -3348,10 +3285,10 @@ namespace Ev3CoreUnsafe.Cui
                     (*pB).NeedUpdate = 1;
                 }
 
-                if (cUiGetShortPress(ENTER_BUTTON))
+                if (cUiGetShortPress(ENTER_BUTTON) != 0)
                 {
                     (*pB).OldFiles = 0;
-                    if ((*pB).OpenFolder)
+                    if ((*pB).OpenFolder != 0)
                     {
                         if (((*pB).ItemPointer > (*pB).OpenFolder) && ((*pB).ItemPointer <= ((*pB).OpenFolder + (*pB).Files)))
                         { // File selected
@@ -3359,10 +3296,10 @@ namespace Ev3CoreUnsafe.Cui
                             Item = (short)((*pB).ItemPointer - (*pB).OpenFolder);
                             Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFiles, Item, Lng, (*pB).FullPath, pType);
 
-                            snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                            CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
 
 
-                            printf("Select file %3d\r\n", Item);
+                            GH.printf($"Select file {Item}\r\n");
                         }
                         else
                         { // Folder selected
@@ -3372,12 +3309,12 @@ namespace Ev3CoreUnsafe.Cui
 
                                 Item = (*pB).OpenFolder;
                                 Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, Lng, pAnswer, pType);
-                                printf("Select folder %3d\r\n", Item);
+                                GH.printf($"Select folder {Item}\r\n");
                             }
                             else
                             { // Close folder
 
-                                printf("Close folder %3d\r\n", (*pB).OpenFolder);
+                                GH.printf($"Close folder {(*pB).OpenFolder}\r\n");
 
                                 GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
                                 if ((*pB).ItemPointer > (*pB).OpenFolder)
@@ -3401,9 +3338,9 @@ namespace Ev3CoreUnsafe.Cui
                                     GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
                                     Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
 
-                                    snprintf((char*)pAnswer, Lng, "%s/%s", (char*)(*pB).FullPath, (char*)(*pB).Filename);
+                                    CommonHelper.snprintf(pAnswer, Lng, $"{CommonHelper.GetString((*pB).FullPath)}/{CommonHelper.GetString((*pB).Filename)}");
                                     *pType = TYPE_BYTECODE;
-                                    printf("Select folder %3d\r\n", Item);
+                                    GH.printf($"Select folder {Item}\r\n");
                                 }
                                 break;
 
@@ -3412,26 +3349,26 @@ namespace Ev3CoreUnsafe.Cui
 
                                     (*pB).OpenFolder = (*pB).ItemPointer;
                                     GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, (*pB).OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).SubFolder, &TmpType);
-                                    printf("Open  folder %3d (%s)\r\n", (*pB).OpenFolder, (*pB).SubFolder);
-                                    if (strcmp((char*)(*pB).SubFolder, SDCARD_FOLDER) == 0)
+                                    GH.printf($"Open  folder {(*pB).OpenFolder} ({CommonHelper.GetString((*pB).SubFolder)})\r\n");
+                                    if (CommonHelper.strcmp((*pB).SubFolder, SDCARD_FOLDER.AsSbytePointer()) == 0)
                                     {
                                         Item = (*pB).ItemPointer;
                                         GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
                                         Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
                                         *pType = TYPE_SDCARD;
 
-                                        snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                                        CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                     }
                                     else
                                     {
-                                        if (strcmp((char*)(*pB).SubFolder, USBSTICK_FOLDER) == 0)
+                                        if (CommonHelper.strcmp((*pB).SubFolder, USBSTICK_FOLDER.AsSbytePointer()) == 0)
                                         {
                                             Item = (*pB).ItemPointer;
                                             GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, &Priority);
                                             Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).FullPath, pType);
                                             *pType = TYPE_USBSTICK;
 
-                                            snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                                            CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                         }
                                         else
                                         {
@@ -3449,10 +3386,10 @@ namespace Ev3CoreUnsafe.Cui
 
                                     Item = (*pB).ItemPointer;
 
-                                    *pType = GH.Memory.cMemoryGetCacheName(Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (char*)(*pB).FullPath, (char*)(*pB).Filename);
-                                    snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                                    *pType = GH.Memory.cMemoryGetCacheName((sbyte)Item, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (char*)(*pB).FullPath, (char*)(*pB).Filename);
+                                    CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                     Result = OK;
-                                    printf("Select folder %3d\r\n", Item);
+                                    GH.printf($"Select folder {Item}\r\n");
                                 }
                                 break;
 
@@ -3466,9 +3403,9 @@ namespace Ev3CoreUnsafe.Cui
 
                                         Result = GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFiles, Item, Lng, (*pB).FullPath, pType);
 
-                                        snprintf((char*)pAnswer, Lng, "%s", (char*)(*pB).FullPath);
+                                        CommonHelper.snprintf(pAnswer, Lng, CommonHelper.GetString((*pB).FullPath));
                                         Result = OK;
-                                        printf("Select file %3d\r\n", Item);
+                                        GH.printf($"Select file {Item}\r\n");
                                     }
                                 }
                                 break;
@@ -3481,7 +3418,7 @@ namespace Ev3CoreUnsafe.Cui
                 TotalItems = (short)((*pB).Folders + (*pB).Files);
                 if (TmpResult == OK)
                 {
-                    if (TotalItems)
+                    if (TotalItems != 0)
                     {
                         if ((*pB).ItemPointer > TotalItems)
                         {
@@ -3536,7 +3473,7 @@ namespace Ev3CoreUnsafe.Cui
                     (*pB).ItemStart++;
                 }
 
-                if ((*pB).NeedUpdate)
+                if ((*pB).NeedUpdate != 0)
                 {
                     //* UPDATE ***************************************************************************************************
                     (*pB).NeedUpdate = 0;
@@ -3553,7 +3490,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (Item <= TotalItems)
                         {
-                            if ((*pB).OpenFolder)
+                            if ((*pB).OpenFolder != 0)
                             {
                                 if ((Item > (*pB).OpenFolder) && (Item <= ((*pB).OpenFolder + (*pB).Files)))
                                 {
@@ -3571,28 +3508,29 @@ namespace Ev3CoreUnsafe.Cui
 
                             //*** Graphics ***********************************************************************************************
 
-                            if (Folder)
+                            if (Folder != 0)
                             { // Show folder
 
                                 switch (Type)
                                 {
                                     case BROWSE_FOLDERS:
                                         {
-                                            GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
+                                            GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (sbyte)(*pB).Chars, (*pB).Filename, &TmpType, &Priority);
                                             if (GH.Memory.cMemoryGetItemIcon((*pB).PrgId, (*pB).hFolders, Item, &TmpHandle, &Image) == OK)
                                             {
-                                                GH.Lcd.dLcdDrawBitmap((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), (IP)Image);
+                                                GH.Lcd.dLcdDrawBitmap((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), (IP)Image);
                                                 GH.Memory.cMemoryCloseFile((*pB).PrgId, TmpHandle);
                                             }
                                             else
                                             {
-                                                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), PCApp_width, PCApp_height, (UBYTE*)PCApp_bits);
+												var app = BmpHelper.Get(BmpType.App);
+												GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), app.Width, app.Height, (UBYTE*)app.Data.AsPointer());
                                             }
 
                                             (*pB).Text[0] = 0;
-                                            if (strcmp((char*)(*pB).Filename, "Bluetooth") == 0)
+                                            if (CommonHelper.strcmp((*pB).Filename, "Bluetooth".AsSbytePointer()) == 0)
                                             {
-                                                if (GH.UiInstance.BtOn)
+                                                if (GH.UiInstance.BtOn != 0)
                                                 {
                                                     (*pB).Text[0] = (sbyte)'+';
                                                 }
@@ -3603,9 +3541,9 @@ namespace Ev3CoreUnsafe.Cui
                                             }
                                             else
                                             {
-                                                if (strcmp((char*)(*pB).Filename, "WiFi") == 0)
+                                                if (CommonHelper.strcmp((*pB).Filename, "WiFi".AsSbytePointer()) == 0)
                                                 {
-                                                    if (GH.UiInstance.WiFiOn)
+                                                    if (GH.UiInstance.WiFiOn != 0)
                                                     {
                                                         (*pB).Text[0] = (sbyte)'+';
                                                     }
@@ -3616,7 +3554,7 @@ namespace Ev3CoreUnsafe.Cui
                                                 }
                                                 else
                                                 {
-                                                    if (GH.Memory.cMemoryGetItemText((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Text) != OK)
+                                                    if (GH.Memory.cMemoryGetItemText((*pB).PrgId, (*pB).hFolders, Item, (sbyte)(*pB).Chars, (*pB).Text) != OK)
                                                     {
                                                         (*pB).Text[0] = 0;
                                                     }
@@ -3632,21 +3570,21 @@ namespace Ev3CoreUnsafe.Cui
                                                 case (sbyte)'+':
                                                     {
                                                         Indent = (short)(((*pB).Chars - 1) * (*pB).CharWidth - GH.Lcd.dLcdGetIconWidth(MENU_ICON));
-                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, ((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight), MENU_ICON, ICON_CHECKED);
+                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).TextStartX + Indent), (short)(((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight)), MENU_ICON, ICON_CHECKED);
                                                     }
                                                     break;
 
                                                 case (sbyte)'-':
                                                     {
                                                         Indent = (short)(((*pB).Chars - 1) * (*pB).CharWidth - GH.Lcd.dLcdGetIconWidth(MENU_ICON));
-                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, ((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight), MENU_ICON, ICON_CHECKBOX);
+                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).TextStartX + Indent), (short)(((*pB).TextStartY - 2) + (Tmp * (*pB).LineHeight)), MENU_ICON, ICON_CHECKBOX);
                                                     }
                                                     break;
 
                                                 default:
                                                     {
-                                                        Indent = (((*pB).Chars - 1) - (DATA16)strlen((char*)(*pB).Text)) * (*pB).CharWidth;
-                                                        GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + Indent, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Text);
+                                                        Indent = (short)((((*pB).Chars - 1) - (DATA16)CommonHelper.strlen((*pB).Text)) * (*pB).CharWidth);
+                                                        GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).TextStartX + Indent), (short)((*pB).TextStartY + (Tmp * (*pB).LineHeight)), NORMAL_FONT, (*pB).Text);
                                                     }
                                                     break;
 
@@ -3657,28 +3595,28 @@ namespace Ev3CoreUnsafe.Cui
 
                                     case BROWSE_FOLDS_FILES:
                                         {
-                                            GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
-                                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+                                            GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, (sbyte)(*pB).Chars, (*pB).Filename, &TmpType, &Priority);
+                                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 
                                             if ((Priority == 1) || (Priority == 2))
                                             {
-                                                GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_FOLDER2);
+                                                GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, ICON_FOLDER2);
                                             }
                                             else
                                             {
                                                 if (Priority == 3)
                                                 {
-                                                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_SD);
+                                                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, ICON_SD);
                                                 }
                                                 else
                                                 {
                                                     if (Priority == 4)
                                                     {
-                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_USB);
+                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, ICON_USB);
                                                     }
                                                     else
                                                     {
-                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+                                                        GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
                                                     }
                                                 }
                                             }
@@ -3686,9 +3624,9 @@ namespace Ev3CoreUnsafe.Cui
                                             {
                                                 if ((Priority == 1) || (Priority >= 3))
                                                 {
-                                                    if (Tmp)
+                                                    if (Tmp != 0)
                                                     {
-                                                        GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + ((Tmp - 1) * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + ((Tmp - 1) * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+                                                        GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (short)((*pB).SelectStartY + ((Tmp - 1) * (*pB).LineHeight) + (*pB).LineHeight - 2), (short)((*pB).SelectStartX + (*pB).SelectWidth), (short)((*pB).SelectStartY + ((Tmp - 1) * (*pB).LineHeight) + (*pB).LineHeight - 2), 1, 2);
                                                     }
                                                 }
                                             }
@@ -3697,32 +3635,32 @@ namespace Ev3CoreUnsafe.Cui
 
                                     case BROWSE_CACHE:
                                         {
-                                            TmpType = GH.Memory.cMemoryGetCacheName(Item, (*pB).Chars, (char*)(*pB).FullPath, (char*)(*pB).Filename);
-                                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+                                            TmpType = GH.Memory.cMemoryGetCacheName((sbyte)Item, (sbyte)(*pB).Chars, (char*)(*pB).FullPath, (char*)(*pB).Filename);
+                                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
                                         }
                                         break;
 
                                     case BROWSE_FILES:
                                         {
-                                            GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (*pB).Chars, (*pB).Filename, &TmpType, &Priority);
-                                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+                                            GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (sbyte)(*pB).Chars, (*pB).Filename, &TmpType, &Priority);
+                                            GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
                                         }
                                         break;
 
                                 }
                                 // Draw folder name
-                                GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Filename);
+                                GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX, (short)((*pB).TextStartY + (Tmp * (*pB).LineHeight)), NORMAL_FONT, (*pB).Filename);
 
                                 // Draw open folder
                                 if (Item == (*pB).OpenFolder)
                                 {
-                                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, 144, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, ICON_OPENFOLDER);
+                                    GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, 144, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, ICON_OPENFOLDER);
                                 }
 
                                 // Draw selection
                                 if ((*pB).ItemPointer == (Tmp + (*pB).ItemStart))
                                 {
-                                    GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).SelectWidth + 1, (*pB).SelectHeight);
+                                    GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pB).SelectStartX, (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight)), (short)((*pB).SelectWidth + 1), (*pB).SelectHeight);
                                 }
 
                                 // Draw end line
@@ -3734,7 +3672,7 @@ namespace Ev3CoreUnsafe.Cui
                                         {
                                             if (((Tmp + (*pB).ItemStart) == TotalItems) && (Tmp < ((*pB).Lines - 1)))
                                             {
-                                                GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+                                                GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2), (short)((*pB).SelectStartX + (*pB).SelectWidth), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2), 1, 2);
                                             }
                                         }
                                         break;
@@ -3743,11 +3681,11 @@ namespace Ev3CoreUnsafe.Cui
                                         {
                                             if (((Tmp + (*pB).ItemStart) == 1) && (Tmp < ((*pB).Lines - 1)))
                                             {
-                                                GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+                                                GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2), (short)((*pB).SelectStartX + (*pB).SelectWidth), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2), 1, 2);
                                             }
                                             if (((Tmp + (*pB).ItemStart) == TotalItems) && (Tmp < ((*pB).Lines - 1)))
                                             {
-                                                GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, (*pB).SelectStartX + (*pB).SelectWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2, 1, 2);
+                                                GH.Lcd.dLcdDrawDotLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).SelectStartX, (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2), (short)((*pB).SelectStartX + (*pB).SelectWidth), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 2), 1, 2);
                                             }
                                         }
                                         break;
@@ -3758,28 +3696,28 @@ namespace Ev3CoreUnsafe.Cui
                             { // Show file
 
                                 // Get file name and type
-                                GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (*pB).Chars - 1, (*pB).Filename, &TmpType, &Priority);
+                                GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFiles, Item, (sbyte)((*pB).Chars - 1), (*pB).Filename, &TmpType, &Priority);
 
                                 // show File icons
-                                GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth, (*pB).IconStartY + (Tmp * (*pB).LineHeight), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
+                                GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).IconStartX + (*pB).CharWidth), (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), NORMAL_ICON, FiletypeToNormalIcon[TmpType]);
 
                                 // Draw file name
-                                GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (*pB).TextStartX + (*pB).CharWidth, (*pB).TextStartY + (Tmp * (*pB).LineHeight), NORMAL_FONT, (*pB).Filename);
+                                GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).TextStartX + (*pB).CharWidth), (short)((*pB).TextStartY + (Tmp * (*pB).LineHeight)), NORMAL_FONT, (*pB).Filename);
 
                                 // Draw folder line
                                 if ((Tmp == ((*pB).Lines - 1)) || (Item == (*pB).Files))
                                 {
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).SelectHeight - 1);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).IconStartX + (*pB).CharWidth - 3), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight)), (short)((*pB).IconStartX + (*pB).CharWidth - 3), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).SelectHeight - 1));
                                 }
                                 else
                                 {
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).IconStartX + (*pB).CharWidth - 3, (*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 1);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)((*pB).IconStartX + (*pB).CharWidth - 3), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight)), (short)((*pB).IconStartX + (*pB).CharWidth - 3), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight) + (*pB).LineHeight - 1));
                                 }
 
                                 // Draw selection
                                 if ((*pB).ItemPointer == (Tmp + (*pB).ItemStart))
                                 {
-                                    GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pB).SelectStartX + (*pB).CharWidth, (*pB).SelectStartY + (Tmp * (*pB).LineHeight), (*pB).SelectWidth + 1 - (*pB).CharWidth, (*pB).SelectHeight);
+                                    GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (short)((*pB).SelectStartX + (*pB).CharWidth), (short)((*pB).SelectStartY + (Tmp * (*pB).LineHeight)), (short)((*pB).SelectWidth + 1 - (*pB).CharWidth), (*pB).SelectHeight);
                                 }
 
                             }
@@ -3806,18 +3744,18 @@ namespace Ev3CoreUnsafe.Cui
                         Tmp = 0;
                     }
 
-                    if ((Tmp != 0) || (cUiTestShortPress(BACK_BUTTON)) || (cUiTestLongPress(BACK_BUTTON)))
+                    if ((Tmp != 0) || (cUiTestShortPress(BACK_BUTTON) != 0) || (cUiTestLongPress(BACK_BUTTON) != 0))
                     {
                         if (Type != BROWSE_CACHE)
                         {
-                            if ((*pB).OpenFolder)
+                            if ((*pB).OpenFolder != 0)
                             {
-                                if ((*pB).hFiles)
+                                if ((*pB).hFiles != 0)
                                 {
                                     GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFiles);
                                 }
                             }
-                            if ((*pB).hFolders)
+                            if ((*pB).hFolders != 0)
                             {
                                 GH.Memory.cMemoryCloseFolder((*pB).PrgId, &(*pB).hFolders);
                             }
@@ -3828,7 +3766,7 @@ namespace Ev3CoreUnsafe.Cui
                         pAnswer[0] = 0;
                         *pType = 0;
 
-                        printf("%d %d Closing browser with [%s] type [%d]\r\n", PrgId, ObjId, (char*)pAnswer, *pType);
+                        GH.printf($"{PrgId} {ObjId} Closing browser with [{CommonHelper.GetString(pAnswer)}] type [{*pType}]\r\n");
                         Result = OK;
                     }
                 }
@@ -3848,7 +3786,7 @@ namespace Ev3CoreUnsafe.Cui
             {
                 //* EXIT *****************************************************************************************************
 
-                printf("%d %d Return from browser with [%s] type [0x%02X]\r\n\n", PrgId, ObjId, (char*)pAnswer, *pType);
+                GH.printf($"{PrgId} {ObjId} Return from browser with [{CommonHelper.GetString(pAnswer)}] type [0x{*pType}]\r\n\n");
             }
 
             return (Result);
@@ -3862,10 +3800,10 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Del < DELS)
             {
-                while (pText[Point] && (Point < Size))
+                while (pText[Point] != 0 && (Point < Size))
                 {
                     DelPoi = 0;
-                    while ((pText[Point]) && (Point < Size) && (Delimiter[Del][DelPoi]) && (pText[Point] == Delimiter[Del][DelPoi]))
+                    while ((pText[Point] != 0) && (Point < Size) && (Delimiter[Del][DelPoi] != 0) && (pText[Point] == Delimiter[Del][DelPoi]))
                     {
                         DelPoi++;
                         Point++;
@@ -3876,7 +3814,7 @@ namespace Ev3CoreUnsafe.Cui
                     }
                     else
                     {
-                        if ((pText[Point]) && (Point < Size))
+                        if ((pText[Point] != 0) && (Point < Size))
                         {
                             Point++;
                         }
@@ -3895,23 +3833,23 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Del < DELS)
             {
-                while ((pText[Point]) && (Point < Size))
+                while ((pText[Point] != 0) && (Point < Size))
                 {
                     Point++;
                 }
-                if ((Point < Size) && (Font))
+                if ((Point < Size) && (Font != 0))
                 {
                     pText[Point] = Font;
                     Point++;
                 }
 
-                while ((Point < Size) && (*pLine))
+                while ((Point < Size) && (*pLine != 0))
                 {
                     pText[Point] = *pLine;
                     Point++;
                     pLine++;
                 }
-                while ((Point < Size) && (Delimiter[Del][DelPoi]))
+                while ((Point < Size) && (Delimiter[Del][DelPoi] != 0))
                 {
                     pText[Point] = (sbyte)Delimiter[Del][DelPoi];
                     Point++;
@@ -3931,11 +3869,11 @@ namespace Ev3CoreUnsafe.Cui
             if (Del < DELS)
             {
                 Result = Point;
-                while ((Line) && (pText[Point]) && (Point < Size))
+                while ((Line != 0) && (pText[Point] != 0) && (Point < Size))
                 {
 
                     DelPoi = 0;
-                    while ((pText[Point]) && (Point < Size) && (Delimiter[Del][DelPoi]) && (pText[Point] == Delimiter[Del][DelPoi]))
+                    while ((pText[Point] != 0) && (Point < Size) && (Delimiter[Del][DelPoi] != 0) && (pText[Point] == Delimiter[Del][DelPoi]))
                     {
                         DelPoi++;
                         Point++;
@@ -3943,14 +3881,14 @@ namespace Ev3CoreUnsafe.Cui
                     if (Delimiter[Del][DelPoi] == 0)
                     {
                         Line--;
-                        if (Line)
+                        if (Line != 0)
                         {
                             Result = Point;
                         }
                     }
                     else
                     {
-                        if ((pText[Point]) && (Point < Size))
+                        if ((pText[Point] != 0) && (Point < Size))
                         {
                             Point++;
                         }
@@ -3987,10 +3925,10 @@ namespace Ev3CoreUnsafe.Cui
 
             if (Point >= 0)
             {
-                while ((Run) && (pText[Point]) && (Point < Size))
+                while ((Run != 0) && (pText[Point] != 0) && (Point < Size))
                 {
                     DelPoi = 0;
-                    while ((pText[Point]) && (Point < Size) && (Delimiter[Del][DelPoi]) && (pText[Point] == Delimiter[Del][DelPoi]))
+                    while ((pText[Point] != 0) && (Point < Size) && (Delimiter[Del][DelPoi] != 0) && (pText[Point] == Delimiter[Del][DelPoi]))
                     {
                         DelPoi++;
                         Point++;
@@ -4001,7 +3939,7 @@ namespace Ev3CoreUnsafe.Cui
                     }
                     else
                     {
-                        if ((pText[Point]) && (Point < Size))
+                        if ((pText[Point] != 0) && (Point < Size))
                         {
                             Point++;
                         }
@@ -4013,7 +3951,7 @@ namespace Ev3CoreUnsafe.Cui
                 {
                     Lng = (sbyte)((DATA8)(Point - Start) + 1);
                 }
-                snprintf((char*)pLine, Lng, "%s", (char*)&pText[Start]);
+                CommonHelper.snprintf(pLine, Lng, CommonHelper.GetString(&pText[Start]));
             }
         }
 
@@ -4028,8 +3966,8 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 Ypos;
             DATA8 Color;
 
-            pB = &GH.UiInstance.Txtbox;
-            Color = FG_COLOR;
+            pB = (TXTBOX*)Unsafe.AsPointer<TXTBOX>(ref GH.UiInstance.Txtbox);
+			Color = FG_COLOR;
 
             if (*pLine < 0)
             {
@@ -4115,13 +4053,13 @@ namespace Ev3CoreUnsafe.Cui
                 (*pB).ItemStart++;
             }
 
-            if (cUiGetShortPress(ENTER_BUTTON))
+            if (cUiGetShortPress(ENTER_BUTTON) != 0)
             {
                 *pLine = (*pB).ItemPointer;
 
                 Result = OK;
             }
-            if (cUiGetShortPress(BACK_BUTTON))
+            if (cUiGetShortPress(BACK_BUTTON) != 0)
             {
                 *pLine = -1;
 
@@ -4129,7 +4067,7 @@ namespace Ev3CoreUnsafe.Cui
             }
 
 
-            if ((*pB).NeedUpdate)
+            if ((*pB).NeedUpdate != 0)
             {
                 //* UPDATE ***************************************************************************************************
                 (*pB).NeedUpdate = 0;
@@ -4183,7 +4121,7 @@ namespace Ev3CoreUnsafe.Cui
                         // Draw selection
                         if ((*pB).ItemPointer == (Tmp + (*pB).ItemStart))
                         {
-                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pB).SelectStartX, Ypos - 1, (*pB).SelectWidth, (*pB).LineHeight);
+                            GH.Lcd.dLcdInverseRect((*GH.UiInstance.pLcd).Lcd, (*pB).SelectStartX, (short)(Ypos - 1), (*pB).SelectWidth, (*pB).LineHeight);
                         }
                     }
                     Ypos += (*pB).LineHeight;
@@ -4230,7 +4168,7 @@ namespace Ev3CoreUnsafe.Cui
             {
                 for (Pointer = 0; Pointer < GH.UiInstance.Graph.GraphSizeX; Pointer++)
                 {
-                    GH.UiInstance.Graph.Buffer[Item][Pointer] = DATAF_NAN;
+                    GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = DATAF_NAN;
                 }
             }
 
@@ -4249,7 +4187,7 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 Item;
             DATA16 Pointer;
 
-            if (GH.UiInstance.Graph.Initialized)
+            if (GH.UiInstance.Graph.Initialized != 0)
             { // Only if initialized
 
                 if (GH.UiInstance.Graph.Pointer < GH.UiInstance.Graph.GraphSizeX)
@@ -4261,11 +4199,11 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (!(float.IsNaN(Sample)))
                         {
-                            GH.UiInstance.Graph.Buffer[Item][GH.UiInstance.Graph.Pointer] = Sample;
+                            GH.UiInstance.Graph.GetBuffer(Item)[GH.UiInstance.Graph.Pointer] = Sample;
                         }
                         else
                         {
-                            GH.UiInstance.Graph.Buffer[Item][GH.UiInstance.Graph.Pointer] = DATAF_NAN;
+                            GH.UiInstance.Graph.GetBuffer(Item)[GH.UiInstance.Graph.Pointer] = DATAF_NAN;
                         }
                     }
                     GH.UiInstance.Graph.Pointer++;
@@ -4277,7 +4215,7 @@ namespace Ev3CoreUnsafe.Cui
                     {
                         for (Pointer = 0; Pointer < (GH.UiInstance.Graph.GraphSizeX - 1); Pointer++)
                         {
-                            GH.UiInstance.Graph.Buffer[Item][Pointer] = GH.UiInstance.Graph.Buffer[Item][Pointer + 1];
+                            GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = GH.UiInstance.Graph.GetBuffer(Item)[Pointer + 1];
                         }
 
                         // Insert sample
@@ -4285,11 +4223,11 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (!(float.IsNaN(Sample)))
                         {
-                            GH.UiInstance.Graph.Buffer[Item][Pointer] = Sample;
+                            GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = Sample;
                         }
                         else
                         {
-                            GH.UiInstance.Graph.Buffer[Item][Pointer] = DATAF_NAN;
+                            GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = DATAF_NAN;
                         }
                     }
                 }
@@ -4315,7 +4253,7 @@ namespace Ev3CoreUnsafe.Cui
             *pAverage = DATAF_NAN;
             Samples = 0;
 
-            if (GH.UiInstance.Graph.Initialized)
+            if (GH.UiInstance.Graph.Initialized != 0)
             { // Only if initialized
 
                 if (GH.UiInstance.ScreenBlocked == 0)
@@ -4332,7 +4270,7 @@ namespace Ev3CoreUnsafe.Cui
                         X = GH.UiInstance.Graph.GraphStartX;
                         for (Pointer = 0; Pointer < GH.UiInstance.Graph.Pointer; Pointer++)
                         {
-                            Sample = GH.UiInstance.Graph.Buffer[Item][Pointer];
+                            Sample = GH.UiInstance.Graph.GetBuffer(Item)[Pointer];
                             if (!(float.IsNaN(Sample)))
                             {
                                 *pActual = Sample;
@@ -4369,30 +4307,30 @@ namespace Ev3CoreUnsafe.Cui
                                     Value = 0;
                                 }
                                 /*
-                                            printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,GH.UiInstance.Graph.pMin[Item],GH.UiInstance.Graph.pMax[Item],GH.UiInstance.Graph.pOffset[Item],GH.UiInstance.Graph.pSpan[Item],Value);
+                                            GH.printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,GH.UiInstance.Graph.pMin[Item],GH.UiInstance.Graph.pMax[Item],GH.UiInstance.Graph.pOffset[Item],GH.UiInstance.Graph.pSpan[Item],Value);
                                 */
                                 Y2 = (short)((GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]) - Value);
                                 if (Pointer > 1)
                                 {
                                     if (Y2 > Y1)
                                     {
-                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 2, Y1 - 1, X - 1, Y2 - 1);
-                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, Y1 + 1, X + 1, Y2 + 1);
+                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
+                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
                                     }
                                     else
                                     {
                                         if (Y2 < Y1)
                                         {
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, Y1 - 1, X + 1, Y2 - 1);
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 2, Y1 + 1, X - 1, Y2 + 1);
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
                                         }
                                         else
                                         {
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 1, Y1 - 1, X, Y2 - 1);
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 1, Y1 + 1, X, Y2 + 1);
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
                                         }
                                     }
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 1, Y1, X, Y2);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 1), Y1, X, Y2);
                                 }
                                 else
                                 {
@@ -4419,7 +4357,7 @@ namespace Ev3CoreUnsafe.Cui
                             X = (short)(GH.UiInstance.Graph.GraphStartX + 1);
                             for (Pointer = 0; Pointer < GH.UiInstance.Graph.Pointer; Pointer++)
                             {
-                                Sample = GH.UiInstance.Graph.Buffer[Item][Pointer];
+                                Sample = GH.UiInstance.Graph.GetBuffer(Item)[Pointer];
 
                                 // Scale Y axis
                                 Value = (DATA16)((((Sample - GH.UiInstance.Graph.pMin[Item]) * (DATAF)GH.UiInstance.Graph.pSpan[Item]) / (GH.UiInstance.Graph.pMax[Item] - GH.UiInstance.Graph.pMin[Item])));
@@ -4439,23 +4377,23 @@ namespace Ev3CoreUnsafe.Cui
 
                                     if (Y2 > Y1)
                                     {
-                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 2, Y1 - 1, X - 1, Y2 - 1);
-                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, Y1 + 1, X + 1, Y2 + 1);
+                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 2), (short)(Y1 - 1), (short)(X - 1), (short)(Y2 - 1));
+                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, (short)(Y1 + 1), (short)(X + 1), (short)(Y2 + 1));
                                     }
                                     else
                                     {
                                         if (Y2 < Y1)
                                         {
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, Y1 - 1, X + 1, Y2 - 1);
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 2, Y1 + 1, X - 1, Y2 + 1);
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X, (short)(Y1 - 1), (short)(X + 1), (short)(Y2 - 1));
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 2), (short)(Y1 + 1), (short)(X - 1), (short)(Y2 + 1));
                                         }
                                         else
                                         {
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 1, Y1 - 1, X, Y2 - 1);
-                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 1, Y1 + 1, X, Y2 + 1);
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 1), (short)(Y1 - 1), X, (short)(Y2 - 1));
+                                            GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 1), (short)(Y1 + 1), X, (short)(Y2 + 1));
                                         }
                                     }
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, X - 1, Y1, X, Y2);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, Color, (short)(X - 1), Y1, X, Y2);
 
                                 }
                                 else
@@ -4478,8 +4416,8 @@ namespace Ev3CoreUnsafe.Cui
             PRGID TmpPrgId;
             OBJID TmpObjId;
             IP TmpIp;
-            DATA8 GBuffer[25];
-            UBYTE pBmp[LCD_BUFFER_SIZE];
+            DATA8* GBuffer = CommonHelper.Pointer1d<DATA8>(25);
+            UBYTE* pBmp = CommonHelper.Pointer1d<UBYTE>(LCD_BUFFER_SIZE);
             DATA8 Cmd;
             DATA8 Color;
             DATA16 X;
@@ -4585,7 +4523,7 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 Color = -1;
                             }
-                            memset(&((*GH.UiInstance.pLcd).Lcd[0]), Color, LCD_BUFFER_SIZE);
+                            CommonHelper.memset(&((*GH.UiInstance.pLcd).Lcd[0]), Color, LCD_BUFFER_SIZE);
 
                             GH.UiInstance.ScreenBusy = 1;
                         }
@@ -4731,7 +4669,7 @@ namespace Ev3CoreUnsafe.Cui
                         X = *(DATA16*)GH.Lms.PrimParPointer();
                         Y = *(DATA16*)GH.Lms.PrimParPointer();
                         R = *(DATA16*)GH.Lms.PrimParPointer();
-                        if (R)
+                        if (R != 0)
                         {
                             if (Blocked == 0)
                             {
@@ -4819,7 +4757,7 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             for (Lng = 0; Lng < Figures; Lng++)
                             {
-                                GBuffer[Lng] = '-';
+                                GBuffer[Lng] = (sbyte)'-';
                             }
                         }
                         else
@@ -4827,11 +4765,11 @@ namespace Ev3CoreUnsafe.Cui
                             if (Figures < 0)
                             {
                                 Figures = (sbyte)(0 - Figures);
-                                snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+                                CommonHelper.snprintf(GBuffer, 24, CommonHelper.GetString(DataF, -1, Decimals));
                             }
                             else
                             {
-                                snprintf((char*)GBuffer, 24, "%*.*f", Figures, Decimals, DataF);
+                                CommonHelper.snprintf(GBuffer, 24, CommonHelper.GetString(DataF, Figures, Decimals));
                             }
                             if (GBuffer[0] == '-')
                             { // Negative
@@ -4866,9 +4804,9 @@ namespace Ev3CoreUnsafe.Cui
                             X1 = (short)(((CharWidth + 2) / 3) - 1);
                             Y1 = ((short)(CharHeight / 2));
 
-                            Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+                            Lng = (DATA8)CommonHelper.snprintf(GBuffer, 24, CommonHelper.GetString(DataF, -1, Decimals));
 
-                            if (Lng)
+                            if (Lng != 0)
                             {
                                 if (GBuffer[0] == '-')
                                 { // Negative
@@ -4885,10 +4823,10 @@ namespace Ev3CoreUnsafe.Cui
                                 }
 
                                 // Make sure negative sign is deleted from last time
-                                GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
+                                GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1));
                                 if (CharHeight > 12)
                                 {
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1 - 1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1 - 1));
                                 }
 
                                 // Check for "not a number"
@@ -4902,7 +4840,7 @@ namespace Ev3CoreUnsafe.Cui
 
                                     for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
                                     {
-                                        GBuffer[Tmp] = '-';
+                                        GBuffer[Tmp] = (sbyte)'-';
                                     }
                                     GBuffer[Tmp] = 0;
 
@@ -4918,7 +4856,7 @@ namespace Ev3CoreUnsafe.Cui
 
                                         for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
                                         {
-                                            GBuffer[Tmp] = '>';
+                                            GBuffer[Tmp] = (sbyte)'>';
                                         }
                                         GBuffer[Tmp] = 0;
                                         Lng = (sbyte)(DATA16)Figures;
@@ -4936,13 +4874,13 @@ namespace Ev3CoreUnsafe.Cui
                                     }
 
                                     // Draw figures
-                                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, GH.UiInstance.Font, pText);
+                                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + Tmp), Y, GH.UiInstance.Font, pText);
 
                                     // Draw negative sign
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1), (short)(X + Tmp), (short)(Y + Y1));
                                     if (CharHeight > 12)
                                     {
-                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
+                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1 - 1), (short)(X + Tmp), (short)(Y + Y1 - 1));
                                     }
                                 }
                             }
@@ -4970,9 +4908,9 @@ namespace Ev3CoreUnsafe.Cui
                             X1 = (short)(((CharWidth + 2) / 3) - 1);
                             Y1 = ((short)(CharHeight / 2));
 
-                            Lng = (DATA8)snprintf((char*)GBuffer, 24, "%.*f", Decimals, DataF);
+                            Lng = (DATA8)CommonHelper.snprintf(GBuffer, 24, CommonHelper.GetString(DataF, -1, Decimals));
 
-                            if (Lng)
+                            if (Lng != 0)
                             {
                                 if (GBuffer[0] == '-')
                                 { // Negative
@@ -4989,10 +4927,10 @@ namespace Ev3CoreUnsafe.Cui
                                 }
 
                                 // Make sure negative sign is deleted from last time
-                                GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1, X + (Figures * CharWidth), Y + Y1);
+                                GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1));
                                 if (CharHeight > 12)
                                 {
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, 1 - Color, X - X1, Y + Y1 - 1, X + (Figures * CharWidth), Y + Y1 - 1);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, (sbyte)(1 - Color), (short)(X - X1), (short)(Y + Y1 - 1), (short)(X + (Figures * CharWidth)), (short)(Y + Y1 - 1));
                                 }
 
                                 // Check for "not a number"
@@ -5006,7 +4944,7 @@ namespace Ev3CoreUnsafe.Cui
 
                                     for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
                                     {
-                                        GBuffer[Tmp] = '-';
+                                        GBuffer[Tmp] = (sbyte)'-';
                                     }
                                     GBuffer[Tmp] = 0;
 
@@ -5022,7 +4960,7 @@ namespace Ev3CoreUnsafe.Cui
 
                                         for (Tmp = 0; Tmp < (DATA16)Figures; Tmp++)
                                         {
-                                            GBuffer[Tmp] = '>';
+                                            GBuffer[Tmp] = (sbyte)'>';
                                         }
                                         GBuffer[Tmp] = 0;
                                         Lng = (sbyte)(DATA16)Figures;
@@ -5041,18 +4979,18 @@ namespace Ev3CoreUnsafe.Cui
                                     Tmp = 0;
 
                                     // Draw figures
-                                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, LARGE_FONT, pText);
+                                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + Tmp), Y, LARGE_FONT, pText);
 
                                     // Draw negative sign
-                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1, X + Tmp, Y + Y1);
+                                    GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1), (short)(X + Tmp), (short)(Y + Y1));
                                     if (CharHeight > 12)
                                     {
-                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, X - X1 + Tmp, Y + Y1 - 1, X + Tmp, Y + Y1 - 1);
+                                        GH.Lcd.dLcdDrawLine((*GH.UiInstance.pLcd).Lcd, TmpColor, (short)(X - X1 + Tmp), (short)(Y + Y1 - 1), (short)(X + Tmp), (short)(Y + Y1 - 1));
                                     }
 
                                     Tmp = (short)(((((DATA16)Lng))) * CharWidth);
-                                    snprintf((char*)GBuffer, Length, "%s", pUnit);
-                                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, X + Tmp, Y, SMALL_FONT, GBuffer);
+                                    CommonHelper.snprintf(GBuffer, Length, CommonHelper.GetString(pUnit));
+                                    GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, Color, (short)(X + Tmp), Y, SMALL_FONT, GBuffer);
 
                                 }
                             }
@@ -5074,7 +5012,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (Blocked == 0)
                         {
-                            if (cUiNotification(Color, X, Y, Icon1, Icon2, Icon3, pText, pState) == RESULT.BUSY)
+                            if (cUiNotification(Color, X, Y, Icon1, Icon2, Icon3, pText, pState) == BUSY)
                             {
                                 GH.Lms.SetObjectIp(TmpIp - 1);
                                 GH.Lms.SetDispatchStatus(DSPSTAT.BUSYBREAK);
@@ -5101,7 +5039,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (Blocked == 0)
                         {
-                            if (cUiQuestion(Color, X, Y, Icon1, Icon2, pText, pState, pAnswer) == RESULT.BUSY)
+                            if (cUiQuestion(Color, X, Y, Icon1, Icon2, pText, pState, pAnswer) == BUSY)
                             {
                                 GH.Lms.SetObjectIp(TmpIp - 1);
                                 GH.Lms.SetDispatchStatus(DSPSTAT.BUSYBREAK);
@@ -5154,7 +5092,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            pAnswer = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pAnswer = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
 
                         if (Blocked == 0)
@@ -5189,7 +5127,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            pAnswer = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pAnswer = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
 
                         if (Blocked == 0)
@@ -5264,7 +5202,7 @@ namespace Ev3CoreUnsafe.Cui
                                 {
                                     Y *= ((LCD_WIDTH + 7) / 8);
 
-                                    if (Y1)
+                                    if (Y1 != 0)
                                     {
                                         Y1 *= ((LCD_WIDTH + 7) / 8);
                                     }
@@ -5273,11 +5211,11 @@ namespace Ev3CoreUnsafe.Cui
                                         Y1 = (short)(LCD_BUFFER_SIZE - Y);
                                     }
 
-                                    if (Color)
+                                    if (Color != 0)
                                     {
                                         Color = -1;
                                     }
-                                    memset(&((*GH.UiInstance.pLcd).Lcd[Y]), Color, Y1);
+                                    CommonHelper.memset(&((*GH.UiInstance.pLcd).Lcd[Y]), Color, Y1);
                                 }
                                 else
                                 {
@@ -5289,7 +5227,7 @@ namespace Ev3CoreUnsafe.Cui
                                     for (Tmp = Y; Tmp < Y1; Tmp++)
                                     {
                                         Y3 = (short)(Tmp * ((LCD_WIDTH + 7) / 8));
-                                        memset(&((*GH.UiInstance.pLcd).Lcd[Y3]), Color, Y2);
+                                        CommonHelper.memset(&((*GH.UiInstance.pLcd).Lcd[Y3]), Color, Y2);
                                         Color = (sbyte)~Color;
                                     }
                                 }
@@ -5307,7 +5245,7 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             if (No < LCD_STORE_LEVELS)
                             {
-                                LCDCopy((LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), &GH.UiInstance.LcdPool[No], sizeof(LCD));
+                                LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)&GH.UiInstance.LcdPool[No], sizeof(LCD));
                             }
                         }
                     }
@@ -5320,7 +5258,7 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             if (No < LCD_STORE_LEVELS)
                             {
-                                LCDCopy(&GH.UiInstance.LcdPool[No], (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
+                                LCDCopy((byte*)&GH.UiInstance.LcdPool[No], (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
                                 GH.UiInstance.ScreenBusy = 1;
                             }
                         }
@@ -5363,7 +5301,7 @@ namespace Ev3CoreUnsafe.Cui
                         Y = *(DATA16*)GH.Lms.PrimParPointer();
                         if ((Y > 0) && (Y < LCD_HEIGHT))
                         {
-                            dLcdScroll((*GH.UiInstance.pLcd).Lcd, Y);
+                            GH.Lcd.dLcdScroll((*GH.UiInstance.pLcd).Lcd, Y);
                         }
                     }
                     break;
@@ -5373,13 +5311,13 @@ namespace Ev3CoreUnsafe.Cui
                         Open = *(DATA8*)GH.Lms.PrimParPointer();
                         if (Blocked == 0)
                         {
-                            if (Open)
+                            if (Open != 0)
                             {
-                                if (!GH.UiInstance.ScreenBusy)
+                                if (GH.UiInstance.ScreenBusy == 0)
                                 {
                                     TmpObjId = GH.Lms.CallingObjectId();
 
-                                    LCDCopy((LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(GH.UiInstance.LcdSave));
+                                    LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(LCD));
                                     GH.UiInstance.ScreenPrgId = TmpPrgId;
                                     GH.UiInstance.ScreenObjId = TmpObjId;
                                     GH.UiInstance.ScreenBlocked = 1;
@@ -5393,11 +5331,11 @@ namespace Ev3CoreUnsafe.Cui
                             }
                             else
                             {
-                                LCDCopy((LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), Unsafe.SizeOf<GH.UiInstance.LcdSafe>());
+                                LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
                                 GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
 
-                                GH.UiInstance.ScreenPrgId = -1;
-                                GH.UiInstance.ScreenObjId = -1;
+                                GH.UiInstance.ScreenPrgId = ushort.MaxValue;
+                                GH.UiInstance.ScreenObjId = ushort.MaxValue;
                                 GH.UiInstance.ScreenBlocked = 0;
                             }
                         }
@@ -5444,13 +5382,13 @@ namespace Ev3CoreUnsafe.Cui
 
                 case GET_STRING:
                     {
-                        if (GH.UiInstance.Keys)
+                        if (GH.UiInstance.Keys != 0)
                         {
                             Lng = *(DATA8*)GH.Lms.PrimParPointer();
                             pDestination = (DATA8*)GH.Lms.PrimParPointer();
                             pSource = (DATA8*)GH.UiInstance.KeyBuffer;
 
-                            while ((GH.UiInstance.Keys) && (Lng))
+                            while ((GH.UiInstance.Keys != 0) && (Lng != 0))
                             {
                                 *pDestination = *pSource;
                                 pDestination++;
@@ -5471,7 +5409,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 case KEY:
                     {
-                        if (GH.UiInstance.KeyBufIn)
+                        if (GH.UiInstance.KeyBufIn != 0)
                         {
                             *(DATA8*)GH.Lms.PrimParPointer() = (DATA8)GH.UiInstance.KeyBuffer[0];
                             GH.UiInstance.KeyBufIn--;
@@ -5520,9 +5458,9 @@ namespace Ev3CoreUnsafe.Cui
 
                 case ADDRESS:
                     {
-                        if (GH.UiInstance.Keys)
+                        if (GH.UiInstance.Keys != 0)
                         {
-                            *(DATA32*)GH.Lms.PrimParPointer() = (DATA32)atol((const char*)GH.UiInstance.KeyBuffer);
+                            *(DATA32*)GH.Lms.PrimParPointer() = (DATA32)CommonHelper.atol(GH.UiInstance.KeyBuffer);
                             GH.UiInstance.Keys = 0;
                         }
                         else
@@ -5535,7 +5473,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 case CODE:
                     {
-                        if (GH.UiInstance.Keys)
+                        if (GH.UiInstance.Keys != 0)
                         {
                             Length = *(DATA32*)GH.Lms.PrimParPointer();
                             pImage = *(DATA32*)GH.Lms.PrimParPointer();
@@ -5566,12 +5504,12 @@ namespace Ev3CoreUnsafe.Cui
 
                                 Length -= sizeof(IMGHEAD) + sizeof(OBJHEAD);
                                 Length--;
-                                while ((GH.UiInstance.Keys) && (Length))
+                                while ((GH.UiInstance.Keys != 0) && (Length != 0))
                                 {
                                     Tmp = (IMGDATA)(AtoN(*pSource) << 4);
                                     pSource++;
                                     GH.UiInstance.Keys--;
-                                    if (GH.UiInstance.Keys)
+                                    if (GH.UiInstance.Keys != 0)
                                     {
                                         Tmp += (IMGDATA)(AtoN(*pSource));
                                         pSource++;
@@ -5589,9 +5527,12 @@ namespace Ev3CoreUnsafe.Cui
                                 *pDestination = opOBJECT_END;
                                 Size++;
                                 (*pImgHead).ImageSize = (uint)Size;
-                                memset(GH.UiInstance.Globals, 0, sizeof(GH.UiInstance.Globals));
 
-                                *(DATA32*)GH.Lms.PrimParPointer() = (DATA32)GH.UiInstance.Globals;
+								// TODO: idk what is it 
+								// CommonHelper.memset(GH.UiInstance.Globals, 0, sizeof(GH.UiInstance.Globals));
+								GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
+
+								*(DATA32*)GH.Lms.PrimParPointer() = (DATA32)GH.UiInstance.Globals;
                                 *(DATA8*)GH.Lms.PrimParPointer() = 1;
                             }
                         }
@@ -5610,16 +5551,16 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            Data8 = (DATA8)strlen((char*)GH.UiInstance.HwVers) + 1;
+                            Data8 = (DATA8)(CommonHelper.strlen(GH.UiInstance.HwVers) + 1);
                             if ((Lng > Data8) || (Lng == -1))
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.HwVers);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.HwVers));
                         }
                     }
                     break;
@@ -5631,16 +5572,16 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            Data8 = (DATA8)strlen((char*)GH.UiInstance.FwVers) + 1;
+                            Data8 = (DATA8)(CommonHelper.strlen(GH.UiInstance.FwVers) + 1);
                             if ((Lng > Data8) || (Lng == -1))
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.FwVers);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.FwVers));
                         }
                     }
                     break;
@@ -5652,16 +5593,16 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            Data8 = (DATA8)strlen((char*)GH.UiInstance.FwBuild) + 1;
+                            Data8 = (DATA8)(CommonHelper.strlen(GH.UiInstance.FwBuild) + 1);
                             if ((Lng > Data8) || (Lng == -1))
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.FwBuild);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.FwBuild));
                         }
                     }
                     break;
@@ -5673,16 +5614,16 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            Data8 = (DATA8)strlen((char*)GH.UiInstance.OsVers) + 1;
+                            Data8 = (DATA8)(CommonHelper.strlen(GH.UiInstance.OsVers) + 1);
                             if ((Lng > Data8) || (Lng == -1))
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.OsVers);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.OsVers));
                         }
                     }
                     break;
@@ -5694,39 +5635,41 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            Data8 = (DATA8)strlen((char*)GH.UiInstance.OsBuild) + 1;
+                            Data8 = (DATA8)(CommonHelper.strlen(GH.UiInstance.OsBuild) + 1);
                             if ((Lng > Data8) || (Lng == -1))
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.OsBuild);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.OsBuild));
                         }
                     }
                     break;
 
                 case GET_VERSION:
                     {
-                        snprintf((char*)GH.UiInstance.ImageBuffer, IMAGEBUFFER_SIZE, "%s V%4.2f%c(%s %s)", PROJECT, VERS, SPECIALVERS, __DATE__, __TIME__);
+                        var __DATE__ = "Jul 27 2012";
+                        var __TIME__ = "21:06:19";
+						CommonHelper.snprintf((sbyte*)GH.UiInstance.ImageBuffer, IMAGEBUFFER_SIZE, $"{PROJECT} V{CommonHelper.GetString(VERS, 4, 2)}{SPECIALVERS}({__DATE__} {__TIME__})");
                         Lng = *(DATA8*)GH.Lms.PrimParPointer();
                         pDestination = (DATA8*)GH.Lms.PrimParPointer();
                         pSource = (DATA8*)GH.UiInstance.ImageBuffer;
 
                         if (GH.VMInstance.Handle >= 0)
                         {
-                            Data8 = (DATA8)strlen((char*)GH.UiInstance.ImageBuffer) + 1;
+                            Data8 = (DATA8)(CommonHelper.strlen((sbyte*)GH.UiInstance.ImageBuffer) + 1);
                             if ((Lng > Data8) || (Lng == -1))
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.ImageBuffer);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.ImageBuffer));
                         }
                     }
                     break;
@@ -5743,11 +5686,11 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 Lng = Data8;
                             }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
+                            pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Lng);
                         }
                         if (pDestination != null)
                         {
-                            snprintf((char*)pDestination, Lng, "%s", GH.UiInstance.IpAddr);
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.IpAddr));
                         }
 
                     }
@@ -5837,7 +5780,7 @@ namespace Ev3CoreUnsafe.Cui
             DATA8 Cmd;
             DATA8* pSource;
             DSPSTAT DspStat = DSPSTAT.BUSYBREAK;
-            DATA8 Buffer[50];
+            DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(50);
             DATA8 Data8;
             DATA16 Data16;
             DATA32 Data32;
@@ -5869,7 +5812,7 @@ namespace Ev3CoreUnsafe.Cui
                         Figures = *(DATA8*)GH.Lms.PrimParPointer();
                         Decimals = *(DATA8*)GH.Lms.PrimParPointer();
 
-                        snprintf((char*)Buffer, 32, "%*.*f", Figures, Decimals, DataF);
+                        CommonHelper.snprintf(Buffer, 32, CommonHelper.GetString(DataF, Figures, Decimals));
                         cUiWriteString(Buffer);
 
                         DspStat = DSPSTAT.NOBREAK;
@@ -5880,7 +5823,7 @@ namespace Ev3CoreUnsafe.Cui
                     { // write time, prgid, objid, ip
 
                         pSource = (DATA8*)GH.Lms.PrimParPointer();
-                        snprintf((char*)Buffer, 50, "####[ %09u %01u %03u %06u %s]####\r\n", GetTime(), GH.Lms.CurrentProgramId(), GH.Lms.CallingObjectId(), CurrentObjectIp(), pSource);
+                        CommonHelper.snprintf(Buffer, 50, $"####[ {GH.Lms.GetTime()} {GH.Lms.CurrentProgramId()} {GH.Lms.CallingObjectId()} {GH.Lms.CurrentObjectIp()} {CommonHelper.GetString(pSource)}]####\r\n");
                         cUiWriteString(Buffer);
                         cUiFlush();
                         DspStat = DSPSTAT.NOBREAK;
@@ -5902,21 +5845,21 @@ namespace Ev3CoreUnsafe.Cui
 
                         pSource = (DATA8*)pGlobal;
 
-                        cUiWriteString((DATA8*)"\r\n    ");
+                        cUiWriteString("\r\n    ".AsSbytePointer());
                         for (Tmp = 0; Tmp < Data32; Tmp++)
                         {
-                            snprintf((char*)Buffer, 7, "%02X ", pSource[Tmp] & 0xFF);
+                            CommonHelper.snprintf(Buffer, 7, $"{pSource[Tmp] & 0xFF} ");
                             cUiWriteString(Buffer);
                             if (((Tmp & 0x3) == 0x3) && ((Tmp & 0xF) != 0xF))
                             {
-                                cUiWriteString((DATA8*)" ");
+                                cUiWriteString(" ".AsSbytePointer());
                             }
                             if (((Tmp & 0xF) == 0xF) && (Tmp < (Data32 - 1)))
                             {
-                                cUiWriteString((DATA8*)"\r\n    ");
+                                cUiWriteString("\r\n    ".AsSbytePointer());
                             }
                         }
-                        cUiWriteString((DATA8*)"\r\n");
+                        cUiWriteString("\r\n".AsSbytePointer());
                         DspStat = DSPSTAT.NOBREAK;
                     }
                     break;
@@ -5938,13 +5881,16 @@ namespace Ev3CoreUnsafe.Cui
                     {
                         Data8 = *(DATA8*)GH.Lms.PrimParPointer();
 
-                        if (Data8)
+                        if (Data8 != 0)
                         {
-                            GH.UiInstance.Warning |= WARNING_BUSY;
+                            unchecked { GH.UiInstance.Warning |= (sbyte)WARNING_BUSY; }
                         }
                         else
                         {
-                            GH.UiInstance.Warning &= ~WARNING_BUSY;
+                            unchecked
+                            {
+                                GH.UiInstance.Warning &= (sbyte)~WARNING_BUSY;
+                            }
                         }
 
                         DspStat = DSPSTAT.NOBREAK;
@@ -5956,11 +5902,11 @@ namespace Ev3CoreUnsafe.Cui
                         Data8 = *(DATA8*)GH.Lms.PrimParPointer();
                         if (Data8 != DATA8_NAN)
                         {
-                            snprintf((char*)Buffer, 7, "%d", (int)Data8);
+                            CommonHelper.snprintf(Buffer, 7, $"{(int)Data8}");
                         }
                         else
                         {
-                            snprintf((char*)Buffer, 7, "nan");
+                            CommonHelper.snprintf(Buffer, 7, "nan");
                         }
                         cUiWriteString(Buffer);
 
@@ -5973,11 +5919,11 @@ namespace Ev3CoreUnsafe.Cui
                         Data16 = *(DATA16*)GH.Lms.PrimParPointer();
                         if (Data16 != DATA16_NAN)
                         {
-                            snprintf((char*)Buffer, 9, "%d", Data16 & 0xFFFF);
+                            CommonHelper.snprintf(Buffer, 9, $"{Data16 & 0xFFFF}");
                         }
                         else
                         {
-                            snprintf((char*)Buffer, 7, "nan");
+                            CommonHelper.snprintf(Buffer, 7, "nan");
                         }
                         cUiWriteString(Buffer);
 
@@ -5990,11 +5936,11 @@ namespace Ev3CoreUnsafe.Cui
                         Data32 = *(DATA32*)GH.Lms.PrimParPointer();
                         if (Data32 != DATA32_NAN)
                         {
-                            snprintf((char*)Buffer, 14, "%ld", (long unsigned int)(Data32 & 0xFFFFFFFF));
+                            CommonHelper.snprintf(Buffer, 14, $"{(ulong)(Data32 & 0xFFFFFFFF)}");
                         }
                         else
                         {
-                            snprintf((char*)Buffer, 7, "nan");
+                            CommonHelper.snprintf(Buffer, 7, "nan");
                         }
 
                         cUiWriteString(Buffer);
@@ -6006,7 +5952,7 @@ namespace Ev3CoreUnsafe.Cui
                 case VALUEF:
                     {
                         DataF = *(DATAF*)GH.Lms.PrimParPointer();
-                        snprintf((char*)Buffer, 24, "%f", DataF);
+                        CommonHelper.snprintf(Buffer, 24, $"{DataF}");
                         cUiWriteString(Buffer);
 
                         DspStat = DSPSTAT.NOBREAK;
@@ -6035,10 +5981,13 @@ namespace Ev3CoreUnsafe.Cui
                     {
                         Data8 = *(DATA8*)GH.Lms.PrimParPointer();
 
-                        if (GH.UiInstance.PowerFile >= 0)
-                        {
-                            ioctl(GH.UiInstance.PowerFile, 0, (size_t) & Data8);
-                        }
+                        // TODO: powerfile handler
+                        //if (GH.UiInstance.PowerFile >= 0)
+                        //{
+                        //    ioctl(GH.UiInstance.PowerFile, 0, (size_t) & Data8);
+                        //}
+
+                        GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
 
                         DspStat = DSPSTAT.NOBREAK;
                     }
@@ -6048,13 +5997,13 @@ namespace Ev3CoreUnsafe.Cui
                     {
                         No = *(DATA8*)GH.Lms.PrimParPointer();
 
-                        if (No)
+                        if (No != 0)
                         {
-                            SetTerminalEnable(1);
+                            GH.Lms.SetTerminalEnable(1);
                         }
                         else
                         {
-                            SetTerminalEnable(0);
+							GH.Lms.SetTerminalEnable(0);
                         }
 
                         DspStat = DSPSTAT.NOBREAK;
@@ -6107,7 +6056,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 default:
                     {
-                        DspStat = FAILBREAK;
+                        DspStat = DSPSTAT.FAILBREAK;
                     }
                     break;
 

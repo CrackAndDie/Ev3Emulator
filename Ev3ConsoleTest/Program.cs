@@ -2,64 +2,37 @@
 using EV3DecompilerLib.Decompile;
 using EV3DecompilerLib.Recognize;
 using EV3ModelLib;
+using System;
 using System.Drawing;
+using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ev3ConsoleTest
 {
-    unsafe struct A
-    {
-        public byte* x;
-        public int y;
-        public int z;
-
-		public A()
-		{
-			x = (byte*)Unsafe.AsPointer(ref GC.AllocateArray<byte>(4, true)[0]);
-		}
-	}
-
-	unsafe struct B
+	public unsafe struct TYPES // if data type changes - remember to change "cInputTypeDataInit" !
 	{
-		public byte* x;
-		public int y;
-		public int z;
-
-		public B()
-		{
-		}
+		public fixed byte Name[11 + 1]; //!< Device name
+		public sbyte Type;                       //!< Device type
+		public sbyte Connection;
+		public sbyte Mode;                       //!< Device mode
+		public sbyte DataSets;
+		public sbyte Format;
+		public sbyte Figures;
+		public sbyte Decimals;
+		public sbyte Views;
+		public float RawMin;                     //!< Raw minimum value      (e.c. 0.0)
+		public float RawMax;                     //!< Raw maximum value      (e.c. 1023.0)
+		public float PctMin;                     //!< Percent minimum value  (e.c. -100.0)
+		public float PctMax;                     //!< Percent maximum value  (e.c. 100.0)
+		public float SiMin;                      //!< SI unit minimum value  (e.c. -100.0)
+		public float SiMax;                      //!< SI unit maximum value  (e.c. 100.0)
+		public ushort InvalidTime;                //!< mS from type change to valid data
+		public ushort IdValue;                    //!< Device id value        (e.c. 0 ~ UART)
+		public sbyte Pins;                       //!< Device pin setup
+		public fixed sbyte Symbol[4 + 1];  //!< SI unit symbol
+		public ushort Align;
 	}
-
-	unsafe struct B2
-	{
-		public int y;
-		public int z;
-		public byte* x;
-
-		public B2()
-		{
-		}
-	}
-
-	unsafe struct C
-    {
-        public A a;
-        public B b = *(B*)Unsafe.AsPointer(ref GC.AllocateArray<byte>(Unsafe.SizeOf<B>(), pinned: true)[0]);
-
-		public C()
-		{
-		}
-
-		public void Init()
-        {
-		}
-    }
-
-    unsafe static class gh
-    {
-        public static C C;
-    }
 
 	internal class Program
     {
@@ -90,14 +63,14 @@ namespace Ev3ConsoleTest
 			//         int sm = Unsafe.SizeOf<B>();
 			//int a = 0;
 
-			var entry = GC.AllocateArray<byte>(16, pinned: true);
-			var entryPtr = (byte*)Unsafe.AsPointer(ref entry[0]);
-			entryPtr[12] = 4;
-			entryPtr[13] = 5;
-			void* tst = (void*)entryPtr;
-			B2* tstF = (B2*)tst;
-			int sm = Unsafe.SizeOf<B2>();
-			int a = 0;
+			//var entry = GC.AllocateArray<byte>(16, pinned: true);
+			//var entryPtr = (byte*)Unsafe.AsPointer(ref entry[0]);
+			//entryPtr[12] = 4;
+			//entryPtr[13] = 5;
+			//void* tst = (void*)entryPtr;
+			//B2* tstF = (B2*)tst;
+			//int sm = Unsafe.SizeOf<B2>();
+			//int a = 0;
 
 			//A* tstA = (A*)tst;
 
@@ -105,6 +78,11 @@ namespace Ev3ConsoleTest
 			//B* m = (B*)Unsafe.AsPointer(ref gh.C.b);
 			//ma->y = 3;
 			//m->y = 3;
+
+			var a = 3132.424f;
+			var stt = a.ToString("0.00");
+
+			var a3 = sizeof(TYPES);
 		}
 
 		private static string GetText(byte[] data, string path)

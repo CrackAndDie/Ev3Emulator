@@ -98,19 +98,9 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public DATA8 Status;
 		public DATA8 Type;
 		public DATA8 Mode;
-		public UBYTE* DeviceData;
+		public fixed UBYTE DeviceData[DEVICE_MAX_DATA];
 		public DATA8 CheckSum;
 		public UBYTE FirstCookie;
-
-		public DAISY_DEVICE_DATA()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			DeviceData = CommonHelper.Pointer1d<UBYTE>(DEVICE_MAX_DATA);
-		}
 	}
 
 	public unsafe struct DAISY_INFO

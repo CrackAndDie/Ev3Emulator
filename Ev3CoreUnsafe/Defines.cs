@@ -681,14 +681,14 @@ namespace Ev3CoreUnsafe
 
 		#region bytecodes.h
 		/*! \page system System Configuration
- *
- *  <hr size="1"/>
- *
- *  Following defines sets the system configuration and limitations.\n
- *  Defines with preceding "vm" is visible for the byte code assembler\n
- *
- *  \verbatim
- */
+		 *
+		 *  <hr size="1"/>
+		 *
+		 *  Following defines sets the system configuration and limitations.\n
+		 *  Defines with preceding "vm" is visible for the byte code assembler\n
+		 *
+		 *  \verbatim
+		 */
 
 		public const float BYTECODE_VERSION = 0.50f;
 

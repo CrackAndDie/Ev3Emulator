@@ -180,19 +180,12 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public OBJSTAT StatusChange;               //!< Program status change
 		public RESULT Result;                     //!< Program result (OK, BUSY, FAIL)
 
-		public BRKP* Brkp;      //!< Storage for breakpoint logic
+		public fixed UBYTE Brkp[8 * MAX_BREAKPOINTS];      //!< Storage for breakpoint logic // 8 - is a sizeof(BRKP)
 
-		public LABEL* Label;          //!< Storage for labels
+		public fixed UBYTE Label[4 * MAX_LABELS];          //!< Storage for labels // 4 - is a sizeof(LABEL)
 		public UWORD Debug;                      //!< Debug flag
 
-		public UBYTE* Name;
-
-		public PRG()
-		{
-			Brkp = CommonHelper.Pointer1d<BRKP>(MAX_BREAKPOINTS, true);
-			Label = CommonHelper.Pointer1d<LABEL>(MAX_LABELS, true);
-			Name = CommonHelper.Pointer1d<UBYTE>(FILENAME_SIZE, false);
-		}
+		public fixed UBYTE Name[FILENAME_SIZE];
 	}
 
 	/*! \struct TYPES
@@ -200,7 +193,7 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 	 */
 	public unsafe struct TYPES // if data type changes - remember to change "cInputTypeDataInit" !
 	{
-		public UBYTE* Name; //!< Device name
+		public fixed UBYTE Name[TYPE_NAME_LENGTH + 1]; //!< Device name
 		public DATA8 Type;                       //!< Device type
 		public DATA8 Connection;
 		public DATA8 Mode;                       //!< Device mode
@@ -218,31 +211,19 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public UWORD InvalidTime;                //!< mS from type change to valid data
 		public UWORD IdValue;                    //!< Device id value        (e.c. 0 ~ UART)
 		public DATA8 Pins;                       //!< Device pin setup
-		public SBYTE* Symbol;  //!< SI unit symbol
+		public fixed SBYTE Symbol[SYMBOL_LENGTH + 1];  //!< SI unit symbol
 		public UWORD Align;
-
-		public TYPES()
-		{
-			Symbol = CommonHelper.Pointer1d<SBYTE>(SYMBOL_LENGTH + 1, false);
-			Name = CommonHelper.Pointer1d<UBYTE>(TYPE_NAME_LENGTH + 1, false);
-		}
 	}
 
 	public unsafe struct COLORSTRUCT
 	{
-		public ULONG** Calibration;
-		public UWORD* CalLimits;
+		public fixed ULONG Calibration0[COLORS];
+		public fixed ULONG Calibration1[COLORS];
+		public fixed ULONG Calibration2[COLORS];
+		public fixed UWORD CalLimits[CALPOINTS - 1];
 		public UWORD Crc;
-		public UWORD* ADRaw;
-		public UWORD* SensorRaw;
-
-		public COLORSTRUCT()
-		{
-			Calibration = CommonHelper.Pointer2d<ULONG>(CALPOINTS, COLORS);
-			CalLimits = CommonHelper.Pointer1d<UWORD>(CALPOINTS - 1);
-			ADRaw = CommonHelper.Pointer1d<UWORD>(COLORS);
-			SensorRaw = CommonHelper.Pointer1d<UWORD>(COLORS);
-		}
+		public fixed UWORD ADRaw[COLORS];
+		public fixed UWORD SensorRaw[COLORS];
 	}
 
 	/*! \page AnalogModuleMemory
@@ -258,87 +239,62 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 	public unsafe struct ANALOG
 	{
-		public DATA16* InPin1;         //!< Analog value at input port connection 1
-		public DATA16* InPin6;         //!< Analog value at input port connection 6
-		public DATA16* OutPin5;       //!< Analog value at output port connection 5
+		public fixed DATA16 InPin1[INPUTS];         //!< Analog value at input port connection 1
+		public fixed DATA16 InPin6[INPUTS];         //!< Analog value at input port connection 6
+		public fixed DATA16 OutPin5[OUTPUTS];       //!< Analog value at output port connection 5
 		public DATA16 BatteryTemp;            //!< Battery temperature
 		public DATA16 MotorCurrent;           //!< Current flowing to motors
 		public DATA16 BatteryCurrent;         //!< Current flowing from the battery
 		public DATA16 Cell123456;             //!< Voltage at battery cell 1, 2, 3,4, 5, and 6
-		public DATA16** Pin1;      //!< Raw value from analog device
-		public DATA16** Pin6;      //!< Raw value from analog device
-		public UWORD* Actual;
-		public UWORD* LogIn;
-		public UWORD* LogOut;
-		public COLORSTRUCT* NxtCol;
-		public DATA16* OutPin5Low;    //!< Analog value at output port connection 5 when connection 6 is low
+		public fixed DATA16 Pin10[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin11[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin12[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin13[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin60[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin61[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin62[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed DATA16 Pin63[DEVICE_LOGBUF_SIZE];      //!< Raw value from analog device
+		public fixed UWORD Actual[INPUTS];
+		public fixed UWORD LogIn[INPUTS];
+		public fixed UWORD LogOut[INPUTS];
+		public fixed UBYTE NxtCol[72 * INPUTS]; // 72 - is a sizeof(COLORSTRUCT)
+		public fixed DATA16 OutPin5Low[OUTPUTS];    //!< Analog value at output port connection 5 when connection 6 is low
 
-		public DATA8* Updated;
+		public fixed DATA8 Updated[INPUTS];
 
-		public DATA8* InDcm;          //!< Input port device types
-		public DATA8* InConn;
+		public fixed DATA8 InDcm[INPUTS];          //!< Input port device types
+		public fixed DATA8 InConn[INPUTS];
 
-		public DATA8* OutDcm;        //!< Output port device types
-		public DATA8* OutConn;
+		public fixed DATA8 OutDcm[OUTPUTS];        //!< Output port device types
+		public fixed DATA8 OutConn[OUTPUTS];
 		public UWORD PreemptMilliSeconds;
-
-		public ANALOG()
-		{
-			Init();
-        }
-
-		public void Init()
-		{
-            InPin1 = CommonHelper.Pointer1d<DATA16>(INPUTS);
-            InPin6 = CommonHelper.Pointer1d<DATA16>(INPUTS);
-            OutPin5 = CommonHelper.Pointer1d<DATA16>(OUTPUTS);
-            Pin1 = CommonHelper.Pointer2d<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);
-            Pin6 = CommonHelper.Pointer2d<DATA16>(INPUTS, DEVICE_LOGBUF_SIZE);
-            Actual = CommonHelper.Pointer1d<UWORD>(INPUTS);
-            LogIn = CommonHelper.Pointer1d<UWORD>(INPUTS);
-            LogOut = CommonHelper.Pointer1d<UWORD>(INPUTS);
-            NxtCol = CommonHelper.Pointer1d<COLORSTRUCT>(INPUTS, true);
-            OutPin5Low = CommonHelper.Pointer1d<DATA16>(OUTPUTS);
-            Updated = CommonHelper.Pointer1d<DATA8>(INPUTS);
-            InDcm = CommonHelper.Pointer1d<DATA8>(INPUTS);
-            InConn = CommonHelper.Pointer1d<DATA8>(INPUTS);
-            OutDcm = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
-            OutConn = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
-        }
 	}
 
 	public unsafe struct UART
 	{
-		public TYPES** TypeData; //!< TypeData
+		public fixed UBYTE TypeData0[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
+		public fixed UBYTE TypeData1[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
+		public fixed UBYTE TypeData2[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
+		public fixed UBYTE TypeData3[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
 
-		public DATA8** Raw;
+		public fixed DATA8 Raw0[UART_DATA_LENGTH];
+		public fixed DATA8 Raw1[UART_DATA_LENGTH];
+		public fixed DATA8 Raw2[UART_DATA_LENGTH];
+		public fixed DATA8 Raw3[UART_DATA_LENGTH];
 
-		public DATA8* Status;                     //!< Status
-		public DATA8** Output;   //!< Bytes to UART device
-		public DATA8* OutputLength;
-
-		public UART()
-		{
-			TypeData = CommonHelper.Pointer2d<TYPES>(INPUTS, MAX_DEVICE_MODES, true);
-			Raw = CommonHelper.Pointer2d<DATA8>(INPUTS, UART_DATA_LENGTH);
-			Status = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			Output = CommonHelper.Pointer2d<DATA8>(INPUTS, UART_DATA_LENGTH);
-			OutputLength = CommonHelper.Pointer1d<DATA8>(INPUTS);
-		}
+		public fixed DATA8 Status[INPUTS];                     //!< Status
+		public fixed DATA8 Output0[UART_DATA_LENGTH];   //!< Bytes to UART device
+		public fixed DATA8 Output1[UART_DATA_LENGTH];   //!< Bytes to UART device
+		public fixed DATA8 Output2[UART_DATA_LENGTH];   //!< Bytes to UART device
+		public fixed DATA8 Output3[UART_DATA_LENGTH];   //!< Bytes to UART device
+		public fixed DATA8 OutputLength[INPUTS];
 	}
 
 	public unsafe struct DEVCON
 	{
-		public DATA8* Connection;
-		public DATA8* Type;
-		public DATA8* Mode;
-
-		public DEVCON()
-		{
-			Connection = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			Type = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			Mode = CommonHelper.Pointer1d<DATA8>(INPUTS);
-		}
+		public fixed DATA8 Connection[INPUTS];
+		public fixed DATA8 Type[INPUTS];
+		public fixed DATA8 Mode[INPUTS];
 	}
 
 	public unsafe struct UARTCTL
@@ -350,24 +306,23 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 	public unsafe struct IIC
 	{
-		public TYPES** TypeData; //!< TypeData
+		public fixed UBYTE TypeData0[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
+		public fixed UBYTE TypeData1[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
+		public fixed UBYTE TypeData2[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
+		public fixed UBYTE TypeData3[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
 
-		public DATA8** Raw;      //!< Raw value from IIC device
+		public fixed DATA8 Raw0[IIC_DATA_LENGTH];      //!< Raw value from IIC device
+		public fixed DATA8 Raw1[IIC_DATA_LENGTH];      //!< Raw value from IIC device
+		public fixed DATA8 Raw2[IIC_DATA_LENGTH];      //!< Raw value from IIC device
+		public fixed DATA8 Raw3[IIC_DATA_LENGTH];      //!< Raw value from IIC device
 
-		public DATA8* Status;                     //!< Status
-		public DATA8* Changed;
-		public DATA8** Output;    //!< Bytes to IIC device
-		public DATA8* OutputLength;
-
-		public IIC()
-		{
-			TypeData = CommonHelper.Pointer2d<TYPES>(INPUTS, MAX_DEVICE_MODES, true);
-			Raw = CommonHelper.Pointer2d<DATA8>(INPUTS, IIC_DATA_LENGTH);
-			Status = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			Changed = CommonHelper.Pointer1d<DATA8>(INPUTS);
-			Output = CommonHelper.Pointer2d<DATA8>(INPUTS, IIC_DATA_LENGTH);
-			OutputLength = CommonHelper.Pointer1d<DATA8>(INPUTS);
-		}
+		public fixed DATA8 Status[INPUTS];                     //!< Status
+		public fixed DATA8 Changed[INPUTS];
+		public fixed DATA8 Output0[IIC_DATA_LENGTH];    //!< Bytes to IIC device
+		public fixed DATA8 Output1[IIC_DATA_LENGTH];    //!< Bytes to IIC device
+		public fixed DATA8 Output2[IIC_DATA_LENGTH];    //!< Bytes to IIC device
+		public fixed DATA8 Output3[IIC_DATA_LENGTH];    //!< Bytes to IIC device
+		public fixed DATA8 OutputLength[INPUTS];
 	}
 
 	public unsafe struct IICCTL
@@ -384,15 +339,9 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Repeat;
 		public DATA16 Time;
 		public DATA8 WrLng;
-		public DATA8* WrData;
+		public fixed DATA8 WrData[IIC_DATA_LENGTH];
 		public DATA8 RdLng;
-		public DATA8* RdData;
-
-		public IICDAT()
-		{
-			WrData = CommonHelper.Pointer1d<DATA8>(IIC_DATA_LENGTH);
-			RdData = CommonHelper.Pointer1d<DATA8>(IIC_DATA_LENGTH);
-		}
+		public fixed DATA8 RdData[IIC_DATA_LENGTH];
 	}
 
 	public unsafe struct IICSTR
@@ -401,31 +350,20 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA16 Time;
 		public DATA8 Type;
 		public DATA8 Mode;
-		public DATA8* Manufacturer;
-		public DATA8* SensorType;
+		public fixed DATA8 Manufacturer[IIC_NAME_LENGTH + 1];
+		public fixed DATA8 SensorType[IIC_NAME_LENGTH + 1];
 		public DATA8 SetupLng;
 		public ULONG SetupString;
 		public DATA8 PollLng;
 		public ULONG PollString;
 		public DATA8 ReadLng;
-
-		public IICSTR()
-		{
-			Manufacturer = CommonHelper.Pointer1d<DATA8>(IIC_NAME_LENGTH + 1);
-			SensorType = CommonHelper.Pointer1d<DATA8>(IIC_NAME_LENGTH + 1);
-		}
 	}
 
 	public unsafe struct TSTPIN
 	{
 		public DATA8 Port;
 		public DATA8 Length;
-		public DATA8* String;
-
-		public TSTPIN()
-		{
-			String = CommonHelper.Pointer1d<DATA8>(TST_PIN_LENGTH + 1);
-		}
+		public fixed DATA8 String[TST_PIN_LENGTH + 1];
 	}
 
 	public unsafe struct TSTUART
@@ -433,42 +371,17 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA32 Bitrate;
 		public DATA8 Port;
 		public DATA8 Length;
-		public DATA8* String;
-
-		public TSTUART()
-		{
-			String = CommonHelper.Pointer1d<DATA8>(TST_UART_LENGTH);
-		}
+		public fixed DATA8 String[TST_UART_LENGTH];
 	}
 
 	public unsafe struct UI
 	{
-		public DATA8* Pressed;                   //!< Pressed status
-
-		public UI()
-		{
-			Init();
-        }
-
-        public void Init()
-        {
-            Pressed = CommonHelper.Pointer1d<DATA8>(BUTTONS);
-        }
+		public fixed DATA8 Pressed[BUTTONS];                   //!< Pressed status
     }
 
 	public unsafe struct LCD
 	{
-		public UBYTE* Lcd;
-
-		public LCD()
-		{
-			Init();
-        }
-
-		public void Init()
-		{
-            Lcd = CommonHelper.Pointer1d<UBYTE>(LCD_BUFFER_SIZE);
-        }
+		public fixed UBYTE Lcd[LCD_BUFFER_SIZE];
 	}
 
 	public unsafe struct SOUND
