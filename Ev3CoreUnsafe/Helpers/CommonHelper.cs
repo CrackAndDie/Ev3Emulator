@@ -354,5 +354,14 @@ namespace Ev3CoreUnsafe.Helpers
 			}
 			return null;
 		}
+
+		public unsafe static byte* memcpy(byte* dst, byte* src, int num)
+		{
+			for (int i = 0; i < num; ++i)
+			{
+				dst[i] = src[i];
+			}
+			return dst;
+		}
 	}
 }

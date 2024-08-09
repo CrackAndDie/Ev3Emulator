@@ -1734,6 +1734,51 @@ namespace Ev3CoreUnsafe
 		public const int POOL_TYPE_FILE = 1;
 		#endregion
 
+		#region c_memory.c
+		public const int OPEN_FOR_WRITE = 1;
+		public const int OPEN_FOR_APPEND = 2;
+		public const int OPEN_FOR_READ = 3;
+		public const int OPEN_FOR_LOG = 4;
+
+		public const int SORT_NONE = 0;
+		public const int SORT_PRJS = 1;
+		public const int SORT_APPS = 2;
+		public const int SORT_TOOLS = 3;
+
+		public const int SORT_TYPES = 4;
+
+		public static DATA8[] NoOfFavourites = new DATA8[SORT_TYPES]
+		{
+			0,  // -
+			6,  // Prjs
+			5,  // Apps
+			8   // Tools
+		};
+
+		public static Dictionary<DATA8, DATA8> FavouriteExts = new Dictionary<sbyte, DATA8>()
+		{
+			[TYPE_BYTECODE] = 1,
+			[TYPE_SOUND]    = 2,
+			[TYPE_GRAPHICS] = 3,
+			[TYPE_TEXT]     = 4,
+		};
+
+		public static string[,] pFavourites = new string[SORT_TYPES, 8]
+		{	// Priority
+			//  0             1                 2                 3                 4
+			{ null,         null,			  null,				null,			  null,					null,         null,				    null,},
+			{ "",           "BrkProg_SAVE",   "BrkDL_SAVE",     "SD_Card",        "USB_Stick",          "TEST",       null,                 null },
+			{ "Port View",  "Motor Control",  "IR Control",     "Brick Program",  "Brick Datalog",		null,		  null,					null },
+			{ "Volume",     "Sleep",          "Bluetooth",      "WiFi",           "Brick Info",         "Test",       "Performance",        "Debug" }
+		};
+
+		// not really defined there
+		public const int DT_LNK = 1; // the same shite as dir
+		public const int DT_DIR = 1;
+		public const int DT_FILE = 3;
+		public const int DT_REG = 3; // the same shite as file
+		#endregion
+
 		#region c_com.h
 		public const int SYSTEM_COMMAND_REPLY = 0x01;    //  System command, reply required
 		public const int SYSTEM_COMMAND_NO_REPLY = 0x81;  //  System command, reply not required
