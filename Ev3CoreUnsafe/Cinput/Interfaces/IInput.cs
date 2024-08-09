@@ -15,7 +15,7 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 
 		RESULT cInputExit();
 
-		void cInputChar(DATA8 Char);
+		// void cInputChar(DATA8 Char); - probably no need
 
 		void cInputUpdate(UWORD Time);
 

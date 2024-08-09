@@ -2195,6 +2195,14 @@ namespace Ev3CoreUnsafe
 		#endregion
 
 		#region c_input.c
+		public const int LINESIZE = 255;
+
+		public unsafe static IMGDATA* CLR_LAYER_CLR_CHANGES = (new byte[] { opINPUT_DEVICE, CLR_CHANGES, 0, 0, opINPUT_DEVICE, CLR_CHANGES, 0, 1, opINPUT_DEVICE, CLR_CHANGES, 0, 2, opINPUT_DEVICE, CLR_CHANGES, 0, 3, opOBJECT_END }).AsPointer();
+		public unsafe static IMGDATA* CLR_LAYER_CLR_BUMBED = (new byte[] { opUI_BUTTON, FLUSH, opOBJECT_END }).AsPointer();
+		public unsafe static IMGDATA* CLR_LAYER_OUTPUT_RESET = (new byte[] { opOUTPUT_RESET, 0, 15, opOBJECT_END }).AsPointer();
+		public unsafe static IMGDATA* CLR_LAYER_OUTPUT_CLR_COUNT = (new byte[] { opOUTPUT_CLR_COUNT, 0, 15, opOBJECT_END }).AsPointer();
+		public unsafe static IMGDATA* CLR_LAYER_INPUT_WRITE = (new byte[] { opINPUT_WRITE, 0, 0, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 1, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 2, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 3, 1, DEVCMD_RESET, opOBJECT_END }).AsPointer();
+
 		public const int SENSOR_RESOLUTION = 1023;
 
 		/* Remember this is ARM AD converter  - 3,3 VDC as max voltage      */
