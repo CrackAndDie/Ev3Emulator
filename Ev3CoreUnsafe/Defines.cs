@@ -2,6 +2,7 @@
 using Ev3CoreUnsafe.Extensions;
 using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Cui.Interfaces;
+using Ev3CoreUnsafe.Lms2012.Interfaces;
 
 namespace Ev3CoreUnsafe
 {
@@ -2202,6 +2203,17 @@ namespace Ev3CoreUnsafe
 		public unsafe static IMGDATA* CLR_LAYER_OUTPUT_RESET = (new byte[] { opOUTPUT_RESET, 0, 15, opOBJECT_END }).AsPointer();
 		public unsafe static IMGDATA* CLR_LAYER_OUTPUT_CLR_COUNT = (new byte[] { opOUTPUT_CLR_COUNT, 0, 15, opOBJECT_END }).AsPointer();
 		public unsafe static IMGDATA* CLR_LAYER_INPUT_WRITE = (new byte[] { opINPUT_WRITE, 0, 0, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 1, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 2, 1, DEVCMD_RESET, opINPUT_WRITE, 0, 3, 1, DEVCMD_RESET, opOBJECT_END }).AsPointer();
+
+		public unsafe static IMGDATA* STOP_LAYER = (new byte[] { opOUTPUT_PRG_STOP, opOBJECT_END }).AsPointer();
+
+		public unsafe static TYPES[] TypeDefault =
+		{
+			//   Name										   Type                   Connection                Mode	 DataSets     Format      Figures       Decimals      Views      RawMin         RawMax            PctMin         PctMax            SiMin        SiMax            Time             IdValue        Pins             Symbol
+			new TYPES("PORT ERROR".AsSbytePointer()) {		Type = TYPE_ERROR,   Connection = CONN_ERROR,   Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
+			new TYPES("NONE".AsSbytePointer())		 {		Type = TYPE_NONE,    Connection = CONN_NONE,    Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
+			new TYPES("UNKNOWN".AsSbytePointer())	 {		Type = TYPE_UNKNOWN, Connection = CONN_UNKNOWN, Mode = 0, DataSets = 1, Format = 1, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 1023.0f, PctMin = 0.0f, PctMax = 100.0f, SiMin = 0.0f, SiMax = 1023.0f, InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
+			new TYPES("".AsSbytePointer())			 { }
+		};
 
 		public const int SENSOR_RESOLUTION = 1023;
 

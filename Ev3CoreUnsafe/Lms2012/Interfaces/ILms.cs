@@ -213,6 +213,16 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Pins;                       //!< Device pin setup
 		public fixed SBYTE Symbol[SYMBOL_LENGTH + 1];  //!< SI unit symbol
 		public UWORD Align;
+
+		public TYPES() { }
+
+		public TYPES(sbyte* name)
+		{
+			fixed (UBYTE* p = &Name[0])
+			{
+				CommonHelper.strcpy((sbyte*)p, name);
+			}
+		}
 	}
 
 	public unsafe struct COLORSTRUCT

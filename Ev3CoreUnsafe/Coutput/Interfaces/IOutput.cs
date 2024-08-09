@@ -15,7 +15,7 @@ namespace Ev3CoreUnsafe.Coutput.Interfaces
 
 		RESULT cOutputExit();
 
-		void cOutputSetTypes(char* pTypes);
+		void cOutputSetTypes(DATA8* pTypes);
 		void cOutputSetType();
 		UBYTE cMotorGetBusyFlags();
 		void cMotorSetBusyFlags(UBYTE Flags);
