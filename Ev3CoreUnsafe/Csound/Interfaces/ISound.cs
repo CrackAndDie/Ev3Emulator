@@ -31,7 +31,7 @@ namespace Ev3CoreUnsafe.Csound.Interfaces
 		//*****************************************************************************
 
 		public int SoundDriverDescriptor;
-		public int hSoundFile;
+		public DATA8* hSoundFile; // the name of the file
 
 		public DATA8 SoundOwner;
 		public DATA8 cSoundState;

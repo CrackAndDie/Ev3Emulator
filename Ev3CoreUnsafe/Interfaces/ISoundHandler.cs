@@ -2,6 +2,6 @@
 {
 	public interface ISoundHandler
 	{
-		byte PlayChunk(byte[] data, byte len);
+		byte PlayChunk(byte[] data);
 	}
 }

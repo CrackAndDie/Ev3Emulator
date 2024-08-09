@@ -42,13 +42,13 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		ULONG CurrentObjectIp();                   // Get current object ip
 
-		void VmPrint(char* pString);                  // print string
+		void VmPrint(DATA8* pString);                  // print string
 
 		void SetTerminalEnable(DATA8 Value);          // Terminal enable/disable
 
 		DATA8 GetTerminalEnable();                 // Get terminal enable state
 
-		void GetResourcePath(char* pString, DATA8 MaxLength);// Get resource path
+		void GetResourcePath(DATA8* pString, DATA8 MaxLength);// Get resource path
 
 		void* VmMemoryResize(HANDLER Handle, DATA32 Elements);
 
