@@ -363,5 +363,31 @@ namespace Ev3CoreUnsafe.Helpers
 			}
 			return dst;
 		}
+
+		public unsafe static byte* memmove(byte* dst, byte* src, int num)
+		{
+			byte[] tmp = new byte[num];
+			for (int i = 0; i < num; ++i)
+			{
+				tmp[i] = src[i];
+			}
+			for (int i = 0; i < num; ++i)
+			{
+				dst[i] = tmp[i];
+			}
+			return dst;
+		}
+
+		public unsafe static int memcmp(byte* mem1, byte* mem2, int num)
+		{
+			for (int i = 0; i < num; ++i)
+			{
+				if (mem1[i] == mem2[i])
+					continue;
+
+				return mem1 > mem2 ? 1 : -1;
+			}
+			return 0;
+		}
 	}
 }
