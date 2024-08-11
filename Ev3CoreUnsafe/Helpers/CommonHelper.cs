@@ -389,5 +389,5 @@ namespace Ev3CoreUnsafe.Helpers
 			}
 			return 0;
 		}
-	}
+    }
 }

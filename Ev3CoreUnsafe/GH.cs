@@ -1,4 +1,5 @@
-﻿using Ev3CoreUnsafe.Ccom.Interfaces;
+﻿using Ev3CoreUnsafe.Ccom;
+using Ev3CoreUnsafe.Ccom.Interfaces;
 using Ev3CoreUnsafe.Cinput;
 using Ev3CoreUnsafe.Cinput.Interfaces;
 using Ev3CoreUnsafe.Cmemory.Interfaces;
