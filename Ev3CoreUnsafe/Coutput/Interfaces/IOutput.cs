@@ -51,8 +51,8 @@ namespace Ev3CoreUnsafe.Coutput.Interfaces
 		public DATA8* OutputType;
 		public OBJID* Owner;
 
-		public int PwmFile;
-		public int MotorFile;
+		// public int PwmFile;
+		// public int MotorFile;
 
 		public MOTORDATA* MotorData;
 		public MOTORDATA* pMotor;

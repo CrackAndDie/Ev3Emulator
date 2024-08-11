@@ -36,6 +36,7 @@ namespace Ev3ConsoleTest
 
 	internal class Program
     {
+		const int A = 150;
         static unsafe void Main(string[] args)
         {
 			//string path = @"./TestPrograms/Program.rbf";
@@ -79,10 +80,11 @@ namespace Ev3ConsoleTest
 			//ma->y = 3;
 			//m->y = 3;
 
-			var a = -1;
-			ushort b = (ushort)a;
+			byte a = 160;
+			sbyte b = (sbyte)a;
 
-			var a3 = sizeof(TYPES);
+			sbyte c = -120;
+			byte d = (byte)c;
 		}
 
 		private static string GetText(byte[] data, string path)

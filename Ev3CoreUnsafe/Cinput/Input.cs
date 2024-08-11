@@ -1,7 +1,10 @@
 ﻿using Ev3CoreUnsafe.Cinput.Interfaces;
 using Ev3CoreUnsafe.Enums;
+using Ev3CoreUnsafe.Extensions;
 using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using static Ev3CoreUnsafe.Defines;
 
@@ -9,7 +12,11 @@ namespace Ev3CoreUnsafe.Cinput
 {
 	public unsafe class Input : IInput
 	{
-		public void cInputPrintLine(DATA8* pBuffer)
+        DATA8* DaisyBuf = CommonHelper.Pointer1d<DATA8>(64);
+        DATA8 ActLayer = 0;
+        DATA8 MoreLayers = 0;
+
+        public void cInputPrintLine(DATA8* pBuffer)
 		{
 			GH.printf(CommonHelper.GetString(pBuffer));
 		}
@@ -441,102 +448,148 @@ namespace Ev3CoreUnsafe.Cinput
 			uint PollLng;
 			uint PollString;
 			int ReadLng;
-			DATA8* Str;
+			string Buf2;
 			TYPES Tmp = new TYPES();
 			TYPES* pTypes;
 			int Count;
 
-			var pFile = fopen(pFilename, "r");
-			if (pFile != null)
+            using FileStream fileStream = File.OpenRead(CommonHelper.GetString(pFilename));
+            using StreamReader reader = new StreamReader(fileStream);
+
+			do
 			{
-				do
-				{
-					Str = fgets(Buf, 255, pFile);
-					Buf[255] = 0;
-					if (Str != null)
+                Buf2 = reader.ReadLine();
+                if (Buf2 != null)
+                {
+					if ((Buf2[0] != '/') && (Buf2[0] != '*'))
 					{
-						if ((Buf[0] != '/') && (Buf[0] != '*'))
+                        string[] data = Buf2.Split();
+                        Type = uint.Parse(data[0]);
+                        Mode = uint.Parse(data[1]);
+                        Name = data[2].AsSbytePointer();
+                        DataSets = uint.Parse(data[3]);
+                        Format = uint.Parse(data[4]);
+                        Figures = uint.Parse(data[5]);
+                        Decimals = uint.Parse(data[6]);
+                        Views = uint.Parse(data[7]);
+                        Connection = uint.Parse(data[8]);
+                        Pins = Convert.ToUInt32(data[9], 16);
+                        Tmp.RawMin = float.Parse(data[10], CultureInfo.InvariantCulture);
+                        Tmp.RawMax = float.Parse(data[11], CultureInfo.InvariantCulture);
+                        Tmp.PctMin = float.Parse(data[12], CultureInfo.InvariantCulture);
+                        Tmp.PctMax = float.Parse(data[13], CultureInfo.InvariantCulture);
+                        Tmp.SiMin = float.Parse(data[14], CultureInfo.InvariantCulture);
+                        Tmp.SiMax = float.Parse(data[15], CultureInfo.InvariantCulture);
+                        Time = uint.Parse(data[16]);
+                        IdValue = uint.Parse(data[17]);
+                        Symbol = data[18].AsSbytePointer();
+
+                        Count = 19; // anime hahaha
+                        if (Count == TYPE_PARAMETERS)
 						{
-							Count = sscanf(Buf, "%u %u %s %u %u %u %u %u %u %x %f %f %f %f %f %f %u %u %s", &Type, &Mode, Name, &DataSets, &Format, &Figures, &Decimals, &Views, &Connection, &Pins, &Tmp.RawMin, &Tmp.RawMax, &Tmp.PctMin, &Tmp.PctMax, &Tmp.SiMin, &Tmp.SiMax, &Time, &IdValue, Symbol);
-							if (Count == TYPE_PARAMETERS)
+							Tmp.Type = (DATA8)Type;
+							Tmp.Mode = (DATA8)Mode;
+							Tmp.DataSets = (DATA8)DataSets;
+							Tmp.Format = (DATA8)Format;
+							Tmp.Figures = (DATA8)Figures;
+							Tmp.Decimals = (DATA8)Decimals;
+							Tmp.Connection = (DATA8)Connection;
+							Tmp.Views = (DATA8)Views;
+							Tmp.Pins = (DATA8)Pins;
+							Tmp.InvalidTime = (UWORD)Time;
+							Tmp.IdValue = (UWORD)IdValue;
+
+							Result = cInputGetNewTypeDataPointer((SBYTE*)Name, (DATA8)Type, (DATA8)Mode, (DATA8)Connection, &pTypes);
+							//            GH.printf("cInputTypeDataInit\r\n");
+							if (Result == OK)
 							{
-								Tmp.Type = (DATA8)Type;
-								Tmp.Mode = (DATA8)Mode;
-								Tmp.DataSets = (DATA8)DataSets;
-								Tmp.Format = (DATA8)Format;
-								Tmp.Figures = (DATA8)Figures;
-								Tmp.Decimals = (DATA8)Decimals;
-								Tmp.Connection = (DATA8)Connection;
-								Tmp.Views = (DATA8)Views;
-								Tmp.Pins = (DATA8)Pins;
-								Tmp.InvalidTime = (UWORD)Time;
-								Tmp.IdValue = (UWORD)IdValue;
+								(*pTypes) = Tmp;
 
-								Result = cInputGetNewTypeDataPointer((SBYTE*)Name, (DATA8)Type, (DATA8)Mode, (DATA8)Connection, &pTypes);
-								//            GH.printf("cInputTypeDataInit\r\n");
-								if (Result == OK)
+								Count = 0;
+								while ((Name[Count] != 0) && (Count < TYPE_NAME_LENGTH))
 								{
-									(*pTypes) = Tmp;
-
-									Count = 0;
-									while ((Name[Count] != 0) && (Count < TYPE_NAME_LENGTH))
+									if (Name[Count] == '_')
 									{
-										if (Name[Count] == '_')
-										{
-											(*pTypes).Name[Count] = (byte)' ';
-										}
-										else
-										{
-											(*pTypes).Name[Count] = (byte)Name[Count];
-										}
-										Count++;
-									}
-								  (*pTypes).Name[Count] = 0;
-
-									if (Symbol[0] == '_')
-									{
-										(*pTypes).Symbol[0] = 0;
+										(*pTypes).Name[Count] = (byte)' ';
 									}
 									else
 									{
-										Count = 0;
-										while ((Symbol[Count] != 0) && (Count < SYMBOL_LENGTH))
-										{
-											if (Symbol[Count] == '_')
-											{
-												(*pTypes).Symbol[Count] = (sbyte)' ';
-											}
-											else
-											{
-												(*pTypes).Symbol[Count] = Symbol[Count];
-											}
-											Count++;
-										}
-									  (*pTypes).Symbol[Count] = 0;
+										(*pTypes).Name[Count] = (byte)Name[Count];
 									}
-									if (Tmp.Connection == CONN_NXT_IIC)
-									{ // NXT IIC sensor
+									Count++;
+								}
+								(*pTypes).Name[Count] = 0;
 
-										// setup string + poll string
-										// 3 0x01420000 2 0x01000000
-
-										Count = sscanf(Buf, "%u %u %s %u %u %u %u %u %u %x %f %f %f %f %f %f %u %u %s %s %s %u %X %u %X %d", &Type, &Mode, Name, &DataSets, &Format, &Figures, &Decimals, &Views, &Connection, &Pins, &Tmp.RawMin, &Tmp.RawMax, &Tmp.PctMin, &Tmp.PctMax, &Tmp.SiMin, &Tmp.SiMax, &Time, &IdValue, Symbol, Manufacturer, SensorType, &SetupLng, &SetupString, &PollLng, &PollString, &ReadLng);
-										if (Count == (TYPE_PARAMETERS + 7))
+								if (Symbol[0] == '_')
+								{
+									(*pTypes).Symbol[0] = 0;
+								}
+								else
+								{
+									Count = 0;
+									while ((Symbol[Count] != 0) && (Count < SYMBOL_LENGTH))
+									{
+										if (Symbol[Count] == '_')
 										{
-											cInputInsertNewIicString((sbyte)Type, (sbyte)Mode, (DATA8*)Manufacturer, (DATA8*)SensorType, (DATA8)SetupLng, (ULONG)SetupString, (DATA8)PollLng, (ULONG)PollString, (DATA8)ReadLng);
-											//                  GH.printf("%02u %01u IIC %u 0x%08X %u 0x%08X %u\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,ReadLng);
+											(*pTypes).Symbol[Count] = (sbyte)' ';
 										}
+										else
+										{
+											(*pTypes).Symbol[Count] = Symbol[Count];
+										}
+										Count++;
+									}
+									(*pTypes).Symbol[Count] = 0;
+								}
+								if (Tmp.Connection == CONN_NXT_IIC)
+								{ // NXT IIC sensor
+
+                                    // setup string + poll string
+                                    // 3 0x01420000 2 0x01000000
+
+                                    data = Buf2.Split();
+                                    Type = uint.Parse(data[0]);
+                                    Mode = uint.Parse(data[1]);
+                                    Name = data[2].AsSbytePointer();
+                                    DataSets = uint.Parse(data[3]);
+                                    Format = uint.Parse(data[4]);
+                                    Figures = uint.Parse(data[5]);
+                                    Decimals = uint.Parse(data[6]);
+                                    Views = uint.Parse(data[7]);
+                                    Connection = uint.Parse(data[8]);
+                                    Pins = Convert.ToUInt32(data[9], 16);
+                                    Tmp.RawMin = float.Parse(data[10], CultureInfo.InvariantCulture);
+                                    Tmp.RawMax = float.Parse(data[11], CultureInfo.InvariantCulture);
+                                    Tmp.PctMin = float.Parse(data[12], CultureInfo.InvariantCulture);
+                                    Tmp.PctMax = float.Parse(data[13], CultureInfo.InvariantCulture);
+                                    Tmp.SiMin = float.Parse(data[14], CultureInfo.InvariantCulture);
+                                    Tmp.SiMax = float.Parse(data[15], CultureInfo.InvariantCulture);
+                                    Time = uint.Parse(data[16]);
+                                    IdValue = uint.Parse(data[17]);
+                                    Symbol = data[18].AsSbytePointer();
+                                    Manufacturer = data[19].AsSbytePointer();
+                                    SensorType = data[20].AsSbytePointer();
+                                    SetupLng = uint.Parse(data[21]);
+                                    SetupString = Convert.ToUInt32(data[22], 16);
+                                    PollLng = uint.Parse(data[23]);
+                                    PollString = Convert.ToUInt32(data[24], 16);
+                                    ReadLng = int.Parse(data[25]);
+
+                                    Count = 26; // anime hahaha
+                                    if (Count == (TYPE_PARAMETERS + 7))
+									{
+										cInputInsertNewIicString((sbyte)Type, (sbyte)Mode, (DATA8*)Manufacturer, (DATA8*)SensorType, (DATA8)SetupLng, (ULONG)SetupString, (DATA8)PollLng, (ULONG)PollString, (DATA8)ReadLng);
+										//                  GH.printf("%02u %01u IIC %u 0x%08X %u 0x%08X %u\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,ReadLng);
 									}
 								}
 							}
 						}
 					}
 				}
-				while (Str != null);
-				fclose(pFile);
-
-				Result = OK;
 			}
+			while (Buf2 != null);
+
+			Result = OK;
 
 			return (Result);
 		}
@@ -992,47 +1045,47 @@ namespace Ev3CoreUnsafe.Cinput
 			DATA8 Type;
 			DATA8 Mode;
 			int File;
-			char PrgNameBuf[vmFILENAMESIZE];
-
-			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
-			File = open(PrgNameBuf, O_RDONLY);
-			if (File >= MIN_HANDLE)
-			{
-				if (read(File, (UBYTE*)&GH.InputInstance.Calib, sizeof(GH.InputInstance.Calib)) != sizeof(GH.InputInstance.Calib))
-				{
-					close(File);
-					File = -1;
-				}
-				else
-				{
-					close(File);
-				}
-			}
-			if (File < 0)
-			{
-				for (Type = 0; Type < (MAX_DEVICE_TYPE); Type++)
-				{
-					for (Mode = 0; Mode < MAX_DEVICE_MODES; Mode++)
-					{
-						GH.InputInstance.Calib[Type][Mode].InUse = 0;
-					}
-				}
-			}
+			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
+			// TODO: calib shite
+			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmCALDATA_FILE_NAME}{vmEXT_CONFIG}");
+			//File = open(PrgNameBuf, O_RDONLY);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	if (read(File, (UBYTE*)&GH.InputInstance.Calib, sizeof(GH.InputInstance.Calib)) != sizeof(GH.InputInstance.Calib))
+			//	{
+			//		close(File);
+			//		File = -1;
+			//	}
+			//	else
+			//	{
+			//		close(File);
+			//	}
+			//}
+			//if (File < 0)
+			//{
+			//	for (Type = 0; Type < (MAX_DEVICE_TYPE); Type++)
+			//	{
+			//		for (Mode = 0; Mode < MAX_DEVICE_MODES; Mode++)
+			//		{
+			//			GH.InputInstance.Calib[Type][Mode].InUse = 0;
+			//		}
+			//	}
+			//}
 		}
 
 
 		public void cInputCalDataExit()
 		{
 			int File;
-			char PrgNameBuf[vmFILENAMESIZE];
-
-			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
-			File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
-			if (File >= MIN_HANDLE)
-			{
-				write(File, (UBYTE*)&GH.InputInstance.Calib, sizeof(GH.InputInstance.Calib));
-				close(File);
-			}
+			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
+            // TODO: calib shite
+            CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmCALDATA_FILE_NAME}{vmEXT_CONFIG}");
+			//File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	write(File, (UBYTE*)&GH.InputInstance.Calib, sizeof(GH.InputInstance.Calib));
+			//	close(File);
+			//}
 		}
 
 		public void cInputCalcFullScale(UWORD* pRawVal, UWORD ZeroPointOffset, UBYTE PctFullScale, UBYTE InvStatus)
@@ -1051,7 +1104,7 @@ namespace Ev3CoreUnsafe.Cinput
 			{
 				*pRawVal = SENSOR_RESOLUTION;
 			}
-			if (TRUE == InvStatus)
+			if (1 == InvStatus)
 			{
 				*pRawVal = (ushort)(SENSOR_RESOLUTION - *pRawVal);
 			}
@@ -1081,24 +1134,24 @@ namespace Ev3CoreUnsafe.Cinput
 			pNewVals[RED] = 0;
 			if ((pC->ADRaw[RED]) > (pC->ADRaw[BLANK]))
 			{
-				pNewVals[RED] = (UWORD)(((ULONG)((pC->ADRaw[RED]) - (pC->ADRaw[BLANK])) * (pC->Calibration[CalRange][RED])) >> 16);
+				pNewVals[RED] = (UWORD)(((ULONG)((pC->ADRaw[RED]) - (pC->ADRaw[BLANK])) * ((*pC).GetCalib(CalRange)[RED])) >> 16);
 			}
 
 			pNewVals[GREEN] = 0;
 			if ((pC->ADRaw[GREEN]) > (pC->ADRaw[BLANK]))
 			{
-				pNewVals[GREEN] = (UWORD)(((ULONG)((pC->ADRaw[GREEN]) - (pC->ADRaw[BLANK])) * (pC->Calibration[CalRange][GREEN])) >> 16);
+				pNewVals[GREEN] = (UWORD)(((ULONG)((pC->ADRaw[GREEN]) - (pC->ADRaw[BLANK])) * ((*pC).GetCalib(CalRange)[GREEN])) >> 16);
 			}
 
 			pNewVals[BLUE] = 0;
 			if ((pC->ADRaw[BLUE]) > (pC->ADRaw[BLANK]))
 			{
-				pNewVals[BLUE] = (UWORD)(((ULONG)((pC->ADRaw[BLUE]) - (pC->ADRaw[BLANK])) * (pC->Calibration[CalRange][BLUE])) >> 16);
+				pNewVals[BLUE] = (UWORD)(((ULONG)((pC->ADRaw[BLUE]) - (pC->ADRaw[BLANK])) * ((*pC).GetCalib(CalRange)[BLUE])) >> 16);
 			}
 
 			pNewVals[BLANK] = (pC->ADRaw[BLANK]);
-			cInputCalcFullScale(&(pNewVals[BLANK]), COLORSENSORBGMIN, COLORSENSORBGPCTDYN, FALSE);
-			(pNewVals[BLANK]) = (UWORD)(((ULONG)(pNewVals[BLANK]) * (pC->Calibration[CalRange][BLANK])) >> 16);
+			cInputCalcFullScale(&(pNewVals[BLANK]), COLORSENSORBGMIN, COLORSENSORBGPCTDYN, 0);
+			(pNewVals[BLANK]) = (UWORD)(((ULONG)(pNewVals[BLANK]) * ((*pC).GetCalib(CalRange)[BLANK])) >> 16);
 		}
 
 
@@ -1252,14 +1305,14 @@ namespace Ev3CoreUnsafe.Cinput
 		{
 			RESULT Result = RESULT.FAIL;
 
-			cInputCalibrateColor(&(*GH.InputInstance.pAnalog).NxtCol[Device], (*GH.InputInstance.pAnalog).NxtCol[Device].SensorRaw);
+			cInputCalibrateColor((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol[Device], ((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].SensorRaw);
 
 			switch (GH.InputInstance.DeviceMode[Device])
 			{
 				case 2:
 					{ // NXT-COL-COL
 
-						pData[0] = cInputCalculateColor(&(*GH.InputInstance.pAnalog).NxtCol[Device]);
+						((float*)pData)[0] = cInputCalculateColor((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol[Device]);
 						Result = OK;
 					}
 					break;
@@ -1267,7 +1320,7 @@ namespace Ev3CoreUnsafe.Cinput
 				case 1:
 					{ // NXT-COL-AMB
 
-						Memcpy((void*)pData, (const void*)&(*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[BLANK],(size_t)2);
+						Memcpy((byte*)pData, (byte*)&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[BLANK], 2);
 						Result = OK;
 					}
 					break;
@@ -1275,7 +1328,7 @@ namespace Ev3CoreUnsafe.Cinput
 				case 0:
 					{ // NXT-COL-RED
 
-						Memcpy((void*)pData, (const void*)&(*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[RED],(size_t)2);
+						Memcpy((byte*)pData, (byte*)&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[RED], 2);
 						Result = OK;
 					}
 					break;
@@ -1283,7 +1336,7 @@ namespace Ev3CoreUnsafe.Cinput
 				case 3:
 					{ // NXT-COL-GRN
 
-						Memcpy((void*)pData, (const void*)&(*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[GREEN],(size_t)2);
+						Memcpy((byte*)pData, (byte*)&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[GREEN], 2);
 						Result = OK;
 					}
 					break;
@@ -1291,7 +1344,7 @@ namespace Ev3CoreUnsafe.Cinput
 				case 4:
 					{ // NXT-COL-BLU
 
-						Memcpy((void*)pData, (const void*)&(*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[BLUE],(size_t)2);
+						Memcpy((byte*)pData, (byte*)&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[BLUE], 2);
 						Result = OK;
 					}
 					break;
@@ -1299,7 +1352,7 @@ namespace Ev3CoreUnsafe.Cinput
 				case 5:
 					{ // NXT-COL-RAW
 
-						Memcpy((void*)pData, (const void*)&(*GH.InputInstance.pAnalog).NxtCol[Device].SensorRaw[0],(size_t)(COLORS * 2));
+						Memcpy((byte*)pData, (byte*)&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].SensorRaw[0], (COLORS * 2));
 						Result = OK;
 					}
 					break;
@@ -1314,42 +1367,42 @@ namespace Ev3CoreUnsafe.Cinput
 
 			Result = DATAF_NAN;
 
-			cInputCalibrateColor(&(*GH.InputInstance.pAnalog).NxtCol[Device], (*GH.InputInstance.pAnalog).NxtCol[Device].SensorRaw);
+			cInputCalibrateColor(&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device], ((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].SensorRaw);
 
 			switch (GH.InputInstance.DeviceMode[Device])
 			{
 				case 2:
 					{ // NXT-COL-COL
 
-						Result = cInputCalculateColor(&(*GH.InputInstance.pAnalog).NxtCol[Device]);
+						Result = cInputCalculateColor(&((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device]);
 					}
 					break;
 
 				case 1:
 					{ // NXT-COL-AMB
 
-						Result = (*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[BLANK];
+						Result = ((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[BLANK];
 					}
 					break;
 
 				case 0:
 					{ // NXT-COL-RED
 
-						Result = (*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[RED];
+						Result = ((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[RED];
 					}
 					break;
 
 				case 3:
 					{ // NXT-COL-GRN
 
-						Result = (*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[GREEN];
+						Result = ((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[GREEN];
 					}
 					break;
 
 				case 4:
 					{ // NXT-COL-BLU
 
-						Result = (*GH.InputInstance.pAnalog).NxtCol[Device].ADRaw[BLUE];
+						Result = ((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].ADRaw[BLUE];
 					}
 					break;
 
@@ -1358,7 +1411,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 						if (Index < COLORS)
 						{
-							Result = (DATAF)(*GH.InputInstance.pAnalog).NxtCol[Device].SensorRaw[Index];
+							Result = (DATAF)((COLORSTRUCT*)(*GH.InputInstance.pAnalog).NxtCol)[Device].SensorRaw[Index];
 						}
 					}
 					break;
@@ -1372,7 +1425,7 @@ namespace Ev3CoreUnsafe.Cinput
 			RESULT Result = RESULT.FAIL;
 			DATA8 Device;
 
-			Result = cInputCompressDevice(&Device, Layer, Port);
+			Result = cInputCompressDevice(&Device, (byte)Layer, (byte)Port);
 			if (Result == OK)
 			{ // Device valid
 
@@ -1381,14 +1434,14 @@ namespace Ev3CoreUnsafe.Cinput
 
 					if (Type != TYPE_UNKNOWN)
 					{
-						cInputSetDeviceType(Device, Type, Mode, __LINE__);
+						cInputSetDeviceType(Device, Type, Mode, 1385); // 1385 was a current line
 					}
-					GH.printf("c_input   cInputSetDeviceType:     L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, Type, Mode);
+					GH.printf($"c_input   cInputSetDeviceType:     L={Layer} P={Port} T={Type} M={Mode}\r\n");
 				}
 			}
 			else
 			{
-				GH.printf("c_input   cInputSetDeviceType: RESULT.FAIL  L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, Type, Mode);
+				GH.printf($"c_input   cInputSetDeviceType: RESULT.FAIL  L={Layer} P={Port} T={Type} M={Mode}\r\n");
 			}
 
 			return (Result);
@@ -1413,17 +1466,17 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Result == OK)
 			{
-				GH.printf("c_com     GH.Com.cComSetDeviceInfo:       l=%-2d N=%s\r\n", Length, (*pType).Name);
+				GH.printf($"c_com     GH.Com.cComSetDeviceInfo:       l={Length} N={CommonHelper.GetString((*pType).Name)}\r\n");
 			}
 			else
 			{
 				if (Result == RESULT.BUSY)
 				{
-					GH.printf("c_com     GH.Com.cComSetDeviceInfo: RESULT.BUSY  l=%-2d N=%s\r\n", Length, (*pType).Name);
+					GH.printf($"c_com     GH.Com.cComSetDeviceInfo: RESULT.BUSY  l={Length} N={CommonHelper.GetString((*pType).Name)}\r\n");
 				}
 				else
 				{
-					GH.printf("c_com     GH.Com.cComSetDeviceInfo: RESULT.FAIL  l=%-2d N=%s\r\n", Length, (*pType).Name);
+					GH.printf($"c_com     GH.Com.cComSetDeviceInfo: RESULT.FAIL  l={Length} N={CommonHelper.GetString((*pType).Name)}\r\n");
 				}
 			}
 
@@ -1441,7 +1494,7 @@ namespace Ev3CoreUnsafe.Cinput
 			if (Result == OK)
 			{
 				pType = (TYPES*)pInfo;
-				GH.printf("c_com     GH.Com.cComGetDeviceInfo:       C=%-3d N=%s\r\n", (*pType).Connection, (*pType).Name);
+				GH.printf($"c_com     GH.Com.cComGetDeviceInfo:       C={(*pType).Connection} N={CommonHelper.GetString((*pType).Name)}\r\n");
 			}
 
 			return (Result);
@@ -1456,17 +1509,17 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Result == OK)
 			{
-				GH.printf("c_com     GH.Com.cComSetDeviceType:       L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, Type, Mode);
+				GH.printf($"c_com     GH.Com.cComSetDeviceType:       L={Layer} P={Port} T={Type} M={Mode}\r\n");
 			}
 			else
 			{
 				if (Result == RESULT.BUSY)
 				{
-					GH.printf("c_com     GH.Com.cComSetDeviceType: RESULT.BUSY  L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, Type, Mode);
+					GH.printf($"c_com     GH.Com.cComSetDeviceType: RESULT.BUSY  L={Layer} P={Port} T={Type} M={Mode}\r\n");
 				}
 				else
 				{
-					GH.printf("c_com     GH.Com.cComSetDeviceType: RESULT.FAIL  L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, Type, Mode);
+					GH.printf("c_com     GH.Com.cComSetDeviceType: RESULT.FAIL  L={Layer} P={Port} T={Type} M={Mode}\r\n");
 				}
 			}
 
@@ -1482,17 +1535,17 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Result == OK)
 			{
-				GH.printf("c_com     GH.Com.cComGetDeviceData:       L=%-2d P=%-2d T=%-3d M=%d 0x%02X\r\n", Layer, Port, *pType, *pMode, *pData);
+				GH.printf($"c_com     GH.Com.cComGetDeviceData:       L={Layer} P={Port} T={*pType} M={*pMode} 0x{*pData}\r\n");
 			}
 			else
 			{
 				if (Result == RESULT.BUSY)
 				{
-					GH.printf("c_com     GH.Com.cComGetDeviceData: RESULT.BUSY  L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, *pType, *pMode);
+					GH.printf($"c_com     GH.Com.cComGetDeviceData: RESULT.BUSY  L={Layer} P={Port} T={*pType} M={*pMode}\r\n");
 				}
 				else
 				{
-					GH.printf("c_com     GH.Com.cComGetDeviceData: RESULT.FAIL  L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, *pType, *pMode);
+					GH.printf($"c_com     GH.Com.cComGetDeviceData: RESULT.FAIL  L={Layer} P={Port} T={*pType} M={*pMode}\r\n");
 				}
 			}
 
@@ -1518,17 +1571,17 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Result == OK)
 			{
-				GH.printf("c_com     cInputGetDeviceData:    L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, *pType, *pMode);
+				GH.printf($"c_com     cInputGetDeviceData:    L={Layer} P={Port} T={*pType} M={*pMode}\r\n");
 			}
 			else
 			{
 				if (Result == RESULT.BUSY)
 				{
-					GH.printf("c_com     cInputGetDeviceData: RESULT.BUSY L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, *pType, *pMode);
+					GH.printf($"c_com     cInputGetDeviceData: RESULT.BUSY L={Layer} P={Port} T={*pType} M={*pMode}\r\n");
 				}
 				else
 				{
-					GH.printf("c_com     cInputGetDeviceData: RESULT.FAIL L=%-2d P=%-2d T=%-3d M=%d\r\n", Layer, Port, *pType, *pMode);
+					GH.printf($"c_com     cInputGetDeviceData: RESULT.FAIL L={Layer} P={Port} T={*pType} M={*pMode}\r\n");
 				}
 			}
 
@@ -1542,15 +1595,15 @@ namespace Ev3CoreUnsafe.Cinput
 			RESULT Result = RESULT.FAIL;
 			DATA8 Device;
 
-			if (cInputCompressDevice(&Device, Layer, Port) == OK)
+			if (cInputCompressDevice(&Device, (byte)Layer, (byte)Port) == OK)
 			{ // Device valid
 
-				GH.printf("c_input   cInputGetDeviceData      D=%-3d L=%d P=%-2d l=%-2d\r\n", Device, Layer, Port, Length);
+				GH.printf($"c_input   cInputGetDeviceData      D={Device} L={Layer} P={Port} l={Length}\r\n");
 
 				if (Length >= MAX_DEVICE_DATALENGTH)
 				{ // Length OK
 
-					memset(pData, 0, (size_t)Length);
+					CommonHelper.memset((byte*)pData, 0, Length);
 
 					*pType = GH.InputInstance.DeviceType[Device];
 					*pMode = GH.InputInstance.DeviceMode[Device];
@@ -1572,7 +1625,7 @@ namespace Ev3CoreUnsafe.Cinput
 								if (GH.InputInstance.DeviceData[Device].Connection == CONN_INPUT_UART)
 								{ // Device is an UART device
 
-									Memcpy((void*)pData, (byte*)&(*GH.InputInstance.pUart).Raw[Device],UART_DATA_LENGTH);
+									Memcpy((byte*)pData, (byte*)(*GH.InputInstance.pUart).GetRaw(Device),UART_DATA_LENGTH);
 									Result = OK;
 								}
 								else
@@ -1580,7 +1633,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 									if (GH.InputInstance.DeviceData[Device].Connection == CONN_NXT_IIC)
 									{ // Device is an IIC device
-										Memcpy((void*)pData, (byte*)&(*GH.InputInstance.pIic).Raw[Device],IIC_DATA_LENGTH);										
+										Memcpy((byte*)pData, (byte*)(*GH.InputInstance.pIic).GetRaw(Device),IIC_DATA_LENGTH);										
 										Result = OK;
 									}
 									else
@@ -1591,11 +1644,11 @@ namespace Ev3CoreUnsafe.Cinput
 
 											if ((GH.InputInstance.DeviceType[Device] == 16) && (GH.InputInstance.DeviceMode[Device] == 1))
 											{
-												Memcpy((void*)pData, (byte*)&GH.InputInstance.DeviceData[Device].Changes,(size_t)4);
+												Memcpy((byte*)pData, (byte*)&GH.InputInstance.DeviceData[Device].Changes, 4);
 											}
 											else
 											{
-												Memcpy((void*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin6[Device],(size_t)2);
+												Memcpy((byte*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin6[Device], 2);
 											}
 											Result = OK;
 										}
@@ -1611,11 +1664,11 @@ namespace Ev3CoreUnsafe.Cinput
 
 												if ((GH.InputInstance.DeviceType[Device] == 1) && (GH.InputInstance.DeviceMode[Device] == 1))
 												{
-													Memcpy((void*)pData, (byte*)&GH.InputInstance.DeviceData[Device].Bumps,(size_t)4);
+													Memcpy((byte*)pData, (byte*)&GH.InputInstance.DeviceData[Device].Bumps, 4);
 												}
 												else
 												{
-													Memcpy((void*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin1[Device],(size_t)2);
+													Memcpy((byte*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin1[Device], 2);
 												}
 												Result = OK;
 											}
@@ -1628,12 +1681,12 @@ namespace Ev3CoreUnsafe.Cinput
 
 								if (GH.InputInstance.DeviceMode[Device] == 2)
 								{
-									Memcpy((void*)pData, (byte*)&GH.OutputInstance.pMotor[Device - INPUT_DEVICES].Speed,(size_t)1);
+									Memcpy((byte*)pData, (byte*)&GH.OutputInstance.pMotor[Device - INPUT_DEVICES].Speed, 1);
 									Result = OK;
 								}
 								else
 								{
-									Memcpy((void*)pData, (byte*)&GH.OutputInstance.pMotor[Device - INPUT_DEVICES].TachoSensor,(size_t)4);
+									Memcpy((byte*)pData, (byte*)&GH.OutputInstance.pMotor[Device - INPUT_DEVICES].TachoSensor, 4);
 									Result = OK;
 								}
 
@@ -1666,7 +1719,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 			Result = DATAF_NAN;
 
-			GH.printf("c_input   cInputReadDeviceRaw:     D=%-3d B=%d\r\n", Device, GH.InputInstance.DeviceData[Device].DevStatus);
+			GH.printf($"c_input   cInputReadDeviceRaw:     D={Device} B={GH.InputInstance.DeviceData[Device].DevStatus}\r\n");
 			if ((Device >= 0) && (Device < DEVICES) && (Index >= 0) && (Index < MAX_DEVICE_DATASETS))
 			{
 				// Parameters are valid
@@ -1686,7 +1739,7 @@ namespace Ev3CoreUnsafe.Cinput
 							{
 								// Device is a UART sensor
 
-								pResult = (void*)&(*GH.InputInstance.pUart).Raw[Device];
+								pResult = (void*)(*GH.InputInstance.pUart).GetRaw(Device);
 								DataSets = GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].DataSets;
 
 								if (Index < DataSets)
@@ -1804,7 +1857,7 @@ namespace Ev3CoreUnsafe.Cinput
 				if (GH.InputInstance.DeviceType[Device] != Type)
 				{
 					GH.InputInstance.DeviceData[Device].Connection = Connection;
-					cInputSetDeviceType(Device, Type, 0, __LINE__);
+					cInputSetDeviceType(Device, Type, 0, 1808); // 1808 was a current line
 				}
 				if (GH.InputInstance.DeviceData[Device].Connection == CONN_INPUT_UART)
 				{
@@ -1819,13 +1872,13 @@ namespace Ev3CoreUnsafe.Cinput
 
 						if ((GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Format & 0x0F) == 0)
 						{
-							(*GH.InputInstance.pIic).Raw[Device][0] = Byte;
-							(*GH.InputInstance.pIic).Raw[Device][1] = 0;
+							(*GH.InputInstance.pIic).GetRaw(Device)[0] = (sbyte)Byte;
+							(*GH.InputInstance.pIic).GetRaw(Device)[1] = 0;
 						}
 						else
 						{
-							(*GH.InputInstance.pIic).Raw[Device][0] = (UBYTE)Word;
-							(*GH.InputInstance.pIic).Raw[Device][1] = (UBYTE)(Word >> 8);
+							(*GH.InputInstance.pIic).GetRaw(Device)[0] = (sbyte)Word;
+							(*GH.InputInstance.pIic).GetRaw(Device)[1] = (sbyte)(Word >> 8);
 						}
 						GH.InputInstance.DeviceData[Device].DevStatus = OK;
 					}
@@ -1852,7 +1905,7 @@ namespace Ev3CoreUnsafe.Cinput
 				if (GH.InputInstance.DeviceType[Device] != Type)
 				{
 					GH.InputInstance.DeviceData[Device].Connection = CONN_UNKNOWN;
-					cInputSetDeviceType(Device, Type, 0, __LINE__);
+					cInputSetDeviceType(Device, Type, 0, 1856); // 1856 was a currrent line
 				}
 				if (GH.InputInstance.DeviceMode[Device] == 2)
 				{
@@ -1891,7 +1944,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 				if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 				{
-					if (GH.InputInstance.Calib[Type][Mode].InUse)
+					if (GH.InputInstance.Calib[Type][Mode].InUse != 0)
 					{
 						Min = GH.InputInstance.Calib[Type][Mode].Min;
 						Max = GH.InputInstance.Calib[Type][Mode].Max;
@@ -1990,12 +2043,13 @@ namespace Ev3CoreUnsafe.Cinput
 						// Get info
 						GH.InputInstance.UartCtl.Port = (sbyte)Port;
 						GH.InputInstance.UartCtl.Mode = GH.InputInstance.TmpMode[Port];
-						ioctl(GH.InputInstance.UartFile, UART_READ_MODE_INFO, &GH.InputInstance.UartCtl);
+						GH.Ev3System.InputHandler.IoctlUart(UART_READ_MODE_INFO, GH.InputInstance.UartCtl);
 
-						if (GH.InputInstance.UartCtl.TypeData.Name[0])
+						if (GH.InputInstance.UartCtl.TypeData.Name[0] != 0)
 						{ // Info available
 
-							Result = cInputGetNewTypeDataPointer(GH.InputInstance.UartCtl.TypeData.Name, GH.InputInstance.UartCtl.TypeData.Type, GH.InputInstance.UartCtl.TypeData.Mode, CONN_INPUT_UART, &pTmp);
+							fixed (byte* tmpP = &GH.InputInstance.UartCtl.TypeData.Name[0])
+								Result = cInputGetNewTypeDataPointer((sbyte*)tmpP, GH.InputInstance.UartCtl.TypeData.Type, GH.InputInstance.UartCtl.TypeData.Mode, CONN_INPUT_UART, &pTmp);
 							if (pTmp != null)
 							{ // Tabel index found
 
@@ -2009,17 +2063,18 @@ namespace Ev3CoreUnsafe.Cinput
 								{ // New mode
 
 									// Insert in tabel
-									Memcpy(pTmp, &GH.InputInstance.UartCtl.TypeData, sizeof(TYPES));
+									Memcpy((byte*)pTmp, (byte*)Unsafe.AsPointer(ref GH.InputInstance.UartCtl.TypeData), sizeof(TYPES));
 
 								}
-								if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)&GH.InputInstance.UartCtl.TypeData) == RESULT.BUSY)
+								if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)(byte*)Unsafe.AsPointer(ref GH.InputInstance.UartCtl.TypeData)) == RESULT.BUSY)
 								{ // Chain not ready - roll back
 
-									ioctl(GH.InputInstance.UartFile, UART_NACK_MODE_INFO, &GH.InputInstance.UartCtl);
+                                    GH.Ev3System.InputHandler.IoctlUart(UART_NACK_MODE_INFO, GH.InputInstance.UartCtl);
 									GH.InputInstance.TmpMode[Port]++;
 								}
 
-								GH.printf("P=%d T=%-3d M=%d N=%s\r\n", Port, GH.InputInstance.UartCtl.TypeData.Type, GH.InputInstance.UartCtl.TypeData.Mode, GH.InputInstance.UartCtl.TypeData.Name);
+								fixed (byte* tmpP = &GH.InputInstance.UartCtl.TypeData.Name[0])
+									GH.printf($"P={Port} T={GH.InputInstance.UartCtl.TypeData.Type} M={GH.InputInstance.UartCtl.TypeData.Mode} N={CommonHelper.GetString((sbyte*)tmpP)}\r\n");
 							}
 						}
 					}
@@ -2027,15 +2082,15 @@ namespace Ev3CoreUnsafe.Cinput
 					{ // All modes received set device mode 0
 
 						GH.InputInstance.UartCtl.Port = (sbyte)Port;
-						ioctl(GH.InputInstance.UartFile, UART_CLEAR_CHANGED, &GH.InputInstance.UartCtl);
+                        GH.Ev3System.InputHandler.IoctlUart(UART_CLEAR_CHANGED, GH.InputInstance.UartCtl);
 						(*GH.InputInstance.pUart).Status[Port] &= ~UART_PORT_CHANGED;
-						cInputSetDeviceType(Port, GH.InputInstance.DeviceType[Port], 0, __LINE__);
+						cInputSetDeviceType((sbyte)Port, GH.InputInstance.DeviceType[Port], 0, 2034); // 2034 was a current line
 					}
 				}
 
-				if (((*GH.InputInstance.pUart).Status[Port] & UART_DATA_READY))
+				if (((*GH.InputInstance.pUart).Status[Port] & UART_DATA_READY) != 0)
 				{
-					if (!((*GH.InputInstance.pUart).Status[Port] & UART_PORT_CHANGED))
+					if (((*GH.InputInstance.pUart).Status[Port] & UART_PORT_CHANGED) == 0)
 					{
 						Result = OK;
 					}
@@ -2059,21 +2114,21 @@ namespace Ev3CoreUnsafe.Cinput
 				if ((*GH.InputInstance.pAnalog).InDcm[Port] == TYPE_NXT_IIC)
 				{
 
-					if ((*GH.InputInstance.pIic).Changed[Port])
+					if ((*GH.InputInstance.pIic).Changed[Port] != 0)
 					{ // something has changed
 
 						GH.InputInstance.IicStr.Port = (sbyte)Port;
 
-						ioctl(GH.InputInstance.IicFile, IIC_READ_TYPE_INFO, &GH.InputInstance.IicStr);
+                        GH.Ev3System.InputHandler.IoctlI2c(IIC_READ_TYPE_INFO, GH.InputInstance.IicStr);
 
 						Index = IIC_NAME_LENGTH;
-						while ((Index) && ((GH.InputInstance.IicStr.Manufacturer[Index] == ' ') || (GH.InputInstance.IicStr.Manufacturer[Index] == 0)))
+						while ((Index != 0) && ((GH.InputInstance.IicStr.Manufacturer[Index] == ' ') || (GH.InputInstance.IicStr.Manufacturer[Index] == 0)))
 						{
 							GH.InputInstance.IicStr.Manufacturer[Index] = 0;
 							Index--;
 						}
 						Index = IIC_NAME_LENGTH;
-						while ((Index) && ((GH.InputInstance.IicStr.SensorType[Index] == ' ') || (GH.InputInstance.IicStr.SensorType[Index] == 0)))
+						while ((Index != 0) && ((GH.InputInstance.IicStr.SensorType[Index] == ' ') || (GH.InputInstance.IicStr.SensorType[Index] == 0)))
 						{
 							GH.InputInstance.IicStr.SensorType[Index] = 0;
 							Index--;
@@ -2086,21 +2141,23 @@ namespace Ev3CoreUnsafe.Cinput
 						while ((Index < GH.InputInstance.IicDeviceTypes) && (Type == TYPE_IIC_UNKNOWN))
 						{ // Check list
 
-							if (strcmp((DATA8*)GH.InputInstance.IicStr.Manufacturer, (DATA8*)GH.InputInstance.IicString[Index].Manufacturer) == 0)
-							{ // Manufacturer found
+                            fixed (sbyte* tmpP = &GH.InputInstance.IicStr.Manufacturer[0])
+                                if (CommonHelper.strcmp((DATA8*)tmpP, (DATA8*)GH.InputInstance.IicString[Index].Manufacturer) == 0)
+								{ // Manufacturer found
 
-								if (strcmp((DATA8*)GH.InputInstance.IicStr.SensorType, (DATA8*)GH.InputInstance.IicString[Index].SensorType) == 0)
-								{ // Type found
+                                    fixed (sbyte* tmpP2 = &GH.InputInstance.IicStr.SensorType[0])
+                                        if (CommonHelper.strcmp((DATA8*)tmpP2, (DATA8*)GH.InputInstance.IicString[Index].SensorType) == 0)
+										{ // Type found
 
-									Type = GH.InputInstance.IicString[Index].Type;
-									Mode = GH.InputInstance.IicString[Index].Mode;
+											Type = GH.InputInstance.IicString[Index].Type;
+											Mode = GH.InputInstance.IicString[Index].Mode;
+										}
 								}
-							}
 							Index++;
 						}
-						cInputSetDeviceType(Port, Type, Mode, __LINE__);
+						cInputSetDeviceType((sbyte)Port, Type, Mode, 2106); // 2106 was a current line
 					}
-				  (*GH.InputInstance.pIic).Changed[Port] = 0;
+					(*GH.InputInstance.pIic).Changed[Port] = 0;
 				}
 				if (((*GH.InputInstance.pIic).Status[Port] & IIC_DATA_READY) != 0)
 				{
@@ -2148,7 +2205,7 @@ namespace Ev3CoreUnsafe.Cinput
 						{ // Connection type has changed
 
 							GH.InputInstance.DeviceData[Device].Connection = (*GH.InputInstance.pAnalog).InConn[Port];
-							cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).InDcm[Port], 0, __LINE__);
+							cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).InDcm[Port], 0, 2156); // 2156 was a current line
 							GH.InputInstance.DeviceMode[Device] = 0;
 							GH.InputInstance.TmpMode[Device] = MAX_DEVICE_MODES;
 							GH.InputInstance.DeviceData[Device].DevStatus = RESULT.BUSY;
@@ -2188,7 +2245,7 @@ namespace Ev3CoreUnsafe.Cinput
 							{ // Connection type has changed
 
 								GH.InputInstance.DeviceData[Device].Connection = (*GH.InputInstance.pAnalog).OutConn[Port];
-								cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).OutDcm[Port], 0, __LINE__);
+								cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).OutDcm[Port], 0, 2196); // 2196 was a current line
 							}
 
 							Result = OK;
@@ -2213,7 +2270,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 							if (GH.InputInstance.DeviceType[Device] != Type)
 							{
-								cInputSetDeviceType(Device, Type, 0, __LINE__);
+								cInputSetDeviceType(Device, Type, 0, 2221); // 2221 was a current line
 							}
 						}
 					}
@@ -2236,7 +2293,7 @@ namespace Ev3CoreUnsafe.Cinput
 							{
 								GH.InputInstance.DeviceData[Device].DevStatus = OK;
 
-								GH.printf("D=%-2d M=%d OK\r\n", (int)Device, GH.InputInstance.DeviceMode[Device]);
+								GH.printf($"D={(int)Device} M={GH.InputInstance.DeviceMode[Device]} OK\r\n");
 							}
 							else
 							{
@@ -2265,11 +2322,11 @@ namespace Ev3CoreUnsafe.Cinput
 					if (Result == OK)
 					{
 						(*pTmp) = Tmp;
-						GH.printf("c_input   cInputDcmUpdate: NEW     T=%-3d M=%d C=%-3d N=%s\r\n", Tmp.Type, Tmp.Mode, Tmp.Connection, Tmp.Name);
+						GH.printf($"c_input   cInputDcmUpdate: NEW     T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString(Tmp.Name)}\r\n");
 					}
 					else
 					{
-						GH.printf("c_input   cInputDcmUpdate: KNOWN   T=%-3d M=%d C=%-3d N=%s\r\n", Tmp.Type, Tmp.Mode, Tmp.Connection, Tmp.Name);
+						GH.printf($"c_input   cInputDcmUpdate: KNOWN   T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString(Tmp.Name)}\r\n");
 					}
 				}
 			}
@@ -2406,38 +2463,41 @@ namespace Ev3CoreUnsafe.Cinput
 
 			GH.InputInstance.MaxDeviceTypes = 3;
 
-			GH.Memory.cMemoryMalloc((void*)&GH.InputInstance.TypeData, (DATA32)(sizeof(TYPES) * GH.InputInstance.MaxDeviceTypes));
+			fixed (TYPES** tmpP = &GH.InputInstance.TypeData)
+				GH.Memory.cMemoryMalloc((void**)tmpP, (DATA32)(sizeof(TYPES) * GH.InputInstance.MaxDeviceTypes));
 
 			GH.InputInstance.IicDeviceTypes = 1;
 
-			GH.Memory.cMemoryMalloc((void*)&GH.InputInstance.IicString, (DATA32)(sizeof(IICSTR) * GH.InputInstance.IicDeviceTypes));
+            fixed (IICSTR** tmpP = &GH.InputInstance.IicString)
+                GH.Memory.cMemoryMalloc((void**)tmpP, (DATA32)(sizeof(IICSTR) * GH.InputInstance.IicDeviceTypes));
 
-			GH.InputInstance.pAnalog = &GH.InputInstance.Analog;
+			GH.InputInstance.pAnalog = (ANALOG*)Unsafe.AsPointer(ref GH.InputInstance.Analog);
 
-			GH.InputInstance.pUart = &GH.InputInstance.Uart;
+			GH.InputInstance.pUart = (UART*)Unsafe.AsPointer(ref GH.InputInstance.Uart);
 
-			GH.InputInstance.pIic = &GH.InputInstance.Iic;
+			GH.InputInstance.pIic = (IIC*)Unsafe.AsPointer(ref GH.InputInstance.Iic);
+			// TODO: mapping shite (probably no need)
 
-			GH.InputInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
-			GH.InputInstance.UartFile = open(UART_DEVICE_NAME, O_RDWR | O_SYNC);
-			GH.InputInstance.DcmFile = open(DCM_DEVICE_NAME, O_RDWR | O_SYNC);
-			GH.InputInstance.IicFile = open(IIC_DEVICE_NAME, O_RDWR | O_SYNC);
+			//GH.InputInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
+			//GH.InputInstance.UartFile = open(UART_DEVICE_NAME, O_RDWR | O_SYNC);
+			//GH.InputInstance.DcmFile = open(DCM_DEVICE_NAME, O_RDWR | O_SYNC);
+			//GH.InputInstance.IicFile = open(IIC_DEVICE_NAME, O_RDWR | O_SYNC);
 			GH.InputInstance.DCMUpdate = 1;
 
 			if (GH.InputInstance.AdcFile >= MIN_HANDLE)
 			{
-				pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.InputInstance.AdcFile, 0);
+				//pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.InputInstance.AdcFile, 0);
 
-				if (pAdcTmp == MAP_FAILED)
-				{
-					GH.Ev3System.Logger.LogError($"Error {nameof(ANALOG_SHARED_MEMORY)} occured in {Environment.StackTrace}");
-					Result = RESULT.FAIL;
-					GH.InputInstance.DCMUpdate = 0;
-				}
-				else
-				{
-					GH.InputInstance.pAnalog = pAdcTmp;
-				}
+				//if (pAdcTmp == MAP_FAILED)
+				//{
+				//	GH.Ev3System.Logger.LogError($"Error {nameof(ANALOG_SHARED_MEMORY)} occured in {Environment.StackTrace}");
+				//	Result = RESULT.FAIL;
+				//	GH.InputInstance.DCMUpdate = 0;
+				//}
+				//else
+				//{
+				//	GH.InputInstance.pAnalog = pAdcTmp;
+				//}
 			}
 			else
 			{
@@ -2449,18 +2509,18 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (GH.InputInstance.UartFile >= MIN_HANDLE)
 			{
-				pUartTmp = (UART*)mmap(0, sizeof(UART), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.InputInstance.UartFile, 0);
+				//pUartTmp = (UART*)mmap(0, sizeof(UART), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.InputInstance.UartFile, 0);
 
-				if (pUartTmp == MAP_FAILED)
-				{
-					GH.Ev3System.Logger.LogError($"Error {nameof(UART_SHARED_MEMORY)} occured in {Environment.StackTrace}");
-					Result = RESULT.FAIL;
-					GH.InputInstance.DCMUpdate = 0;
-				}
-				else
-				{
-					GH.InputInstance.pUart = pUartTmp;
-				}
+				//if (pUartTmp == MAP_FAILED)
+				//{
+				//	GH.Ev3System.Logger.LogError($"Error {nameof(UART_SHARED_MEMORY)} occured in {Environment.StackTrace}");
+				//	Result = RESULT.FAIL;
+				//	GH.InputInstance.DCMUpdate = 0;
+				//}
+				//else
+				//{
+				//	GH.InputInstance.pUart = pUartTmp;
+				//}
 			}
 			else
 			{
@@ -2472,18 +2532,18 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (GH.InputInstance.IicFile >= MIN_HANDLE)
 			{
-				pIicTmp = (IIC*)mmap(0, sizeof(UART), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.InputInstance.IicFile, 0);
+				//pIicTmp = (IIC*)mmap(0, sizeof(UART), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.InputInstance.IicFile, 0);
 
-				if (pIicTmp == MAP_FAILED)
-				{
-					GH.Ev3System.Logger.LogError($"Error {nameof(IIC_SHARED_MEMORY)} occured in {Environment.StackTrace}");
-					Result = RESULT.FAIL;
-					GH.InputInstance.DCMUpdate = 0;
-				}
-				else
-				{
-					GH.InputInstance.pIic = pIicTmp;
-				}
+				//if (pIicTmp == MAP_FAILED)
+				//{
+				//	GH.Ev3System.Logger.LogError($"Error {nameof(IIC_SHARED_MEMORY)} occured in {Environment.StackTrace}");
+				//	Result = RESULT.FAIL;
+				//	GH.InputInstance.DCMUpdate = 0;
+				//}
+				//else
+				//{
+				//	GH.InputInstance.pIic = pIicTmp;
+				//}
 			}
 			else
 			{
@@ -2553,39 +2613,41 @@ namespace Ev3CoreUnsafe.Cinput
 
 			cInputCalDataExit();
 
-			if (GH.InputInstance.AdcFile >= MIN_HANDLE)
-			{
-				munmap(GH.InputInstance.pAnalog, sizeof(ANALOG));
-				close(GH.InputInstance.AdcFile);
-			}
+            // TODO: mapping shite (probably no need)
+            //if (GH.InputInstance.AdcFile >= MIN_HANDLE)
+            //{
+            //	munmap(GH.InputInstance.pAnalog, sizeof(ANALOG));
+            //	close(GH.InputInstance.AdcFile);
+            //}
 
-			if (GH.InputInstance.UartFile >= MIN_HANDLE)
-			{
-				munmap(GH.InputInstance.pUart, sizeof(UART));
-				close(GH.InputInstance.UartFile);
-			}
+            //if (GH.InputInstance.UartFile >= MIN_HANDLE)
+            //{
+            //	munmap(GH.InputInstance.pUart, sizeof(UART));
+            //	close(GH.InputInstance.UartFile);
+            //}
 
-			if (GH.InputInstance.IicFile >= MIN_HANDLE)
-			{
-				munmap(GH.InputInstance.pIic, sizeof(IIC));
-				close(GH.InputInstance.IicFile);
-			}
+            //if (GH.InputInstance.IicFile >= MIN_HANDLE)
+            //{
+            //	munmap(GH.InputInstance.pIic, sizeof(IIC));
+            //	close(GH.InputInstance.IicFile);
+            //}
 
-			if (GH.InputInstance.DcmFile >= MIN_HANDLE)
-			{
-				close(GH.InputInstance.DcmFile);
-			}
+            //if (GH.InputInstance.DcmFile >= MIN_HANDLE)
+            //{
+            //	close(GH.InputInstance.DcmFile);
+            //}
 
-			if (GH.InputInstance.IicString != null)
-			{
-				free((void*)GH.InputInstance.IicString);
-			}
-			if (GH.InputInstance.TypeData != null)
-			{
-				free((void*)GH.InputInstance.TypeData);
-			}
+            // TODO: memory free
+            //if (GH.InputInstance.IicString != null)
+            //{
+            //	free((void*)GH.InputInstance.IicString);
+            //}
+            //if (GH.InputInstance.TypeData != null)
+            //{
+            //	free((void*)GH.InputInstance.TypeData);
+            //}
 
-			Result = OK;
+            Result = OK;
 
 			return (Result);
 		}
@@ -3067,7 +3129,7 @@ namespace Ev3CoreUnsafe.Cinput
 							}
 							if (pDestination != null)
 							{
-								while ((Count < (Length - 1)) && (TmpName[Count]))
+								while ((Count < (Length - 1)) && (TmpName[Count] != 0))
 								{
 									pDestination[Count] = TmpName[Count];
 
@@ -3165,7 +3227,7 @@ namespace Ev3CoreUnsafe.Cinput
 										if (GH.InputInstance.TypeData[Index].Mode == Mode)
 										{ // match on mode
 
-											TmpName = GH.InputInstance.TypeData[Index].Name;
+											TmpName = (sbyte*)GH.InputInstance.TypeData[Index].Name;
 
 											if (GH.VMInstance.Handle >= 0)
 											{
@@ -3265,11 +3327,11 @@ namespace Ev3CoreUnsafe.Cinput
 
 						Value = 0;
 						Busy = 0;
-						Owner = CallingObjectId();
+						Owner = GH.Lms.CallingObjectId();
 
 						if (Device == TESTDEVICE)
 						{
-							GH.printf("c_input   opINPUT_DEVICE READY_XX: D=%-3d T=%-3d M=%-3d B=%d C=%-3d\r\n", Device, Type, Mode, GH.InputInstance.DeviceData[Device].DevStatus, GH.InputInstance.DeviceData[Device].Connection);
+							GH.printf($"c_input   opINPUT_DEVICE READY_XX: D={Device} T={Type} M={Mode} B={GH.InputInstance.DeviceData[Device].DevStatus} C={GH.InputInstance.DeviceData[Device].Connection}\r\n");
 						}
 						if (Device < DEVICES)
 						{ // Device valid
@@ -3295,9 +3357,9 @@ namespace Ev3CoreUnsafe.Cinput
 										if ((GH.InputInstance.DeviceData[Device].Owner == 0) || (GH.InputInstance.DeviceData[Device].Owner == Owner))
 										{ // Owner is OK
 
-											GH.printf("c_input   opINPUT_DEVICE READY_XX: D=%-3d Change to type %d mode %d\r\n", Device, Type, Mode);
+											GH.printf($"c_input   opINPUT_DEVICE READY_XX: D={Device} Change to type {Type} mode {Mode}\r\n");
 											GH.InputInstance.DeviceData[Device].Owner = Owner;
-											cInputSetDeviceType(Device, Type, Mode, __LINE__);
+											cInputSetDeviceType(Device, Type, Mode, 3307); // 3307 was a current line
 											GH.InputInstance.DeviceData[Device].TimeoutTimer = MAX_DEVICE_BUSY_TIME;
 											GH.InputInstance.DeviceData[Device].Busy = 0;
 											if (Device == TESTDEVICE)
@@ -3308,7 +3370,7 @@ namespace Ev3CoreUnsafe.Cinput
 										else
 										{ // Another owner
 
-											GH.printf("c_input   opINPUT_DEVICE READY_XX: D=%-3d Trying to change to type %d mode %d\r\n", Device, Type, Mode);
+											GH.printf($"c_input   opINPUT_DEVICE READY_XX: D={Device} Trying to change to type {Type} mode {Mode}\r\n");
 											if (Device == TESTDEVICE)
 											{
 												GH.VMInstance.Status |= 0x40;
@@ -3332,7 +3394,7 @@ namespace Ev3CoreUnsafe.Cinput
 										{
 											if (GH.InputInstance.DeviceData[Device].TimeoutTimer == 0)
 											{
-												GH.printf("c_input   opINPUT_DEVICE READY_XX: D=%-3d Timeout when trying to change to type %d mode %d\r\n", Device, Type, Mode);
+												GH.printf($"c_input   opINPUT_DEVICE READY_XX: D={Device} Timeout when trying to change to type {Type} mode {Mode}\r\n");
 												GH.InputInstance.DeviceData[Device].Owner = 0;
 												GH.InputInstance.DeviceData[Device].Busy = 0;
 												Busy = 0;
@@ -3498,18 +3560,18 @@ namespace Ev3CoreUnsafe.Cinput
 
 									DaisyBuf[0] = 0;
 									DaisyBuf[1] = 0;
-									DaisyBuf[2] = opINPUT_DEVICE;
+									unchecked { DaisyBuf[2] = (sbyte)opINPUT_DEVICE; }
 									DaisyBuf[3] = CLR_ALL;
 									DaisyBuf[4] = 0;
 
-									Result = cDaisyDownStreamCmd(DaisyBuf, 5, Layer);
+									Result = GH.Daisy.cDaisyDownStreamCmd(DaisyBuf, 5, Layer);
 								}
 							}
 
 							if (Result != RESULT.BUSY)
 							{ // If job done
 
-								if (MoreLayers)
+								if (MoreLayers != 0)
 								{ // More layers ?
 
 									ActLayer++;
@@ -3568,18 +3630,18 @@ namespace Ev3CoreUnsafe.Cinput
 
 									DaisyBuf[0] = 0;
 									DaisyBuf[1] = 0;
-									DaisyBuf[2] = opINPUT_DEVICE;
+									unchecked { DaisyBuf[2] = (sbyte)opINPUT_DEVICE; }
 									DaisyBuf[3] = STOP_ALL;
 									DaisyBuf[4] = 0;
 
-									Result = cDaisyDownStreamCmd(DaisyBuf, 5, Layer);
+									Result = GH.Daisy.cDaisyDownStreamCmd(DaisyBuf, 5, Layer);
 								}
 							}
 
 							if (Result != RESULT.BUSY)
 							{ // If job done
 
-								if (MoreLayers)
+								if (MoreLayers != 0)
 								{ // More layers ?
 
 									ActLayer++;
@@ -3639,7 +3701,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Device < DEVICES)
 			{
-				cInputSetType(Device, Type, Mode, __LINE__);
+				cInputSetType(Device, Type, Mode, 3653); // 3653 was a current line
 			}
 			*(DATA8*)GH.Lms.PrimParPointer() = cInputReadDevicePct(Device, 0, 0, null);
 		}
@@ -3671,10 +3733,10 @@ namespace Ev3CoreUnsafe.Cinput
 			Type = *(DATA8*)GH.Lms.PrimParPointer();
 			Mode = *(DATA8*)GH.Lms.PrimParPointer();
 
-			GH.printf("c_input   opINPUT_READSI:          D=%-3d B=%d\r\n", Device, GH.InputInstance.DeviceData[Device].DevStatus);
+			GH.printf($"c_input   opINPUT_READSI:          D={Device} B={GH.InputInstance.DeviceData[Device].DevStatus}\r\n");
 			if (Device < DEVICES)
 			{
-				cInputSetType(Device, Type, Mode, __LINE__);
+				cInputSetType(Device, Type, Mode, 3688); // 3688 was a current line
 			}
 			*(DATAF*)GH.Lms.PrimParPointer() = cInputReadDeviceSi(Device, 0, 0, null);
 		}
@@ -3704,7 +3766,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Device < DEVICES)
 			{
-				GH.printf("c_input   opINPUT_TEST:            D=%-3d B=%d\r\n", Device, GH.InputInstance.DeviceData[Device].DevStatus);
+				GH.printf($"c_input   opINPUT_TEST:            D={Device} B={GH.InputInstance.DeviceData[Device].DevStatus}\r\n");
 				if (GH.InputInstance.DeviceData[Device].DevStatus != RESULT.BUSY)
 				{
 					Busy = 0;
@@ -3769,8 +3831,8 @@ namespace Ev3CoreUnsafe.Cinput
 			DATA8 Device;
 			DATA8 Tmp;
 			IP TmpIp;
-			DATA8 Buffer[UART_DATA_LENGTH + 1];
-			DSPSTAT DspStat = FAILBREAK;
+			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(UART_DATA_LENGTH + 1);
+			DSPSTAT DspStat = DSPSTAT.FAILBREAK;
 
 			TmpIp = GH.Lms.GetObjectIp();
 
@@ -3786,7 +3848,7 @@ namespace Ev3CoreUnsafe.Cinput
 					{
 						if ((Bytes > 0) && (Bytes <= UART_DATA_LENGTH))
 						{
-							if (((*GH.InputInstance.pUart).Status[Device] & UART_WRITE_REQUEST))
+							if (((*GH.InputInstance.pUart).Status[Device] & UART_WRITE_REQUEST) != 0)
 							{
 								DspStat = DSPSTAT.BUSYBREAK;
 							}
@@ -3805,9 +3867,9 @@ namespace Ev3CoreUnsafe.Cinput
 								// write setup string to "UART Device Controller" driver
 								if (GH.InputInstance.UartFile >= MIN_HANDLE)
 								{
-									write(GH.InputInstance.UartFile, Buffer, Bytes + 1);
+									GH.Ev3System.InputHandler.WriteUartData(CommonHelper.GetArray((byte*)Buffer, Bytes + 1));
 								}
-								DspStat = NOBREAK;
+								DspStat = DSPSTAT.NOBREAK;
 							}
 						}
 					}
@@ -3818,7 +3880,7 @@ namespace Ev3CoreUnsafe.Cinput
 						{
 							if ((Bytes > 0) && (Bytes <= IIC_DATA_LENGTH))
 							{
-								if (((*GH.InputInstance.pIic).Status[Device] & IIC_WRITE_REQUEST))
+								if (((*GH.InputInstance.pIic).Status[Device] & IIC_WRITE_REQUEST) != 0)
 								{
 									DspStat = DSPSTAT.BUSYBREAK;
 								}
@@ -3837,26 +3899,26 @@ namespace Ev3CoreUnsafe.Cinput
 									// write setup string to "IIC Device Controller" driver
 									if (GH.InputInstance.IicFile >= MIN_HANDLE)
 									{
-										write(GH.InputInstance.IicFile, Buffer, Bytes + 1);
+                                        GH.Ev3System.InputHandler.WriteI2cData(CommonHelper.GetArray((byte*)Buffer, Bytes + 1));
 									}
-									DspStat = NOBREAK;
+									DspStat = DSPSTAT.NOBREAK;
 								}
 							}
 						}
 						else
 						{ // don't bother if not UART or IIC device
 
-							DspStat = NOBREAK;
+							DspStat = DSPSTAT.NOBREAK;
 						}
 					}
 				}
 				else
 				{ // don't bother if TERMINAL
 
-					DspStat = NOBREAK;
+					DspStat = DSPSTAT.NOBREAK;
 				}
 			}
-			if (DspStat == DSTPSTAT.DSPSTAT.BUSYBREAK)
+			if (DspStat == DSPSTAT.BUSYBREAK)
 			{ // Rewind IP
 
 				GH.Lms.SetObjectIp(TmpIp - 1);
@@ -3904,7 +3966,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Device < DEVICES)
 			{
-				cInputSetType(Device, Type, Mode, __LINE__);
+				cInputSetType(Device, Type, Mode, 3918); // 3918 was a current line
 
 				while ((Value < Values) && (Value < MAX_DEVICE_MODES))
 				{
@@ -4052,7 +4114,7 @@ namespace Ev3CoreUnsafe.Cinput
 						Type = pTypes[Index];
 						Mode = pModes[Index];
 
-						cInputSetType(Device, Type, Mode, __LINE__);
+						cInputSetType(Device, Type, Mode, 4066); // 4066 was a current line
 
 						pValues[Index] = cInputReadDeviceSi(Device, pDataSets[Index], (short)SampleTime, &pInits[Index]);
 					}

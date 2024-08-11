@@ -2,7 +2,7 @@
 {
 	public interface IOutputHandler
 	{
-		void WritePwmData(byte[] data, int len);
+		void WritePwmData(byte[] data);
 
 		(int, int) GetMotorBusyFlags();
 		void SetMotorBusyFlags(byte val);

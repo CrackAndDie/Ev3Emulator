@@ -1,4 +1,5 @@
 ﻿using Ev3CoreUnsafe.Cui.Interfaces;
+using Ev3CoreUnsafe.Lms2012.Interfaces;
 
 namespace Ev3CoreUnsafe.Extensions
 {
@@ -51,5 +52,51 @@ namespace Ev3CoreUnsafe.Extensions
 			}
 			return null;
 		}
-	}
+
+		public unsafe static ULONG* GetCalib(this COLORSTRUCT color, int n)
+		{
+			switch (n)
+			{
+				case 0:
+					return color.Calibration0;
+				case 1:
+					return color.Calibration1;
+				case 2:
+					return color.Calibration2;
+			}
+			return null;
+		}
+
+        public unsafe static DATA8* GetRaw(this UART color, int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return color.Raw0;
+                case 1:
+                    return color.Raw1;
+                case 2:
+                    return color.Raw2;
+                case 3:
+                    return color.Raw3;
+            }
+            return null;
+        }
+
+        public unsafe static DATA8* GetRaw(this IIC color, int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return color.Raw0;
+                case 1:
+                    return color.Raw1;
+                case 2:
+                    return color.Raw2;
+                case 3:
+                    return color.Raw3;
+            }
+            return null;
+        }
+    }
 }

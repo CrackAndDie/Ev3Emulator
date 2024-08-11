@@ -150,9 +150,6 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 			IicDat = *CommonHelper.PointerStruct<IICDAT>();
 			IicStr = *CommonHelper.PointerStruct<IICSTR>();
 
-			// inits
-			Analog.Init();
-
 			TmpMode = CommonHelper.Pointer1d<DATA8>(INPUT_PORTS);
 			ConfigurationChanged = CommonHelper.Pointer1d<DATA8>(MAX_PROGRAMS);
 			DeviceType = CommonHelper.Pointer1d<DATA8>(DEVICES);
