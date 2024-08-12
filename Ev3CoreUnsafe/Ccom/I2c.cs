@@ -22,7 +22,8 @@ namespace Ev3CoreUnsafe.Ccom
 
         public RESULT I2cInit(READBUF* pBuf, WRITEBUF* pWriteBuf, char* pBundleId, char* pBundleSeedId)
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("I2C INIT CALLED");
+            return RESULT.OK;
         }
 
         public void I2cStart()

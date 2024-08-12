@@ -31,7 +31,7 @@ namespace Ev3CoreUnsafe.Coutput
 
         public RESULT cOutputInit()
         {
-            RESULT Result = RESULT.FAIL;
+            RESULT Result = RESULT.OK;
             // MOTORDATA* pTmp;
 
             // To ensure that pMotor is never uninitialised

@@ -7,7 +7,16 @@ using EV3ModelLib;
 
 namespace Ev3ConsoleTest
 {
-	internal class Program
+    public unsafe struct IMGHEAD
+    {
+        public fixed byte Sign[4];   //!< Place holder for the file type identifier                  
+        public uint ImageSize;  //!< Image size                  
+        public ushort VersionInfo;  //!< Version identifier                 
+        public ushort NumberOfObjects;  //!< Total number of objects in image          
+        public uint GlobalBytes;  //!< Number of bytes to allocate for global variables
+    }
+
+    internal class Program
     {
         static unsafe void Main(string[] args)
         {
@@ -16,10 +25,9 @@ namespace Ev3ConsoleTest
 		}
 
 		#region common test
-        private static void CommonTest()
+        private unsafe static void CommonTest()
         {
-            sbyte a = 43;
-            char b = (char)(object)a;
+            var sz = sizeof(IMGHEAD);
         }
 		#endregion
 

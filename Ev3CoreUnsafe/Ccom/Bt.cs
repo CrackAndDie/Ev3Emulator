@@ -26,7 +26,7 @@ namespace Ev3CoreUnsafe.Ccom
 
         public void BtInit(sbyte* pName)
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("BT INIT CALLED");
         }
 
         public byte BtSetMode2(byte Mode2)

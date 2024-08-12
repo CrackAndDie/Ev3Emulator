@@ -10,7 +10,7 @@ namespace Ev3CoreUnsafe.Cui
 
 		public RESULT dTerminalInit()
 		{
-			RESULT Result = RESULT.FAIL;
+			RESULT Result = RESULT.OK;
 
 			//if (tcgetattr(STDIN_FILENO, &TerminalAttr) >= 0)
 			//{

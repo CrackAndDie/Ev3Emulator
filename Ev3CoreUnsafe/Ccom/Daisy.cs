@@ -87,7 +87,8 @@ namespace Ev3CoreUnsafe.Ccom
 
         public RESULT cDaisyInit()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("DAISY INIT CALLED");
+            return RESULT.OK;
         }
 
         public RESULT cDaisyMotorDownStream(sbyte* pData, sbyte Length, sbyte Layer, sbyte PortField)

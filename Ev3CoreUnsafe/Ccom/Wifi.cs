@@ -92,7 +92,8 @@ namespace Ev3CoreUnsafe.Ccom
 
         public RESULT cWiFiInit()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogWarning("WIFI INIT CALLED");
+            return RESULT.OK;
         }
 
         public RESULT cWiFiKnownDongleAttached()

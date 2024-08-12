@@ -8,9 +8,9 @@ namespace Ev3ConsoleTest.Emulation
 
 		public ILedHandler LedHandler => throw new NotImplementedException();
 
-		public ILcdHandler LcdHandler => throw new NotImplementedException();
+        public ILcdHandler LcdHandler { get; } = new LcdHandler();
 
-		public ISoundHandler SoundHandler => throw new NotImplementedException();
+        public ISoundHandler SoundHandler => throw new NotImplementedException();
 
 		public IOutputHandler OutputHandler => throw new NotImplementedException();
 

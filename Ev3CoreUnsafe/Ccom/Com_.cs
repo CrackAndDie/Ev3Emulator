@@ -78,7 +78,7 @@ namespace Ev3CoreUnsafe.Ccom
             GH.ComInstance.ComResult = OK;
 
             GH.ComInstance.BrickName[0] = 0;
-            using FileStream fs = File.OpenRead("./settings/BrickName"); // TODO: not the path
+            using FileStream fs = File.OpenRead("./Resources/other/BrickName"); 
             if (fs != null)
             {
                 fs.ReadUnsafe((UBYTE*)&(GH.ComInstance.BrickName[0]), 0, (int)vmBRICKNAMESIZE);
@@ -97,6 +97,8 @@ namespace Ev3CoreUnsafe.Ccom
 
             GH.ComInstance.VmReady = 1;
             GH.ComInstance.ReplyStatus = 0;
+
+            Result = OK;
 
 
             return (Result);
@@ -5091,7 +5093,7 @@ namespace Ev3CoreUnsafe.Ccom
                         {
                             if (RESULT.FAIL != (RESULT)GH.Bt.cBtSetName((UBYTE*)pName, (byte)(Len + 1)))
                             {
-                                using FileStream fs = File.OpenWrite("./settings/BrickName"); // TODO: not the path
+                                using FileStream fs = File.OpenWrite("./Resources/other/BrickName");
                                 if (fs != null)
                                 {
                                     fs.Write(CommonHelper.GetArray((byte*)pName, Len + 1));

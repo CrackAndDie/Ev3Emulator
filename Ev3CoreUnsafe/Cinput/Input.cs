@@ -2506,7 +2506,7 @@ namespace Ev3CoreUnsafe.Cinput
 			else
 			{
 				GH.Ev3System.Logger.LogError($"Error {nameof(ANALOG_DEVICE_FILE_NOT_FOUND)} occured in {Environment.StackTrace}");
-				Result = RESULT.FAIL;
+				// Result = RESULT.FAIL;
 				GH.InputInstance.DCMUpdate = 0;
 			}
 
@@ -2529,7 +2529,7 @@ namespace Ev3CoreUnsafe.Cinput
 			else
 			{
 				GH.Ev3System.Logger.LogError($"Error {nameof(UART_DEVICE_FILE_NOT_FOUND)} occured in {Environment.StackTrace}");
-				Result = RESULT.FAIL;
+				// Result = RESULT.FAIL;
 				//    GH.InputInstance.DCMUpdate   =  0;
 			}
 
@@ -2552,7 +2552,7 @@ namespace Ev3CoreUnsafe.Cinput
 			else
 			{
 				GH.Ev3System.Logger.LogError($"Error {nameof(IIC_DEVICE_FILE_NOT_FOUND)} occured in {Environment.StackTrace}");
-				Result = RESULT.FAIL;
+				// Result = RESULT.FAIL;
 				//    GH.InputInstance.DCMUpdate   =  0;
 			}
 

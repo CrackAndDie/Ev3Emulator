@@ -1022,6 +1022,7 @@ namespace Ev3CoreUnsafe
 		public const int vmPOP3_ABS_WARN_LINE_ENDX = 155;
 
 
+		public static UBYTE[] REALLONGToBytes(long _x) { return new UBYTE[] { (UBYTE)((_x) & 0xFF), (UBYTE)((_x >> 8) & 0xFF), (UBYTE)((_x >> 16) & 0xFF), (UBYTE)((_x >> 24) & 0xFF), (UBYTE)((_x >> 32) & 0xFF), (UBYTE)((_x >> 40) & 0xFF), (UBYTE)((_x >> 48) & 0xFF), (UBYTE)((_x >> 56) & 0xFF) }; }
 		public static UBYTE[] LONGToBytes(ULONG _x) { return new UBYTE[] { (UBYTE)((_x) & 0xFF), (UBYTE)((_x >> 8) & 0xFF), (UBYTE)((_x >> 16) & 0xFF), (UBYTE)((_x >> 24) & 0xFF) }; }
 		public static UBYTE[] WORDToBytes(UWORD _x) { return new UBYTE[] { (UBYTE)((_x) & 0xFF), (UBYTE)((_x >> 8) & 0xFF) }; }
 		public static UBYTE BYTEToBytes(UBYTE _x) { return (UBYTE)((_x) & 0xFF); }
@@ -1036,29 +1037,29 @@ namespace Ev3CoreUnsafe
 			return lst.ToArray();
 		}
 
-		public static UBYTE[] VMTHREADHeader(ULONG OffsetToInstructions, ULONG LocalBytes)
+		public static UBYTE[] VMTHREADHeader(long OffsetToInstructions, ULONG LocalBytes)
 		{
 			var lst = new List<UBYTE>();
-			lst.AddRange(LONGToBytes(OffsetToInstructions));
+			lst.AddRange(REALLONGToBytes(OffsetToInstructions));
 			lst.AddRange(new UBYTE[] { 0, 0, 0, 0 });
 			lst.AddRange(LONGToBytes(LocalBytes));
 			return lst.ToArray();
 		}
 
-		public static UBYTE[] SUBCALLHeader(ULONG OffsetToInstructions, ULONG LocalBytes)
+		public static UBYTE[] SUBCALLHeader(long OffsetToInstructions, ULONG LocalBytes)
 		{
 			var lst = new List<UBYTE>();
-			lst.AddRange(LONGToBytes(OffsetToInstructions));
+			lst.AddRange(REALLONGToBytes(OffsetToInstructions));
 			lst.AddRange(new UBYTE[] { 0, 0, 1, 0 });
 			lst.AddRange(LONGToBytes(LocalBytes));
 			return lst.ToArray();
 		}
 
 
-		public static UBYTE[] BLOCKHeader(ULONG OffsetToInstructions, UWORD OwnerObjectId, UWORD TriggerCount)
+		public static UBYTE[] BLOCKHeader(long OffsetToInstructions, UWORD OwnerObjectId, UWORD TriggerCount)
 		{
 			var lst = new List<UBYTE>();
-			lst.AddRange(LONGToBytes(OffsetToInstructions));
+			lst.AddRange(REALLONGToBytes(OffsetToInstructions));
 			lst.AddRange(WORDToBytes(OwnerObjectId));
 			lst.AddRange(WORDToBytes(TriggerCount));
 			lst.AddRange(LONGToBytes(0));

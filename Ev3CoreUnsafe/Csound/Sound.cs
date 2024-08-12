@@ -17,7 +17,7 @@ namespace Ev3CoreUnsafe.Csound
 			int SndFile;
 
 			GH.SoundInstance.SoundDriverDescriptor = -1;
-			*GH.SoundInstance.hSoundFile = 0;
+			// *GH.SoundInstance.hSoundFile = 0;
 			GH.SoundInstance.pSound = (SOUND*)Unsafe.AsPointer<SOUND>(ref GH.SoundInstance.Sound);
 
 			// TODO: file shite
