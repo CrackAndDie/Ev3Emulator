@@ -1,4 +1,5 @@
 ﻿using Ev3CoreUnsafe.Enums;
+using Ev3CoreUnsafe.Extensions;
 using Ev3CoreUnsafe.Helpers;
 using static Ev3CoreUnsafe.Defines;
 
@@ -98,11 +99,10 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		void Strings();
 		void MemoryWrite();
 		void MemoryRead();
-		void cBranchJr();
 		void PortCnvOutput();
 		void PortCnvInput();
 		void NoteToFreq();
-		void System();
+		void System_();
 		void Monitor();
 
 		void TstClose();
@@ -571,6 +571,20 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 			PrintBuffer = CommonHelper.Pointer1d<DATA8>(PRINTBUFFERSIZE + 1);
 			Program = CommonHelper.Pointer1d<PRG>(MAX_PROGRAMS, true);
 			Errors = CommonHelper.Pointer1d<ERR>(ERROR_BUFFER_SIZE);
+		}
+	}
+
+	// from source file
+	public unsafe struct NOTEFREQ
+	{
+		public fixed DATA8 Note[4];
+		public DATA16 Freq;
+
+		public NOTEFREQ(string name, DATA16 freq)
+		{
+			fixed (DATA8* tmpP = &Note[0])
+				CommonHelper.strcpy(tmpP, name.AsSbytePointer());
+			Freq = freq;
 		}
 	}
 }

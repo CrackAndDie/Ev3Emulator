@@ -563,7 +563,7 @@ namespace Ev3CoreUnsafe
 			[opSELECT16] = GH.Compare.cCompareSelect16,
 			[opSELECT32] = GH.Compare.cCompareSelect32,
 			[opSELECTF] = GH.Compare.cCompareSelectF,
-			[opSYSTEM] = GH.Lms.System,
+			[opSYSTEM] = GH.Lms.System_,
 			[opPORT_CNV_OUTPUT] = GH.Lms.PortCnvOutput,
 			[opPORT_CNV_INPUT] = GH.Lms.PortCnvInput,
 			[opNOTE_TO_FREQ] = GH.Lms.NoteToFreq,
@@ -677,6 +677,186 @@ namespace Ev3CoreUnsafe
 			[opMAILBOX_CLOSE] = GH.Com.cComCloseMailBox,
 
 			[opTST] = GH.Lms.Tst
+		};
+
+		public const int NOTES = 36;
+
+		public static NOTEFREQ[] NoteFreq = new NOTEFREQ[NOTES]
+		{
+			new NOTEFREQ("C4"  ,  262 ),
+			new NOTEFREQ("D4"  ,  294 ),
+			new NOTEFREQ("E4"  ,  330 ),
+			new NOTEFREQ("F4"  ,  349 ),
+			new NOTEFREQ("G4"  ,  392 ),
+			new NOTEFREQ("A4"  ,  440 ),
+			new NOTEFREQ("B4"  ,  494 ),
+			new NOTEFREQ("C5"  ,  523 ),
+			new NOTEFREQ("D5"  ,  587 ),
+			new NOTEFREQ("E5"  ,  659 ),
+			new NOTEFREQ("F5"  ,  698 ),
+			new NOTEFREQ("G5"  ,  784 ),
+			new NOTEFREQ("A5"  ,  880 ),
+			new NOTEFREQ("B5"  ,  988 ),
+			new NOTEFREQ("C6"  , 1047 ),
+			new NOTEFREQ("D6"  , 1175 ),
+			new NOTEFREQ("E6"  , 1319 ),
+			new NOTEFREQ("F6"  , 1397 ),
+			new NOTEFREQ("G6"  , 1568 ),
+			new NOTEFREQ("A6"  , 1760 ),
+			new NOTEFREQ("B6"  , 1976 ),
+
+			new NOTEFREQ("C#4" ,  277 ),
+			new NOTEFREQ("D#4" ,  311 ),
+
+			new NOTEFREQ("F#4" ,  370 ),
+			new NOTEFREQ("G#4" ,  415 ),
+			new NOTEFREQ("A#4" ,  466 ),
+
+			new NOTEFREQ("C#5" ,  554 ),
+			new NOTEFREQ("D#5" ,  622 ),
+
+			new NOTEFREQ("F#5" ,  740 ),
+			new NOTEFREQ("G#5" ,  831 ),
+			new NOTEFREQ("A#5" ,  932 ),
+
+			new NOTEFREQ("C#6" , 1109 ),
+			new NOTEFREQ("D#6" , 1245 ),
+
+			new NOTEFREQ("F#6" , 1480 ),
+			new NOTEFREQ("G#6" , 1661 ),
+			new NOTEFREQ("A#6" , 1865 )
+		};
+
+		public static DATA8[] ValidChars = new DATA8[]
+		{
+			0x00,   // 0x00      NUL
+			0x00,   // 0x01      SOH
+			0x00,   // 0x02      STX
+			0x00,   // 0x03      ETX
+			0x00,   // 0x04      EOT
+			0x00,   // 0x05      ENQ
+			0x00,   // 0x06      ACK
+			0x00,   // 0x07      BEL
+			0x00,   // 0x08      BS
+			0x00,   // 0x09      TAB
+			0x00,   // 0x0A      LF
+			0x00,   // 0x0B      VT
+			0x00,   // 0x0C      FF
+			0x00,   // 0x0D      CR
+			0x00,   // 0x0E      SO
+			0x00,   // 0x0F      SI
+			0x00,   // 0x10      DLE
+			0x00,   // 0x11      DC1
+			0x00,   // 0x12      DC2
+			0x00,   // 0x13      DC3
+			0x00,   // 0x14      DC4
+			0x00,   // 0x15      NAK
+			0x00,   // 0x16      SYN
+			0x00,   // 0x17      ETB
+			0x00,   // 0x18      CAN
+			0x00,   // 0x19      EM
+			0x00,   // 0x1A      SUB
+			0x00,   // 0x1B      ESC
+			0x00,   // 0x1C      FS
+			0x00,   // 0x1D      GS
+			0x00,   // 0x1E      RS
+			0x00,   // 0x1F      US
+			0x12,   // 0x20      (space)
+			0x00,   // 0x21      !
+			0x00,   // 0x22      "
+			0x00,   // 0x23      #
+			0x00,   // 0x24      $
+			0x00,   // 0x25      %
+			0x00,   // 0x26      &
+			0x00,   // 0x27      '
+			0x00,   // 0x28      (
+			0x00,   // 0x29      )
+			0x00,   // 0x2A      *
+			0x00,   // 0x2B      +
+			0x00,   // 0x2C      ,
+			0x03,   // 0x2D      -
+			0x02,   // 0x2E      .
+			0x02,   // 0x2F      /
+			0x1F,   // 0x30      0
+			0x1F,   // 0x31      1
+			0x1F,   // 0x32      2
+			0x1F,   // 0x33      3
+			0x1F,   // 0x34      4
+			0x1F,   // 0x35      5
+			0x1F,   // 0x36      6
+			0x1F,   // 0x37      7
+			0x1F,   // 0x38      8
+			0x1F,   // 0x39      9
+			0x00,   // 0x3A      :
+			0x00,   // 0x3B      ;
+			0x00,   // 0x3C      <
+			0x00,   // 0x3D      =
+			0x00,   // 0x3E      >
+			0x00,   // 0x3F      ?
+			0x00,   // 0x40      @
+			0x1F,   // 0x41      A
+			0x1F,   // 0x42      B
+			0x1F,   // 0x43      C
+			0x1F,   // 0x44      D
+			0x1F,   // 0x45      E
+			0x1F,   // 0x46      F
+			0x1F,   // 0x47      G
+			0x1F,   // 0x48      H
+			0x1F,   // 0x49      I
+			0x1F,   // 0x4A      J
+			0x1F,   // 0x4B      K
+			0x1F,   // 0x4C      L
+			0x1F,   // 0x4D      M
+			0x1F,   // 0x4E      N
+			0x1F,   // 0x4F      O
+			0x1F,   // 0x50      P
+			0x1F,   // 0x51      Q
+			0x1F,   // 0x52      R
+			0x1F,   // 0x53      S
+			0x1F,   // 0x54      T
+			0x1F,   // 0x55      U
+			0x1F,   // 0x56      V
+			0x1F,   // 0x57      W
+			0x1F,   // 0x58      X
+			0x1F,   // 0x59      Y
+			0x1F,   // 0x5A      Z
+			0x00,   // 0x5B      [
+			0x00,   // 0x5C      '\'
+			0x00,   // 0x5D      ]
+			0x00,   // 0x5E      ^
+			0x1F,   // 0x5F      _
+			0x00,   // 0x60      `
+			0x1F,   // 0x61      a
+			0x1F,   // 0x62      b
+			0x1F,   // 0x63      c
+			0x1F,   // 0x64      d
+			0x1F,   // 0x65      e
+			0x1F,   // 0x66      f
+			0x1F,   // 0x67      g
+			0x1F,   // 0x68      h
+			0x1F,   // 0x69      i
+			0x1F,   // 0x6A      j
+			0x1F,   // 0x6B      k
+			0x1F,   // 0x6C      l
+			0x1F,   // 0x6D      m
+			0x1F,   // 0x6E      n
+			0x1F,   // 0x6F      o
+			0x1F,   // 0x70      p
+			0x1F,   // 0x71      q
+			0x1F,   // 0x72      r
+			0x1F,   // 0x73      s
+			0x1F,   // 0x74      t
+			0x1F,   // 0x75      u
+			0x1F,   // 0x76      v
+			0x1F,   // 0x77      w
+			0x1F,   // 0x78      x
+			0x1F,   // 0x79      y
+			0x1F,   // 0x7A      z
+			0x00,   // 0x7B      {
+			0x00,   // 0x7C      |
+			0x00,   // 0x7D      }
+			0x02,   // 0x7E      ~
+			0x00    // 0x7F      
 		};
 		#endregion
 
@@ -988,26 +1168,26 @@ namespace Ev3CoreUnsafe
 
 		public static Dictionary<int, string> ParTypeNames = new Dictionary<int, string>()
 		{
-			[DATA_8]   = "DATA8",
-			[DATA_16]  = "DATA16",
-			[DATA_32]  = "DATA32",
-			[DATA_F]   = "DATAF",
-			[DATA_S]   = "STRING",
-			[DATA_V]   = "UNKNOWN",
+			[DATA_8] = "DATA8",
+			[DATA_16] = "DATA16",
+			[DATA_32] = "DATA32",
+			[DATA_F] = "DATAF",
+			[DATA_S] = "STRING",
+			[DATA_V] = "UNKNOWN",
 		};
 
 		public static Dictionary<int, DATA32> ParMin = new Dictionary<int, DATA32>()
 		{
-			[DATA_8]   = DATA8_MIN,
-			[DATA_16]  = DATA16_MIN,
-			[DATA_32]  = DATA32_MIN,
+			[DATA_8] = DATA8_MIN,
+			[DATA_16] = DATA16_MIN,
+			[DATA_32] = DATA32_MIN,
 		};
 
 		public static Dictionary<int, DATA32> ParMax = new Dictionary<int, DATA32>()
 		{
-			[DATA_8]   = DATA8_MAX,
-			[DATA_16]  = DATA16_MAX,
-			[DATA_32]  = DATA32_MAX,
+			[DATA_8] = DATA8_MAX,
+			[DATA_16] = DATA16_MAX,
+			[DATA_32] = DATA32_MAX,
 		};
 
 		// TODO: check it out. wtf is going on here
@@ -1759,17 +1939,17 @@ namespace Ev3CoreUnsafe
 		public static Dictionary<DATA8, DATA8> FavouriteExts = new Dictionary<sbyte, DATA8>()
 		{
 			[TYPE_BYTECODE] = 1,
-			[TYPE_SOUND]    = 2,
+			[TYPE_SOUND] = 2,
 			[TYPE_GRAPHICS] = 3,
-			[TYPE_TEXT]     = 4,
+			[TYPE_TEXT] = 4,
 		};
 
 		public static string[,] pFavourites = new string[SORT_TYPES, 8]
 		{	// Priority
 			//  0             1                 2                 3                 4
-			{ null,         null,			  null,				null,			  null,					null,         null,				    null,},
+			{ null,         null,             null,             null,             null,                 null,         null,                 null,},
 			{ "",           "BrkProg_SAVE",   "BrkDL_SAVE",     "SD_Card",        "USB_Stick",          "TEST",       null,                 null },
-			{ "Port View",  "Motor Control",  "IR Control",     "Brick Program",  "Brick Datalog",		null,		  null,					null },
+			{ "Port View",  "Motor Control",  "IR Control",     "Brick Program",  "Brick Datalog",      null,         null,                 null },
 			{ "Volume",     "Sleep",          "Bluetooth",      "WiFi",           "Brick Info",         "Test",       "Performance",        "Debug" }
 		};
 
@@ -2115,17 +2295,17 @@ namespace Ev3CoreUnsafe
 		#endregion
 
 		#region c_md5.c
-		public static int FF(int b, int c, int d) 
-		{ 
-			return (d ^ (b & (c ^ d))); 
+		public static int FF(int b, int c, int d)
+		{
+			return (d ^ (b & (c ^ d)));
 		}
 		public static int FG(int b, int c, int d)
 		{
-			return FF(d, b, c); 
+			return FF(d, b, c);
 		}
 		public static int FH(int b, int c, int d)
 		{
-			return (b ^ c ^ d); 
+			return (b ^ c ^ d);
 		}
 		public static int FI(int b, int c, int d)
 		{
@@ -2235,10 +2415,10 @@ namespace Ev3CoreUnsafe
 		public unsafe static TYPES[] TypeDefault =
 		{
 			//   Name										   Type                   Connection                Mode	 DataSets     Format      Figures       Decimals      Views      RawMin         RawMax            PctMin         PctMax            SiMin        SiMax            Time             IdValue        Pins             Symbol
-			new TYPES("PORT ERROR".AsSbytePointer()) {		Type = TYPE_ERROR,   Connection = CONN_ERROR,   Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
-			new TYPES("NONE".AsSbytePointer())		 {		Type = TYPE_NONE,    Connection = CONN_NONE,    Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
-			new TYPES("UNKNOWN".AsSbytePointer())	 {		Type = TYPE_UNKNOWN, Connection = CONN_UNKNOWN, Mode = 0, DataSets = 1, Format = 1, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 1023.0f, PctMin = 0.0f, PctMax = 100.0f, SiMin = 0.0f, SiMax = 1023.0f, InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
-			new TYPES("".AsSbytePointer())			 { }
+			new TYPES("PORT ERROR".AsSbytePointer()) {      Type = TYPE_ERROR,   Connection = CONN_ERROR,   Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
+			new TYPES("NONE".AsSbytePointer())       {      Type = TYPE_NONE,    Connection = CONN_NONE,    Mode = 0, DataSets = 0, Format = 0, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 0.0f,    PctMin = 0.0f, PctMax = 0.0f,   SiMin = 0.0f, SiMax = 0.0f,    InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
+			new TYPES("UNKNOWN".AsSbytePointer())    {      Type = TYPE_UNKNOWN, Connection = CONN_UNKNOWN, Mode = 0, DataSets = 1, Format = 1, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 1023.0f, PctMin = 0.0f, PctMax = 100.0f, SiMin = 0.0f, SiMax = 1023.0f, InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
+			new TYPES("".AsSbytePointer())           { }
 		};
 
 		public const int SENSOR_RESOLUTION = 1023;
