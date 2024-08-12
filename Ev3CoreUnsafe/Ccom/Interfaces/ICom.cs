@@ -547,6 +547,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 
 		public UBYTE* BrickName;
 
+		public static int SizeofImage = Unsafe.SizeOf<IMGHEAD>() + Unsafe.SizeOf<OBJHEAD>() + USB_CMD_IN_REP_SIZE - Unsafe.SizeOf<DIRCMD>();
+
 		public COM_GLOBALS()
 		{
 			Init();
@@ -554,7 +556,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 
 		public void Init()
 		{
-			Image = CommonHelper.Pointer1d<IMGDATA>(Unsafe.SizeOf<IMGHEAD>() + Unsafe.SizeOf<OBJHEAD>() + USB_CMD_IN_REP_SIZE - Unsafe.SizeOf<DIRCMD>());
+			Image = CommonHelper.Pointer1d<IMGDATA>(SizeofImage);
 			Globals = CommonHelper.Pointer1d<UBYTE>(MAX_COMMAND_GLOBALS);
 			Files = CommonHelper.Pointer1d<FIL>(MAX_FILE_HANDLES, true);
 			TxBuf = CommonHelper.Pointer1d<TXBUF>(NO_OF_CHS, true);

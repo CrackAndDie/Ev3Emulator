@@ -83,7 +83,7 @@ namespace Ev3ConsoleTest
 			byte a = 160;
 			sbyte b = (sbyte)a;
 
-			sbyte c = -120;
+			sbyte c = -1;
 			byte d = (byte)c;
 		}
 

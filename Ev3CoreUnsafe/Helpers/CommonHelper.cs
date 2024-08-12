@@ -355,6 +355,25 @@ namespace Ev3CoreUnsafe.Helpers
 			return null;
 		}
 
+		public unsafe static DATA8* strcat(DATA8* dst, DATA8* src)
+		{
+			int localPointer = 0;
+			// find the '\0'
+			while (dst[localPointer] != 0)
+			{
+				localPointer++;
+			}
+			// copy
+			int srcPointer = 0;
+			while (src[srcPointer] != 0)
+			{
+				dst[localPointer + srcPointer] = src[srcPointer];
+				srcPointer++;
+			}
+			dst[localPointer + srcPointer] = 0;
+			return dst;
+		}
+
 		public unsafe static byte* memcpy(byte* dst, byte* src, int num)
 		{
 			for (int i = 0; i < num; ++i)

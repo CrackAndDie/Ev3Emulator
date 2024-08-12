@@ -1904,6 +1904,9 @@ namespace Ev3CoreUnsafe
 
 		#region c_com.c
 		public const int FS_IDLE = 0;
+
+		public const int SIZEOFFILESIZE = 8;
+		public const int USB_CABLE_DETECT_RATE = 15000;  // ?? Approx 5 sec. on a good day. Cable detection is a NON-critical
 		#endregion
 
 		#region c_bt.h
@@ -2105,6 +2108,29 @@ namespace Ev3CoreUnsafe
 		public const int MIN_MSG_LEN = 6;
 		public const uint SLEEPuS = ((ULONG)(1000));
 		public const uint SEC_1 = (((ULONG)(1000000)) / SLEEPuS);
+		#endregion
+
+		#region c_md5.h
+		public const int MD5LEN = 32;
+		#endregion
+
+		#region c_md5.c
+		public static int FF(int b, int c, int d) 
+		{ 
+			return (d ^ (b & (c ^ d))); 
+		}
+		public static int FG(int b, int c, int d)
+		{
+			return FF(d, b, c); 
+		}
+		public static int FH(int b, int c, int d)
+		{
+			return (b ^ c ^ d); 
+		}
+		public static int FI(int b, int c, int d)
+		{
+			return (c ^ (b | ~d));
+		}
 		#endregion
 
 		#region c_wifi.h
