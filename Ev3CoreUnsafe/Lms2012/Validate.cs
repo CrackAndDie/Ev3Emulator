@@ -25,7 +25,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			{ // Byte code exist
 
 				Size = 0;
-				Length = CommonHelper.snprintf(&Buf[Size], Lng - Size, $"  {CommonHelper.GetString(OpCodes[OpCode].Name)},");
+				Length = CommonHelper.snprintf(&Buf[Size], Lng - Size, $"  {CommonHelper.GetString((sbyte*)OpCodes[OpCode].Name)},");
 				Size += Length;
 				Size += CommonHelper.snprintf(&Buf[Size], Lng - Size, new string(' ', 3 + OPCODE_NAMESIZE - Length));
 
@@ -56,7 +56,7 @@ namespace Ev3CoreUnsafe.Lms2012
 									Size += CommonHelper.snprintf(&Buf[Size], Lng - Size, $"{CommonHelper.GetString(TmpBuf)}");
 								}
 								Flag = 1;
-								Size += CommonHelper.snprintf(&Buf[Size], Lng - Size, $"{CommonHelper.GetString(SubCodes[Tab][Sub].Name)}, ");
+								Size += CommonHelper.snprintf(&Buf[Size], Lng - Size, $"{CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}, ");
 								Pars = SubCodes[Tab][Sub].Pars;
 							}
 							while ((Pars & 0x0F) >= PAR)
@@ -236,7 +236,7 @@ namespace Ev3CoreUnsafe.Lms2012
 				Parameters = 0;
 
 				// Print opcode
-				LineLength = GH.printf($"  /* {*pIndex} */  {CommonHelper.GetString(OpCodes[OpCode].Name)},");
+				LineLength = GH.printf($"  /* {*pIndex} */  {CommonHelper.GetString((sbyte*)OpCodes[OpCode].Name)},");
 				Indent = LineLength;
 
 				(*pIndex)++;
@@ -282,20 +282,20 @@ namespace Ev3CoreUnsafe.Lms2012
 
 										if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_1_BYTE)
 										{
-											LineLength += GH.printf($"LC1({CommonHelper.GetString(SubCodes[Tab][Sub].Name)}),");
+											LineLength += GH.printf($"LC1({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 										}
 										if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_2_BYTES)
 										{
-											LineLength += GH.printf($"LC2({CommonHelper.GetString(SubCodes[Tab][Sub].Name)}),");
+											LineLength += GH.printf($"LC2({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 										}
 										if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_4_BYTES)
 										{
-											LineLength += GH.printf($"LC4({CommonHelper.GetString(SubCodes[Tab][Sub].Name)}),");
+											LineLength += GH.printf($"LC4({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 										}
 									}
 									else
 									{
-										LineLength += GH.printf($"LC0({CommonHelper.GetString(SubCodes[Tab][Sub].Name)}),");
+										LineLength += GH.printf($"LC0({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 									}
 
 									// Get sub code parameter list

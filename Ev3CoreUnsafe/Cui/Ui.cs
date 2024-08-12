@@ -5669,7 +5669,7 @@ namespace Ev3CoreUnsafe.Cui
                         }
                         if (pDestination != null)
                         {
-                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString(GH.UiInstance.ImageBuffer));
+                            CommonHelper.snprintf(pDestination, Lng, CommonHelper.GetString((sbyte*)GH.UiInstance.ImageBuffer));
                         }
                     }
                     break;

@@ -4,7 +4,7 @@ namespace Ev3CoreUnsafe.Helpers
 {
 	public static class BmpHelper
 	{
-		public static string BasePathToBmp = "./Resources/Bmp/";
+		public static string BasePathToBmp = "./Resources/";
 
 		private static List<BmpImage> _images = new List<BmpImage>()
 		{
@@ -30,17 +30,14 @@ namespace Ev3CoreUnsafe.Helpers
 			new BmpImage("KEY_SmCHAR", BmpType.KeyboardSmp),
 
 			new BmpImage("24x12_PCApp", BmpType.App),
-		};
-		public static List<BmpImage> Images => _images;
 
-		private static List<BmpImage> _fonts = new List<BmpImage>()
-		{
+			// FONTS
 			new BmpImage("fonts/brick_font_2011_v1.3-bold", BmpType.SmallFont),
 			new BmpImage("fonts/brick_font_2011_v1.3-regular", BmpType.NormalFont),
 			new BmpImage("fonts/brick_font_LARGE", BmpType.LargeFont),
 			new BmpImage("fonts/small_font", BmpType.TinyFont),
 		};
-		public static List<BmpImage> Fonts => _fonts;
+		public static List<BmpImage> Images => _images;
 
 		public static BmpImage Get(BmpType name)
 		{

@@ -100,7 +100,7 @@ namespace Ev3CoreUnsafe.Cinput
 					Pos += CommonHelper.snprintf(&Buffer[Pos], LINESIZE - Pos, $"{Mode}");
 
 					Pos += CommonHelper.snprintf(&Buffer[Pos], LINESIZE - Pos, "  ");
-					Pos += CommonHelper.snprintf(&Buffer[Pos], LINESIZE - Pos, CommonHelper.GetString(GH.InputInstance.TypeData[Index].Name));
+					Pos += CommonHelper.snprintf(&Buffer[Pos], LINESIZE - Pos, CommonHelper.GetString((sbyte*)GH.InputInstance.TypeData[Index].Name));
 
 					Pos += CommonHelper.snprintf(&Buffer[Pos], LINESIZE - Pos, "  ");
 					Pos += CommonHelper.snprintf(&Buffer[Pos], LINESIZE - Pos, $"{GH.InputInstance.TypeData[Index].DataSets}");
@@ -453,17 +453,21 @@ namespace Ev3CoreUnsafe.Cinput
 			TYPES* pTypes;
 			int Count;
 
-            using FileStream fileStream = File.OpenRead(CommonHelper.GetString(pFilename));
+			var fileNameee = CommonHelper.GetString(pFilename);
+			if (!File.Exists(fileNameee))
+				return Result;
+
+			using FileStream fileStream = File.OpenRead(fileNameee);
             using StreamReader reader = new StreamReader(fileStream);
 
 			do
 			{
                 Buf2 = reader.ReadLine();
-                if (Buf2 != null)
+                if (!string.IsNullOrWhiteSpace(Buf2))
                 {
 					if ((Buf2[0] != '/') && (Buf2[0] != '*'))
 					{
-                        string[] data = Buf2.Split();
+                        string[] data = Buf2.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                         Type = uint.Parse(data[0]);
                         Mode = uint.Parse(data[1]);
                         Name = data[2].AsSbytePointer();
@@ -547,8 +551,8 @@ namespace Ev3CoreUnsafe.Cinput
                                     // setup string + poll string
                                     // 3 0x01420000 2 0x01000000
 
-                                    data = Buf2.Split();
-                                    Type = uint.Parse(data[0]);
+                                    data = Buf2.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+									Type = uint.Parse(data[0]);
                                     Mode = uint.Parse(data[1]);
                                     Name = data[2].AsSbytePointer();
                                     DataSets = uint.Parse(data[3]);
@@ -951,7 +955,7 @@ namespace Ev3CoreUnsafe.Cinput
 							GH.Ev3System.InputHandler.IoctlUart(UART_SET_CONN, GH.InputInstance.DevCon);
 							GH.Ev3System.InputHandler.IoctlI2c(IIC_SET_CONN, GH.InputInstance.DevCon);
 
-							GH.printf($"c_input   cInputSetDeviceType: I   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString(GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
+							GH.printf($"c_input   cInputSetDeviceType: I   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString((sbyte*)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
 						}
 					}
 					else
@@ -984,7 +988,7 @@ namespace Ev3CoreUnsafe.Cinput
 							Buf[Index] = 0;
 							GH.Output.cOutputSetTypes(Buf);
 
-							GH.printf($"c_input   cInputSetDeviceType: O   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString(GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
+							GH.printf($"c_input   cInputSetDeviceType: O   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString((sbyte*)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
 						}
 					}
 
@@ -1012,7 +1016,7 @@ namespace Ev3CoreUnsafe.Cinput
 								GH.InputInstance.DeviceData[Device].InvalidTime = DAISYCHAIN_MODE_TIME;
 								cInputComSetDeviceType(Layer, Port, GH.InputInstance.DeviceType[Device], GH.InputInstance.DeviceMode[Device]);
 
-								GH.printf($"c_input   cInputSetDeviceType: D   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString(GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
+								GH.printf($"c_input   cInputSetDeviceType: D   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString((sbyte*)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
 
 								if (Device == TESTDEVICE)
 								{
@@ -1466,17 +1470,17 @@ namespace Ev3CoreUnsafe.Cinput
 
 			if (Result == OK)
 			{
-				GH.printf($"c_com     GH.Com.cComSetDeviceInfo:       l={Length} N={CommonHelper.GetString((*pType).Name)}\r\n");
+				GH.printf($"c_com     GH.Com.cComSetDeviceInfo:       l={Length} N={CommonHelper.GetString((sbyte*)(*pType).Name)}\r\n");
 			}
 			else
 			{
 				if (Result == RESULT.BUSY)
 				{
-					GH.printf($"c_com     GH.Com.cComSetDeviceInfo: RESULT.BUSY  l={Length} N={CommonHelper.GetString((*pType).Name)}\r\n");
+					GH.printf($"c_com     GH.Com.cComSetDeviceInfo: RESULT.BUSY  l={Length} N={CommonHelper.GetString((sbyte*)(*pType).Name)}\r\n");
 				}
 				else
 				{
-					GH.printf($"c_com     GH.Com.cComSetDeviceInfo: RESULT.FAIL  l={Length} N={CommonHelper.GetString((*pType).Name)}\r\n");
+					GH.printf($"c_com     GH.Com.cComSetDeviceInfo: RESULT.FAIL  l={Length} N={CommonHelper.GetString((sbyte*)(*pType).Name)}\r\n");
 				}
 			}
 
@@ -1494,7 +1498,7 @@ namespace Ev3CoreUnsafe.Cinput
 			if (Result == OK)
 			{
 				pType = (TYPES*)pInfo;
-				GH.printf($"c_com     GH.Com.cComGetDeviceInfo:       C={(*pType).Connection} N={CommonHelper.GetString((*pType).Name)}\r\n");
+				GH.printf($"c_com     GH.Com.cComGetDeviceInfo:       C={(*pType).Connection} N={CommonHelper.GetString((sbyte*)(*pType).Name)}\r\n");
 			}
 
 			return (Result);
@@ -2322,11 +2326,11 @@ namespace Ev3CoreUnsafe.Cinput
 					if (Result == OK)
 					{
 						(*pTmp) = Tmp;
-						GH.printf($"c_input   cInputDcmUpdate: NEW     T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString(Tmp.Name)}\r\n");
+						GH.printf($"c_input   cInputDcmUpdate: NEW     T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString((sbyte*)Tmp.Name)}\r\n");
 					}
 					else
 					{
-						GH.printf($"c_input   cInputDcmUpdate: KNOWN   T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString(Tmp.Name)}\r\n");
+						GH.printf($"c_input   cInputDcmUpdate: KNOWN   T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString((sbyte*)Tmp.Name)}\r\n");
 					}
 				}
 			}

@@ -942,7 +942,7 @@ namespace Ev3CoreUnsafe
 		public const string vmTOOLS_DIR = "../tools";            //!< Tools folder
 		public const string vmTMP_DIR = "../tmp";               //!< Temporary folder
 
-		public const string vmSETTINGS_DIR = "../sys/settings";           //!< Folder for non volatile settings
+		public const string vmSETTINGS_DIR = "./Resources/other";           //!< Folder for non volatile settings
 
 		public const int vmDIR_DEEPT = 127;                        //!< Max directory items allocated including "." and ".."
 
@@ -1192,7 +1192,7 @@ namespace Ev3CoreUnsafe
 
 		// TODO: check it out. wtf is going on here
 		//public const byte FILENAME_SUBP = 12;
-		public const byte TST_SUBP = 6;
+		// public const byte TST_SUBP = 6;
 
 		public const byte UI_READ_SUBP = 0;
 		public const byte UI_WRITE_SUBP = 1;
@@ -1210,9 +1210,8 @@ namespace Ev3CoreUnsafe
 		public const byte MATH_SUBP = 13;
 		public const byte COM_GET_SUBP = 14;
 		public const byte COM_SET_SUBP = 15;
-		public const byte FILENAME_SUBP = 16;
 
-		public const byte SUBPS = 17;
+		public const byte SUBPS = 16;
 
 		public unsafe static KeyValuePair<OP, OPCODE> OC(OP opCode, byte par1, byte par2, byte par3, byte par4, byte par5, byte par6, byte par7, byte par8)
 		{
@@ -1406,7 +1405,7 @@ namespace Ev3CoreUnsafe
 			OC(   OP.opINPUT_DEVICE,         PAR8,SUBP,INPUT_SUBP,                           0,0,0,0,0             ),
 			OC(   OP.opINPUT_READ,           PAR8,PAR8,PAR8,PAR8,PAR8,                       0,0,0                 ),
 			OC(   OP.opINPUT_READSI,         PAR8,PAR8,PAR8,PAR8,PARF,                       0,0,0                 ),
-			OC(   OP.opINPUT_TEST,           PAR8,                                           0,0,0,0,0,0,0         ),
+			// OC(   OP.opINPUT_TEST,           PAR8,                                           0,0,0,0,0,0,0         ),
 			OC(   OP.opINPUT_TEST,           PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
 			OC(   OP.opINPUT_READY,          PAR8,PAR8,                                      0,0,0,0,0,0           ),
 			OC(   OP.opINPUT_READEXT,        PAR8,PAR8,PAR8,PAR8,PAR8,PARNO,                 0,0                   ),
@@ -1438,7 +1437,7 @@ namespace Ev3CoreUnsafe
 			OC(   OP.opARRAY_READ,           PAR16,PAR32,PARV,                               0,0,0,0,0             ),
 			OC(   OP.opARRAY_APPEND,         PAR16,PARV,                                     0,0,0,0,0,0           ),
 			OC(   OP.opMEMORY_USAGE,         PAR32,PAR32,                                    0,0,0,0,0,0           ),
-			OC(   OP.opFILENAME,             PAR8,SUBP,FILENAME_SUBP,                        0,0,0,0,0             ),
+			OC(   OP.opFILENAME,             PAR8,SUBP,ARRAY_SUBP,                        0,0,0,0,0             ),
 			//    Move
 			OC(   OP.opREAD8,                PAR8,PAR8,PAR8,                                 0,0,0,0,0             ),
 			OC(   OP.opREAD16,               PAR16,PAR8,PAR16,                               0,0,0,0,0             ),
@@ -1465,7 +1464,7 @@ namespace Ev3CoreUnsafe
 			OC(   OP.opMAILBOX_READY,        PAR8,                                           0,0,0,0,0,0,0         ),
 			OC(   OP.opMAILBOX_CLOSE,        PAR8,                                           0,0,0,0,0,0,0         ),
 			//    Test
-			OC(   OP.opTST,                  PAR8,SUBP,TST_SUBP,                             0,0,0,0,0             ),
+			OC(   OP.opTST,                  PAR8,SUBP,VM_SUBP,                             0,0,0,0,0             ),
 		});
 
 		public static Dictionary<byte, Dictionary<byte, SUBCODE>> SubCodes = new Dictionary<byte, Dictionary<byte, SUBCODE>>(new[]
@@ -1542,12 +1541,7 @@ namespace Ev3CoreUnsafe
 					SC(nameof(READ_CONTENT), READ_CONTENT, PAR16, PAR16, PAR32, PAR32, PAR8,                   0,0,0                 ),
 					SC(nameof(WRITE_CONTENT), WRITE_CONTENT, PAR16, PAR16, PAR32, PAR32, PAR8,                   0,0,0                 ),
 					SC(nameof(READ_SIZE), READ_SIZE, PAR16, PAR16, PAR32,                              0,0,0,0,0             ),
-				})),
 
-			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
-				FILENAME_SUBP,
-				new Dictionary<byte, SUBCODE>(new []
-				{
 					SC(nameof(EXIST), EXIST, PAR8, PAR8,                                      0,0,0,0,0,0           ),
 					SC(nameof(TOTALSIZE), TOTALSIZE, PAR8, PAR32, PAR32,                               0,0,0,0,0             ),
 					SC(nameof(SPLIT), SPLIT, PAR8, PAR8, PAR8, PAR8, PAR8,                       0,0,0                 ),
@@ -1571,12 +1565,7 @@ namespace Ev3CoreUnsafe
 					SC(nameof(SET_VOLUME), SET_VOLUME, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(GET_MINUTES), GET_MINUTES, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(SET_MINUTES), SET_MINUTES, PAR8,                                           0,0,0,0,0,0,0         ),
-				})),
 
-			new KeyValuePair<byte, Dictionary<byte, SUBCODE>>(
-				TST_SUBP,
-				new Dictionary<byte, SUBCODE>(new []
-				{
 					SC(nameof(TST_OPEN), TST_OPEN,               0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(TST_CLOSE), TST_CLOSE,              0,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(TST_READ_PINS), TST_READ_PINS, PAR8, PAR8, PAR8,                                 0,0,0,0,0             ),

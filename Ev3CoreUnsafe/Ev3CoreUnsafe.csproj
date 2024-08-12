@@ -7,6 +7,10 @@
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
 
+	<ItemGroup>
+		<None Include="$(SolutionDir)Ev3CoreUnsafe\Resources\**" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="BmpSharp" />
         <PackageReference Include="SkiaSharp" />

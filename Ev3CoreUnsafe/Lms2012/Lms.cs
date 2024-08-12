@@ -1850,9 +1850,9 @@ namespace Ev3CoreUnsafe.Lms2012
 			// Fill holes in PrimDispatchTabel
 			for (Loop = 0; Loop < PRIMDISPATHTABLE_SIZE; Loop++)
 			{
-				if (PrimDispatchTabel[Loop] == null)
+				if (!PrimDispatchTabel.ContainsKey(Loop))
 				{
-					PrimDispatchTabel[Loop] = Error;
+					PrimDispatchTabel.Add(Loop, Error);
 				}
 			}
 

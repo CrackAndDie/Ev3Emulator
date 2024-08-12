@@ -11,6 +11,7 @@
     <ItemGroup>
         <ProjectReference Include="..\EV3Decompiler\EV3Decompiler.csproj" />
         <ProjectReference Include="..\EV3Model\EV3Model.csproj" />
+        <ProjectReference Include="..\Ev3CoreUnsafe\Ev3CoreUnsafe.csproj" />
     </ItemGroup>
 
     <ItemGroup>

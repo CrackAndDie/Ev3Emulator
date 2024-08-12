@@ -117,12 +117,12 @@ namespace Ev3CoreUnsafe.Helpers
 			return arr;
 		}
 
-		public unsafe static string GetString<T>(T* buf)
+		public unsafe static string GetString(sbyte* buf)
 		{
 			List<char> arr = new List<char>();
-			while ((char)(object)*buf != '\0')
+			while ((char)*buf != '\0')
 			{
-				arr.Add((char)(object)*buf);
+				arr.Add((char)*buf);
 				buf++;
 			}
 			return string.Concat(arr);
