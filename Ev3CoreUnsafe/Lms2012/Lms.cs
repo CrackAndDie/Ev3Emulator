@@ -1227,7 +1227,8 @@ namespace Ev3CoreUnsafe.Lms2012
 
 							// Save object pointer in Object list
 
-							GH.VMInstance.Program[PrgId].pObjList[ObjIndex] = (OBJ*)pData;
+							OBJ* dataTmp = (OBJ*)pData;
+							GH.VMInstance.Program[PrgId].pObjList[ObjIndex] = dataTmp;
 
 							// Initialise instruction pointer, trigger counts and status
 
@@ -1988,7 +1989,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			VmPrint("\r\n\n\n\n\n\nLMS2012 VM STARTED\r\n{\r\n".AsSbytePointer());
 			GH.VMInstance.ProgramId = DEBUG_SLOT;
 			pImgHead = (IMGHEAD*)UiImage;
-			(*pImgHead).ImageSize = 0; // sizeof(UiImage); TODO: !!!!!! check the size in running prog
+			(*pImgHead).ImageSize = 40; // sizeof(UiImage); 
 
 			GH.Ev3System.Logger.LogInfo("VM Started");
 
@@ -4788,7 +4789,8 @@ namespace Ev3CoreUnsafe.Lms2012
 		{
 			RESULT Result = OK;
 
-			if ((ValidChars[*pChar] & Set) == 0)
+			var num = (byte)*pChar;
+			if ((ValidChars[num] & Set) == 0)
 			{
 				*pChar = (sbyte)'_';
 				Result = RESULT.FAIL;

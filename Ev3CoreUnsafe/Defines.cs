@@ -1037,29 +1037,29 @@ namespace Ev3CoreUnsafe
 			return lst.ToArray();
 		}
 
-		public static UBYTE[] VMTHREADHeader(long OffsetToInstructions, ULONG LocalBytes)
+		public static UBYTE[] VMTHREADHeader(ULONG OffsetToInstructions, ULONG LocalBytes)
 		{
 			var lst = new List<UBYTE>();
-			lst.AddRange(REALLONGToBytes(OffsetToInstructions));
+			lst.AddRange(LONGToBytes(OffsetToInstructions));
 			lst.AddRange(new UBYTE[] { 0, 0, 0, 0 });
 			lst.AddRange(LONGToBytes(LocalBytes));
 			return lst.ToArray();
 		}
 
-		public static UBYTE[] SUBCALLHeader(long OffsetToInstructions, ULONG LocalBytes)
+		public static UBYTE[] SUBCALLHeader(ULONG OffsetToInstructions, ULONG LocalBytes)
 		{
 			var lst = new List<UBYTE>();
-			lst.AddRange(REALLONGToBytes(OffsetToInstructions));
+			lst.AddRange(LONGToBytes(OffsetToInstructions));
 			lst.AddRange(new UBYTE[] { 0, 0, 1, 0 });
 			lst.AddRange(LONGToBytes(LocalBytes));
 			return lst.ToArray();
 		}
 
 
-		public static UBYTE[] BLOCKHeader(long OffsetToInstructions, UWORD OwnerObjectId, UWORD TriggerCount)
+		public static UBYTE[] BLOCKHeader(ULONG OffsetToInstructions, UWORD OwnerObjectId, UWORD TriggerCount)
 		{
 			var lst = new List<UBYTE>();
-			lst.AddRange(REALLONGToBytes(OffsetToInstructions));
+			lst.AddRange(LONGToBytes(OffsetToInstructions));
 			lst.AddRange(WORDToBytes(OwnerObjectId));
 			lst.AddRange(WORDToBytes(TriggerCount));
 			lst.AddRange(LONGToBytes(0));
@@ -1101,23 +1101,23 @@ namespace Ev3CoreUnsafe
 
 		public static (UBYTE, UBYTE) LAB1(UBYTE v) { return ((PRIMPAR_LONG | PRIMPAR_LABEL), (UBYTE)(v & 0xFF)); }
 
-		public static UBYTE LC0(UBYTE v) { return ((UBYTE)((v & PRIMPAR_VALUE) | PRIMPAR_SHORT | PRIMPAR_CONST)); }
-		public static (UBYTE, UBYTE) LC1(UBYTE v) { return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_1_BYTE), (UBYTE)(v & 0xFF)); }
-		public static (UBYTE, UBYTE, UBYTE) LC2(UWORD v) { return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_2_BYTES), (UBYTE)(v & 0xFF), (UBYTE)((v >> 8) & 0xFF)); }
-		public static (UBYTE, UBYTE, UBYTE, UBYTE, UBYTE) LC4(ULONG v) { return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_4_BYTES), (UBYTE)((ULONG)v & 0xFF), (UBYTE)(((ULONG)v >> (int)8) & 0xFF), (UBYTE)(((ULONG)v >> (int)16) & 0xFF), (UBYTE)(((ULONG)v >> (int)24) & 0xFF)); }
-		public static (UBYTE, UBYTE) LCA(UBYTE h) { return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_1_BYTE | PRIMPAR_ARRAY), (UBYTE)(h & 0xFF)); }
+		public static UBYTE LC0(UBYTE v)								{ return ((UBYTE)((v & PRIMPAR_VALUE) | PRIMPAR_SHORT | PRIMPAR_CONST)); }
+		public static (UBYTE, UBYTE) LC1(UBYTE v)						{ return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_1_BYTE), (UBYTE)(v & 0xFF)); }
+		public static (UBYTE, UBYTE, UBYTE) LC2(UWORD v)				{ return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_2_BYTES), (UBYTE)(v & 0xFF), (UBYTE)((v >> 8) & 0xFF)); }
+		public static (UBYTE, UBYTE, UBYTE, UBYTE, UBYTE) LC4(ULONG v)  { return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_4_BYTES), (UBYTE)((ULONG)v & 0xFF), (UBYTE)(((ULONG)v >> (int)8) & 0xFF), (UBYTE)(((ULONG)v >> (int)16) & 0xFF), (UBYTE)(((ULONG)v >> (int)24) & 0xFF)); }
+		public static (UBYTE, UBYTE) LCA(UBYTE h)						{ return ((PRIMPAR_LONG | PRIMPAR_CONST | PRIMPAR_1_BYTE | PRIMPAR_ARRAY), (UBYTE)(h & 0xFF)); }
 
-		public static UBYTE LV0(UBYTE v) { return ((UBYTE)((v & PRIMPAR_VALUE) | PRIMPAR_SHORT | PRIMPAR_LOCAL)); }
-		public static (UBYTE, UBYTE) LV1(UBYTE v) { return ((PRIMPAR_LONG | PRIMPAR_LOCAL | PRIMPAR_1_BYTE), (UBYTE)(v & 0xFF)); }
-		public static (UBYTE, UBYTE, UBYTE) LV2(UWORD v) { return ((PRIMPAR_LONG | PRIMPAR_LOCAL | PRIMPAR_2_BYTES), (UBYTE)(v & 0xFF), (UBYTE)((v >> 8) & 0xFF)); }
-		public static (UBYTE, UBYTE, UBYTE, UBYTE, UBYTE) LV4(ULONG v) { return ((PRIMPAR_LONG | PRIMPAR_LOCAL | PRIMPAR_4_BYTES), (UBYTE)((ULONG)v & 0xFF), (UBYTE)(((ULONG)v >> (int)8) & 0xFF), (UBYTE)(((ULONG)v >> (int)16) & 0xFF), (UBYTE)(((ULONG)v >> (int)24) & 0xFF)); }
-		public static (UBYTE, UBYTE) LVA(UBYTE h) { return ((PRIMPAR_LONG | PRIMPAR_LOCAL | PRIMPAR_1_BYTE | PRIMPAR_ARRAY), (UBYTE)(h & 0xFF)); }
+		public static UBYTE LV0(UBYTE v)								{ return ((UBYTE)((v & PRIMPAR_INDEX) | PRIMPAR_SHORT | PRIMPAR_VARIABEL | PRIMPAR_LOCAL)); }
+		public static (UBYTE, UBYTE) LV1(UBYTE v)						{ return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_LOCAL | PRIMPAR_1_BYTE), (UBYTE)(v & 0xFF)); }
+		public static (UBYTE, UBYTE, UBYTE) LV2(UWORD v)				{ return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_LOCAL | PRIMPAR_2_BYTES), (UBYTE)(v & 0xFF), (UBYTE)((v >> 8) & 0xFF)); }
+		public static (UBYTE, UBYTE, UBYTE, UBYTE, UBYTE) LV4(ULONG v)  { return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_LOCAL | PRIMPAR_4_BYTES), (UBYTE)((ULONG)v & 0xFF), (UBYTE)(((ULONG)v >> (int)8) & 0xFF), (UBYTE)(((ULONG)v >> (int)16) & 0xFF), (UBYTE)(((ULONG)v >> (int)24) & 0xFF)); }
+		public static (UBYTE, UBYTE) LVA(UBYTE h)						{ return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_LOCAL | PRIMPAR_1_BYTE | PRIMPAR_ARRAY), (UBYTE)(h & 0xFF)); }
 
-		public static UBYTE GV0(UBYTE v) { return ((UBYTE)((v & PRIMPAR_VALUE) | PRIMPAR_SHORT | PRIMPAR_GLOBAL)); }
-		public static (UBYTE, UBYTE) GV1(UBYTE v) { return ((PRIMPAR_LONG | PRIMPAR_GLOBAL | PRIMPAR_1_BYTE), (UBYTE)(v & 0xFF)); }
-		public static (UBYTE, UBYTE, UBYTE) GV2(UWORD v) { return ((PRIMPAR_LONG | PRIMPAR_GLOBAL | PRIMPAR_2_BYTES), (UBYTE)(v & 0xFF), (UBYTE)((v >> 8) & 0xFF)); }
-		public static (UBYTE, UBYTE, UBYTE, UBYTE, UBYTE) GV4(ULONG v) { return ((PRIMPAR_LONG | PRIMPAR_GLOBAL | PRIMPAR_4_BYTES), (UBYTE)((ULONG)v & 0xFF), (UBYTE)(((ULONG)v >> (int)8) & 0xFF), (UBYTE)(((ULONG)v >> (int)16) & 0xFF), (UBYTE)(((ULONG)v >> (int)24) & 0xFF)); }
-		public static (UBYTE, UBYTE) GVA(UBYTE h) { return ((PRIMPAR_LONG | PRIMPAR_GLOBAL | PRIMPAR_1_BYTE | PRIMPAR_ARRAY), (UBYTE)(h & 0xFF)); }
+		public static UBYTE GV0(UBYTE v)								{ return ((UBYTE)((v & PRIMPAR_INDEX) | PRIMPAR_SHORT | PRIMPAR_VARIABEL | PRIMPAR_GLOBAL)); }
+		public static (UBYTE, UBYTE) GV1(UBYTE v)						{ return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_GLOBAL | PRIMPAR_1_BYTE), (UBYTE)(v & 0xFF)); }
+		public static (UBYTE, UBYTE, UBYTE) GV2(UWORD v)				{ return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_GLOBAL | PRIMPAR_2_BYTES), (UBYTE)(v & 0xFF), (UBYTE)((v >> 8) & 0xFF)); }
+		public static (UBYTE, UBYTE, UBYTE, UBYTE, UBYTE) GV4(ULONG v)  { return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_GLOBAL | PRIMPAR_4_BYTES), (UBYTE)((ULONG)v & 0xFF), (UBYTE)(((ULONG)v >> (int)8) & 0xFF), (UBYTE)(((ULONG)v >> (int)16) & 0xFF), (UBYTE)(((ULONG)v >> (int)24) & 0xFF)); }
+		public static (UBYTE, UBYTE) GVA(UBYTE h)						{ return ((PRIMPAR_LONG | PRIMPAR_VARIABEL | PRIMPAR_GLOBAL | PRIMPAR_1_BYTE | PRIMPAR_ARRAY), (UBYTE)(h & 0xFF)); }
 
 		//        MACROS FOR SUB CALLS
 

@@ -42,29 +42,30 @@ namespace Ev3CoreUnsafe.Ccom
                 GH.ComInstance.RxBuf[Cnt].State = RXIDLE;
             }
 
+            // TODO: WARNING: all bt channels are commented
             GH.ComInstance.ReadChannel[0] = cComReadBuffer;
             GH.ComInstance.ReadChannel[1] = null;
-            GH.ComInstance.ReadChannel[2] = GH.Bt.cBtReadCh0;
-            GH.ComInstance.ReadChannel[3] = GH.Bt.cBtReadCh1;
-            GH.ComInstance.ReadChannel[4] = GH.Bt.cBtReadCh2;
-            GH.ComInstance.ReadChannel[5] = GH.Bt.cBtReadCh3;
-            GH.ComInstance.ReadChannel[6] = GH.Bt.cBtReadCh4;
-            GH.ComInstance.ReadChannel[7] = GH.Bt.cBtReadCh5;
-            GH.ComInstance.ReadChannel[8] = GH.Bt.cBtReadCh6;
-            GH.ComInstance.ReadChannel[9] = GH.Bt.cBtReadCh7;
-            GH.ComInstance.ReadChannel[10] = GH.Wifi.cWiFiReadTcp;
+            GH.ComInstance.ReadChannel[2] = null;  // GH.Bt.cBtReadCh0;
+            GH.ComInstance.ReadChannel[3] = null;  // GH.Bt.cBtReadCh1;
+			GH.ComInstance.ReadChannel[4] = null;  // GH.Bt.cBtReadCh2;
+			GH.ComInstance.ReadChannel[5] = null;  // GH.Bt.cBtReadCh3;
+			GH.ComInstance.ReadChannel[6] = null;  // GH.Bt.cBtReadCh4;
+			GH.ComInstance.ReadChannel[7] = null;  // GH.Bt.cBtReadCh5;
+			GH.ComInstance.ReadChannel[8] = null;  // GH.Bt.cBtReadCh6;
+			GH.ComInstance.ReadChannel[9] = null;  // GH.Bt.cBtReadCh7;
+			GH.ComInstance.ReadChannel[10] = GH.Wifi.cWiFiReadTcp;
 
             GH.ComInstance.WriteChannel[0] = cComWriteBuffer;
             GH.ComInstance.WriteChannel[1] = null;
-            GH.ComInstance.WriteChannel[2] = GH.Bt.cBtDevWriteBuf;
-            GH.ComInstance.WriteChannel[3] = GH.Bt.cBtDevWriteBuf1;
-            GH.ComInstance.WriteChannel[4] = GH.Bt.cBtDevWriteBuf2;
-            GH.ComInstance.WriteChannel[5] = GH.Bt.cBtDevWriteBuf3;
-            GH.ComInstance.WriteChannel[6] = GH.Bt.cBtDevWriteBuf4;
-            GH.ComInstance.WriteChannel[7] = GH.Bt.cBtDevWriteBuf5;
-            GH.ComInstance.WriteChannel[8] = GH.Bt.cBtDevWriteBuf6;
-            GH.ComInstance.WriteChannel[9] = GH.Bt.cBtDevWriteBuf7;
-            GH.ComInstance.WriteChannel[10] = GH.Wifi.cWiFiWriteTcp;
+            GH.ComInstance.WriteChannel[2] = null;  // GH.Bt.cBtDevWriteBuf;
+			GH.ComInstance.WriteChannel[3] = null;  // GH.Bt.cBtDevWriteBuf1;
+			GH.ComInstance.WriteChannel[4] = null;  // GH.Bt.cBtDevWriteBuf2;
+			GH.ComInstance.WriteChannel[5] = null;  // GH.Bt.cBtDevWriteBuf3;
+			GH.ComInstance.WriteChannel[6] = null;  // GH.Bt.cBtDevWriteBuf4;
+			GH.ComInstance.WriteChannel[7] = null;  // GH.Bt.cBtDevWriteBuf5;
+			GH.ComInstance.WriteChannel[8] = null;  // GH.Bt.cBtDevWriteBuf6;
+			GH.ComInstance.WriteChannel[9] = null;  // GH.Bt.cBtDevWriteBuf7;
+			GH.ComInstance.WriteChannel[10] = GH.Wifi.cWiFiWriteTcp;
 
             for (Cnt = 0; Cnt < NO_OF_MAILBOXES; Cnt++)
             {

@@ -6,7 +6,7 @@ namespace Ev3CoreUnsafe.Ccom
     {
         public void BtExit()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("BtExit called");
         }
 
         public byte BtGetMode2(byte* pMode2)
@@ -61,7 +61,7 @@ namespace Ev3CoreUnsafe.Ccom
 
         public void BtUpdate()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("Bt update called");
         }
 
         public byte cBtConnect(byte* pName)
@@ -141,7 +141,8 @@ namespace Ev3CoreUnsafe.Ccom
 
         public byte cBtGetEvent()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("cBtGetEvent called");
+            return 0;
         }
 
         public byte cBtGetHciBusyFlag()

@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<PlatformTarget>x86</PlatformTarget>
     </PropertyGroup>
 
 	<ItemGroup>

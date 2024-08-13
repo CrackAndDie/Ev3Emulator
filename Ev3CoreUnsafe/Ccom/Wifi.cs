@@ -17,7 +17,7 @@ namespace Ev3CoreUnsafe.Ccom
 
         public void cWiFiControl()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogWarning("cWiFiControl called");
         }
 
         public void cWiFiDeleteAsKnown(int LocalIndex)
@@ -32,8 +32,9 @@ namespace Ev3CoreUnsafe.Ccom
 
         public RESULT cWiFiExit()
         {
-            throw new NotImplementedException();
-        }
+			GH.Ev3System.Logger.LogWarning("WIFI EXIT CALLED");
+			return RESULT.OK;
+		}
 
         public int cWiFiGetApListSize()
         {
@@ -118,8 +119,9 @@ namespace Ev3CoreUnsafe.Ccom
 
         public ushort cWiFiReadTcp(byte* Buffer, ushort Length)
         {
-            throw new NotImplementedException();
-        }
+			GH.Ev3System.Logger.LogWarning("cWiFiReadTcp CALLED");
+            return 0;
+		}
 
         public RESULT cWiFiScanForAPs()
         {

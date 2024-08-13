@@ -12,7 +12,7 @@ namespace Ev3ConsoleTest.Emulation
 
         public ISoundHandler SoundHandler => throw new NotImplementedException();
 
-		public IOutputHandler OutputHandler => throw new NotImplementedException();
+		public IOutputHandler OutputHandler { get; } = new OutputHandler();
 
 		public IInputHandler InputHandler => throw new NotImplementedException();
 	}

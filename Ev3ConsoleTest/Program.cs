@@ -1,22 +1,15 @@
 ﻿using Ev3ConsoleTest;
 using Ev3ConsoleTest.Emulation;
 using Ev3CoreUnsafe;
+using Ev3CoreUnsafe.Ccom.Interfaces;
+using Ev3CoreUnsafe.Lms2012.Interfaces;
 using EV3DecompilerLib.Decompile;
 using EV3DecompilerLib.Recognize;
 using EV3ModelLib;
 
 namespace Ev3ConsoleTest
 {
-    public unsafe struct IMGHEAD
-    {
-        public fixed byte Sign[4];   //!< Place holder for the file type identifier                  
-        public uint ImageSize;  //!< Image size                  
-        public ushort VersionInfo;  //!< Version identifier                 
-        public ushort NumberOfObjects;  //!< Total number of objects in image          
-        public uint GlobalBytes;  //!< Number of bytes to allocate for global variables
-    }
-
-    internal class Program
+	internal class Program
     {
         static unsafe void Main(string[] args)
         {
@@ -27,8 +20,9 @@ namespace Ev3ConsoleTest
 		#region common test
         private unsafe static void CommonTest()
         {
-            var sz = sizeof(IMGHEAD);
-        }
+            var sz = sizeof(TYPES);
+
+		}
 		#endregion
 
 		#region emulator test

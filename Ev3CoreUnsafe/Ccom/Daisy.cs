@@ -7,7 +7,8 @@ namespace Ev3CoreUnsafe.Ccom
     {
         public RESULT cDaisyChained()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("cDaisyChained called");
+            return RESULT.FAIL;
         }
 
         public byte cDaisyCheckBusyBit(byte Layer, byte PortBits)
@@ -32,7 +33,7 @@ namespace Ev3CoreUnsafe.Ccom
 
         public void cDaisyControl()
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("cDaisyControl called");
         }
 
         public ushort cDaisyData(byte** pData)
@@ -52,7 +53,8 @@ namespace Ev3CoreUnsafe.Ccom
 
         public RESULT cDaisyGetDeviceInfo(sbyte Length, byte* pInfo)
         {
-            throw new NotImplementedException();
+            GH.Ev3System.Logger.LogInfo("cDaisyGetDeviceInfo called");
+            return RESULT.FAIL;
         }
 
         public RESULT cDaisyGetDownstreamData(sbyte Layer, sbyte Sensor, sbyte Length, sbyte* pType, sbyte* pMode, sbyte* pData)

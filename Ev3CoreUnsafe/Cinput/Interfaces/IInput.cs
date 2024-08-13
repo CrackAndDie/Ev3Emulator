@@ -56,20 +56,10 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 		public OBJID Owner;
 		public RESULT DevStatus;
 		public DATA8 Busy;
-		public DATAF* Raw;           //!< Raw value (only updated when "cInputReadDeviceRaw" function is called)
+		public fixed DATAF Raw[MAX_DEVICE_DATASETS];           //!< Raw value (only updated when "cInputReadDeviceRaw" function is called)
 		public DATAF OldRaw;
 		public DATA32 Changes;
 		public DATA32 Bumps;
-
-		public DEVICE()
-		{
-			Init();
-		}
-
-		public void Init()
-		{
-			Raw = CommonHelper.Pointer1d<DATAF>(MAX_DEVICE_DATASETS);
-		}
 	}
 
 	public unsafe struct CALIB
