@@ -2262,13 +2262,13 @@ namespace Ev3CoreUnsafe.Lms2012
 		}
 
 		/*! \page VM
- *  <hr size="1"/>
- *  <b>     opERROR </b>
- *
- *- This code does not exist in normal program\n
- *- Dispatch status changes to INSTRBREAK
- *
- */
+		 *  <hr size="1"/>
+		 *  <b>     opERROR </b>
+		 *
+		 *- This code does not exist in normal program\n
+		 *- Dispatch status changes to INSTRBREAK
+		 *
+		 */
 		/*! \brief    opOUTPUT_READY byte code
 		 *
 		 *            Uses following from current program context:

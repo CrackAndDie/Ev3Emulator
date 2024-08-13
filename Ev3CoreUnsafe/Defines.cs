@@ -1218,7 +1218,7 @@ namespace Ev3CoreUnsafe
 		{
 			return new KeyValuePair<OP, OPCODE>(opCode, new OPCODE()
 			{
-				Name = Enum.GetName(opCode.GetType(), opCode).ToByteArray().AsPointer(),
+				Name = (byte*)Enum.GetName(opCode.GetType(), opCode).AsSbytePointer(),
 				Pars = ((ULONG)par1) + ((ULONG)par2 << 4) + ((ULONG)par3 << 8) + ((ULONG)par4 << 12) +
 						((ULONG)par5 << 16) + ((ULONG)par6 << 20) + ((ULONG)par7 << 24) + ((ULONG)par8 << 28),
 			});
@@ -1228,7 +1228,7 @@ namespace Ev3CoreUnsafe
 		{
 			return new KeyValuePair<byte, SUBCODE>(subcode, new SUBCODE()
 			{
-				Name = subCodeName.ToByteArray().AsPointer(),
+				Name = (byte*)subCodeName.AsSbytePointer(),
 				Pars = ((ULONG)par1) + ((ULONG)par2 << 4) + ((ULONG)par3 << 8) + ((ULONG)par4 << 12) +
 						((ULONG)par5 << 16) + ((ULONG)par6 << 20) + ((ULONG)par7 << 24) + ((ULONG)par8 << 28),
 			});
