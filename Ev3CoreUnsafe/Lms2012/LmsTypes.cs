@@ -38,7 +38,9 @@ global using HANDLER = short;
 // from c_com.h
 global using CMDSIZE = ushort;
 global using MSGCNT = ushort;
+using System.Runtime.InteropServices;
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct IMGHEAD 
 {
 	public fixed UBYTE Sign[4];   //!< Place holder for the file type identifier                  
@@ -61,6 +63,7 @@ public unsafe struct IMGHEAD
 /*! \struct OBJHEAD
  *          Object header used for all types of objects (VMTHREAD, SUBCALL, BLOCK and ALIAS)
  */
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct OBJHEAD                  // Object header
 {
 	public IP OffsetToInstructions;         //!< Offset to instructions from image start      
@@ -72,6 +75,7 @@ public unsafe struct OBJHEAD                  // Object header
 /*! \struct LABEL
  *          Label data hold information used for labels
  */
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct LABEL
 {
 	public IMINDEX Addr; //!< Offset to breakpoint address from image start
@@ -79,12 +83,14 @@ public unsafe struct LABEL
 
 // bytecodes.c
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct OPCODE
 {
     public ULONG Pars;                         //!< Contains parameter info nibbles (max 8)
     public byte* Name;                        //!< Opcode name
 }
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct SUBCODE
 {
     public ULONG Pars;                         //!< Contains parameter info nibbles (max 8)

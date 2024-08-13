@@ -1,4 +1,5 @@
 ﻿using Ev3CoreUnsafe.Enums;
+using System.Runtime.InteropServices;
 
 namespace Ev3CoreUnsafe.Lms2012.Interfaces
 {
@@ -13,7 +14,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble);
 	}
 
-	public unsafe struct VALIDATE_GLOBALS
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct VALIDATE_GLOBALS
 	{
 		//*****************************************************************************
 		// Validate Global variables

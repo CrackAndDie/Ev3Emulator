@@ -1346,7 +1346,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					}
 				}
 			}
-			CommonHelper.snprintf((*pMemory).Entry[(*pMemory).Entries], FILENAME_SIZE, CommonHelper.GetString(pName));
+			CommonHelper.snprintf((*pMemory).GetEntry((*pMemory).Entries), FILENAME_SIZE, CommonHelper.GetString(pName));
 			(*pMemory).Priority[(*pMemory).Entries] = Priority;
 			((*pMemory).Entries)++;
 			if (Priority < Favourites)
@@ -1358,11 +1358,11 @@ namespace Ev3CoreUnsafe.Cmemory
 						if ((*pMemory).Priority[Sort2 + 1] < (*pMemory).Priority[Sort2])
 						{
 							TmpPriority = (*pMemory).Priority[Sort2];
-							CommonHelper.strcpy(TmpEntry, (*pMemory).Entry[Sort2]);
+							CommonHelper.strcpy(TmpEntry, (*pMemory).GetEntry(Sort2));
 							(*pMemory).Priority[Sort2] = (*pMemory).Priority[Sort2 + 1];
-							CommonHelper.strcpy((*pMemory).Entry[Sort2], (*pMemory).Entry[Sort2 + 1]);
+							CommonHelper.strcpy((*pMemory).GetEntry(Sort2), (*pMemory).GetEntry(Sort2 + 1));
 							(*pMemory).Priority[Sort2 + 1] = TmpPriority;
-							CommonHelper.strcpy((*pMemory).Entry[Sort2 + 1], TmpEntry);
+							CommonHelper.strcpy((*pMemory).GetEntry(Sort2 + 1), TmpEntry);
 						}
 					}
 				}
@@ -1376,7 +1376,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			for (Pointer = 0; Pointer < (*pMemory).Entries; Pointer++)
 			{
-				GH.printf($"[{CommonHelper.GetString((*pMemory).Folder)}]({(*pMemory).Sort})({(*pMemory).Priority[Pointer]}) {CommonHelper.GetString((*pMemory).Entry[Pointer])}\r\n");
+				GH.printf($"[{CommonHelper.GetString((*pMemory).Folder)}]({(*pMemory).Sort})({(*pMemory).Priority[Pointer]}) {CommonHelper.GetString((*pMemory).GetEntry(Pointer))}\r\n");
 			}
 		}
 
@@ -1395,7 +1395,6 @@ namespace Ev3CoreUnsafe.Cmemory
 			Result = cMemoryAlloc(PrgId, POOL_TYPE_MEMORY, (GBINDEX)sizeof(FOLDER), ((void**)&pMemory), pHandle);
 			if (Result == OK)
 			{
-				(*pMemory).Init();
 				(*pMemory).pDir = null;
 				(*pMemory).Entries = 0;
 				(*pMemory).Type = Type;
@@ -1521,7 +1520,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 					if (Length >= 2)
 					{
-						if (cMemoryCheckFilename((*pMemory).Entry[Item - 1], null, Name, Ext) == OK)
+						if (cMemoryCheckFilename((*pMemory).GetEntry(Item - 1), null, Name, Ext) == OK)
 						{
 							*pType = cMemoryFindType(Ext);
 							if (CommonHelper.strlen(Name) >= Length)
@@ -1575,7 +1574,7 @@ namespace Ev3CoreUnsafe.Cmemory
 				if ((Item > 0) && (Item <= (*pMemory).Entries))
 				{ // Item ok
 
-					CommonHelper.snprintf(Filename, MAX_FILENAME_SIZE, $"{CommonHelper.GetString((*pMemory).Folder)}/{CommonHelper.GetString((*pMemory).Entry[Item - 1])}/{ICON_FILE_NAME}{EXT_GRAPHICS}");
+					CommonHelper.snprintf(Filename, MAX_FILENAME_SIZE, $"{CommonHelper.GetString((*pMemory).Folder)}/{CommonHelper.GetString((*pMemory).GetEntry(Item - 1))}/{ICON_FILE_NAME}{EXT_GRAPHICS}");
 
 					using var hFile = File.OpenRead(CommonHelper.GetString(Filename));
 
@@ -1625,7 +1624,7 @@ namespace Ev3CoreUnsafe.Cmemory
 				{ // Item ok
 
 					//      CommonHelper.snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s/%s%s",(*pMemory).Folder,(*pMemory).Entry[Item - 1],TEXT_FILE_NAME,EXT_TEXT);
-					CommonHelper.snprintf(Filename, MAX_FILENAME_SIZE, $"{vmSETTINGS_DIR}/{CommonHelper.GetString((*pMemory).Entry[Item - 1])}{EXT_TEXT}");
+					CommonHelper.snprintf(Filename, MAX_FILENAME_SIZE, $"{vmSETTINGS_DIR}/{CommonHelper.GetString((*pMemory).GetEntry(Item - 1))}{EXT_TEXT}");
 					using var hFile = File.OpenRead(CommonHelper.GetString(Filename));
 					Result = OK;
 					No = 1;
@@ -1676,7 +1675,7 @@ namespace Ev3CoreUnsafe.Cmemory
 				if ((Item > 0) && (Item <= (*pMemory).Entries) && Length != 0)
 				{ // Item ok
 
-					CommonHelper.snprintf(Filename, MAX_FILENAME_SIZE, $"{CommonHelper.GetString((*pMemory).Folder)}/{CommonHelper.GetString((*pMemory).Entry[Item - 1])}/{TEXT_FILE_NAME}{EXT_TEXT}");
+					CommonHelper.snprintf(Filename, MAX_FILENAME_SIZE, $"{CommonHelper.GetString((*pMemory).Folder)}/{CommonHelper.GetString((*pMemory).GetEntry(Item - 1))}/{TEXT_FILE_NAME}{EXT_TEXT}");
 
 					var pFile = File.OpenWrite(CommonHelper.GetString(Filename));
 					pFile.WriteUnsafe((byte*)pText, 0, Length);
@@ -1714,7 +1713,7 @@ namespace Ev3CoreUnsafe.Cmemory
 				if ((Item > 0) && (Item <= (*pMemory).Entries))
 				{ // Item ok
 
-					if (cMemoryCheckFilename((*pMemory).Entry[Item - 1], Folder, Name, Ext) == OK)
+					if (cMemoryCheckFilename((*pMemory).GetEntry(Item - 1), Folder, Name, Ext) == OK)
 					{
 						*pType = cMemoryFindType(Ext);
 						CommonHelper.snprintf(pName, (int)Length, $"{CommonHelper.GetString((*pMemory).Folder)}{CommonHelper.GetString(Folder)}/{CommonHelper.GetString(Name)}");

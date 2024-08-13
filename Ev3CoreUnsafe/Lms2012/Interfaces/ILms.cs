@@ -1,6 +1,7 @@
 ﻿using Ev3CoreUnsafe.Enums;
 using Ev3CoreUnsafe.Extensions;
 using Ev3CoreUnsafe.Helpers;
+using System.Runtime.InteropServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Lms2012.Interfaces
@@ -128,36 +129,41 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 	/*! \struct OBJ
 	 *          Object data is used to hold the variables used for an object (allocated at image load time)
 	 */
+	[StructLayout(LayoutKind.Explicit, Pack = 1)]
 	public unsafe struct OBJ                        // Object
 	{
-		public IP Ip;                           //!< Object instruction pointer
-		public LP pLocal;                       //!< Local variable pointer
+        [FieldOffset(0)]
+        public IP Ip;                           //!< Object instruction pointer
+        [FieldOffset(4)]
+        public LP pLocal;                       //!< Local variable pointer
 
-		public UWORD ObjStatus;                    //!< Object status
+        [FieldOffset(8)]
+        public UWORD ObjStatus;                    //!< Object status
 
-		public UNIONu u;
-		public VARDATA* Local;                      //!< Poll of bytes used for local variables
+        [FieldOffset(10)]
+        public OBJID CallerId;                   //!< Caller id used for SUBCALL to save object id to return to
+        [FieldOffset(10)]
+        public TRIGGER TriggerCount;               //!< Trigger count used by BLOCK's trigger logic
+
+        [FieldOffset(12)]
+        public VARDATA* Local;                      //!< Poll of bytes used for local variables
 	}
 
-	public unsafe struct UNIONu
-	{
-		public OBJID CallerId;                   //!< Caller id used for SUBCALL to save object id to return to
-		public TRIGGER TriggerCount;               //!< Trigger count used by BLOCK's trigger logic
-	}
-
-	/*! \struct BRKP
+    /*! \struct BRKP
 	 *          Breakpoint data hold information used for breakpoint
 	 */
-	public unsafe struct BRKP
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BRKP
 	{
 		public IMINDEX Addr;                         //!< Offset to breakpoint address from image start
 		public OP OpCode;                       //!< Saved substituted opcode
 	}
 
-	/*! \struct PRG
+    /*! \struct PRG
 	 *          Program data hold information about a program
 	 */
-	public unsafe struct PRG
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct PRG
 	{
 		public ULONG InstrCnt;                   //!< Instruction counter used for performance analyses
 		public ULONG InstrTime;                  //!< Instruction time used for performance analyses
@@ -188,10 +194,11 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public fixed UBYTE Name[FILENAME_SIZE];
 	}
 
-	/*! \struct TYPES
+    /*! \struct TYPES
 	 *          Device type data
 	 */
-	public unsafe struct TYPES // if data type changes - remember to change "cInputTypeDataInit" !
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TYPES // if data type changes - remember to change "cInputTypeDataInit" !
 	{
 		public fixed UBYTE Name[TYPE_NAME_LENGTH + 1]; //!< Device name
 		public DATA8 Type;                       //!< Device type
@@ -225,7 +232,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		}
 	}
 
-	public unsafe struct COLORSTRUCT
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct COLORSTRUCT
 	{
 		public fixed ULONG Calibration0[COLORS];
 		public fixed ULONG Calibration1[COLORS];
@@ -236,7 +244,7 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public fixed UWORD SensorRaw[COLORS];
 	}
 
-	/*! \page AnalogModuleMemory
+    /*! \page AnalogModuleMemory
 	 *  <b>     Shared Memory </b>
 	 *
 	 *  <hr size="1"/>
@@ -247,7 +255,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 	 *  \verbatim
 	 */
 
-	public unsafe struct ANALOG
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct ANALOG
 	{
 		public fixed DATA16 InPin1[INPUTS];         //!< Analog value at input port connection 1
 		public fixed DATA16 InPin6[INPUTS];         //!< Analog value at input port connection 6
@@ -280,7 +289,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public UWORD PreemptMilliSeconds;
 	}
 
-	public unsafe struct UART
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct UART
 	{
 		public fixed UBYTE TypeData0[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
 		public fixed UBYTE TypeData1[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
@@ -300,21 +310,24 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public fixed DATA8 OutputLength[INPUTS];
 	}
 
-	public unsafe struct DEVCON
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DEVCON
 	{
 		public fixed DATA8 Connection[INPUTS];
 		public fixed DATA8 Type[INPUTS];
 		public fixed DATA8 Mode[INPUTS];
 	}
 
-	public unsafe struct UARTCTL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct UARTCTL
 	{
 		public TYPES TypeData;
 		public DATA8 Port;
 		public DATA8 Mode;
 	}
 
-	public unsafe struct IIC
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct IIC
 	{
 		public fixed UBYTE TypeData0[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
 		public fixed UBYTE TypeData1[56 * MAX_DEVICE_MODES]; //!< TypeData // 56 - is a sizeof(TYPES)
@@ -335,14 +348,16 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public fixed DATA8 OutputLength[INPUTS];
 	}
 
-	public unsafe struct IICCTL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct IICCTL
 	{
 		public TYPES TypeData;
 		public DATA8 Port;
 		public DATA8 Mode;
 	}
 
-	public unsafe struct IICDAT
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct IICDAT
 	{
 		public RESULT Result;
 		public DATA8 Port;
@@ -354,7 +369,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public fixed DATA8 RdData[IIC_DATA_LENGTH];
 	}
 
-	public unsafe struct IICSTR
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct IICSTR
 	{
 		public DATA8 Port;
 		public DATA16 Time;
@@ -369,14 +385,16 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 ReadLng;
 	}
 
-	public unsafe struct TSTPIN
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TSTPIN
 	{
 		public DATA8 Port;
 		public DATA8 Length;
 		public fixed DATA8 String[TST_PIN_LENGTH + 1];
 	}
 
-	public unsafe struct TSTUART
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TSTUART
 	{
 		public DATA32 Bitrate;
 		public DATA8 Port;
@@ -384,40 +402,47 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public fixed DATA8 String[TST_UART_LENGTH];
 	}
 
-	public unsafe struct UI
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct UI
 	{
 		public fixed DATA8 Pressed[BUTTONS];                   //!< Pressed status
     }
 
-	public unsafe struct LCD
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct LCD
 	{
 		public fixed UBYTE Lcd[LCD_BUFFER_SIZE];
 	}
 
-	public unsafe struct SOUND
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct SOUND
 	{
 		public DATA8 Status;                       //!< Status
 	}
 
-	public unsafe struct USB_SPEED
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct USB_SPEED
 	{
 		public DATA8 Speed;
 	}
 
-	public unsafe struct NONVOL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct NONVOL
 	{
 		public DATA8 VolumePercent;                //!< System default volume [0..100%]
 		public DATA8 SleepMinutes;                 //!< System sleep          [0..120min] (0 = ~)
 	}
 
-	public unsafe struct MOTORDATA
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MOTORDATA
 	{
 		public SLONG TachoCounts;
 		public SBYTE Speed;
 		public SLONG TachoSensor;
 	}
 
-	public unsafe struct STEPPOWER
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct STEPPOWER
 	{
 		public DATA8 Cmd;
 		public DATA8 Nos;
@@ -428,7 +453,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Brake;
 	}
 
-	public unsafe struct TIMEPOWER
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TIMEPOWER
 	{
 		public DATA8 Cmd;
 		public DATA8 Nos;
@@ -439,7 +465,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Brake;
 	}
 
-	public unsafe struct STEPSPEED
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct STEPSPEED
 	{
 		public DATA8 Cmd;
 		public DATA8 Nos;
@@ -450,7 +477,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Brake;
 	}
 
-	public unsafe struct TIMESPEED
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TIMESPEED
 	{
 		public DATA8 Cmd;
 		public DATA8 Nos;
@@ -461,7 +489,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Brake;
 	}
 
-	public unsafe struct STEPSYNC
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct STEPSYNC
 	{
 		public DATA8 Cmd;
 		public DATA8 Nos;
@@ -471,7 +500,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DATA8 Brake;
 	}
 
-	public unsafe struct TIMESYNC
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TIMESYNC
 	{
 		public DATA8 Cmd;
 		public DATA8 Nos;

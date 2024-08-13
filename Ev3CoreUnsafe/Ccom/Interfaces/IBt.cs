@@ -70,8 +70,9 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		UWORD cBtSetBundleSeedId(UBYTE* pSeedId);
 	}
 
-	// Buffer to read into from the socket
-	public unsafe struct READBUF
+    // Buffer to read into from the socket
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct READBUF
 	{
 		public fixed UBYTE Buf[1024];
 		public UWORD InPtr;
@@ -79,17 +80,19 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UWORD Status;
 	}
 
-	// Buffer to write into from the socket
-	public unsafe struct WRITEBUF
+    // Buffer to write into from the socket
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct WRITEBUF
 	{
 		public fixed UBYTE Buf[1024];
 		public UWORD InPtr;
 		public UWORD OutPtr;
 	}
 
-	// Buffer to fill complete message into from READBUF
-	// only one Messages can fit into this buffer
-	public unsafe struct MSGBUF
+    // Buffer to fill complete message into from READBUF
+    // only one Messages can fit into this buffer
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MSGBUF
 	{
 		public fixed UBYTE Buf[1024];
 		public UWORD InPtr;
@@ -99,28 +102,32 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE LargeMsg;
 	}
 
-	// Control socket
-	public unsafe struct HCISOCKET
+    // Control socket
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct HCISOCKET
 	{
 		public SLONG Socket;
 		public UBYTE WaitForEvent;
 		public UBYTE Busy;
 	}
 
-	// Socket to listen for incoming requests
-	public unsafe struct LISTENSOCKET
+    // Socket to listen for incoming requests
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct LISTENSOCKET
 	{
 		public SLONG Socket;
 		public ULONG opt;
 	}
 
-	// Communication sockets
-	public unsafe struct BTSOCKET
+    // Communication sockets
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BTSOCKET
 	{
 		public SLONG Socket;
 	}
 
-	public unsafe struct DEVICELIST
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DEVICELIST
 	{
 		public fixed DATA8 Name[MAX_BT_NAME_SIZE];
 		public UWORD ConnHandle;
@@ -131,7 +138,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Status;
 	}
 
-	public unsafe struct SEARCHLIST
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct SEARCHLIST
 	{
 		public fixed DATA8 Name[MAX_BT_NAME_SIZE];
 		public fixed UBYTE DevClass[3];
@@ -140,7 +148,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE ChNo;
 	}
 
-	public unsafe struct BTCH
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BTCH
 	{
 		public WRITEBUF WriteBuf;
 		public READBUF ReadBuf;
@@ -164,7 +173,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		}
 	}
 
-	public unsafe struct NONVOLBT
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct NONVOLBT
 	{
 		public fixed UBYTE DevList[262 * MAX_DEV_TABLE_ENTRIES]; // 262 - is sizeof(DEVICELIST)
 		public UBYTE DevListEntries;
@@ -175,7 +185,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public fixed UBYTE BundleSeedID[MAX_BUNDLE_SEED_ID_SIZE];
 	}
 
-	public unsafe struct INCOMMING
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct INCOMMING
 	{
 		public ULONG Passkey;
 		public UWORD ConnHandle;
@@ -183,12 +194,14 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public fixed UBYTE DevClass[3];
 	}
 
-	public unsafe struct OUTGOING
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct OUTGOING
 	{
 		public UBYTE ChNo;
 	}
 
-	public unsafe struct TRUSTED_DEV
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TRUSTED_DEV
 	{
 		public UBYTE PinLen;
 		public fixed UBYTE Pin[10];

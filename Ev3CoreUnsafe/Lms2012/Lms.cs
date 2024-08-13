@@ -1073,7 +1073,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		{
 			(*GH.VMInstance.pObjList[ObjId]).Ip = &GH.VMInstance.pImage[(ULONG)GH.VMInstance.pObjHead[ObjId].OffsetToInstructions];
 
-			(*GH.VMInstance.pObjList[ObjId]).u.TriggerCount = GH.VMInstance.pObjHead[ObjId].TriggerCount;
+			(*GH.VMInstance.pObjList[ObjId]).TriggerCount = GH.VMInstance.pObjHead[ObjId].TriggerCount;
 		}
 
 
@@ -1234,9 +1234,9 @@ namespace Ev3CoreUnsafe.Lms2012
 
 							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &pI[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
 
-							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).u.TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
+							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
 
-							if (((*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).u.TriggerCount != 0) || (ObjIndex > 1))
+							if (((*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount != 0) || (ObjIndex > 1))
 							{
 								(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = (ushort)OBJSTAT.STOPPED;
 							}
@@ -1583,7 +1583,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			{
 				(*GH.VMInstance.pObjList[Id]).ObjStatus = RUNNING;
 				(*GH.VMInstance.pObjList[Id]).Ip = &GH.VMInstance.pImage[(ULONG)GH.VMInstance.pObjHead[Id].OffsetToInstructions];
-				(*GH.VMInstance.pObjList[Id]).u.TriggerCount = GH.VMInstance.pObjHead[Id].TriggerCount;
+				(*GH.VMInstance.pObjList[Id]).TriggerCount = GH.VMInstance.pObjHead[Id].TriggerCount;
 			}
 		}
 
@@ -2484,10 +2484,10 @@ namespace Ev3CoreUnsafe.Lms2012
 			TmpId = *(OBJID*)PrimParPointer();
 
 			(*GH.VMInstance.pObjList[TmpId]).ObjStatus = WAITING;
-			if ((*GH.VMInstance.pObjList[TmpId]).u.TriggerCount != 0)
+			if ((*GH.VMInstance.pObjList[TmpId]).TriggerCount != 0)
 			{
-				((*GH.VMInstance.pObjList[TmpId]).u.TriggerCount)--;
-				if ((*GH.VMInstance.pObjList[TmpId]).u.TriggerCount == 0)
+				((*GH.VMInstance.pObjList[TmpId]).TriggerCount)--;
+				if ((*GH.VMInstance.pObjList[TmpId]).TriggerCount == 0)
 				{
 					ObjectReset(TmpId);
 					ObjectEnQueue(TmpId);
@@ -2561,7 +2561,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			OBJID ObjectIdCaller;
 
 			// Get caller id from saved
-			ObjectIdCaller = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).u.CallerId;
+			ObjectIdCaller = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).CallerId;
 
 			// Copy local variables to parameters
 			GH.VMInstance.ObjectLocal = (*GH.VMInstance.pObjList[ObjectIdCaller]).pLocal;
@@ -2614,7 +2614,7 @@ namespace Ev3CoreUnsafe.Lms2012
 				ObjectReset(ObjectIdToCall);
 
 				// Save mother id
-				(*GH.VMInstance.pObjList[ObjectIdToCall]).u.CallerId = GH.VMInstance.ObjectId;
+				(*GH.VMInstance.pObjList[ObjectIdToCall]).CallerId = GH.VMInstance.ObjectId;
 
 				// Copy parameters to local variables
 				CopyParsToLocals(ObjectIdToCall);
@@ -2762,7 +2762,7 @@ namespace Ev3CoreUnsafe.Lms2012
 							}
 						  (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = RUNNING;
 							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &GH.VMInstance.Program[PrgId].pImage[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
-							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).u.TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
+							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
 						}
 					}
 					break;

@@ -1,5 +1,6 @@
 ﻿using Ev3CoreUnsafe.Enums;
 using Ev3CoreUnsafe.Helpers;
+using System.Runtime.InteropServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Ccom.Interfaces
@@ -49,7 +50,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 																								// specific protocol down @ the transport layer
 	}
 
-	public unsafe struct DAISY_POLL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISY_POLL
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -58,7 +60,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public DATA8* PayLoad;
 	}
 
-	public unsafe struct DAISY_UNLOCK_REPLY
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISY_UNLOCK_REPLY
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -67,7 +70,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public DATA8 Status;
 	}
 
-	public unsafe struct DAISY_READ
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISY_READ
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -78,7 +82,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public DATA8* PayLoad;
 	}
 
-	public unsafe struct DAISY_WRITE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISY_WRITE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -87,7 +92,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public DATA8* PayLoad;
 	}
 
-	public unsafe struct DAISY_DEVICE_DATA
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISY_DEVICE_DATA
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -103,7 +109,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FirstCookie;
 	}
 
-	public unsafe struct DAISY_INFO
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISY_INFO
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -112,7 +119,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE* Info;
 	}
 
-	public unsafe struct DAISYCMD        // Used for downstream
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DAISYCMD        // Used for downstream
 	{
 		public UBYTE DaisyCmd;
 		public UBYTE Layer;

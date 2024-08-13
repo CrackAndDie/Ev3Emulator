@@ -6,6 +6,7 @@ using Ev3CoreUnsafe.Lms2012.Interfaces;
 using EV3DecompilerLib.Decompile;
 using EV3DecompilerLib.Recognize;
 using EV3ModelLib;
+using System.Runtime.CompilerServices;
 
 namespace Ev3ConsoleTest
 {
@@ -13,15 +14,14 @@ namespace Ev3ConsoleTest
     {
         static unsafe void Main(string[] args)
         {
-            EnumlatorTest();
-            // CommonTest();
+            // EnumlatorTest();
+            CommonTest();
 		}
 
 		#region common test
         private unsafe static void CommonTest()
         {
-            var sz = sizeof(TYPES);
-
+            var sz = sizeof(COMCMD);
 		}
 		#endregion
 

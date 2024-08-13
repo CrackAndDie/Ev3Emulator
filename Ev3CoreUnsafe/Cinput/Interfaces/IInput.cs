@@ -1,6 +1,7 @@
 ﻿using Ev3CoreUnsafe.Enums;
 using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
+using System.Runtime.InteropServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Cinput.Interfaces
@@ -47,7 +48,8 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 		void cInputSample();
 	}
 
-	public unsafe struct DEVICE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DEVICE
 	{
 		public UWORD InvalidTime;                        //!< mS from type change to valid data
 		public UWORD TimeoutTimer;                       //!< mS allowed to be busy timer
@@ -62,7 +64,8 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 		public DATA32 Bumps;
 	}
 
-	public unsafe struct CALIB
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct CALIB
 	{
 		public DATA8 InUse;
 		public DATAF Min;

@@ -2,6 +2,7 @@
 using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Cui.Interfaces
@@ -37,7 +38,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		void cUiKeepAlive();
 	}
 
-	public unsafe struct GRAPH
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct GRAPH
 	{
 		public DATAF* pMin;
 		public DATAF* pMax;
@@ -64,7 +66,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 Down;
 	}
 
-	public unsafe struct NOTIFY
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct NOTIFY
 	{
 		public DATA16 ScreenStartX;
 		public DATA16 ScreenStartY;
@@ -100,7 +103,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 NeedUpdate;
 	}
 
-	public unsafe struct IQUESTION
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct IQUESTION
 	{
 		public DATA16 ScreenStartX;
 		public DATA16 ScreenStartY;
@@ -123,7 +127,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 NeedUpdate;
 	}
 
-	public unsafe struct TQUESTION
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TQUESTION
 	{
 		public DATA16 ScreenStartX;
 		public DATA16 ScreenStartY;
@@ -145,7 +150,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 NeedUpdate;
 	}
 
-	public unsafe struct KEYB
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct KEYB
 	{
 		public DATA16 ScreenStartX;
 		public DATA16 ScreenStartY;
@@ -170,7 +176,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 NeedUpdate;
 	}
 
-	public unsafe struct BROWSER
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BROWSER
 	{
 		public DATA16 ScreenStartX;
 		public DATA16 ScreenStartY;
@@ -224,7 +231,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public fixed DATA8 Text[TEXTSIZE];
 	}
 
-	public unsafe struct TXTBOX
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TXTBOX
 	{
 		public DATA16 ScreenStartX;
 		public DATA16 ScreenStartY;

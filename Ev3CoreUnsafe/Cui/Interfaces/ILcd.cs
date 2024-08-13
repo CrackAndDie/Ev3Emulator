@@ -1,4 +1,5 @@
 ﻿using Ev3CoreUnsafe.Lms2012.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace Ev3CoreUnsafe.Cui.Interfaces
 {
@@ -56,7 +57,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		unsafe void dLcdFlodfill(UBYTE* pImage, DATA8 Color, DATA16 X0, DATA16 Y0);
 	}
 
-	public unsafe struct FONTINFO
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct FONTINFO
 	{
 		public UBYTE* pFontBits;           // Pointer to start of font bitmap
 		public DATA16 FontHeight;           // Character height (all inclusive)
@@ -66,7 +68,8 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public DATA8 FontLast;             // Last character supported
 	}
 
-	public unsafe struct ICONINFO
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct ICONINFO
 	{
 		public UBYTE* pIconBits;
 		public DATA16 IconSize;

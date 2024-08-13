@@ -1,6 +1,7 @@
 ﻿using Ev3CoreUnsafe.Enums;
 using Ev3CoreUnsafe.Helpers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Ccom.Interfaces
@@ -65,48 +66,59 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		RESULT cComGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, DATA8* pType, DATA8* pMode, DATA8* pData);
 	}
 
-	public unsafe struct COMCMD                    //!< Common command struct
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct COMCMD                    //!< Common command struct
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCnt;
 		public UBYTE Cmd;
-		public UBYTE* PayLoad;                    //!< Pay load is DIRCMD or SYSCMD
+		[Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;                    //!< Pay load is DIRCMD or SYSCMD
 	}
 
-	public unsafe struct COMRPL                     //!< Common reply struct
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct COMRPL                     //!< Common reply struct
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCnt;
 		public UBYTE Cmd;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct DIRCMD                       //!< Direct command struct
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct DIRCMD                       //!< Direct command struct
 	{
 		public UBYTE Globals;
 		public UBYTE Locals;
-		public UBYTE* Code;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Code;
 	}
 
-	public unsafe struct SYSCMDB                       //!< System command begin down load command
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct SYSCMDB                       //!< System command begin down load command
 	{
 		public UBYTE Sys;
 		public UBYTE LengthLsb;
 		public UBYTE LengthNsb1;
 		public UBYTE LengthNsb2;
 		public UBYTE LengthMsb;
-		public UBYTE* Name;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Name;
 	}
 
-	public unsafe struct SYSCMDBUPL                     //!< System command begin Upload command
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct SYSCMDBUPL                     //!< System command begin Upload command
 	{
 		public UBYTE Sys;
 		public UBYTE LengthLsb;
 		public UBYTE LengthMsb;
-		public UBYTE* Name;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Name;
 	}
 
-	public unsafe struct SYSCMDCUPL                     //!< System command Continue Upload command
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct SYSCMDCUPL                     //!< System command Continue Upload command
 	{
 		public UBYTE Sys;
 		public UBYTE Handle;
@@ -114,14 +126,17 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE LengthMsb;
 	}
 
-	public unsafe struct SYSCMDC                    //!< System command continue down load command
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct SYSCMDC                    //!< System command continue down load command
 	{
 		public UBYTE Sys;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct BEGIN_LIST
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BEGIN_LIST
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -129,10 +144,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE BytesToReadLsb;
 		public UBYTE BytesToReadMsb;
-		public UBYTE* Path;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Path;
 	}
 
-	public unsafe struct RPLY_BEGIN_LIST
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BEGIN_LIST
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -144,10 +161,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE ListSizeNsb2;
 		public UBYTE ListSizeMsb;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct CONTINUE_LIST
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct CONTINUE_LIST
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -158,7 +177,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE BytesToReadMsb;
 	}
 
-	public unsafe struct RPLY_CONTINUE_LIST
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_CONTINUE_LIST
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -166,10 +186,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE Status;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct BEGIN_GET_FILE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BEGIN_GET_FILE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -177,10 +199,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE BytesToReadLsb;
 		public UBYTE BytesToReadMsb;
-		public UBYTE* Path;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Path;
 	}
 
-	public unsafe struct RPLY_BEGIN_GET_FILE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BEGIN_GET_FILE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -192,10 +216,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct CONTINUE_GET_FILE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct CONTINUE_GET_FILE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -206,7 +232,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE BytesToReadMsb;
 	}
 
-	public unsafe struct RPLY_CONTINUE_GET_FILE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_CONTINUE_GET_FILE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -218,10 +245,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct BEGIN_READ
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BEGIN_READ
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -229,10 +258,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE BytesToReadLsb;
 		public UBYTE BytesToReadMsb;
-		public UBYTE* Path;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Path;
 	}
 
-	public unsafe struct RPLY_BEGIN_READ
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BEGIN_READ
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -244,10 +275,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct CONTINUE_READ
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct CONTINUE_READ
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -258,7 +291,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE BytesToReadMsb;
 	}
 
-	public unsafe struct RPLY_CONTINUE_READ
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_CONTINUE_READ
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -266,10 +300,12 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE Status;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct LIST_HANDLES
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct LIST_HANDLES
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -277,44 +313,31 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 	}
 
-	public unsafe struct RPLY_LIST_HANDLES
-	{
-		public CMDSIZE CmdSize;
-		public MSGCNT MsgCount;
-		public UBYTE CmdType;
-		public UBYTE Cmd;
-		public UBYTE Status;
-		public UBYTE* PayLoad;
-	}
-
-	public unsafe struct REMOVE_FILE
-	{
-		public CMDSIZE CmdSize;
-		public MSGCNT MsgCount;
-		public UBYTE CmdType;
-		public UBYTE Cmd;
-		public UBYTE* Name;
-	}
-
-	public unsafe struct RPLY_REMOVE_FILE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_LIST_HANDLES
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE Status;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct MAKE_DIR
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct REMOVE_FILE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
-		public UBYTE* Dir;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Name;
 	}
 
-	public unsafe struct RPLY_MAKE_DIR
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_REMOVE_FILE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -323,7 +346,29 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Status;
 	}
 
-	public unsafe struct CLOSE_HANDLE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MAKE_DIR
+	{
+		public CMDSIZE CmdSize;
+		public MSGCNT MsgCount;
+		public UBYTE CmdType;
+		public UBYTE Cmd;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Dir;
+	}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_MAKE_DIR
+	{
+		public CMDSIZE CmdSize;
+		public MSGCNT MsgCount;
+		public UBYTE CmdType;
+		public UBYTE Cmd;
+		public UBYTE Status;
+	}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct CLOSE_HANDLE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -332,7 +377,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Handle;
 	}
 
-	public unsafe struct RPLY_CLOSE_HANDLE
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_CLOSE_HANDLE
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -342,7 +388,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Handle;
 	}
 
-	public unsafe struct BEGIN_DL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BEGIN_DL
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -352,11 +399,13 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb1;
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
-		public UBYTE* Path;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Path;
 		//  UBYTE   PayLoad[];
 	}
 
-	public unsafe struct RPLY_BEGIN_DL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BEGIN_DL
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -366,17 +415,20 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Handle;
 	}
 
-	public unsafe struct CONTINUE_DL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct CONTINUE_DL
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE Handle;
-		public UBYTE* PayLoad;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* PayLoad;
 	}
 
-	public unsafe struct RPLY_CONTINUE_DL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_CONTINUE_DL
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -386,24 +438,29 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Handle;
 	}
 
-	public unsafe struct WRITE_MAILBOX
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct WRITE_MAILBOX
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE NameSize;
-		public UBYTE* Name;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Name;
 	}
 
-	public unsafe struct WRITE_MAILBOX_PAYLOAD
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct WRITE_MAILBOX_PAYLOAD
 	{
 		public UBYTE SizeLsb;
 		public UBYTE SizeMsb;
-		public UBYTE* Payload;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* Payload;
 	}
 
-	public unsafe struct BLUETOOTH_PIN
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BLUETOOTH_PIN
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -415,7 +472,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public fixed UBYTE Pin[7];
 	}
 
-	public unsafe struct RPLY_BLUETOOTH_PIN
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BLUETOOTH_PIN
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -428,7 +486,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public fixed UBYTE Pin[7];
 	}
 
-	public unsafe struct BUNDLE_ID
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BUNDLE_ID
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -437,7 +496,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE* BundleId;
 	}
 
-	public unsafe struct RPLY_BUNDLE_ID
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BUNDLE_ID
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -446,16 +506,19 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Status;
 	}
 
-	public unsafe struct BUNDLE_SEED_ID
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct BUNDLE_SEED_ID
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
-		public UBYTE* BundleSeedId;
+        [Obsolete("alloc memory before usage")]
+        public UBYTE* BundleSeedId;
 	}
 
-	public unsafe struct RPLY_BUNDLE_SEED_ID
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RPLY_BUNDLE_SEED_ID
 	{
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCount;
@@ -464,10 +527,13 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Status;
 	}
 
-	public unsafe struct FIL
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct FIL
 	{
 		public fixed DATA8 Name[vmFILENAMESIZE];         //!< File name
-							 // struct dirent   **namelist;
+
+		public int PlaceHolder; // there was dirent
+
 		public ULONG Size;                         //!< File size
 		public int File;
 
@@ -476,8 +542,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UWORD State;
 	}
 
-
-	public unsafe struct TXBUF
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct TXBUF
 	{
 		public fixed UBYTE Buf[1024];
 		public ULONG MsgLen;
@@ -494,7 +560,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public fixed UBYTE Folder[vmFILENAMESIZE];
 	}
 
-	public unsafe struct RXBUF
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct RXBUF
 	{
 		public fixed UBYTE Buf[1024];
 		public ULONG MsgLen;
@@ -505,7 +572,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE State;
 	}
 
-	public unsafe struct MAILBOX
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MAILBOX
 	{
 		public fixed UBYTE Name[50];
 		public UBYTE Status;
