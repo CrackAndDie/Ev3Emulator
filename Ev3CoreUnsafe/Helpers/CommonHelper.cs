@@ -79,18 +79,21 @@ namespace Ev3CoreUnsafe.Helpers
 			return result;
 		}
 
+#pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
         public unsafe static T* PointerStruct<T>() where T : new()
         {
             // T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(Unsafe.SizeOf<T>(), true)[0]);
             T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(1, true)[0]);
+#pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
             return inst;
         }
 
+#pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
         public unsafe static T* Pointer1d<T>(int a, bool inst = false) where T : new()
-		{
+        {
 			T* arr = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(a, true)[0]);
-
-			if (!inst)
+#pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
+            if (!inst)
 				return arr;
 
 			for (int j = 0; j < a; ++j)
@@ -100,14 +103,17 @@ namespace Ev3CoreUnsafe.Helpers
 			return arr;
 		}
 
-		public unsafe static T** Pointer2d<T>(int a, int b, bool inst = false) where T : new()
+#pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
+        public unsafe static T** Pointer2d<T>(int a, int b, bool inst = false) where T : new()
 		{
 			T** arr = (T**)Unsafe.AsPointer(ref GC.AllocateArray<T[]>(a, true)[0]);
+
 			for (int i = 0; i < a; i++)
 			{
 				arr[i] = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(b, true)[0]);
+#pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
 
-				if (!inst)
+                if (!inst)
 					continue;
 				for (int j = 0; j < b; ++j)
 				{
@@ -150,10 +156,12 @@ namespace Ev3CoreUnsafe.Helpers
 			return tmp;
 		}
 
-		public unsafe static T[] GetArray<T>(T* p, int count)
+#pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
+        public unsafe static T[] GetArray<T>(T* p, int count)
 		{
 			T[] values = new T[count];
-			for (int i = 0; i < count; i++)
+#pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
+            for (int i = 0; i < count; i++)
 			{
 				values[i] = p[i];
 			}

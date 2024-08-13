@@ -339,33 +339,36 @@ namespace Ev3CoreUnsafe.Cinput
 			(*IicStr).PollString = 0;
 			(*IicStr).ReadLng = 0;
 
-			if ((Type >= 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
-			{ // Type and mode valid
+			unchecked 
+			{ 
+				if ((Type >= 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+				{ // Type and mode valid
 
 
-				while ((Index < GH.InputInstance.IicDeviceTypes) && (Result != OK))
-				{ // trying to find device type
+					while ((Index < GH.InputInstance.IicDeviceTypes) && (Result != OK))
+					{ // trying to find device type
 
-					if ((GH.InputInstance.IicString[Index].Type == Type) && (GH.InputInstance.IicString[Index].Mode == Mode))
-					{ // match on type and mode
+						if ((GH.InputInstance.IicString[Index].Type == Type) && (GH.InputInstance.IicString[Index].Mode == Mode))
+						{ // match on type and mode
 
-						(*IicStr).Type = Type;
-						(*IicStr).Mode = Mode;
-						CommonHelper.snprintf((DATA8*)IicStr->Manufacturer, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)GH.InputInstance.IicString[Index].Manufacturer));
-						CommonHelper.snprintf((DATA8*)IicStr->SensorType, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)GH.InputInstance.IicString[Index].SensorType));
-						(*IicStr).SetupLng = GH.InputInstance.IicString[Index].SetupLng;
-						(*IicStr).SetupString = GH.InputInstance.IicString[Index].SetupString;
-						(*IicStr).PollLng = GH.InputInstance.IicString[Index].PollLng;
-						(*IicStr).PollString = GH.InputInstance.IicString[Index].PollString;
-						(*IicStr).ReadLng = GH.InputInstance.IicString[Index].ReadLng;
+							(*IicStr).Type = Type;
+							(*IicStr).Mode = Mode;
+							CommonHelper.snprintf((DATA8*)IicStr->Manufacturer, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)GH.InputInstance.IicString[Index].Manufacturer));
+							CommonHelper.snprintf((DATA8*)IicStr->SensorType, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)GH.InputInstance.IicString[Index].SensorType));
+							(*IicStr).SetupLng = GH.InputInstance.IicString[Index].SetupLng;
+							(*IicStr).SetupString = GH.InputInstance.IicString[Index].SetupString;
+							(*IicStr).PollLng = GH.InputInstance.IicString[Index].PollLng;
+							(*IicStr).PollString = GH.InputInstance.IicString[Index].PollString;
+							(*IicStr).ReadLng = GH.InputInstance.IicString[Index].ReadLng;
 
-						Result = OK;
+							Result = OK;
+						}
+						Index++;
 					}
-					Index++;
 				}
-			}
+            }
 
-			return (Result);
+            return (Result);
 		}
 
 
