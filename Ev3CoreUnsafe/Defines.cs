@@ -1022,7 +1022,6 @@ namespace Ev3CoreUnsafe
 		public const int vmPOP3_ABS_WARN_LINE_ENDX = 155;
 
 
-		public static UBYTE[] REALLONGToBytes(long _x) { return new UBYTE[] { (UBYTE)((_x) & 0xFF), (UBYTE)((_x >> 8) & 0xFF), (UBYTE)((_x >> 16) & 0xFF), (UBYTE)((_x >> 24) & 0xFF), (UBYTE)((_x >> 32) & 0xFF), (UBYTE)((_x >> 40) & 0xFF), (UBYTE)((_x >> 48) & 0xFF), (UBYTE)((_x >> 56) & 0xFF) }; }
 		public static UBYTE[] LONGToBytes(ULONG _x) { return new UBYTE[] { (UBYTE)((_x) & 0xFF), (UBYTE)((_x >> 8) & 0xFF), (UBYTE)((_x >> 16) & 0xFF), (UBYTE)((_x >> 24) & 0xFF) }; }
 		public static UBYTE[] WORDToBytes(UWORD _x) { return new UBYTE[] { (UBYTE)((_x) & 0xFF), (UBYTE)((_x >> 8) & 0xFF) }; }
 		public static UBYTE BYTEToBytes(UBYTE _x) { return (UBYTE)((_x) & 0xFF); }

@@ -1107,8 +1107,8 @@ namespace Ev3CoreUnsafe.Lms2012
 			return (Result);
 		}
 
-
-		public RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
+		private int tmpParValue = 0;
+        public RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 		{
 			RESULT Result = RESULT.FAIL;
 			RESULT Aligned = OK;
@@ -1119,7 +1119,8 @@ namespace Ev3CoreUnsafe.Lms2012
 			ULONG Value;
 			UBYTE ParType = PAR;
 			UBYTE ParCode;
-			void* pParValue;
+			
+			void* pParValue = Unsafe.AsPointer(ref tmpParValue);
 			DATA8 Parameters;
 			DATA8 ParNo;
 			DATA32 Bytes = 0;
@@ -1163,7 +1164,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						if (ParType == SUBP)
 						{ // Check existence of sub command
 
-							// Sub = *(DATA8*)pParValue; // TODO: wtf uninit usage
+							Sub = *(UBYTE*)pParValue;
 							Pars >>= 4;
 							Tab = (byte)(Pars & 0x0F);
 							Pars = 0;
@@ -1181,7 +1182,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						if (ParType == PARVALUES)
 						{ // Last parameter tells number of bytes to follow
 
-							// Bytes = *(DATA32*)pParValue; // TODO: wtf uninit usage
+							Bytes = *(DATA32*)pParValue;
 
 							Pars >>= 4;
 							Pars &= 0x0F;
@@ -1603,7 +1604,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 		public RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 		{
-			return RESULT.OK;
+			// return RESULT.OK;
 
 			// TODO: doesn't work
 
