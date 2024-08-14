@@ -24,6 +24,8 @@ using static Avalonia.AvaloniaLocator;
 using System.Reflection;
 using System.Threading;
 using Ev3Emulator.Modules;
+using Ev3CoreUnsafe;
+using Ev3Emulator.CoreImpl;
 
 namespace Ev3Emulator;
 
@@ -34,7 +36,10 @@ public partial class App : ApplicationBase
 
     public override void Initialize()
     {
-        Thread.CurrentThread.Name = "MainThread";
+		// init ev3
+		GH.Ev3System = new Ev3System();
+
+		Thread.CurrentThread.Name = "MainThread";
         AvaloniaXamlLoader.Load(this);
         base.Initialize();              // <-- Required
     }

@@ -151,11 +151,11 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct BTCH
 	{
-		public WRITEBUF WriteBuf;
-		public READBUF ReadBuf;
-		public MSGBUF MsgBuf;
-		public BTSOCKET BtSocket;
-		public UBYTE Status;
+		public WRITEBUF* WriteBuf;
+		public READBUF* ReadBuf;
+		public MSGBUF* MsgBuf;
+		public BTSOCKET* BtSocket;
+		public UBYTE* Status;
 
 		public BTCH()
 		{
@@ -165,11 +165,11 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public void Init()
 		{
 			// structs 
-			WriteBuf = *CommonHelper.PointerStruct<WRITEBUF>();
-			ReadBuf = *CommonHelper.PointerStruct<READBUF>();
-			MsgBuf = *CommonHelper.PointerStruct<MSGBUF>();
-			BtSocket = *CommonHelper.PointerStruct<BTSOCKET>();
-			BtSocket = *CommonHelper.PointerStruct<BTSOCKET>();
+			WriteBuf = CommonHelper.PointerStruct<WRITEBUF>();
+			ReadBuf = CommonHelper.PointerStruct<READBUF>();
+			MsgBuf = CommonHelper.PointerStruct<MSGBUF>();
+			BtSocket = CommonHelper.PointerStruct<BTSOCKET>();
+			BtSocket = CommonHelper.PointerStruct<BTSOCKET>();
 		}
 	}
 
@@ -214,16 +214,16 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		// Bluetooth Global variables
 		//*****************************************************************************
 
-		public HCISOCKET HciSocket;            // Control socket
-		public LISTENSOCKET ListenSocket;         // Socket to listen for incoming requests
+		public HCISOCKET* HciSocket;            // Control socket
+		public LISTENSOCKET* ListenSocket;         // Socket to listen for incoming requests
 		public BTCH* BtCh;   // Communication sockets
-		public READBUF Mode2Buf;
-		public WRITEBUF Mode2WriteBuf;
+		public READBUF* Mode2Buf;
+		public WRITEBUF* Mode2WriteBuf;
 
 		public SEARCHLIST* SearchList;
-		public INCOMMING Incoming;
-		public OUTGOING OutGoing;
-		public TRUSTED_DEV TrustedDev;
+		public INCOMMING* Incoming;
+		public OUTGOING* OutGoing;
+		public TRUSTED_DEV* TrustedDev;
 		public DATA8* Adr;
 		public UBYTE SearchIndex;
 		public UBYTE NoOfFoundDev;
@@ -235,7 +235,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public SLONG State;
 		public SLONG OldState;
 		public ULONG Delay;
-		public NONVOLBT NonVol;
+		public NONVOLBT* NonVol;
 		public UBYTE OnOffSeqCnt;
 		public UBYTE RestartSeqCnt;
 		public UBYTE Events;
@@ -250,14 +250,14 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 
 		public void Init()
 		{
-			HciSocket = *CommonHelper.PointerStruct<HCISOCKET>();
-			ListenSocket = *CommonHelper.PointerStruct<LISTENSOCKET>();
-			Mode2Buf = *CommonHelper.PointerStruct<READBUF>();
-			Mode2WriteBuf = *CommonHelper.PointerStruct<WRITEBUF>();
-			Incoming = *CommonHelper.PointerStruct<INCOMMING>();
-			OutGoing = *CommonHelper.PointerStruct<OUTGOING>();
-			TrustedDev = *CommonHelper.PointerStruct<TRUSTED_DEV>();
-			NonVol = *CommonHelper.PointerStruct<NONVOLBT>();
+			HciSocket = CommonHelper.PointerStruct<HCISOCKET>();
+			ListenSocket = CommonHelper.PointerStruct<LISTENSOCKET>();
+			Mode2Buf = CommonHelper.PointerStruct<READBUF>();
+			Mode2WriteBuf = CommonHelper.PointerStruct<WRITEBUF>();
+			Incoming = CommonHelper.PointerStruct<INCOMMING>();
+			OutGoing = CommonHelper.PointerStruct<OUTGOING>();
+			TrustedDev = CommonHelper.PointerStruct<TRUSTED_DEV>();
+			NonVol = CommonHelper.PointerStruct<NONVOLBT>();
 
 			BtCh = CommonHelper.Pointer1d<BTCH>(NO_OF_BT_CHS, true);
 			SearchList = CommonHelper.Pointer1d<SEARCHLIST>(MAX_DEV_TABLE_ENTRIES, true);

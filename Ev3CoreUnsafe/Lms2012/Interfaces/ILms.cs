@@ -515,7 +515,7 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 	public unsafe struct GLOBALS
 	{
-		public NONVOL NonVol;
+		public NONVOL* NonVol;
 		public DATA8* FirstProgram;
 
 		public DATA8* PrintBuffer;
@@ -584,10 +584,10 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public ULONG UsbstickTimer;
 		public DATA8 UsbstickOk;
 
-		public LCD LcdBuffer;                    //!< Copy of last LCD update
+		public LCD* LcdBuffer;                    //!< Copy of last LCD update
 		public DATA8 LcdUpdated;                   //!< LCD updated
 
-		public ANALOG Analog;
+		public ANALOG* Analog;
 		public ANALOG* pAnalog;
 		public int AdcFile;
 
@@ -595,9 +595,9 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		public GLOBALS()
 		{
-			NonVol = *CommonHelper.PointerStruct<NONVOL>();
-			LcdBuffer = *CommonHelper.PointerStruct<LCD>();
-			Analog = *CommonHelper.PointerStruct<ANALOG>();
+			NonVol = CommonHelper.PointerStruct<NONVOL>();
+			LcdBuffer = CommonHelper.PointerStruct<LCD>();
+			Analog = CommonHelper.PointerStruct<ANALOG>();
 
 			FirstProgram = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
 			PrintBuffer = CommonHelper.Pointer1d<DATA8>(PRINTBUFFERSIZE + 1);

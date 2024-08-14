@@ -18,7 +18,7 @@ namespace Ev3CoreUnsafe.Csound
 
 			GH.SoundInstance.SoundDriverDescriptor = -1;
 			// *GH.SoundInstance.hSoundFile = 0;
-			GH.SoundInstance.pSound = (SOUND*)Unsafe.AsPointer<SOUND>(ref GH.SoundInstance.Sound);
+			GH.SoundInstance.pSound = (SOUND*)GH.SoundInstance.Sound;
 
 			// TODO: file shite
 			// Create a Shared Memory entry for signaling the driver state BUSY or NOT BUSY

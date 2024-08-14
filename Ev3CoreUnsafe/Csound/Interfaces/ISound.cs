@@ -35,7 +35,7 @@ namespace Ev3CoreUnsafe.Csound.Interfaces
 
 		public DATA8 SoundOwner;
 		public DATA8 cSoundState;
-		public SOUND Sound;
+		public SOUND* Sound;
 		public SOUND* pSound;
 		public UWORD BytesLeft;
 		public UWORD SoundFileFormat;
@@ -59,7 +59,7 @@ namespace Ev3CoreUnsafe.Csound.Interfaces
 		public void Init()
 		{
 			// structs
-			Sound = *CommonHelper.PointerStruct<SOUND>();
+			Sound = CommonHelper.PointerStruct<SOUND>();
 
 			PathBuffer = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
 			SoundData = CommonHelper.Pointer1d<UBYTE>(SOUND_FILE_BUFFER_SIZE + 1);

@@ -190,25 +190,25 @@ namespace Ev3CoreUnsafe.Lms2012
 
 		public void SetVolumePercent(DATA8 Volume)
 		{
-			GH.VMInstance.NonVol.VolumePercent = Volume;
+			(*GH.VMInstance.NonVol).VolumePercent = Volume;
 		}
 
 
 		public DATA8 GetVolumePercent()
 		{
-			return (GH.VMInstance.NonVol.VolumePercent);
+			return ((*GH.VMInstance.NonVol).VolumePercent);
 		}
 
 
 		public void SetSleepMinutes(DATA8 Minutes)
 		{
-			GH.VMInstance.NonVol.SleepMinutes = Minutes;
+			(*GH.VMInstance.NonVol).SleepMinutes = Minutes;
 		}
 
 
 		public DATA8 GetSleepMinutes()
 		{
-			return (GH.VMInstance.NonVol.SleepMinutes);
+			return ((*GH.VMInstance.NonVol).SleepMinutes);
 		}
 
 
@@ -1816,7 +1816,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 			ANALOG* pAdcTmp;
 
-			GH.VMInstance.pAnalog = (ANALOG*)Unsafe.AsPointer(ref GH.VMInstance.Analog);
+			GH.VMInstance.pAnalog = (ANALOG*)GH.VMInstance.Analog;
 			// TODO: analog shite
 			//GH.VMInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
 

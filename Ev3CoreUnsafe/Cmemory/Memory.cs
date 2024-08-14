@@ -39,7 +39,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			cMemoryGetUsage(&Total, &Free, 0);
 			if (((Size + (KB - 1)) / KB) < (Free - RESERVED_MEMORY))
 			{
-				*ppMemory = Unsafe.AsPointer<byte>(ref GC.AllocateArray<byte>(Size, true)[0]);
+				*ppMemory = CommonHelper.AllocateByteArray(Size);
 				//*ppMemory = malloc((int)Size);
 				if (*ppMemory != null)
 				{
@@ -55,9 +55,8 @@ namespace Ev3CoreUnsafe.Cmemory
 		{
 			RESULT Result = RESULT.FAIL;
 
-#warning THE OLD MEMORY IS NOT CLEARED
-            //*ppMemory = realloc(pOldMemory, (int)Size);
-            *ppMemory = Unsafe.AsPointer<byte>(ref GC.AllocateArray<byte>(Size, true)[0]);
+			CommonHelper.DeleteByteArray((byte*)pOldMemory);
+			*ppMemory = CommonHelper.AllocateByteArray(Size);
             if (*ppMemory != null)
 			{
 				Result = OK;

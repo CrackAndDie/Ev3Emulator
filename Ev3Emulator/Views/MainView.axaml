@@ -10,6 +10,34 @@
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="Ev3Emulator.Views.MainView"
-             x:DataType="vm:MainViewModel">
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+             x:DataType="vm:MainViewModel"
+			 x:CompileBindings="False">
+	<Grid ColumnDefinitions="*,*">
+		<StackPanel VerticalAlignment="Center"
+					HorizontalAlignment="Center">
+			<Button Content="Start"
+					Command="{Binding StartCommand}"/>
+			<Border Background="Gray">
+				<Image Source="{Binding LcdBitmap}"
+					   Width="178"
+					   Height="128"/>
+			</Border>
+		</StackPanel>
+		
+		
+		<ListBox Grid.Column="1"
+				 Background="Black"
+				 ItemsSource="{Binding OutputData}"
+				 AutoScrollToSelectedItem="True"
+				 SelectedItem="{Binding LastData}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<TextBox Text="{Binding Text}"
+							 Foreground="{Binding Color}">
+						
+					</TextBox>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+	</Grid>
 </UserControl>

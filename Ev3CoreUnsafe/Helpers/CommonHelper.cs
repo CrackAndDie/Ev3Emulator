@@ -79,11 +79,23 @@ namespace Ev3CoreUnsafe.Helpers
 			return result;
 		}
 
+		public unsafe static byte* AllocateByteArray(int amount)
+		{
+			IntPtr handler = Marshal.AllocHGlobal(amount);
+			return (byte*)handler.ToPointer();
+		}
+
+		public unsafe static void DeleteByteArray(byte* ptr)
+		{
+			var handler = new IntPtr(ptr);
+			Marshal.FreeHGlobal(handler);
+		}
+
 #pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
-        public unsafe static T* PointerStruct<T>() where T : new()
+		public unsafe static T* PointerStruct<T>() where T : new()
         {
             // T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(Unsafe.SizeOf<T>(), true)[0]);
-            T* inst = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(1, true)[0]);
+            T* inst = (T*)AllocateByteArray(sizeof(T));
 #pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
             return inst;
         }
@@ -91,7 +103,7 @@ namespace Ev3CoreUnsafe.Helpers
 #pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
         public unsafe static T* Pointer1d<T>(int a, bool inst = false) where T : new()
         {
-			T* arr = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(a, true)[0]);
+			T* arr = (T*)AllocateByteArray(sizeof(T) * a);
 #pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
             if (!inst)
 				return arr;
@@ -106,22 +118,22 @@ namespace Ev3CoreUnsafe.Helpers
 #pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
         public unsafe static T** Pointer2d<T>(int a, int b, bool inst = false) where T : new()
 		{
-			T** arr = (T**)Unsafe.AsPointer(ref GC.AllocateArray<T[]>(a, true)[0]);
+			int* arr = (int*)AllocateByteArray(sizeof(int) * a); // warning: int here is a size of ptr
 
 			for (int i = 0; i < a; i++)
 			{
-				arr[i] = (T*)Unsafe.AsPointer(ref GC.AllocateArray<T>(b, true)[0]);
-#pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
+				arr[i] = (int)(T*)AllocateByteArray(sizeof(T) * b);
 
                 if (!inst)
 					continue;
 				for (int j = 0; j < b; ++j)
 				{
-					arr[i][j] = new T();
+					((T*)arr[i])[j] = new T();
 				}
 			}
-			return arr;
+			return (T**)arr;
 		}
+#pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
 
 		public unsafe static string GetString(sbyte* buf)
 		{

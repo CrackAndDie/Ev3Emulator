@@ -1604,10 +1604,6 @@ namespace Ev3CoreUnsafe.Lms2012
 
 		public RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 		{
-			// return RESULT.OK;
-
-			// TODO: doesn't work
-
 			RESULT Result;
 			IMGHEAD* pIH;             // Pointer to image header
 			IMINDEX TotalSize;        // Total image size

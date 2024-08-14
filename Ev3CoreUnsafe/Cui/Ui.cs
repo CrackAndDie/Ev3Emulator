@@ -339,12 +339,12 @@ namespace Ev3CoreUnsafe.Cui
             GH.UiInstance.WarningConfirmed = 0;
             GH.UiInstance.VoltageState = 0;
 
-            GH.UiInstance.pLcd = (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe);
-            GH.UiInstance.pUi = (UI*)Unsafe.AsPointer<UI>(ref GH.UiInstance.UiSafe);
-            GH.UiInstance.pAnalog = (ANALOG*)Unsafe.AsPointer<ANALOG>(ref GH.UiInstance.Analog);
+            GH.UiInstance.pLcd = (LCD*)GH.UiInstance.LcdSafe;
+            GH.UiInstance.pUi = GH.UiInstance.UiSafe;
+            GH.UiInstance.pAnalog = (ANALOG*)GH.UiInstance.Analog;
 
-            GH.UiInstance.Browser.PrgId = 0;
-            GH.UiInstance.Browser.ObjId = 0;
+            (*GH.UiInstance.Browser).PrgId = 0;
+            (*GH.UiInstance.Browser).ObjId = 0;
 
             GH.UiInstance.Tbatt = 0.0f;
             GH.UiInstance.Vbatt = 9.0f;
@@ -440,7 +440,7 @@ namespace Ev3CoreUnsafe.Cui
             RESULT Result = RESULT.FAIL;
 
             // Save screen before run
-            LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)&GH.UiInstance.LcdPool[0], sizeof(LCD));
+            LCDCopy((byte*)GH.UiInstance.LcdSafe, (byte*)&GH.UiInstance.LcdPool[0], sizeof(LCD));
 
             cUiButtonClr();
             cUiSetLed(LED_GREEN_PULSE);
@@ -462,7 +462,7 @@ namespace Ev3CoreUnsafe.Cui
             GH.UiInstance.RunScreenEnabled = 0;
             GH.UiInstance.TopLineEnabled = 1;
             GH.UiInstance.BackButtonBlocked = 0;
-            GH.UiInstance.Browser.NeedUpdate = 1;
+            (*GH.UiInstance.Browser).NeedUpdate = 1;
             cUiSetLed(LED_GREEN);
 
             cUiButtonClr();
@@ -1602,7 +1602,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 case 2:
                     {
-                        LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(LCD));
+                        LCDCopy((byte*)GH.UiInstance.LcdSafe, (byte*)GH.UiInstance.LcdSave, sizeof(LCD));
                         GH.UiInstance.PowerState++;
                     }
                     break;
@@ -1632,7 +1632,7 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 GH.UiInstance.ScreenBlocked = 0;
                             }
-                            LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
+                            LCDCopy((byte*)GH.UiInstance.LcdSave, (byte*)GH.UiInstance.LcdSafe, sizeof(LCD));
                             GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
                             GH.UiInstance.PowerState++;
                         }
@@ -1873,7 +1873,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (GH.UiInstance.ScreenBlocked == 0)
                         {
-                            LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(LCD));
+                            LCDCopy((byte*)GH.UiInstance.LcdSafe, (byte*)GH.UiInstance.LcdSave, sizeof(LCD));
                             GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
 
                             if ((Tmp & WARNING_TEMP) != 0)
@@ -1941,7 +1941,7 @@ namespace Ev3CoreUnsafe.Cui
                     if (cUiGetShortPress(ENTER_BUTTON) != 0)
                     {
                         GH.UiInstance.ScreenBlocked = 0;
-                        LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
+                        LCDCopy((byte*)GH.UiInstance.LcdSave, (byte*)GH.UiInstance.LcdSafe, sizeof(LCD));
                         GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
                         if ((Tmp & WARNING_TEMP) != 0)
                         {
@@ -2009,7 +2009,7 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 UsedY;
 
 			var pop3 = BmpHelper.Get(BmpType.POP3);
-			pQ = (NOTIFY*)Unsafe.AsPointer<NOTIFY>(ref GH.UiInstance.Notify);
+			pQ = (NOTIFY*)GH.UiInstance.Notify;
 
             if (*pState == 0)
             {
@@ -2216,7 +2216,7 @@ namespace Ev3CoreUnsafe.Cui
             TQUESTION* pQ;
             DATA16 Inc;
 
-            pQ = (TQUESTION*)Unsafe.AsPointer<TQUESTION>(ref GH.UiInstance.Question);
+            pQ = (TQUESTION*)GH.UiInstance.Question;
 			var pop3 = BmpHelper.Get(BmpType.POP3);
 
 			Inc = cUiGetHorz();
@@ -2356,7 +2356,7 @@ namespace Ev3CoreUnsafe.Cui
             DATA8 Icon;
 
 			var pop2 = BmpHelper.Get(BmpType.POP2);
-			pQ = (IQUESTION*)Unsafe.AsPointer<IQUESTION>(ref GH.UiInstance.IconQuestion);
+			pQ = (IQUESTION*)GH.UiInstance.IconQuestion;
 
 			if (*pState == 0)
             {
@@ -2551,7 +2551,7 @@ namespace Ev3CoreUnsafe.Cui
 
 			KeyboardLayout[0] = lay1; KeyboardLayout[1] = lay2; KeyboardLayout[2] = lay3;
 
-			pK = (KEYB*)Unsafe.AsPointer<KEYB>(ref GH.UiInstance.Keyboard);
+			pK = (KEYB*)GH.UiInstance.Keyboard;
 
 			if (*pCharSet != 0)
             {
@@ -2941,7 +2941,7 @@ namespace Ev3CoreUnsafe.Cui
 
             PrgId = GH.Lms.CurrentProgramId();
             ObjId = GH.Lms.CallingObjectId();
-            pB = (BROWSER*)Unsafe.AsPointer<BROWSER>(ref GH.UiInstance.Browser);
+            pB = (BROWSER*)GH.UiInstance.Browser;
 
             Color = FG_COLOR;
 
@@ -3966,7 +3966,7 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 Ypos;
             DATA8 Color;
 
-            pB = (TXTBOX*)Unsafe.AsPointer<TXTBOX>(ref GH.UiInstance.Txtbox);
+            pB = (TXTBOX*)GH.UiInstance.Txtbox;
 			Color = FG_COLOR;
 
             if (*pLine < 0)
@@ -4141,13 +4141,13 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 Item;
             DATA16 Pointer;
 
-            GH.UiInstance.Graph.Initialized = 0;
+            (*GH.UiInstance.Graph).Initialized = 0;
 
-            GH.UiInstance.Graph.pOffset = pOffset;
-            GH.UiInstance.Graph.pSpan = pSpan;
-            GH.UiInstance.Graph.pMin = pMin;
-            GH.UiInstance.Graph.pMax = pMax;
-            GH.UiInstance.Graph.pVal = pVal;
+            (*GH.UiInstance.Graph).pOffset = pOffset;
+            (*GH.UiInstance.Graph).pSpan = pSpan;
+            (*GH.UiInstance.Graph).pMin = pMin;
+            (*GH.UiInstance.Graph).pMax = pMax;
+            (*GH.UiInstance.Graph).pVal = pVal;
 
             if (Items < 0)
             {
@@ -4159,25 +4159,25 @@ namespace Ev3CoreUnsafe.Cui
             }
 
 
-            GH.UiInstance.Graph.GraphStartX = StartX;
-            GH.UiInstance.Graph.GraphSizeX = SizeX;
-            GH.UiInstance.Graph.Items = Items;
-            GH.UiInstance.Graph.Pointer = 0;
+            (*GH.UiInstance.Graph).GraphStartX = StartX;
+            (*GH.UiInstance.Graph).GraphSizeX = SizeX;
+            (*GH.UiInstance.Graph).Items = Items;
+            (*GH.UiInstance.Graph).Pointer = 0;
 
-            for (Item = 0; Item < GH.UiInstance.Graph.Items; Item++)
+            for (Item = 0; Item < (*GH.UiInstance.Graph).Items; Item++)
             {
-                for (Pointer = 0; Pointer < GH.UiInstance.Graph.GraphSizeX; Pointer++)
+                for (Pointer = 0; Pointer < (*GH.UiInstance.Graph).GraphSizeX; Pointer++)
                 {
-                    GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = DATAF_NAN;
+                    (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer] = DATAF_NAN;
                 }
             }
 
-            GH.UiInstance.Graph.Initialized = 1;
+            (*GH.UiInstance.Graph).Initialized = 1;
 
             // Simulate graph
-            GH.UiInstance.Graph.Value = GH.UiInstance.Graph.pMin[0];
-            GH.UiInstance.Graph.Down = 0;
-            GH.UiInstance.Graph.Inc = (GH.UiInstance.Graph.pMax[0] - GH.UiInstance.Graph.pMin[0]) / (DATAF)20;
+            (*GH.UiInstance.Graph).Value = (*GH.UiInstance.Graph).pMin[0];
+            (*GH.UiInstance.Graph).Down = 0;
+            (*GH.UiInstance.Graph).Inc = ((*GH.UiInstance.Graph).pMax[0] - (*GH.UiInstance.Graph).pMin[0]) / (DATAF)20;
         }
 
 
@@ -4187,47 +4187,47 @@ namespace Ev3CoreUnsafe.Cui
             DATA16 Item;
             DATA16 Pointer;
 
-            if (GH.UiInstance.Graph.Initialized != 0)
+            if ((*GH.UiInstance.Graph).Initialized != 0)
             { // Only if initialized
 
-                if (GH.UiInstance.Graph.Pointer < GH.UiInstance.Graph.GraphSizeX)
+                if ((*GH.UiInstance.Graph).Pointer < (*GH.UiInstance.Graph).GraphSizeX)
                 {
-                    for (Item = 0; Item < (GH.UiInstance.Graph.Items); Item++)
+                    for (Item = 0; Item < ((*GH.UiInstance.Graph).Items); Item++)
                     {
                         // Insert sample
-                        Sample = GH.UiInstance.Graph.pVal[Item];
+                        Sample = (*GH.UiInstance.Graph).pVal[Item];
 
                         if (!(float.IsNaN(Sample)))
                         {
-                            GH.UiInstance.Graph.GetBuffer(Item)[GH.UiInstance.Graph.Pointer] = Sample;
+                            (*GH.UiInstance.Graph).GetBuffer(Item)[(*GH.UiInstance.Graph).Pointer] = Sample;
                         }
                         else
                         {
-                            GH.UiInstance.Graph.GetBuffer(Item)[GH.UiInstance.Graph.Pointer] = DATAF_NAN;
+                            (*GH.UiInstance.Graph).GetBuffer(Item)[(*GH.UiInstance.Graph).Pointer] = DATAF_NAN;
                         }
                     }
-                    GH.UiInstance.Graph.Pointer++;
+                    (*GH.UiInstance.Graph).Pointer++;
                 }
                 else
                 {
                     // Scroll buffers
-                    for (Item = 0; Item < (GH.UiInstance.Graph.Items); Item++)
+                    for (Item = 0; Item < ((*GH.UiInstance.Graph).Items); Item++)
                     {
-                        for (Pointer = 0; Pointer < (GH.UiInstance.Graph.GraphSizeX - 1); Pointer++)
+                        for (Pointer = 0; Pointer < ((*GH.UiInstance.Graph).GraphSizeX - 1); Pointer++)
                         {
-                            GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = GH.UiInstance.Graph.GetBuffer(Item)[Pointer + 1];
+                            (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer] = (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer + 1];
                         }
 
                         // Insert sample
-                        Sample = GH.UiInstance.Graph.pVal[Item];
+                        Sample = (*GH.UiInstance.Graph).pVal[Item];
 
                         if (!(float.IsNaN(Sample)))
                         {
-                            GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = Sample;
+                            (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer] = Sample;
                         }
                         else
                         {
-                            GH.UiInstance.Graph.GetBuffer(Item)[Pointer] = DATAF_NAN;
+                            (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer] = DATAF_NAN;
                         }
                     }
                 }
@@ -4253,24 +4253,24 @@ namespace Ev3CoreUnsafe.Cui
             *pAverage = DATAF_NAN;
             Samples = 0;
 
-            if (GH.UiInstance.Graph.Initialized != 0)
+            if ((*GH.UiInstance.Graph).Initialized != 0)
             { // Only if initialized
 
                 if (GH.UiInstance.ScreenBlocked == 0)
                 {
 
                     // View or all
-                    if ((View >= 0) && (View < GH.UiInstance.Graph.Items))
+                    if ((View >= 0) && (View < (*GH.UiInstance.Graph).Items))
                     {
                         Item = View;
 
-                        Y1 = ((short)(GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]));
+                        Y1 = ((short)((*GH.UiInstance.Graph).pOffset[Item] + (*GH.UiInstance.Graph).pSpan[Item]));
 
                         // Draw buffers
-                        X = GH.UiInstance.Graph.GraphStartX;
-                        for (Pointer = 0; Pointer < GH.UiInstance.Graph.Pointer; Pointer++)
+                        X = (*GH.UiInstance.Graph).GraphStartX;
+                        for (Pointer = 0; Pointer < (*GH.UiInstance.Graph).Pointer; Pointer++)
                         {
-                            Sample = GH.UiInstance.Graph.GetBuffer(Item)[Pointer];
+                            Sample = (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer];
                             if (!(float.IsNaN(Sample)))
                             {
                                 *pActual = Sample;
@@ -4295,12 +4295,12 @@ namespace Ev3CoreUnsafe.Cui
                                 Samples++;
 
                                 // Scale Y axis
-                                Value = (DATA16)((((Sample - GH.UiInstance.Graph.pMin[Item]) * (DATAF)GH.UiInstance.Graph.pSpan[Item]) / (GH.UiInstance.Graph.pMax[Item] - GH.UiInstance.Graph.pMin[Item])));
+                                Value = (DATA16)((((Sample - (*GH.UiInstance.Graph).pMin[Item]) * (DATAF)(*GH.UiInstance.Graph).pSpan[Item]) / ((*GH.UiInstance.Graph).pMax[Item] - (*GH.UiInstance.Graph).pMin[Item])));
 
                                 // Limit Y axis
-                                if (Value > GH.UiInstance.Graph.pSpan[Item])
+                                if (Value > (*GH.UiInstance.Graph).pSpan[Item])
                                 {
-                                    Value = GH.UiInstance.Graph.pSpan[Item];
+                                    Value = (*GH.UiInstance.Graph).pSpan[Item];
                                 }
                                 if (Value < 0)
                                 {
@@ -4309,7 +4309,7 @@ namespace Ev3CoreUnsafe.Cui
                                 /*
                                             GH.printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\r\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,GH.UiInstance.Graph.pMin[Item],GH.UiInstance.Graph.pMax[Item],GH.UiInstance.Graph.pOffset[Item],GH.UiInstance.Graph.pSpan[Item],Value);
                                 */
-                                Y2 = (short)((GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]) - Value);
+                                Y2 = (short)(((*GH.UiInstance.Graph).pOffset[Item] + (*GH.UiInstance.Graph).pSpan[Item]) - Value);
                                 if (Pointer > 1)
                                 {
                                     if (Y2 > Y1)
@@ -4350,28 +4350,28 @@ namespace Ev3CoreUnsafe.Cui
                     else
                     {
                         // Draw buffers
-                        for (Item = 0; Item < GH.UiInstance.Graph.Items; Item++)
+                        for (Item = 0; Item < (*GH.UiInstance.Graph).Items; Item++)
                         {
-                            Y1 = ((short)(GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]));
+                            Y1 = ((short)((*GH.UiInstance.Graph).pOffset[Item] + (*GH.UiInstance.Graph).pSpan[Item]));
 
-                            X = (short)(GH.UiInstance.Graph.GraphStartX + 1);
-                            for (Pointer = 0; Pointer < GH.UiInstance.Graph.Pointer; Pointer++)
+                            X = (short)((*GH.UiInstance.Graph).GraphStartX + 1);
+                            for (Pointer = 0; Pointer < (*GH.UiInstance.Graph).Pointer; Pointer++)
                             {
-                                Sample = GH.UiInstance.Graph.GetBuffer(Item)[Pointer];
+                                Sample = (*GH.UiInstance.Graph).GetBuffer(Item)[Pointer];
 
                                 // Scale Y axis
-                                Value = (DATA16)((((Sample - GH.UiInstance.Graph.pMin[Item]) * (DATAF)GH.UiInstance.Graph.pSpan[Item]) / (GH.UiInstance.Graph.pMax[Item] - GH.UiInstance.Graph.pMin[Item])));
+                                Value = (DATA16)((((Sample - (*GH.UiInstance.Graph).pMin[Item]) * (DATAF)(*GH.UiInstance.Graph).pSpan[Item]) / ((*GH.UiInstance.Graph).pMax[Item] - (*GH.UiInstance.Graph).pMin[Item])));
 
                                 // Limit Y axis
-                                if (Value > GH.UiInstance.Graph.pSpan[Item])
+                                if (Value > (*GH.UiInstance.Graph).pSpan[Item])
                                 {
-                                    Value = GH.UiInstance.Graph.pSpan[Item];
+                                    Value = (*GH.UiInstance.Graph).pSpan[Item];
                                 }
                                 if (Value < 0)
                                 {
                                     Value = 0;
                                 }
-                                Y2 = (short)((GH.UiInstance.Graph.pOffset[Item] + GH.UiInstance.Graph.pSpan[Item]) - Value);
+                                Y2 = (short)(((*GH.UiInstance.Graph).pOffset[Item] + (*GH.UiInstance.Graph).pSpan[Item]) - Value);
                                 if (Pointer > 1)
                                 {
 
@@ -5245,7 +5245,7 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             if (No < LCD_STORE_LEVELS)
                             {
-                                LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)&GH.UiInstance.LcdPool[No], sizeof(LCD));
+                                LCDCopy((byte*)GH.UiInstance.LcdSafe, (byte*)&GH.UiInstance.LcdPool[No], sizeof(LCD));
                             }
                         }
                     }
@@ -5258,7 +5258,7 @@ namespace Ev3CoreUnsafe.Cui
                         {
                             if (No < LCD_STORE_LEVELS)
                             {
-                                LCDCopy((byte*)&GH.UiInstance.LcdPool[No], (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
+                                LCDCopy((byte*)&GH.UiInstance.LcdPool[No], (byte*)GH.UiInstance.LcdSafe, sizeof(LCD));
                                 GH.UiInstance.ScreenBusy = 1;
                             }
                         }
@@ -5317,7 +5317,7 @@ namespace Ev3CoreUnsafe.Cui
                                 {
                                     TmpObjId = GH.Lms.CallingObjectId();
 
-                                    LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), sizeof(LCD));
+                                    LCDCopy((byte*)GH.UiInstance.LcdSafe, (byte*)GH.UiInstance.LcdSave, sizeof(LCD));
                                     GH.UiInstance.ScreenPrgId = TmpPrgId;
                                     GH.UiInstance.ScreenObjId = TmpObjId;
                                     GH.UiInstance.ScreenBlocked = 1;
@@ -5331,7 +5331,7 @@ namespace Ev3CoreUnsafe.Cui
                             }
                             else
                             {
-                                LCDCopy((byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSave), (byte*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdSafe), sizeof(LCD));
+                                LCDCopy((byte*)GH.UiInstance.LcdSave, (byte*)GH.UiInstance.LcdSafe, sizeof(LCD));
                                 GH.Lcd.dLcdUpdate(GH.UiInstance.pLcd);
 
                                 GH.UiInstance.ScreenPrgId = ushort.MaxValue;

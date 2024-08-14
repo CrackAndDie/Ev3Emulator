@@ -16,8 +16,8 @@ namespace Ev3CoreUnsafe.Cui
 			UWORD X;
 			UWORD Y;
 
-			LCD* bufPtr = (LCD*)Unsafe.AsPointer<LCD>(ref GH.VMInstance.LcdBuffer);
-			LCD* uiBufPtr = (LCD*)Unsafe.AsPointer<LCD>(ref GH.UiInstance.LcdBuffer);
+			LCD* bufPtr = (LCD*)GH.VMInstance.LcdBuffer;
+			LCD* uiBufPtr = (LCD*)GH.UiInstance.LcdBuffer;
 
 			if (CommonHelper.memcmp((byte*)pDisp, (byte*)bufPtr, sizeof(LCD)) != 0)
 			{

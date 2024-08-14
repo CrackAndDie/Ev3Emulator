@@ -273,25 +273,25 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		// Ui Global variables
 		//*****************************************************************************
 
-		public LCD LcdSafe;
-		public LCD LcdSave;
+		public LCD* LcdSafe;
+		public LCD* LcdSave;
 		public LCD* LcdPool;
-		public LCD LcdBuffer;
+		public LCD* LcdBuffer;
 		public LCD* pLcd;
 
-		public UI UiSafe;
+		public UI* UiSafe;
 		public UI* pUi;
 
-		public ANALOG Analog;
+		public ANALOG* Analog;
 		public ANALOG* pAnalog;
 
-		public NOTIFY Notify;
-		public TQUESTION Question;
-		public IQUESTION IconQuestion;
-		public BROWSER Browser;
-		public KEYB Keyboard;
-		public GRAPH Graph;
-		public TXTBOX Txtbox;
+		public NOTIFY* Notify;
+		public TQUESTION* Question;
+		public IQUESTION* IconQuestion;
+		public BROWSER* Browser;
+		public KEYB* Keyboard;
+		public GRAPH* Graph;
+		public TXTBOX* Txtbox;
 
 		// redirected
 		//public int PowerFile;
@@ -399,18 +399,18 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 		public UI_GLOBALS()
 		{
 			// structs 
-			LcdSafe = *CommonHelper.PointerStruct<LCD>();
-			LcdSave = *CommonHelper.PointerStruct<LCD>();
-			LcdBuffer = *CommonHelper.PointerStruct<LCD>();
-			UiSafe = *CommonHelper.PointerStruct<UI>();
-			Analog = *CommonHelper.PointerStruct<ANALOG>();
-			Notify = *CommonHelper.PointerStruct<NOTIFY>();
-			Question = *CommonHelper.PointerStruct<TQUESTION>();
-			IconQuestion = *CommonHelper.PointerStruct<IQUESTION>();
-			Browser = *CommonHelper.PointerStruct<BROWSER>();
-			Keyboard = *CommonHelper.PointerStruct<KEYB>();
-			Graph = *CommonHelper.PointerStruct<GRAPH>();
-			Txtbox = *CommonHelper.PointerStruct<TXTBOX>();
+			LcdSafe = CommonHelper.PointerStruct<LCD>();
+			LcdSave = CommonHelper.PointerStruct<LCD>();
+			LcdBuffer = CommonHelper.PointerStruct<LCD>();
+			UiSafe = CommonHelper.PointerStruct<UI>();
+			Analog = CommonHelper.PointerStruct<ANALOG>();
+			Notify = CommonHelper.PointerStruct<NOTIFY>();
+			Question = CommonHelper.PointerStruct<TQUESTION>();
+			IconQuestion = CommonHelper.PointerStruct<IQUESTION>();
+			Browser = CommonHelper.PointerStruct<BROWSER>();
+			Keyboard = CommonHelper.PointerStruct<KEYB>();
+			Graph = CommonHelper.PointerStruct<GRAPH>();
+			Txtbox = CommonHelper.PointerStruct<TXTBOX>();
 
 			// LCD* a = (LCD*)Unsafe.AsPointer<LCD>(ref LcdBuffer);
 

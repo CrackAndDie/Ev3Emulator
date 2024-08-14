@@ -667,7 +667,7 @@ namespace Ev3CoreUnsafe.Cinput
 		public RESULT cInputSetupDevice(DATA8 Device, DATA8 Repeat, DATA16 Time, DATA8 WrLng, DATA8* pWrData, DATA8 RdLng, DATA8* pRdData)
 		{
 
-			GH.InputInstance.IicDat.Result = RESULT.FAIL;
+			(*GH.InputInstance.IicDat).Result = RESULT.FAIL;
 
 			if (Device < INPUTS)
 			{
@@ -695,27 +695,25 @@ namespace Ev3CoreUnsafe.Cinput
 						}
 					}
 
-					GH.InputInstance.IicDat.Result = RESULT.BUSY;
-					GH.InputInstance.IicDat.Port = Device;
-					GH.InputInstance.IicDat.Repeat = Repeat;
-					GH.InputInstance.IicDat.Time = Time;
-					GH.InputInstance.IicDat.WrLng = WrLng;
-					GH.InputInstance.IicDat.RdLng = RdLng;
+					(*GH.InputInstance.IicDat).Result = RESULT.BUSY;
+					(*GH.InputInstance.IicDat).Port = Device;
+					(*GH.InputInstance.IicDat).Repeat = Repeat;
+					(*GH.InputInstance.IicDat).Time = Time;
+					(*GH.InputInstance.IicDat).WrLng = WrLng;
+					(*GH.InputInstance.IicDat).RdLng = RdLng;
 
-					fixed (DATA8* tmpP = &GH.InputInstance.IicDat.WrData[0])
-						Memcpy((byte*)tmpP, (byte*)pWrData, GH.InputInstance.IicDat.WrLng);
+					Memcpy((byte*)(*GH.InputInstance.IicDat).WrData, (byte*)pWrData, (*GH.InputInstance.IicDat).WrLng);
 
-					GH.Ev3System.InputHandler.IoctlI2c(IIC_SETUP, GH.InputInstance.IicDat);
+					GH.Ev3System.InputHandler.IoctlI2c(IIC_SETUP, (*GH.InputInstance.IicDat));
 
-					if (GH.InputInstance.IicDat.Result == OK)
+					if ((*GH.InputInstance.IicDat).Result == OK)
 					{
-						fixed (DATA8* tmpP = &GH.InputInstance.IicDat.RdData[0])
-							Memcpy((byte*)pRdData, (byte*)tmpP, GH.InputInstance.IicDat.RdLng);
+						Memcpy((byte*)pRdData, (byte*)(*GH.InputInstance.IicDat).RdData, (*GH.InputInstance.IicDat).RdLng);
 					}
 				}
 			}
 
-			return (GH.InputInstance.IicDat.Result);
+			return ((*GH.InputInstance.IicDat).Result);
 		}
 
 		public RESULT cInputFindDumbInputDevice(DATA8 Device, DATA8 Type, DATA8 Mode, UWORD* pTypeIndex)
@@ -916,15 +914,15 @@ namespace Ev3CoreUnsafe.Cinput
 							{ // Device is an IIC device
 
 								
-								cInputGetIicString(GH.InputInstance.DeviceType[Device], GH.InputInstance.DeviceMode[Device], (IICSTR*)Unsafe.AsPointer<IICSTR>(ref GH.InputInstance.IicStr));
-								GH.InputInstance.IicStr.Port = Device;
-								GH.InputInstance.IicStr.Time = (short)GH.InputInstance.DeviceData[Device].InvalidTime;
+								cInputGetIicString(GH.InputInstance.DeviceType[Device], GH.InputInstance.DeviceMode[Device], (IICSTR*)GH.InputInstance.IicStr);
+								(*GH.InputInstance.IicStr).Port = Device;
+								(*GH.InputInstance.IicStr).Time = (short)GH.InputInstance.DeviceData[Device].InvalidTime;
 
-								if ((GH.InputInstance.IicStr.SetupLng != 0) || (GH.InputInstance.IicStr.PollLng != 0))
+								if (((*GH.InputInstance.IicStr).SetupLng != 0) || ((*GH.InputInstance.IicStr).PollLng != 0))
 								{
 									//              GH.printf("%u %-4u %-3u %01u IIC %u 0x%08X %u 0x%08X %d\r\n",GH.InputInstance.IicStr.Port,GH.InputInstance.IicStr.Time,GH.InputInstance.IicStr.Type,GH.InputInstance.IicStr.Mode,GH.InputInstance.IicStr.SetupLng,GH.InputInstance.IicStr.SetupString,GH.InputInstance.IicStr.PollLng,GH.InputInstance.IicStr.PollString,GH.InputInstance.IicStr.ReadLng);
 
-									GH.Ev3System.InputHandler.IoctlI2c(IIC_SET, GH.InputInstance.IicStr);
+									GH.Ev3System.InputHandler.IoctlI2c(IIC_SET, (*GH.InputInstance.IicStr));
 								}
 							}
 
@@ -949,14 +947,14 @@ namespace Ev3CoreUnsafe.Cinput
 							for (Index = 0; Index < INPUTS; Index++)
 							{ // build setup string for UART and IIC driver
 
-								GH.InputInstance.DevCon.Connection[Index] = GH.InputInstance.DeviceData[Index].Connection;
-								GH.InputInstance.DevCon.Type[Index] = GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Index].TypeIndex].Type;
-								GH.InputInstance.DevCon.Mode[Index] = GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Index].TypeIndex].Mode;
+								(*GH.InputInstance.DevCon).Connection[Index] = GH.InputInstance.DeviceData[Index].Connection;
+								(*GH.InputInstance.DevCon).Type[Index] = GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Index].TypeIndex].Type;
+								(*GH.InputInstance.DevCon).Mode[Index] = GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Index].TypeIndex].Mode;
 							}
 
 							// write setup string to "UART Device Controller" driver
-							GH.Ev3System.InputHandler.IoctlUart(UART_SET_CONN, GH.InputInstance.DevCon);
-							GH.Ev3System.InputHandler.IoctlI2c(IIC_SET_CONN, GH.InputInstance.DevCon);
+							GH.Ev3System.InputHandler.IoctlUart(UART_SET_CONN, (*GH.InputInstance.DevCon));
+							GH.Ev3System.InputHandler.IoctlI2c(IIC_SET_CONN, (*GH.InputInstance.DevCon));
 
 							GH.printf($"c_input   cInputSetDeviceType: I   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString((sbyte*)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
 						}
@@ -2048,48 +2046,46 @@ namespace Ev3CoreUnsafe.Cinput
 						GH.InputInstance.TmpMode[Port]--;
 
 						// Get info
-						GH.InputInstance.UartCtl.Port = (sbyte)Port;
-						GH.InputInstance.UartCtl.Mode = GH.InputInstance.TmpMode[Port];
-						GH.Ev3System.InputHandler.IoctlUart(UART_READ_MODE_INFO, GH.InputInstance.UartCtl);
+						(*GH.InputInstance.UartCtl).Port = (sbyte)Port;
+						(*GH.InputInstance.UartCtl).Mode = GH.InputInstance.TmpMode[Port];
+						GH.Ev3System.InputHandler.IoctlUart(UART_READ_MODE_INFO, (*GH.InputInstance.UartCtl));
 
-						if (GH.InputInstance.UartCtl.TypeData.Name[0] != 0)
+						if ((*GH.InputInstance.UartCtl).TypeData.Name[0] != 0)
 						{ // Info available
 
-							fixed (byte* tmpP = &GH.InputInstance.UartCtl.TypeData.Name[0])
-								Result = cInputGetNewTypeDataPointer((sbyte*)tmpP, GH.InputInstance.UartCtl.TypeData.Type, GH.InputInstance.UartCtl.TypeData.Mode, CONN_INPUT_UART, &pTmp);
+							Result = cInputGetNewTypeDataPointer((sbyte*)(*GH.InputInstance.UartCtl).TypeData.Name, (*GH.InputInstance.UartCtl).TypeData.Type, (*GH.InputInstance.UartCtl).TypeData.Mode, CONN_INPUT_UART, &pTmp);
 							if (pTmp != null)
 							{ // Tabel index found
 
 								if (GH.InputInstance.DeviceType[Port] == TYPE_UNKNOWN)
 								{ // Use first mode info to set type
 
-									GH.InputInstance.DeviceType[Port] = GH.InputInstance.UartCtl.TypeData.Type;
+									GH.InputInstance.DeviceType[Port] = (*GH.InputInstance.UartCtl).TypeData.Type;
 								}
 
 								if (Result == OK)
 								{ // New mode
 
 									// Insert in tabel
-									Memcpy((byte*)pTmp, (byte*)Unsafe.AsPointer(ref GH.InputInstance.UartCtl.TypeData), sizeof(TYPES));
+									Memcpy((byte*)pTmp, (byte*)Unsafe.AsPointer(ref (*GH.InputInstance.UartCtl).TypeData), sizeof(TYPES));
 
 								}
-								if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)(byte*)Unsafe.AsPointer(ref GH.InputInstance.UartCtl.TypeData)) == RESULT.BUSY)
+								if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)(byte*)Unsafe.AsPointer(ref (*GH.InputInstance.UartCtl).TypeData)) == RESULT.BUSY)
 								{ // Chain not ready - roll back
 
-                                    GH.Ev3System.InputHandler.IoctlUart(UART_NACK_MODE_INFO, GH.InputInstance.UartCtl);
+                                    GH.Ev3System.InputHandler.IoctlUart(UART_NACK_MODE_INFO, (*GH.InputInstance.UartCtl));
 									GH.InputInstance.TmpMode[Port]++;
 								}
 
-								fixed (byte* tmpP = &GH.InputInstance.UartCtl.TypeData.Name[0])
-									GH.printf($"P={Port} T={GH.InputInstance.UartCtl.TypeData.Type} M={GH.InputInstance.UartCtl.TypeData.Mode} N={CommonHelper.GetString((sbyte*)tmpP)}\r\n");
+								GH.printf($"P={Port} T={(*GH.InputInstance.UartCtl).TypeData.Type} M={(*GH.InputInstance.UartCtl).TypeData.Mode} N={CommonHelper.GetString((sbyte*)(*GH.InputInstance.UartCtl).TypeData.Name)}\r\n");
 							}
 						}
 					}
 					else
 					{ // All modes received set device mode 0
 
-						GH.InputInstance.UartCtl.Port = (sbyte)Port;
-                        GH.Ev3System.InputHandler.IoctlUart(UART_CLEAR_CHANGED, GH.InputInstance.UartCtl);
+						(*GH.InputInstance.UartCtl).Port = (sbyte)Port;
+                        GH.Ev3System.InputHandler.IoctlUart(UART_CLEAR_CHANGED, (*GH.InputInstance.UartCtl));
 						(*GH.InputInstance.pUart).Status[Port] &= ~UART_PORT_CHANGED;
 						cInputSetDeviceType((sbyte)Port, GH.InputInstance.DeviceType[Port], 0, 2034); // 2034 was a current line
 					}
@@ -2124,20 +2120,20 @@ namespace Ev3CoreUnsafe.Cinput
 					if ((*GH.InputInstance.pIic).Changed[Port] != 0)
 					{ // something has changed
 
-						GH.InputInstance.IicStr.Port = (sbyte)Port;
+						(*GH.InputInstance.IicStr).Port = (sbyte)Port;
 
-                        GH.Ev3System.InputHandler.IoctlI2c(IIC_READ_TYPE_INFO, GH.InputInstance.IicStr);
+                        GH.Ev3System.InputHandler.IoctlI2c(IIC_READ_TYPE_INFO, (*GH.InputInstance.IicStr));
 
 						Index = IIC_NAME_LENGTH;
-						while ((Index != 0) && ((GH.InputInstance.IicStr.Manufacturer[Index] == ' ') || (GH.InputInstance.IicStr.Manufacturer[Index] == 0)))
+						while ((Index != 0) && (((*GH.InputInstance.IicStr).Manufacturer[Index] == ' ') || ((*GH.InputInstance.IicStr).Manufacturer[Index] == 0)))
 						{
-							GH.InputInstance.IicStr.Manufacturer[Index] = 0;
+							(*GH.InputInstance.IicStr).Manufacturer[Index] = 0;
 							Index--;
 						}
 						Index = IIC_NAME_LENGTH;
-						while ((Index != 0) && ((GH.InputInstance.IicStr.SensorType[Index] == ' ') || (GH.InputInstance.IicStr.SensorType[Index] == 0)))
+						while ((Index != 0) && (((*GH.InputInstance.IicStr).SensorType[Index] == ' ') || ((*GH.InputInstance.IicStr).SensorType[Index] == 0)))
 						{
-							GH.InputInstance.IicStr.SensorType[Index] = 0;
+							(*GH.InputInstance.IicStr).SensorType[Index] = 0;
 							Index--;
 						}
 
@@ -2148,18 +2144,16 @@ namespace Ev3CoreUnsafe.Cinput
 						while ((Index < GH.InputInstance.IicDeviceTypes) && (Type == TYPE_IIC_UNKNOWN))
 						{ // Check list
 
-                            fixed (sbyte* tmpP = &GH.InputInstance.IicStr.Manufacturer[0])
-                                if (CommonHelper.strcmp((DATA8*)tmpP, (DATA8*)GH.InputInstance.IicString[Index].Manufacturer) == 0)
-								{ // Manufacturer found
+                            if (CommonHelper.strcmp((DATA8*)(*GH.InputInstance.IicStr).Manufacturer, (DATA8*)GH.InputInstance.IicString[Index].Manufacturer) == 0)
+							{ // Manufacturer found
 
-                                    fixed (sbyte* tmpP2 = &GH.InputInstance.IicStr.SensorType[0])
-                                        if (CommonHelper.strcmp((DATA8*)tmpP2, (DATA8*)GH.InputInstance.IicString[Index].SensorType) == 0)
-										{ // Type found
+                                if (CommonHelper.strcmp((DATA8*)(*GH.InputInstance.IicStr).SensorType, (DATA8*)GH.InputInstance.IicString[Index].SensorType) == 0)
+								{ // Type found
 
-											Type = GH.InputInstance.IicString[Index].Type;
-											Mode = GH.InputInstance.IicString[Index].Mode;
-										}
+									Type = GH.InputInstance.IicString[Index].Type;
+									Mode = GH.InputInstance.IicString[Index].Mode;
 								}
+							}
 							Index++;
 						}
 						cInputSetDeviceType((sbyte)Port, Type, Mode, 2106); // 2106 was a current line
@@ -2478,11 +2472,11 @@ namespace Ev3CoreUnsafe.Cinput
             fixed (IICSTR** tmpP = &GH.InputInstance.IicString)
                 GH.Memory.cMemoryMalloc((void**)tmpP, (DATA32)(sizeof(IICSTR) * GH.InputInstance.IicDeviceTypes));
 
-			GH.InputInstance.pAnalog = (ANALOG*)Unsafe.AsPointer(ref GH.InputInstance.Analog);
+			GH.InputInstance.pAnalog = (ANALOG*)GH.InputInstance.Analog;
 
-			GH.InputInstance.pUart = (UART*)Unsafe.AsPointer(ref GH.InputInstance.Uart);
+			GH.InputInstance.pUart = (UART*)GH.InputInstance.Uart;
 
-			GH.InputInstance.pIic = (IIC*)Unsafe.AsPointer(ref GH.InputInstance.Iic);
+			GH.InputInstance.pIic = (IIC*)GH.InputInstance.Iic;
 			// TODO: mapping shite (probably no need)
 
 			//GH.InputInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);

@@ -80,13 +80,13 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 
 		// UBYTE Data[MAX_DEVICE_DATALENGTH];
 
-		public ANALOG Analog;
+		public ANALOG* Analog;
 		public ANALOG* pAnalog;
 
-		public UART Uart;
+		public UART* Uart;
 		public UART* pUart;
 
-		public IIC Iic;
+		public IIC* Iic;
 		public IIC* pIic;
 
 		public int UartFile;
@@ -94,10 +94,10 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 		public int DcmFile;
 		public int IicFile;
 
-		public DEVCON DevCon;
-		public UARTCTL UartCtl;
-		public IICCTL IicCtl;
-		public IICDAT IicDat;
+		public DEVCON* DevCon;
+		public UARTCTL* UartCtl;
+		public IICCTL* IicCtl;
+		public IICDAT* IicDat;
 
 		public DATA32 InputNull;
 
@@ -119,7 +119,7 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 		public TYPES* TypeData;                        //!< Type specific data
 		public UWORD IicDeviceTypes;                   //!< Number of IIC device type/mode entries in tabel
 		public IICSTR* IicString;
-		public IICSTR IicStr;
+		public IICSTR* IicStr;
 
 		public DATA16 TypeDataTimer;
 		public DATA16 TypeDataIndex;
@@ -134,14 +134,14 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 		public void Init()
 		{
 			// structs
-			Analog = *CommonHelper.PointerStruct<ANALOG>();
-			Uart = *CommonHelper.PointerStruct<UART>();
-			Iic = *CommonHelper.PointerStruct<IIC>();
-			DevCon = *CommonHelper.PointerStruct<DEVCON>();
-			UartCtl = *CommonHelper.PointerStruct<UARTCTL>();
-			IicCtl = *CommonHelper.PointerStruct<IICCTL>();
-			IicDat = *CommonHelper.PointerStruct<IICDAT>();
-			IicStr = *CommonHelper.PointerStruct<IICSTR>();
+			Analog = CommonHelper.PointerStruct<ANALOG>();
+			Uart = CommonHelper.PointerStruct<UART>();
+			Iic = CommonHelper.PointerStruct<IIC>();
+			DevCon = CommonHelper.PointerStruct<DEVCON>();
+			UartCtl = CommonHelper.PointerStruct<UARTCTL>();
+			IicCtl = CommonHelper.PointerStruct<IICCTL>();
+			IicDat = CommonHelper.PointerStruct<IICDAT>();
+			IicStr = CommonHelper.PointerStruct<IICSTR>();
 
 			TmpMode = CommonHelper.Pointer1d<DATA8>(INPUT_PORTS);
 			ConfigurationChanged = CommonHelper.Pointer1d<DATA8>(MAX_PROGRAMS);
