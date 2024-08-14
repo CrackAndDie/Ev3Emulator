@@ -4,6 +4,7 @@ using Ev3CoreUnsafe.Interfaces;
 using System;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Threading;
 
 namespace Ev3Emulator.CoreImpl
 {
@@ -20,6 +21,7 @@ namespace Ev3Emulator.CoreImpl
 		private void LogInternal(LogData logData)
 		{
 			LogAction?.Invoke(logData);
+			Thread.Sleep(40);
 		}
 
 		public void Log(string message)

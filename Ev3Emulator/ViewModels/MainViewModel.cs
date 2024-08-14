@@ -22,10 +22,8 @@ public class MainViewModel : ViewModelBase
 	public override void OnViewReady()
 	{
 		base.OnViewReady();
-
-		LcdBitmap = new WriteableBitmap(new PixelSize(Defines.vmLCD_WIDTH, Defines.vmLCD_HEIGHT), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888);
-		(GH.Ev3System.LcdHandler as LcdHandler).Bitmap = LcdBitmap;
-
+		
+		(GH.Ev3System.LcdHandler as LcdHandler).BitmapAction = UpdateLcd;
 		(GH.Ev3System.Logger as ViewLogger).LogAction = UpdateLog;
 	}
 
@@ -37,6 +35,14 @@ public class MainViewModel : ViewModelBase
 			LastData = data;
 		});
 	}
+
+	private void UpdateLcd(Bitmap bmp)
+	{
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            LcdBitmap = bmp;
+        });
+    }
 
 	private void OnStartCommand()
 	{
@@ -50,7 +56,7 @@ public class MainViewModel : ViewModelBase
 	public ObservableCollection<LogData> OutputData { get; } = new ObservableCollection<LogData>();
 
 	[Notify]
-    public WriteableBitmap LcdBitmap { get; set; }
+    public Bitmap LcdBitmap { get; set; }
 	[Notify]
 	public LogData LastData { get; set; }
 

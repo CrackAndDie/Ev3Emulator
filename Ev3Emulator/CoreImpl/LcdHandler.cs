@@ -1,13 +1,16 @@
-﻿using Avalonia.Media.Imaging;
-using BmpSharp;
+﻿using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using Ev3CoreUnsafe;
 using Ev3CoreUnsafe.Interfaces;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Ev3Emulator.CoreImpl
 {
 	internal class LcdHandler : ILcdHandler
 	{
-		public WriteableBitmap Bitmap { get; set; }
+		public Action<Bitmap> BitmapAction { get; set; }
 
 		public void Exit()
 		{
@@ -20,12 +23,17 @@ namespace Ev3Emulator.CoreImpl
 
 		public void UpdateLcd(byte[] data)
 		{
-			using (var frameBuffer = Bitmap.Lock())
+			if (data.Length != (Defines.vmLCD_HEIGHT * Defines.vmLCD_WIDTH))
+				return;
+
+            var LcdBitmap = new WriteableBitmap(new PixelSize(Defines.vmLCD_WIDTH, Defines.vmLCD_HEIGHT), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888);
+            using (var frameBuffer = LcdBitmap.Lock())
 			{
 				// * 4 because orig data is grayscale
-				Marshal.Copy(ConvertToRgba8888(data), 0, frameBuffer.Address, data.Length * 4); 
+				Marshal.Copy(ConvertToRgba8888(data), 0, frameBuffer.Address, data.Length * 4);
 			}
-		}
+			BitmapAction?.Invoke(LcdBitmap);
+        }
 
 		private byte[] ConvertToRgba8888(byte[] data)
 		{

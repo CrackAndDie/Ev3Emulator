@@ -2592,11 +2592,23 @@ namespace Ev3CoreUnsafe
 				dlcd[i] = slcd[i];
 			}
 		}
-		#endregion
+        #endregion
 
-		#region d_lcd.c
-		// it was not a define but i don't care
-		public unsafe static Dictionary<int, FONTINFO> FontInfo = new Dictionary<int, FONTINFO>()
+        #region d_lcd.c
+        public static UBYTE[] PixelTab =
+		{
+			0x00, // 000 00000000
+			0xE0, // 001 11100000
+			0x1C, // 010 00011100
+			0xFC, // 011 11111100
+			0x03, // 100 00000011
+			0xE3, // 101 11100011
+			0x1F, // 110 00011111
+			0xFF  // 111 11111111
+		};
+
+        // it was not a define but i don't care
+        public unsafe static Dictionary<int, FONTINFO> FontInfo = new Dictionary<int, FONTINFO>()
 		{
 			{ NORMAL_FONT, new FONTINFO()
 							{

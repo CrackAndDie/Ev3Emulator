@@ -212,10 +212,11 @@ namespace Ev3CoreUnsafe.Csound
 
 								if (*GH.SoundInstance.hSoundFile >= 0)  // Valid file
 								{
-									using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
-									BytesRead = hand.ReadUnsafe(&(GH.SoundInstance.SoundData[1]), 0, BytesToRead);
+									// TODO: UNCOMMENT!!!!
+									//using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
+									//BytesRead = hand.ReadUnsafe(&(GH.SoundInstance.SoundData[1]), 0, BytesToRead);
 
-									GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
+									//GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
 								}
 							}
 							// Now we have or should have some bytes to write down into the driver
@@ -707,6 +708,7 @@ namespace Ev3CoreUnsafe.Csound
 			DSPSTAT DspStat = DSPSTAT.NOBREAK;
 
 			TmpIp = GH.Lms.GetObjectIp();
+
 
 			if ((*GH.SoundInstance.pSound).Status == BUSY)
 			{ // If BUSY check for OVERRULED

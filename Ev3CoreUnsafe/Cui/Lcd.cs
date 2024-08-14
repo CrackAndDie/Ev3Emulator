@@ -8,7 +8,43 @@ namespace Ev3CoreUnsafe.Cui
 {
 	public unsafe class Lcd : ILcd
 	{
-		public void dLcdExec(LCD* pDisp)
+        private static UBYTE* outLcdResult = CommonHelper.Pointer1d<UBYTE>(22784);
+        private static UBYTE* vmem = CommonHelper.Pointer1d<UBYTE>(7680);
+        private UBYTE* dbuf = vmem;
+
+        private void update_to_fb()
+        {
+            ulong x, y, offset, mask;
+
+            for (y = 0; y < LCD_HEIGHT; y++)
+            {
+                for (x = 0; x < LCD_WIDTH; x++)
+                {
+                    offset = x % 3;
+                    if (offset != 0)
+                    {
+                        mask = (ulong)(((offset >> 1) != 0) ? 0x1 : 0x8);
+                    }
+                    else
+                    {
+                        mask = 0x80;
+                    }
+
+                    if ((vmem[x / 3 + y * 60] & mask) != 0)
+                    {
+                        outLcdResult[y * vmLCD_WIDTH + x] = FG_COLOR;
+                        // grx_fast_draw_pixel(x, y, GRX_COLOR_BLACK);
+                    }
+                    else
+                    {
+						outLcdResult[y * vmLCD_WIDTH + x] = BG_COLOR; 
+                        // grx_fast_draw_pixel(x, y, GRX_COLOR_WHITE);
+                    }
+                }
+            }
+        }
+
+        public void dLcdExec(LCD* pDisp)
 		{
 			UBYTE* pSrc;
 			UBYTE* pDst;
@@ -21,10 +57,65 @@ namespace Ev3CoreUnsafe.Cui
 
 			if (CommonHelper.memcmp((byte*)pDisp, (byte*)bufPtr, sizeof(LCD)) != 0)
 			{
-				// TODO: there was some logics, hope that i don't need it
+                pSrc = (*pDisp).Lcd;
+                pDst = dbuf;
 
-				LCDCopy((byte*)uiBufPtr, (byte*)bufPtr, sizeof(LCD));
-				GH.Ev3System.LcdHandler.UpdateLcd(CommonHelper.GetArray((byte*)bufPtr, sizeof(LCD)));
+                for (Y = 0; Y < LCD_HEIGHT; Y++)
+                {
+                    for (X = 0; X < 7; X++)
+                    {
+                        Pixels = (ULONG) (* pSrc);
+                        pSrc++;
+                        Pixels |= (ULONG) (* pSrc << 8);
+                        pSrc++;
+                        Pixels |= (ULONG) (* pSrc << 16);
+                        pSrc++;
+
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                        Pixels >>= 3;
+                        *pDst = PixelTab[Pixels & 0x07];
+                        pDst++;
+                    }
+                    Pixels = (ULONG) (* pSrc);
+                    pSrc++;
+                    Pixels |= (ULONG) (* pSrc << 8);
+                    pSrc++;
+
+                    *pDst = PixelTab[Pixels & 0x07];
+                    pDst++;
+                    Pixels >>= 3;
+                    *pDst = PixelTab[Pixels & 0x07];
+                    pDst++;
+                    Pixels >>= 3;
+                    *pDst = PixelTab[Pixels & 0x07];
+                    pDst++;
+                    Pixels >>= 3;
+                    *pDst = PixelTab[Pixels & 0x07];
+                    pDst++;
+                }
+
+                LCDCopy((byte*)uiBufPtr, (byte*)bufPtr, sizeof(LCD));
+				update_to_fb();
+                GH.Ev3System.LcdHandler.UpdateLcd(CommonHelper.GetArray((byte*)outLcdResult, vmLCD_WIDTH * vmLCD_HEIGHT));
 				GH.VMInstance.LcdUpdated = 1;
 			}
 		}
