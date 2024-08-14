@@ -20,6 +20,8 @@
 		CODE = 14,
 		DOWNLOAD_END = 15,
 		SCREEN_BLOCK = 16,
+		ALLOW_PULSE = 17,
+		SET_PULSE = 18,
 		TEXTBOX_APPEND = 21,
 		SET_BUSY = 22,
 		SET_TESTPIN = 24,
@@ -50,6 +52,8 @@ namespace Ev3CoreUnsafe
 		public const int CODE = 14;
 		public const int DOWNLOAD_END = 15;
 		public const int SCREEN_BLOCK = 16;
+		public const int ALLOW_PULSE = 17;
+		public const int SET_PULSE = 18;
 		public const int TEXTBOX_APPEND = 21;
 		public const int SET_BUSY = 22;
 		public const int SET_TESTPIN = 24;

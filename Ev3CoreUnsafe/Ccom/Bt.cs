@@ -182,7 +182,7 @@ namespace Ev3CoreUnsafe.Ccom
 
         public byte cBtGetStatus()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public byte cBtI2cBufReady()

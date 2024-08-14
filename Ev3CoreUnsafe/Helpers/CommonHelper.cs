@@ -215,11 +215,11 @@ namespace Ev3CoreUnsafe.Helpers
 			{
 				foreach (var c in str)
 				{
-					if (buf[0] == 0)
-					{
-						brakeOut = true;
-						break;
-					}
+					//if (buf[0] == 0)
+					//{
+					//	brakeOut = true;
+					//	break;
+					//}
 
 					// probably no need to add nullterm to the buf (yes, tested)
 					if (c == '\0')
@@ -297,9 +297,6 @@ namespace Ev3CoreUnsafe.Helpers
 		{
 			for (int i = 0; i < num; ++i)
 			{
-				if (dst[i] == 0) // if it is already the end
-					return dst;
-
 				if (src[i] == 0)
 				{
 					dst[i] = src[i];
@@ -316,9 +313,6 @@ namespace Ev3CoreUnsafe.Helpers
 			int i = 0;
 			while (true)
 			{
-				if (dst[i] == 0) // if it is already the end
-					return dst;
-
 				if (src[i] == 0)
 				{
 					dst[i] = src[i];

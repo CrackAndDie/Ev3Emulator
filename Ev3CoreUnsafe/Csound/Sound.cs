@@ -502,10 +502,10 @@ namespace Ev3CoreUnsafe.Csound
 
 					GH.SoundInstance.cSoundState = SOUND_STOPPED;  // Yes but only shortly
 
-					if (*GH.SoundInstance.hSoundFile >= 0)  // An active handle?
+					if ((int)GH.SoundInstance.hSoundFile >= 0)  // An active handle?
 					{
 						// close(GH.SoundInstance.hSoundFile);  // No more use
-						*GH.SoundInstance.hSoundFile = 0;   // Signal it
+						GH.SoundInstance.hSoundFile = null;   // Signal it
 					}
 
 					(*GH.SoundInstance.pSound).Status = BUSY;
@@ -583,6 +583,8 @@ namespace Ev3CoreUnsafe.Csound
 						if (pFileName[0] != '.')
 						{
 							GH.Lms.GetResourcePath(PathName, MAX_FILENAME_SIZE);
+							// var tmpTest = CommonHelper.GetString(PathName);
+							// var tmpTest2 = CommonHelper.GetString(pFileName);
 							CommonHelper.sprintf(GH.SoundInstance.PathBuffer, $"{CommonHelper.GetString(PathName)}{CommonHelper.GetString(pFileName)}.rsf");
 						}
 						else
@@ -592,6 +594,7 @@ namespace Ev3CoreUnsafe.Csound
 
 						// Open SoundFile
 
+						// var tmpTest3 = CommonHelper.GetString(GH.SoundInstance.PathBuffer);
 						GH.SoundInstance.hSoundFile = GH.SoundInstance.PathBuffer;
 						using var fileH = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.PathBuffer));
 

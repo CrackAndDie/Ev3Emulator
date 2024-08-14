@@ -160,10 +160,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 		public void VmPrint(DATA8* pString)
 		{
-			if (GH.VMInstance.TerminalEnabled != 0)
-			{
-				GH.printf(CommonHelper.GetString(pString));
-			}
+			GH.printf(CommonHelper.GetString(pString));
 		}
 
 
@@ -1100,7 +1097,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			for (ObjId = 1; ObjId <= NoOfObj; ObjId++)
 			{
 				Bytes = (Bytes + 3) & 0xFFFFFFFC;
-				Bytes += (uint)(sizeof(OBJ) + (*pHead).LocalBytes);
+				Bytes += (uint)(OBJ.Sizeof + (*pHead).LocalBytes);
 				pHead++;
 			}
 
@@ -1117,7 +1114,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			for (ObjId = 1; ObjId <= NoOfObj; ObjId++)
 			{
 				Bytes = (Bytes + 3) & 0xFFFFFFFC;
-				Bytes += (uint)(sizeof(OBJ) + pHead[ObjId].LocalBytes);
+				Bytes += (uint)(OBJ.Sizeof + pHead[ObjId].LocalBytes);
 			}
 
 			return (Bytes);
@@ -1263,7 +1260,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 							// Advance data pointer
 
-							pData = &pData[sizeof(OBJ) + GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes];
+							pData = &pData[OBJ.Sizeof + GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes];
 						}
 
 						GH.VMInstance.Program[PrgId].ObjectId = 1;
@@ -2246,6 +2243,10 @@ namespace Ev3CoreUnsafe.Lms2012
 								  Result   =  RESULT.FAIL;
 								}
 						*/
+
+						// TODO: comment
+						// DEBUG SLOWER
+						Thread.Sleep(100);
 					}
 					while (Result == OK);
 
@@ -2276,9 +2277,11 @@ namespace Ev3CoreUnsafe.Lms2012
 		 */
 		public void Error()
 		{
-			ProgramEnd(GH.VMInstance.ProgramId);
-			GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
-			SetDispatchStatus((DSPSTAT)INSTRBREAK);
+			// TODO: probably uncomment
+			// ProgramEnd(GH.VMInstance.ProgramId);
+			// GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
+			// SetDispatchStatus((DSPSTAT)INSTRBREAK);
+			GH.Ev3System.Logger.LogError($"An error occured in prgId: {GH.VMInstance.ProgramId}");
 		}
 
 

@@ -2586,6 +2586,9 @@ namespace Ev3CoreUnsafe.Cmemory
 									CommonHelper.snprintf(PathBuf, vmPATHSIZE, $"{DEFAULT_FOLDER}/");
 								}
 
+								// WARNING: "Resources" added to the beginning of the path
+								CommonHelper.snprintf(PathBuf, vmPATHSIZE, $"{DEFAULT_FOLDER_CSHARP}/{CommonHelper.GetString(PathBuf)}");
+
 								if (ExtBuf[0] == 0)
 								{ // Default extension
 
@@ -2616,9 +2619,8 @@ namespace Ev3CoreUnsafe.Cmemory
 
 								hFile.Close();
 
-								* (DATA32*)GH.Lms.PrimParPointer() = ISize;
+								*(DATA32*)GH.Lms.PrimParPointer() = ISize;
 								*(DATA32*)GH.Lms.PrimParPointer() = (int)ImagePointer;
-#warning (int)ImagePointer; won't work
 							}
 							else
 							{

@@ -251,6 +251,8 @@ namespace Ev3CoreUnsafe
 		public const string USBSTICK_MOUNT = "./mount_usbstick";
 		public const string USBSTICK_UNMOUNT = "./unmount_usbstick";
 
+		public const string DEFAULT_FOLDER_CSHARP = "Resources";             //!< Folder containing the first small programs
+
 		public const string DEFAULT_FOLDER = "ui";             //!< Folder containing the first small programs
 		public const string DEFAULT_UI = "ui";            //!< Default user interface
 
@@ -1634,6 +1636,8 @@ namespace Ev3CoreUnsafe
 				new Dictionary<byte, SUBCODE>(new []
 				{
 					SC(nameof(WRITE_FLUSH), WRITE_FLUSH,            0,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(ALLOW_PULSE), ALLOW_PULSE,            PAR8,                                              0,0,0,0,0,0,0         ),
+					SC(nameof(SET_PULSE), SET_PULSE,            PAR8,                                              0,0,0,0,0,0,0         ),
 					SC(nameof(FLOATVALUE), FLOATVALUE, PARF, PAR8, PAR8,                                 0,0,0,0,0             ),
 					SC(nameof(STAMP), STAMP, PAR8,                                           0,0,0,0,0,0,0         ),
 					SC(nameof(PUT_STRING), PUT_STRING, PAR8,                                           0,0,0,0,0,0,0         ),

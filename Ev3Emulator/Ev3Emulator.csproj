@@ -28,4 +28,8 @@
 
         <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Ev3CoreUnsafe\Ev3CoreUnsafe.csproj" />
+	</ItemGroup>
 </Project>

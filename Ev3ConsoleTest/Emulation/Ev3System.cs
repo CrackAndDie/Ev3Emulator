@@ -6,11 +6,11 @@ namespace Ev3ConsoleTest.Emulation
 	{
 		public ILogger Logger { get; } = new Logger();
 
-		public ILedHandler LedHandler => throw new NotImplementedException();
+		public ILedHandler LedHandler { get; } = new LedHandler();
 
-        public ILcdHandler LcdHandler { get; } = new LcdHandler();
+		public ILcdHandler LcdHandler { get; } = new LcdHandler();
 
-        public ISoundHandler SoundHandler => throw new NotImplementedException();
+        public ISoundHandler SoundHandler { get; } = new SoundHandler();
 
 		public IOutputHandler OutputHandler { get; } = new OutputHandler();
 

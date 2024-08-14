@@ -78,7 +78,9 @@ namespace Ev3CoreUnsafe.Ccom
 
         public RESULT cWiFiGetOnStatus()
         {
-            throw new NotImplementedException();
+            // TODO: !!!
+            GH.Ev3System.Logger.LogWarning("cWiFiGetOnStatus CALLED");
+            return RESULT.FAIL;
         }
 
         public RESULT cWiFiGetStatus()
