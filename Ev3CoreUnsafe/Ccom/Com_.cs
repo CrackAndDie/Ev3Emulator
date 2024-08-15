@@ -2304,14 +2304,16 @@ namespace Ev3CoreUnsafe.Ccom
 
 			GH.Daisy.cDaisyControl();  // Keep the HOST part going
 
-            for (ChNo = 0; ChNo < NO_OF_CHS; ChNo++)
+			for (ChNo = 0; ChNo < NO_OF_CHS; ChNo++)
             {
 
                 pTxBuf = &(GH.ComInstance.TxBuf[ChNo]);
                 pRxBuf = &(GH.ComInstance.RxBuf[ChNo]);
                 BytesRead = 0;
 
-                if (pTxBuf->Writing == 0)
+				GH.Ev3System.Logger.LogInfo($"In loop cComUpdate ch {ChNo}");
+
+				if (pTxBuf->Writing == 0)
                 {
                     if (null != GH.ComInstance.ReadChannel[ChNo])
                     {
@@ -2622,7 +2624,9 @@ namespace Ev3CoreUnsafe.Ccom
 
             }
 
-            GH.Bt.BtUpdate();
+			GH.Ev3System.Logger.LogInfo("After loop cComUpdate");
+
+			GH.Bt.BtUpdate();
 			GH.Wifi.cWiFiControl();
         }
 

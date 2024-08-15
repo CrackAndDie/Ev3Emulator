@@ -7,6 +7,7 @@ using Hypocrite.Mvvm;
 using Prism.Ioc;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Text;
 using System.Threading;
 
@@ -27,11 +28,13 @@ namespace Ev3Emulator.CoreImpl
 		public ViewLogger()
 		{
 			_loggingService = (Application.Current as ApplicationBase).Container.Resolve<ILoggingService>();
+			File.Create("anime322.txt");
 		}
 
 		private void LogInternal(LogData logData)
 		{
 			_loggingService.Info(logData.Text);
+			File.AppendAllText("anime322.txt", logData.Text + "\n");
 			LogAction?.Invoke(logData);
 			// Thread.Sleep(40);
 		}

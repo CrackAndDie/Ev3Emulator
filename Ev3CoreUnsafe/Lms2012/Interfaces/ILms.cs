@@ -413,7 +413,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct LCD
 	{
-		public fixed UBYTE Lcd[LCD_BUFFER_SIZE];
+		// public fixed UBYTE Lcd[LCD_BUFFER_SIZE];
+		public fixed UBYTE Lcd[LCD_WIDTH * LCD_HEIGHT];
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

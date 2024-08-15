@@ -1494,6 +1494,7 @@ namespace Ev3CoreUnsafe.Cinput
 			RESULT Result = RESULT.FAIL;
 			TYPES* pType;
 
+			GH.Ev3System.Logger.LogInfo("Calling cComGetDeviceInfo in cInputComGetDeviceInfo");
 			Result = GH.Com.cComGetDeviceInfo(Length, pInfo);
 
 			if (Result == OK)
@@ -1502,6 +1503,7 @@ namespace Ev3CoreUnsafe.Cinput
 				GH.printf($"c_com     GH.Com.cComGetDeviceInfo:       C={(*pType).Connection} N={CommonHelper.GetString((sbyte*)(*pType).Name)}\r\n");
 			}
 
+			GH.Ev3System.Logger.LogInfo("After shite in cInputComGetDeviceInfo");
 			return (Result);
 		}
 
@@ -2184,7 +2186,7 @@ namespace Ev3CoreUnsafe.Cinput
 			RESULT Result = RESULT.BUSY;
 			DATA8 Device;
 			DATA8 Port;
-			TYPES Tmp;
+			TYPES* Tmp = CommonHelper.PointerStruct<TYPES>();
 			TYPES* pTmp;
 			DATA16 Index;
 			DATA8 Layer;
@@ -2257,7 +2259,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 							cInputExpandDevice(Device, &Layer, &Port, &Output);
 
-							Result = cInputComGetDeviceType(Layer, Port, MAX_DEVICE_DATALENGTH, &Type, &Mode, (DATA8*)&Tmp);
+							Result = cInputComGetDeviceType(Layer, Port, MAX_DEVICE_DATALENGTH, &Type, &Mode, (DATA8*)Tmp);
 
 							if ((Type > 0) && (Type <= MAX_VALID_TYPE) && (Result != RESULT.FAIL))
 							{
@@ -2315,22 +2317,24 @@ namespace Ev3CoreUnsafe.Cinput
 				}
 			}
 
-			if (cInputComGetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)&Tmp) == OK)
+			GH.Ev3System.Logger.LogInfo("Calling cInputComGetDeviceInfo in cInputDcmUpdate");
+			if (cInputComGetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)Tmp) == OK)
 			{
-				Result = cInputGetNewTypeDataPointer((sbyte*)Tmp.Name, Tmp.Type, Tmp.Mode, Tmp.Connection, &pTmp);
+				Result = cInputGetNewTypeDataPointer((sbyte*)(*Tmp).Name, (*Tmp).Type, (*Tmp).Mode, (*Tmp).Connection, &pTmp);
 				if (pTmp != null)
 				{
 					if (Result == OK)
 					{
-						(*pTmp) = Tmp;
-						GH.printf($"c_input   cInputDcmUpdate: NEW     T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString((sbyte*)Tmp.Name)}\r\n");
+						(*pTmp) = *Tmp;
+						GH.printf($"c_input   cInputDcmUpdate: NEW     T={(*Tmp).Type} M={(*Tmp).Mode} C={(*Tmp).Connection} N={CommonHelper.GetString((sbyte*)(*Tmp).Name)}\r\n");
 					}
 					else
 					{
-						GH.printf($"c_input   cInputDcmUpdate: KNOWN   T={Tmp.Type} M={Tmp.Mode} C={Tmp.Connection} N={CommonHelper.GetString((sbyte*)Tmp.Name)}\r\n");
+						GH.printf($"c_input   cInputDcmUpdate: KNOWN   T={(*Tmp).Type} M={(*Tmp).Mode} C={(*Tmp).Connection} N={CommonHelper.GetString((sbyte*)(*Tmp).Name)}\r\n");
 					}
 				}
 			}
+			GH.Ev3System.Logger.LogInfo("After call of cInputComGetDeviceInfo in cInputDcmUpdate");
 
 			if (GH.InputInstance.TypeDataIndex < GH.InputInstance.MaxDeviceTypes)
 			{ // Upload TypeData info through daisy chain

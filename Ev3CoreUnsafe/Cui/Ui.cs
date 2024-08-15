@@ -1217,8 +1217,9 @@ namespace Ev3CoreUnsafe.Cui
                     GH.UiInstance.UiUpdate = 1;
                 }
 
-                CommonHelper.snprintf(TempBuf, 10, $"{GH.UiInstance.Tbatt.ToString("F1", CultureInfo.InvariantCulture)}");
-                GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 32, 1, SMALL_FONT, (DATA8*)TempBuf);
+                // TODO: uncommment to show battery shite
+                //CommonHelper.snprintf(TempBuf, 10, $"{GH.UiInstance.Tbatt.ToString("F1", CultureInfo.InvariantCulture)}");
+                //GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 32, 1, SMALL_FONT, (DATA8*)TempBuf);
 
                 // Show brick name
                 GH.Com.cComGetBrickName(NAME_LENGTH + 1, Name);
@@ -1230,48 +1231,49 @@ namespace Ev3CoreUnsafe.Cui
                 X2 *= X1;
                 GH.Lcd.dLcdDrawText((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X2, 1, SMALL_FONT, Name);
 
-                X1 = 100;
-                X2 = (DATA16)GH.VMInstance.PerformTime;
-                X2 = (short)((X2 * 40) / 1000);
-                if (X2 > 40)
-                {
-                    X2 = 40;
-                }
-                GH.Lcd.dLcdRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, 40, 5);
-                GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, X2, 5);
-                X1 = 100;
-                X2 = (DATA16)(GH.UiInstance.Iintegrated * 1000.0);
-                X2 = (short)((X2 * 40) / (DATA16)(LOAD_SHUTDOWN_HIGH * 1000.0));
-                if (X2 > 40)
-                {
-                    X2 = 40;
-                }
-                GH.Lcd.dLcdRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, 40, 5);
-                GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, X2, 5);
-                GH.Memory.cMemoryGetUsage(&Total, &Free, 0);
+                // TODO: uncomment to debug
+                //X1 = 100;
+                //X2 = (DATA16)GH.VMInstance.PerformTime;
+                //X2 = (short)((X2 * 40) / 1000);
+                //if (X2 > 40)
+                //{
+                //    X2 = 40;
+                //}
+                //GH.Lcd.dLcdRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, 40, 5);
+                //GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, X2, 5);
+                //X1 = 100;
+                //X2 = (DATA16)(GH.UiInstance.Iintegrated * 1000.0);
+                //X2 = (short)((X2 * 40) / (DATA16)(LOAD_SHUTDOWN_HIGH * 1000.0));
+                //if (X2 > 40)
+                //{
+                //    X2 = 40;
+                //}
+                //GH.Lcd.dLcdRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, 40, 5);
+                //GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, X2, 5);
+                //GH.Memory.cMemoryGetUsage(&Total, &Free, 0);
 
-                X1 = 100;
-                X2 = (DATA16)((((Total - (DATA32)LOW_MEMORY) - Free) * (DATA32)40) / (Total - (DATA32)LOW_MEMORY));
-                if (X2 > 40)
-                {
-                    X2 = 40;
-                }
-                GH.Lcd.dLcdRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, 40, 5);
-                GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, X2, 5);
+                //X1 = 100;
+                //X2 = (DATA16)((((Total - (DATA32)LOW_MEMORY) - Free) * (DATA32)40) / (Total - (DATA32)LOW_MEMORY));
+                //if (X2 > 40)
+                //{
+                //    X2 = 40;
+                //}
+                //GH.Lcd.dLcdRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, 40, 5);
+                //GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X1, 3, X2, 5);
 
-                // 112,118,124,130,136,142,148
-                X1 = 100;
-                X2 = 102;
-                for (V = 0; V < 7; V++)
-                {
-                    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 + (V * 6)), 5);
-                    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 + (V * 6)), 4);
+                //// 112,118,124,130,136,142,148
+                //X1 = 100;
+                //X2 = 102;
+                //for (V = 0; V < 7; V++)
+                //{
+                //    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 + (V * 6)), 5);
+                //    GH.Lcd.dLcdDrawPixel((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X2 + (V * 6)), 4);
 
-                    if ((GH.VMInstance.Status & (0x40 >> V)) != 0)
-                    {
-                        GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X1 + (V * 6)), 2, 5, 6);
-                    }
-                }
+                //    if ((GH.VMInstance.Status & (0x40 >> V)) != 0)
+                //    {
+                //        GH.Lcd.dLcdFillRect((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X1 + (V * 6)), 2, 5, 6);
+                //    }
+                //}
 
                 // Calculate number of icons
                 X1 = GH.Lcd.dLcdGetIconWidth(SMALL_ICON);
@@ -1752,6 +1754,7 @@ namespace Ev3CoreUnsafe.Cui
 
                 if (GH.UiInstance.Event == 0)
                 {
+                    GH.Ev3System.Logger.LogInfo("Calling bt event in cUiUpdate");
                     GH.UiInstance.Event = GH.Com.cComGetEvent();
                 }
 
@@ -1838,7 +1841,8 @@ namespace Ev3CoreUnsafe.Cui
 
                 }
 
-                if (GH.UiInstance.Warning != 0)
+				GH.Ev3System.Logger.LogInfo("After switch in cUiUpdate");
+				if (GH.UiInstance.Warning != 0)
                 { // Some warning present
 
                     if (GH.UiInstance.Warnlight == 0)
@@ -1865,7 +1869,9 @@ namespace Ev3CoreUnsafe.Cui
                 // Find warnings that has not been showed
                 Tmp = (sbyte)(Warning & ~GH.UiInstance.WarningShowed);
 
-                if (Tmp != 0)
+				GH.Ev3System.Logger.LogInfo("Before pop ups in cUiUpdate");
+
+				if (Tmp != 0)
                 { // Show popup
 
                     if (GH.UiInstance.ScreenBusy == 0)
@@ -1936,7 +1942,9 @@ namespace Ev3CoreUnsafe.Cui
                 Tmp = GH.UiInstance.WarningShowed;
                 Tmp &= (sbyte)~GH.UiInstance.WarningConfirmed;
 
-                if (Tmp != 0)
+				GH.Ev3System.Logger.LogInfo("Before pop ups 2 in cUiUpdate");
+
+				if (Tmp != 0)
                 {
                     if (cUiGetShortPress(ENTER_BUTTON) != 0)
                     {
@@ -1988,7 +1996,9 @@ namespace Ev3CoreUnsafe.Cui
                 Tmp &= GH.UiInstance.WarningShowed;
                 Tmp &= GH.UiInstance.WarningConfirmed;
 
-                GH.UiInstance.WarningShowed &= (sbyte)~Tmp;
+				GH.Ev3System.Logger.LogInfo("Before exit in cUiUpdate");
+
+				GH.UiInstance.WarningShowed &= (sbyte)~Tmp;
                 GH.UiInstance.WarningConfirmed &= (sbyte)~Tmp;
             }
         }
@@ -4417,7 +4427,7 @@ namespace Ev3CoreUnsafe.Cui
             OBJID TmpObjId;
             IP TmpIp;
             DATA8* GBuffer = CommonHelper.Pointer1d<DATA8>(25);
-            UBYTE* pBmp = CommonHelper.Pointer1d<UBYTE>(LCD_BUFFER_SIZE);
+            UBYTE* pBmp = CommonHelper.Pointer1d<UBYTE>(LCD_WIDTH * LCD_HEIGHT);
             DATA8 Cmd;
             DATA8 Color;
             DATA16 X;
@@ -4523,7 +4533,7 @@ namespace Ev3CoreUnsafe.Cui
                             {
                                 Color = -1;
                             }
-                            CommonHelper.memset(&((*GH.UiInstance.pLcd).Lcd[0]), Color, LCD_BUFFER_SIZE);
+                            CommonHelper.memset(&((*GH.UiInstance.pLcd).Lcd[0]), Color, LCD_WIDTH * LCD_HEIGHT);
 
                             GH.UiInstance.ScreenBusy = 1;
                         }
@@ -4718,7 +4728,7 @@ namespace Ev3CoreUnsafe.Cui
 
                         if (Blocked == 0)
                         {
-                            if (GH.Memory.cMemoryGetImage(pText, LCD_BUFFER_SIZE, pBmp) == OK)
+                            if (GH.Memory.cMemoryGetImage(pText, LCD_WIDTH * LCD_HEIGHT, pBmp) == OK)
                             {
                                 GH.Lcd.dLcdDrawBitmap((*GH.UiInstance.pLcd).Lcd, Color, X, Y, pBmp);
                                 GH.UiInstance.ScreenBusy = 1;
@@ -5208,7 +5218,7 @@ namespace Ev3CoreUnsafe.Cui
                                     }
                                     else
                                     {
-                                        Y1 = (short)(LCD_BUFFER_SIZE - Y);
+                                        Y1 = (short)(LCD_WIDTH * LCD_HEIGHT - Y);
                                     }
 
                                     if (Color != 0)

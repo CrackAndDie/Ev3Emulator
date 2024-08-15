@@ -362,6 +362,7 @@ namespace Ev3CoreUnsafe.Lms2012
 				}
 			}
 			Result = GH.VMInstance.DispatchStatus;
+			GH.Ev3System.Logger.LogInfo($"Getting dspstat {Result} in ExecuteByteCode");
 
 			GH.UiInstance.ButtonState[IDX_BACK_BUTTON] &= ~BUTTON_LONGPRESS;
 
@@ -371,6 +372,8 @@ namespace Ev3CoreUnsafe.Lms2012
 			GH.VMInstance.ObjectLocal = GH.VMInstance.ObjLocalSave;
 			GH.VMInstance.pGlobal = GH.VMInstance.ObjGlobalSave;
 			GH.VMInstance.ObjectIp = GH.VMInstance.ObjIpSave;
+
+			GH.Ev3System.Logger.LogInfo($"Exit in ExecuteByteCode");
 
 			return (Result);
 		}
@@ -2099,8 +2102,9 @@ namespace Ev3CoreUnsafe.Lms2012
 					{
 						TstClose();
 					}
-				}
+				}				
 			}
+			GH.Ev3System.Logger.LogInfo($"After if stmt with ui update in mSchedCtrl");
 
 			if (GH.VMInstance.DispatchStatus == DSPSTAT.FAILBREAK)
 			{
@@ -2158,6 +2162,8 @@ namespace Ev3CoreUnsafe.Lms2012
 					}
 				}
 			}
+
+			GH.Ev3System.Logger.LogInfo($"After big if stmt in mSchedCtrl");
 
 			if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
 			{

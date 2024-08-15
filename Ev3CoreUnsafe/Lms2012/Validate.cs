@@ -203,7 +203,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			return (GH.ValidateInstance.ValidateErrorIndex);
 		}
 
-
+		private int* tmpParValueDissAss = (int*)CommonHelper.AllocateByteArray(4);
 		public RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 		{
 			RESULT Result = RESULT.FAIL;  // Current status
@@ -214,7 +214,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			UBYTE Tab;            // Sub code table index
 			ULONG Value;
 			UBYTE ParCode = 0;
-			void* pParValue;
+			void* pParValue = tmpParValueDissAss;
 			DATA8 Parameters;
 			DATA32 Bytes = 0;
 			int Indent;
@@ -262,7 +262,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						{ // Prior plain parameter was a sub code
 
 							// Get sub code from last plain parameter
-							// Sub = *(DATA8*)pParValue; // TODO: wtf uninit used
+							Sub = (byte)(*(DATA8*)pParValue); 
 
 							// Isolate next parameter type
 							Pars >>= 4;
@@ -306,7 +306,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 						if (ParType == PARVALUES)
 						{
-							// Bytes = *(DATA32*)pParValue; // TODO: wtf uninit used
+							Bytes = *(DATA32*)pParValue;
 							// Next parameter
 							Pars >>= 4;
 							Pars &= 0x0F;
@@ -1107,7 +1107,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			return (Result);
 		}
 
-		private int tmpParValue = 0;
+		private int* tmpParValue = (int*)CommonHelper.AllocateByteArray(4);
         public RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 		{
 			RESULT Result = RESULT.FAIL;
@@ -1120,7 +1120,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			UBYTE ParType = PAR;
 			UBYTE ParCode;
 			
-			void* pParValue = Unsafe.AsPointer(ref tmpParValue);
+			void* pParValue = tmpParValue;
 			DATA8 Parameters;
 			DATA8 ParNo;
 			DATA32 Bytes = 0;

@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Ev3CoreUnsafe;
@@ -35,16 +36,31 @@ namespace Ev3Emulator.CoreImpl
 			BitmapAction?.Invoke(LcdBitmap);
         }
 
-		private byte[] ConvertToRgba8888(byte[] data)
+		public static byte[] ConvertToRgba8888(byte[] data)
 		{
 			byte[] outData = new byte[data.Length * 4];
 			for (int i = 0; i < data.Length; i++)
 			{
-				outData[i * 4] = (byte)(data[i] * 255);
+				var clr = GetColor(data[i]);
+				outData[i * 4] =	 (byte)clr.R;
+				outData[i * 4 + 1] = (byte)clr.G;
+				outData[i * 4 + 2] = (byte)clr.B;
 
 				outData[i * 4 + 3] = 255; // alpha
 			}
 			return outData;
+		}
+
+		private static Color GetColor(byte clr)
+		{
+			if (clr > 0)
+			{
+				return Colors.Black;
+			}
+			else
+			{
+				return new Color(255, 136, 221, 178);
+			}
 		}
 	}
 }

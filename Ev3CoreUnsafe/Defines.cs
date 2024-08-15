@@ -432,8 +432,8 @@ namespace Ev3CoreUnsafe
 
 		public const int TST_UART_LENGTH = UART_BUFFER_SIZE;
 
-		public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
-		public const int LCD_TOPLINE_SIZE = (((LCD_WIDTH + 7) / 8) * (TOPLINE_HEIGHT + 1));
+		// public const int LCD_BUFFER_SIZE = (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT);
+		// public const int LCD_TOPLINE_SIZE = (((LCD_WIDTH + 7) / 8) * (TOPLINE_HEIGHT + 1));
 
 		public const int PRINTBUFFERSIZE = 160;
 
@@ -2563,7 +2563,7 @@ namespace Ev3CoreUnsafe
 		#region d_lcd.h
 		public unsafe static void LCDClear(UBYTE* lcd)
 		{
-			for (int i = 0; i < LCD_BUFFER_SIZE; ++i)
+			for (int i = 0; i < LCD_WIDTH * LCD_HEIGHT; ++i)
 			{
 				lcd[i] = (byte)BG_COLOR;
 			}
@@ -2571,7 +2571,7 @@ namespace Ev3CoreUnsafe
 
 		public unsafe static void LCDClearTopline(UBYTE* lcd)
 		{
-			for (int i = 0; i < LCD_TOPLINE_SIZE; ++i)
+			for (int i = 0; i < LCD_WIDTH * TOPLINE_HEIGHT; ++i)
 			{
 				lcd[i] = (byte)BG_COLOR;
 			}
@@ -2579,7 +2579,7 @@ namespace Ev3CoreUnsafe
 
 		public unsafe static void LCDErase(UBYTE* lcd)
 		{
-			for (int i = LCD_TOPLINE_SIZE; i < LCD_BUFFER_SIZE; ++i)
+			for (int i = LCD_WIDTH * TOPLINE_HEIGHT; i < LCD_WIDTH * LCD_HEIGHT; ++i)
 			{
 				lcd[i] = (byte)BG_COLOR;
 			}

@@ -74,7 +74,7 @@ namespace Ev3CoreUnsafe.Helpers
 
 			Width = (short)outputImage.Width;
 			Height = (short)outputImage.Height;
-			Data = GetBinaryBytes(bmp.GetBmpBytes(), outputImage.BytesPerPixel);
+			Data = GetBinaryBytes(bmp.PixelData, outputImage.BytesPerPixel);
 		}
 
 		private byte[] GetBinaryBytes(byte[] bmp, int perPixel)
@@ -90,7 +90,10 @@ namespace Ev3CoreUnsafe.Helpers
 
 				if (currValNumber == perPixel)
 				{
-					bool isBlackPixel = (currVal / perPixel) > 0;
+					// remove alpha value
+					currVal -= b;
+
+					bool isBlackPixel = (currVal / perPixel) > 120;
 					bytes.Add(isBlackPixel ? (byte)1 : (byte)0);
 
 					currVal = 0;

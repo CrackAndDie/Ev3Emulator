@@ -2,6 +2,7 @@
 using Ev3ConsoleTest.Emulation;
 using Ev3CoreUnsafe;
 using Ev3CoreUnsafe.Ccom.Interfaces;
+using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
 using EV3DecompilerLib.Decompile;
 using EV3DecompilerLib.Recognize;
@@ -10,18 +11,30 @@ using System.Runtime.CompilerServices;
 
 namespace Ev3ConsoleTest
 {
-	internal class Program
+	internal unsafe class Program
     {
         static unsafe void Main(string[] args)
         {
             // EnumlatorTest();
             CommonTest();
+
+            Console.ReadKey();
 		}
 
 		#region common test
         private unsafe static void CommonTest()
         {
-            var sz = sizeof(LCD);
+			byte* notAllocated = CommonHelper.AllocateByteArray(3);
+
+			// notAllocated[4] = 3;
+
+			CommonHelper.DeleteByteArray(&notAllocated[3]);
+
+            System.Console.WriteLine("asdasd");
+            System.Console.WriteLine("asdasd");
+            System.Console.WriteLine("asdasd");
+            System.Console.WriteLine("asdasd");
+            System.Console.WriteLine("asdasd");
 		}
 		#endregion
 

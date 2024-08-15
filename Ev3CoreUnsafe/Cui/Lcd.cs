@@ -8,41 +8,41 @@ namespace Ev3CoreUnsafe.Cui
 {
 	public unsafe class Lcd : ILcd
 	{
-        private static UBYTE* outLcdResult = CommonHelper.Pointer1d<UBYTE>(22784);
-        private static UBYTE* vmem = CommonHelper.Pointer1d<UBYTE>(7680);
-        private UBYTE* dbuf = vmem;
+        //private static UBYTE* outLcdResult = CommonHelper.Pointer1d<UBYTE>(22784);
+        //private static UBYTE* vmem = CommonHelper.Pointer1d<UBYTE>(7680);
+        //private UBYTE* dbuf = vmem;
 
-        private void update_to_fb()
-        {
-            ulong x, y, offset, mask;
+      //  private void update_to_fb()
+      //  {
+      //      ulong x, y, offset, mask;
 
-            for (y = 0; y < LCD_HEIGHT; y++)
-            {
-                for (x = 0; x < LCD_WIDTH; x++)
-                {
-                    offset = x % 3;
-                    if (offset != 0)
-                    {
-                        mask = (ulong)(((offset >> 1) != 0) ? 0x1 : 0x8);
-                    }
-                    else
-                    {
-                        mask = 0x80;
-                    }
+      //      for (y = 0; y < LCD_HEIGHT; y++)
+      //      {
+      //          for (x = 0; x < LCD_WIDTH; x++)
+      //          {
+      //              offset = x % 3;
+      //              if (offset != 0)
+      //              {
+      //                  mask = (ulong)(((offset >> 1) != 0) ? 0x1 : 0x8);
+      //              }
+      //              else
+      //              {
+      //                  mask = 0x80;
+      //              }
 
-                    if ((vmem[x / 3 + y * 60] & mask) != 0)
-                    {
-                        outLcdResult[y * vmLCD_WIDTH + x] = FG_COLOR;
-                        // grx_fast_draw_pixel(x, y, GRX_COLOR_BLACK);
-                    }
-                    else
-                    {
-						outLcdResult[y * vmLCD_WIDTH + x] = BG_COLOR; 
-                        // grx_fast_draw_pixel(x, y, GRX_COLOR_WHITE);
-                    }
-                }
-            }
-        }
+      //              if ((vmem[x / 3 + y * 60] & mask) != 0)
+      //              {
+      //                  outLcdResult[y * vmLCD_WIDTH + x] = FG_COLOR;
+      //                  // grx_fast_draw_pixel(x, y, GRX_COLOR_BLACK);
+      //              }
+      //              else
+      //              {
+						//outLcdResult[y * vmLCD_WIDTH + x] = BG_COLOR; 
+      //                  // grx_fast_draw_pixel(x, y, GRX_COLOR_WHITE);
+      //              }
+      //          }
+      //      }
+      //  }
 
         public void dLcdExec(LCD* pDisp)
 		{
@@ -58,64 +58,64 @@ namespace Ev3CoreUnsafe.Cui
 			if (CommonHelper.memcmp((byte*)pDisp, (byte*)bufPtr, sizeof(LCD)) != 0)
 			{
                 pSrc = (*pDisp).Lcd;
-                pDst = dbuf;
+                //pDst = dbuf;
 
-                for (Y = 0; Y < LCD_HEIGHT; Y++)
-                {
-                    for (X = 0; X < 7; X++)
-                    {
-                        Pixels = (ULONG) (* pSrc);
-                        pSrc++;
-                        Pixels |= (ULONG) (* pSrc << 8);
-                        pSrc++;
-                        Pixels |= (ULONG) (* pSrc << 16);
-                        pSrc++;
+                //for (Y = 0; Y < LCD_HEIGHT; Y++)
+                //{
+                //    for (X = 0; X < 7; X++)
+                //    {
+                //        Pixels = (ULONG) (* pSrc);
+                //        pSrc++;
+                //        Pixels |= (ULONG) (* pSrc << 8);
+                //        pSrc++;
+                //        Pixels |= (ULONG) (* pSrc << 16);
+                //        pSrc++;
 
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                        Pixels >>= 3;
-                        *pDst = PixelTab[Pixels & 0x07];
-                        pDst++;
-                    }
-                    Pixels = (ULONG) (* pSrc);
-                    pSrc++;
-                    Pixels |= (ULONG) (* pSrc << 8);
-                    pSrc++;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //        Pixels >>= 3;
+                //        *pDst = PixelTab[Pixels & 0x07];
+                //        pDst++;
+                //    }
+                //    Pixels = (ULONG) (* pSrc);
+                //    pSrc++;
+                //    Pixels |= (ULONG) (* pSrc << 8);
+                //    pSrc++;
 
-                    *pDst = PixelTab[Pixels & 0x07];
-                    pDst++;
-                    Pixels >>= 3;
-                    *pDst = PixelTab[Pixels & 0x07];
-                    pDst++;
-                    Pixels >>= 3;
-                    *pDst = PixelTab[Pixels & 0x07];
-                    pDst++;
-                    Pixels >>= 3;
-                    *pDst = PixelTab[Pixels & 0x07];
-                    pDst++;
-                }
+                //    *pDst = PixelTab[Pixels & 0x07];
+                //    pDst++;
+                //    Pixels >>= 3;
+                //    *pDst = PixelTab[Pixels & 0x07];
+                //    pDst++;
+                //    Pixels >>= 3;
+                //    *pDst = PixelTab[Pixels & 0x07];
+                //    pDst++;
+                //    Pixels >>= 3;
+                //    *pDst = PixelTab[Pixels & 0x07];
+                //    pDst++;
+                //}
 
                 LCDCopy((byte*)uiBufPtr, (byte*)bufPtr, sizeof(LCD));
-				update_to_fb();
-                GH.Ev3System.LcdHandler.UpdateLcd(CommonHelper.GetArray((byte*)outLcdResult, vmLCD_WIDTH * vmLCD_HEIGHT));
+				// update_to_fb();
+                GH.Ev3System.LcdHandler.UpdateLcd(CommonHelper.GetArray((byte*)pSrc, vmLCD_WIDTH * vmLCD_HEIGHT));
 				GH.VMInstance.LcdUpdated = 1;
 			}
 		}
@@ -150,8 +150,8 @@ namespace Ev3CoreUnsafe.Cui
 
 		public void dLcdScroll(UBYTE* pImage, DATA16 Y0)
 		{
-			CommonHelper.memmove(pImage, &pImage[((LCD_WIDTH + 7) / 8) * Y0], (LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8));
-			CommonHelper.memset(&pImage[(LCD_HEIGHT - Y0) * ((LCD_WIDTH + 7) / 8)], 0, ((LCD_WIDTH + 7) / 8) * Y0);
+			CommonHelper.memmove(pImage, &pImage[(LCD_WIDTH) * Y0], (LCD_HEIGHT - Y0) * (LCD_WIDTH));
+			CommonHelper.memset(&pImage[(LCD_HEIGHT - Y0) * (LCD_WIDTH)], 0, (LCD_WIDTH) * Y0);
 		}
 
 
@@ -159,14 +159,7 @@ namespace Ev3CoreUnsafe.Cui
 		{
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
 			{
-				if (Color != 0)
-				{
-					pImage[(X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3)] |= (byte)(1 << (X0 % 8));
-				}
-				else
-				{
-					pImage[(X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3)] &= (byte)~(1 << (X0 % 8));
-				}
+				pImage[Y0 * LCD_WIDTH + X0] = (byte)(Color);
 			}
 		}
 
@@ -175,7 +168,7 @@ namespace Ev3CoreUnsafe.Cui
 		{
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
 			{
-				pImage[(X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3)] ^= (byte)(1 << (X0 % 8));
+				pImage[Y0 * LCD_WIDTH + X0] = (byte)~pImage[Y0 * LCD_WIDTH + X0];
 			}
 		}
 
@@ -186,7 +179,7 @@ namespace Ev3CoreUnsafe.Cui
 
 			if ((X0 >= 0) && (X0 < LCD_WIDTH) && (Y0 >= 0) && (Y0 < LCD_HEIGHT))
 			{
-				if ((pImage[(X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3)] & (1 << (X0 % 8))) != 0)
+				if (pImage[Y0 * LCD_WIDTH + X0] != 0)
 				{
 					Result = 1;
 				}
@@ -386,118 +379,34 @@ namespace Ev3CoreUnsafe.Cui
 			{
 				Char -= FontInfo[Font].FontFirst;
 
-				CharByteIndex = (short)((Char % FontInfo[Font].FontHorz) * ((CharWidth + 7) / 8));
-				CharByteIndex += (short)((Char / FontInfo[Font].FontHorz) * ((CharWidth + 7) / 8) * CharHeight * FontInfo[Font].FontHorz);
+				CharByteIndex = (short)((Char % FontInfo[Font].FontHorz) * (CharWidth));
+				CharByteIndex += (short)((Char / FontInfo[Font].FontHorz) * (CharWidth) * CharHeight * FontInfo[Font].FontHorz);
 
-				if (((CharWidth % 8) == 0) && ((X0 % 8) == 0))
-				{ // Font aligned
+				// Font not aligned
 
-					X0 = (short)((X0 >> 3) << 3);
-					LcdByteIndex = (short)((X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3));
+				// MaxX = (short)(X0 + CharWidth);
 
-					if (Color != 0)
+				for (Y = 0; Y < CharHeight; Y++)
+				{
+					TmpX = X0;
+
+					for (X = 0; X < CharWidth; X++)
 					{
-						while (CharHeight != 0)
+						CharByte = FontInfo[Font].pFontBits[CharByteIndex + X];
+
+						if ((CharByte & 1) != 0)
 						{
-							Tmp = 0;
-							do
-							{
-								if (LcdByteIndex < sizeof(LCD))
-								{
-									pImage[LcdByteIndex + Tmp] = FontInfo[Font].pFontBits[CharByteIndex + Tmp];
-								}
-								Tmp++;
-							}
-							while (Tmp < (CharWidth / 8));
-
-							CharByteIndex += (short)((CharWidth * FontInfo[Font].FontHorz) / 8);
-							LcdByteIndex += ((LCD_WIDTH + 7) >> 3);
-							CharHeight--;
+							dLcdDrawPixel(pImage, (sbyte)((Color == 0) ? 1 : 0), TmpX, Y0);
 						}
-					}
-					else
-					{
-						while (CharHeight != 0)
+						else
 						{
-							Tmp = 0;
-							do
-							{
-								if (LcdByteIndex < sizeof(LCD))
-								{
-									pImage[LcdByteIndex + Tmp] = (byte)~FontInfo[Font].pFontBits[CharByteIndex + Tmp];
-								}
-								Tmp++;
-							}
-							while (Tmp < (CharWidth / 8));
-
-							CharByteIndex += (short)((CharWidth * FontInfo[Font].FontHorz) / 8);
-							LcdByteIndex += ((LCD_WIDTH + 7) >> 3);
-							CharHeight--;
+							dLcdDrawPixel(pImage, (sbyte)((Color == 0) ? 0 : 1), TmpX, Y0);
 						}
+						TmpX++;
 					}
-				}
-				else
-				{ // Font not aligned
+					Y0++;
+					CharByteIndex += (short)(CharWidth * FontInfo[Font].FontHorz);
 
-					MaxX = (short)(X0 + CharWidth);
-
-					if (Color != 0)
-					{
-						for (Y = 0; Y < CharHeight; Y++)
-						{
-							TmpX = X0;
-
-							for (X = 0; X < ((CharWidth + 7) / 8); X++)
-							{
-								CharByte = FontInfo[Font].pFontBits[CharByteIndex + X];
-
-								for (Tmp = 0; (Tmp < 8) && (TmpX < MaxX); Tmp++)
-								{
-									if ((CharByte & 1) != 0)
-									{
-										dLcdDrawPixel(pImage, 1, TmpX, Y0);
-									}
-									else
-									{
-										dLcdDrawPixel(pImage, 0, TmpX, Y0);
-									}
-									CharByte >>= 1;
-									TmpX++;
-								}
-							}
-							Y0++;
-							CharByteIndex += (short)(((CharWidth + 7) / 8) * FontInfo[Font].FontHorz);
-
-						}
-					}
-					else
-					{
-						for (Y = 0; Y < CharHeight; Y++)
-						{
-							TmpX = X0;
-
-							for (X = 0; X < ((CharWidth + 7) / 8); X++)
-							{
-								CharByte = FontInfo[Font].pFontBits[CharByteIndex + X];
-
-								for (Tmp = 0; (Tmp < 8) && (TmpX < MaxX); Tmp++)
-								{
-									if ((CharByte & 1) != 0) 
-									{
-										dLcdDrawPixel(pImage, 0, TmpX, Y0);
-									}
-									else
-									{
-										dLcdDrawPixel(pImage, 1, TmpX, Y0);
-									}
-									CharByte >>= 1;
-									TmpX++;
-								}
-							}
-							Y0++;
-							CharByteIndex += (short)(((CharWidth + 7) / 8) * FontInfo[Font].FontHorz);
-						}
-					}
 				}
 			}
 		}
@@ -552,21 +461,21 @@ namespace Ev3CoreUnsafe.Cui
 
 			IconByteIndex = 0;
 
-			X0 = (short)((X0 >> 3) << 3);
-			LcdByteIndex = (short)((X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3));
+			// X0 = (short)((X0 >> 3) << 3);
+			LcdByteIndex = (short)((X0) + Y0 * (LCD_WIDTH));
 
 
 			if (Color != 0)
 			{
 				while (IconHeight != 0)
 				{
-					for (Tmp = 0; Tmp < (IconWidth / 8); Tmp++)
+					for (Tmp = 0; Tmp < IconWidth; Tmp++)
 					{
 						pImage[LcdByteIndex + Tmp] = pIconBits[IconByteIndex + Tmp];
 					}
 
-					IconByteIndex += (short)(IconWidth / 8);
-					LcdByteIndex += ((LCD_WIDTH + 7) >> 3);
+					IconByteIndex += (short)IconWidth;
+					LcdByteIndex += LCD_WIDTH;
 					IconHeight--;
 				}
 			}
@@ -574,13 +483,13 @@ namespace Ev3CoreUnsafe.Cui
 			{
 				while (IconHeight != 0)
 				{
-					for (Tmp = 0; Tmp < (IconWidth / 8); Tmp++)
+					for (Tmp = 0; Tmp < IconWidth; Tmp++)
 					{
 						pImage[LcdByteIndex + Tmp] = (byte)~pIconBits[IconByteIndex + Tmp];
 					}
 
-					IconByteIndex += (short)(IconWidth / 8);
-					LcdByteIndex += ((LCD_WIDTH + 7) >> 3);
+					IconByteIndex += (short)IconWidth;
+					LcdByteIndex += LCD_WIDTH;
 					IconHeight--;
 				}
 			}
@@ -600,7 +509,7 @@ namespace Ev3CoreUnsafe.Cui
 			if ((No >= 0) && (No <= dLcdGetNoOfIcons(Type)))
 			{
 				pIconBits = dLcdGetIconBits(Type);
-				IconByteIndex = (DATA16)((No * IconWidth * IconHeight) / 8);
+				IconByteIndex = (DATA16)(No * IconWidth * IconHeight);
 				dLcdDrawPicture(pImage, Color, X0, Y0, IconWidth, IconHeight, &pIconBits[IconByteIndex]);
 			}
 		}
@@ -640,118 +549,33 @@ namespace Ev3CoreUnsafe.Cui
 
 				if ((BitmapWidth >= 0) && (BitmapHeight >= 0))
 				{
-					if ((X0 % 8) != 0 || (BitmapWidth % 8) != 0)
-					{ // X is not aligned
+					// BitmapWidth = (short)((BitmapWidth >> 3) << 3);
 
-						BitmapWidth = (short)(((BitmapWidth + 7) >> 3) << 3);
+					for (Y = 0; Y < BitmapHeight; Y++)
+					{
+						BitmapByteIndex = (short)(Y * BitmapWidth);
+						TmpX = X0;
 
-						if (Color != 0)
+						for (X = 0; X < BitmapWidth; X++)
 						{
-							for (Y = 0; Y < BitmapHeight; Y++)
+							BitmapByte = pBitmapBytes[BitmapByteIndex + X];
+
+							for (Tmp = 0; (Tmp < 8) && (TmpX < MaxX); Tmp++)
 							{
-								BitmapByteIndex = (short)((Y * BitmapWidth) / 8);
-								TmpX = X0;
-
-								for (X = 0; X < (BitmapWidth / 8); X++)
+								if ((BitmapByte & 1) != 0)
 								{
-									BitmapByte = pBitmapBytes[BitmapByteIndex + X];
-
-									for (Tmp = 0; (Tmp < 8) && (TmpX < MaxX); Tmp++)
-									{
-										if ((BitmapByte & 1) != 0)
-										{
-											dLcdDrawPixel(pImage, 1, TmpX, Y0);
-										}
-										else
-										{
-											dLcdDrawPixel(pImage, 0, TmpX, Y0);
-										}
-										BitmapByte >>= 1;
-										TmpX++;
-									}
+									dLcdDrawPixel(pImage, (sbyte)((Color != 0) ? 1 : 0), TmpX, Y0);
 								}
-								Y0++;
+								else
+								{
+									dLcdDrawPixel(pImage, (sbyte)((Color != 0) ? 0 : 1), TmpX, Y0);
+								}
+								BitmapByte >>= 1;
+								TmpX++;
 							}
 						}
-						else
-						{
-							for (Y = 0; Y < BitmapHeight; Y++)
-							{
-								BitmapByteIndex = (short)((Y * BitmapWidth) / 8);
-								TmpX = X0;
-
-								for (X = 0; X < (BitmapWidth / 8); X++)
-								{
-									BitmapByte = pBitmapBytes[BitmapByteIndex + X];
-
-									for (Tmp = 0; (Tmp < 8) && (TmpX < MaxX); Tmp++)
-									{
-										if ((BitmapByte & 1) != 0)
-										{
-											dLcdDrawPixel(pImage, 0, TmpX, Y0);
-										}
-										else
-										{
-											dLcdDrawPixel(pImage, 1, TmpX, Y0);
-										}
-										BitmapByte >>= 1;
-										TmpX++;
-									}
-								}
-								Y0++;
-							}
-						}
+						Y0++;
 					}
-
-					else
-					{ // X is byte aligned
-
-						BitmapByteIndex = 0;
-
-						LcdByteIndex = (short)((X0 >> 3) + Y0 * ((LCD_WIDTH + 7) >> 3));
-
-						if (Color != 0)
-						{
-							while (BitmapHeight != 0)
-							{
-								X = X0;
-								for (Tmp = 0; Tmp < (BitmapWidth / 8); Tmp++)
-								{
-									if (((LcdByteIndex + Tmp) < LCD_BUFFER_SIZE) && (X < LCD_WIDTH) && (X >= 0))
-									{
-										pImage[LcdByteIndex + Tmp] = pBitmapBytes[BitmapByteIndex + Tmp];
-									}
-									X += 8;
-								}
-
-								BitmapByteIndex += (short)(BitmapWidth / 8);
-								LcdByteIndex += ((LCD_WIDTH + 7) >> 3);
-
-								BitmapHeight--;
-							}
-						}
-						else
-						{
-							while (BitmapHeight != 0)
-							{
-								X = X0;
-								for (Tmp = 0; Tmp < (BitmapWidth / 8); Tmp++)
-								{
-									if (((LcdByteIndex + Tmp) < LCD_BUFFER_SIZE) && (X < LCD_WIDTH) && (X >= 0))
-									{
-										pImage[LcdByteIndex + Tmp] = (byte)~pBitmapBytes[BitmapByteIndex + Tmp];
-									}
-									X += 8;
-								}
-
-								BitmapByteIndex += (short)(BitmapWidth / 8);
-								LcdByteIndex += ((LCD_WIDTH + 7) >> 3);
-
-								BitmapHeight--;
-							}
-						}
-					}
-
 				}
 			}
 		}

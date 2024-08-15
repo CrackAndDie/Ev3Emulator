@@ -79,14 +79,22 @@ namespace Ev3CoreUnsafe.Helpers
 			return result;
 		}
 
-		public unsafe static byte* AllocateByteArray(int amount)
+		public unsafe static byte* AllocateByteArray(int amount, bool fillZeros = true)
 		{
 			IntPtr handler = Marshal.AllocHGlobal(amount);
-			return (byte*)handler.ToPointer();
+			var ptr = (byte*)handler.ToPointer();
+
+			// if should be zeroed
+			if (fillZeros)
+			{
+				memset(ptr, 0, amount);
+			}
+			return ptr;
 		}
 
 		public unsafe static void DeleteByteArray(byte* ptr)
-		{
+		{ 
+			GH.Ev3System.Logger.LogWarning($"before deleting ptr: {Environment.StackTrace}");
 			var handler = new IntPtr(ptr);
 			Marshal.FreeHGlobal(handler);
 		}
