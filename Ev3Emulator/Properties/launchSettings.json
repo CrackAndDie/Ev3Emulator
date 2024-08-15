@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Ev3Emulator": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

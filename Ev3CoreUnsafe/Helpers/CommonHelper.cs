@@ -94,7 +94,7 @@ namespace Ev3CoreUnsafe.Helpers
 
 		public unsafe static void DeleteByteArray(byte* ptr)
 		{ 
-			GH.Ev3System.Logger.LogWarning($"before deleting ptr: {Environment.StackTrace}");
+			// GH.Ev3System.Logger.LogWarning($"before deleting ptr: {Environment.StackTrace}"); 
 			var handler = new IntPtr(ptr);
 			Marshal.FreeHGlobal(handler);
 		}

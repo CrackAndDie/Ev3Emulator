@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Ev3ConsoleTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -74,7 +74,6 @@ public class MainViewModel : ViewModelBase
         Dispatcher.UIThread.Invoke(() =>
         {
             LcdBitmap = bmp;
-			bmp.Save("Anime.bmp", 100);
         });
     }
 

@@ -1494,12 +1494,16 @@ namespace Ev3CoreUnsafe.Cinput
 			RESULT Result = RESULT.FAIL;
 			TYPES* pType;
 
-			GH.Ev3System.Logger.LogInfo("Calling cComGetDeviceInfo in cInputComGetDeviceInfo");
+            GH.Ev3System.Logger.LogInfo($"info: {(int)pInfo}");
+
+            GH.Ev3System.Logger.LogInfo("Calling cComGetDeviceInfo in cInputComGetDeviceInfo");
 			Result = GH.Com.cComGetDeviceInfo(Length, pInfo);
 
-			if (Result == OK)
+            GH.Ev3System.Logger.LogInfo("after Calling cComGetDeviceInfo in cInputComGetDeviceInfo");
+            if (Result == OK)
 			{
-				pType = (TYPES*)pInfo;
+                GH.Ev3System.Logger.LogInfo($"info: {(int)pInfo}");
+                pType = (TYPES*)pInfo;
 				GH.printf($"c_com     GH.Com.cComGetDeviceInfo:       C={(*pType).Connection} N={CommonHelper.GetString((sbyte*)(*pType).Name)}\r\n");
 			}
 
@@ -2381,7 +2385,9 @@ namespace Ev3CoreUnsafe.Cinput
 				GH.InputInstance.TypeDataIndex = DATA16_MAX;
 			}
 
-			GH.VMInstance.Status &= ~0x07;
+            GH.Ev3System.Logger.LogInfo("After big if stmt in cInputDcmUpdate");
+
+            GH.VMInstance.Status &= ~0x07;
 
 			if (GH.InputInstance.DeviceData[TESTDEVICE].DevStatus == OK)
 			{
@@ -2398,7 +2404,9 @@ namespace Ev3CoreUnsafe.Cinput
 					GH.VMInstance.Status |= 0x04;
 				}
 			}
-		}
+
+            GH.Ev3System.Logger.LogInfo("exit in cInputDcmUpdate");
+        }
 
 
 		public RESULT cInputStartTypeDataUpload()

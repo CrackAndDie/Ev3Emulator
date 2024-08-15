@@ -17,34 +17,41 @@ namespace Ev3CoreUnsafe.Csound
 			int SndFile;
 
 			GH.SoundInstance.SoundDriverDescriptor = -1;
-			// *GH.SoundInstance.hSoundFile = 0;
+			GH.SoundInstance.hSoundFile = null;
 			GH.SoundInstance.pSound = (SOUND*)GH.SoundInstance.Sound;
 
-			// TODO: file shite
-			// Create a Shared Memory entry for signaling the driver state BUSY or NOT BUSY
-			//SndFile = open(SOUND_DEVICE_NAME, O_RDWR | O_SYNC);
+			GH.Ev3System.SoundHandler.DonePlaying += OnSoundDonePlaying;
 
-			//if (SndFile >= 0)
-			//{
-			//	pSoundTmp = (SOUND*)mmap(0, sizeof(UWORD), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, SndFile, 0);
+            // TODO: file shite
+            // Create a Shared Memory entry for signaling the driver state BUSY or NOT BUSY
+            //SndFile = open(SOUND_DEVICE_NAME, O_RDWR | O_SYNC);
 
-			//	if (pSoundTmp == MAP_FAILED)
-			//	{
-			//		LogErrorNumber(SOUND_SHARED_MEMORY);
-			//	}
-			//	else
-			//	{
-			//		GH.SoundInstance.pSound = pSoundTmp;
-			//		Result = OK;
-			//	}
+            //if (SndFile >= 0)
+            //{
+            //	pSoundTmp = (SOUND*)mmap(0, sizeof(UWORD), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, SndFile, 0);
 
-			//	close(SndFile);
-			//}
+            //	if (pSoundTmp == MAP_FAILED)
+            //	{
+            //		LogErrorNumber(SOUND_SHARED_MEMORY);
+            //	}
+            //	else
+            //	{
+            //		GH.SoundInstance.pSound = pSoundTmp;
+            //		Result = OK;
+            //	}
 
-			Result = OK;
+            //	close(SndFile);
+            //}
+
+            Result = OK;
 
 			return (Result);
 		}
+
+		private void OnSoundDonePlaying()
+		{
+			(*GH.SoundInstance.pSound).Status = OK;
+        }
 
 		public RESULT cSoundOpen()
 		{
@@ -210,14 +217,15 @@ namespace Ev3CoreUnsafe.Csound
 								//else
 								BytesToRead = GH.SoundInstance.SoundDataLength;
 
-								if (*GH.SoundInstance.hSoundFile >= 0)  // Valid file
+								if (GH.SoundInstance.hSoundFile != null)  // Valid file
 								{
-									// TODO: UNCOMMENT!!!!
-									//using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
-									//BytesRead = hand.ReadUnsafe(&(GH.SoundInstance.SoundData[1]), 0, BytesToRead);
+                                    // TODO: UNCOMMENT!!!!
+                                    //using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
+                                    //BytesRead = hand.ReadUnsafe(&(GH.SoundInstance.SoundData[1]), 0, BytesToRead);
 
-									//GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
-								}
+                                    //GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
+                                    GH.SoundInstance.BytesToWrite = (byte)(BytesToRead + 1); // REMOVE!!!!!
+                                }
 							}
 							// Now we have or should have some bytes to write down into the driver
 							GH.Ev3System.SoundHandler.PlayChunk(CommonHelper.GetArray(GH.SoundInstance.SoundData, GH.SoundInstance.BytesToWrite));

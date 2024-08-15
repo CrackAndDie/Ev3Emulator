@@ -15,8 +15,8 @@ namespace Ev3ConsoleTest
     {
         static unsafe void Main(string[] args)
         {
-            // EnumlatorTest();
-            CommonTest();
+            EnumlatorTest();
+            // CommonTest();
 
             Console.ReadKey();
 		}

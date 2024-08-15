@@ -11,11 +11,11 @@ namespace Ev3ConsoleTest.Emulation
 
 		public void Log(string message, Exception exception)
 		{
-			var prevColor = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.Gray;
-			Console.WriteLine(message);
-			Console.WriteLine(exception);
-			Console.ForegroundColor = prevColor;
+			//var prevColor = Console.ForegroundColor;
+			//Console.ForegroundColor = ConsoleColor.Gray;
+			//Console.WriteLine(message);
+			//Console.WriteLine(exception);
+			//Console.ForegroundColor = prevColor;
 		}
 
 		public void LogError(string message)
@@ -39,11 +39,11 @@ namespace Ev3ConsoleTest.Emulation
 
 		public void LogInfo(string message, Exception exception)
 		{
-			var prevColor = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine(message);
-			Console.WriteLine(exception);
-			Console.ForegroundColor = prevColor;
+			//var prevColor = Console.ForegroundColor;
+			//Console.ForegroundColor = ConsoleColor.Green;
+			//Console.WriteLine(message);
+			//Console.WriteLine(exception);
+			//Console.ForegroundColor = prevColor;
 		}
 
 		public void LogWarning(string message)
@@ -53,11 +53,11 @@ namespace Ev3ConsoleTest.Emulation
 
 		public void LogWarning(string message, Exception exception)
 		{
-			var prevColor = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine(message);
-			Console.WriteLine(exception);
-			Console.ForegroundColor = prevColor;
+			//var prevColor = Console.ForegroundColor;
+			//Console.ForegroundColor = ConsoleColor.Yellow;
+			//Console.WriteLine(message);
+			//Console.WriteLine(exception);
+			//Console.ForegroundColor = prevColor;
 		}
 	}
 }

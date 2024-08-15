@@ -204,8 +204,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					}
 
 					GH.printf($"  Free   P={(uint)PrgId} H={(uint)Handle} T={(uint)GH.MemoryInstance.pPoolList[PrgId][Handle].Type} S={(ulong)GH.MemoryInstance.pPoolList[PrgId][Handle].Size} A={(long)GH.MemoryInstance.pPoolList[PrgId][Handle].pPool}\r\n");
-#warning THE OLD MEMORY IS NOT CLEARED
-                    // free(GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
+                    CommonHelper.DeleteByteArray((byte*)GH.MemoryInstance.pPoolList[PrgId][Handle].pPool);
                     GH.MemoryInstance.pPoolList[PrgId][Handle].pPool = null;
 					GH.MemoryInstance.pPoolList[PrgId][Handle].Size = 0;
 

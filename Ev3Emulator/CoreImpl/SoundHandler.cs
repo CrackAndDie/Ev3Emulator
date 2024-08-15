@@ -1,13 +1,18 @@
 ﻿using Ev3CoreUnsafe.Interfaces;
+using System;
 
 namespace Ev3Emulator.CoreImpl
 {
 	internal class SoundHandler : ISoundHandler
 	{
-		public byte PlayChunk(byte[] data)
+        public event Action DonePlaying;
+
+        public byte PlayChunk(byte[] data)
 		{
-			// TODO:
-			return (byte)data.Length;
+            // TODO:
+            DonePlaying?.Invoke();
+
+            return (byte)data.Length;
 		}
 	}
 }
