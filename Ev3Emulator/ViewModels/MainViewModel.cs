@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Ev3CoreUnsafe;
@@ -22,7 +23,10 @@ public class MainViewModel : ViewModelBase
 	public override void OnViewReady()
 	{
 		base.OnViewReady();
-		
+
+		if (Design.IsDesignMode)
+			return;
+
 		(GH.Ev3System.LcdHandler as LcdHandler).BitmapAction = UpdateLcd;
 		(GH.Ev3System.Logger as ViewLogger).LogAction = UpdateLog;
 	}
@@ -41,6 +45,7 @@ public class MainViewModel : ViewModelBase
         Dispatcher.UIThread.Invoke(() =>
         {
             LcdBitmap = bmp;
+			bmp.Save("Anime.bmp", 100);
         });
     }
 

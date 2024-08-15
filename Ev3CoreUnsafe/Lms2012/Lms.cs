@@ -2247,6 +2247,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						// TODO: comment
 						// DEBUG SLOWER
 						Thread.Sleep(100);
+						GC.Collect();
 					}
 					while (Result == OK);
 

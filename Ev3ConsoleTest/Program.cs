@@ -14,14 +14,14 @@ namespace Ev3ConsoleTest
     {
         static unsafe void Main(string[] args)
         {
-            EnumlatorTest();
-            // CommonTest();
+            // EnumlatorTest();
+            CommonTest();
 		}
 
 		#region common test
         private unsafe static void CommonTest()
         {
-            var sz = sizeof(COMCMD);
+            var sz = sizeof(LCD);
 		}
 		#endregion
 

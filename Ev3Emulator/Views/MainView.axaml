@@ -33,6 +33,7 @@
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<TextBox Text="{Binding Text}"
+							 Background="Transparent"
 							 Foreground="{Binding Color}">
 						
 					</TextBox>

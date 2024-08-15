@@ -20,7 +20,6 @@ using Prism.Modularity;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using static Avalonia.AvaloniaLocator;
 using System.Reflection;
 using System.Threading;
 using Ev3Emulator.Modules;
@@ -36,9 +35,6 @@ public partial class App : ApplicationBase
 
     public override void Initialize()
     {
-		// init ev3
-		GH.Ev3System = new Ev3System();
-
 		Thread.CurrentThread.Name = "MainThread";
         AvaloniaXamlLoader.Load(this);
         base.Initialize();              // <-- Required
@@ -49,7 +45,10 @@ public partial class App : ApplicationBase
         var viewModelService = Container.Resolve<IViewModelResolverService>();
         viewModelService.RegisterViewModelAssembly(Assembly.GetExecutingAssembly());
 
-        return base.CreateShell();
+		// init ev3
+		GH.Ev3System = new Ev3System();
+
+		return base.CreateShell();
     }
 
     protected override void RegisterTypes(IContainerRegistry containerRegistry)

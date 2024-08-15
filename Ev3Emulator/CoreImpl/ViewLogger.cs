@@ -1,6 +1,10 @@
-﻿using Avalonia.Media;
+﻿using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Ev3CoreUnsafe.Interfaces;
+using Hypocrite.Core.Logging.Interfaces;
+using Hypocrite.Mvvm;
+using Prism.Ioc;
 using System;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -18,10 +22,18 @@ namespace Ev3Emulator.CoreImpl
 	{
 		public Action<LogData> LogAction { get; set; }
 
+		private ILoggingService _loggingService;
+		
+		public ViewLogger()
+		{
+			_loggingService = (Application.Current as ApplicationBase).Container.Resolve<ILoggingService>();
+		}
+
 		private void LogInternal(LogData logData)
 		{
+			_loggingService.Info(logData.Text);
 			LogAction?.Invoke(logData);
-			Thread.Sleep(40);
+			// Thread.Sleep(40);
 		}
 
 		public void Log(string message)
