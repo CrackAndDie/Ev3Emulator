@@ -914,7 +914,8 @@ namespace Ev3CoreUnsafe.Ccom
          *
          *
          */
-        public void cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
+        private DATA8* FileHandlecComSystemCommand = (DATA8*)CommonHelper.AllocateByteArray(1);
+		public void cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
         {
             COMCMD* pComCmd;
             SYSCMDC* pSysCmdC;
@@ -922,7 +923,7 @@ namespace Ev3CoreUnsafe.Ccom
             int Tmp;
             DATA8* Folder = CommonHelper.Pointer1d<DATA8>(60);
             ULONG BytesToWrite;
-            DATA8 FileHandle = 0;
+            
 
             pComCmd = (COMCMD*)pRxBuf->Buf;
             pSysCmdC = (SYSCMDC*)(*pComCmd).PayLoad;
@@ -941,8 +942,8 @@ namespace Ev3CoreUnsafe.Ccom
                         pReplyDl = (RPLY_BEGIN_DL*)pTxBuf->Buf;
 
                         // Get file handle
-                        FileHandle = cComGetHandle((DATA8*)pBeginDl->Path);
-                        pRxBuf->pFile = &(GH.ComInstance.Files[FileHandle]);
+                        *FileHandlecComSystemCommand = cComGetHandle((DATA8*)pBeginDl->Path);
+                        pRxBuf->pFile = &(GH.ComInstance.Files[*FileHandlecComSystemCommand]);
 
                         // Fill the reply
                         pReplyDl->CmdSize = SIZEOF_RPLYBEGINDL - sizeof(CMDSIZE);
@@ -950,25 +951,25 @@ namespace Ev3CoreUnsafe.Ccom
                         pReplyDl->CmdType = SYSTEM_REPLY;
                         pReplyDl->Cmd = BEGIN_DOWNLOAD;
                         pReplyDl->Status = SUCCESS;
-                        pReplyDl->Handle = (byte)FileHandle;
+                        pReplyDl->Handle = (byte)*FileHandlecComSystemCommand;
 
-                        if (FileHandle >= 0)
+                        if (*FileHandlecComSystemCommand >= 0)
                         {
                             pRxBuf->pFile->Size = (ULONG)(pBeginDl->FileSizeLsb);
                             pRxBuf->pFile->Size += (ULONG)(pBeginDl->FileSizeNsb1) << 8;
                             pRxBuf->pFile->Size += (ULONG)(pBeginDl->FileSizeNsb2) << 16;
                             pRxBuf->pFile->Size += (ULONG)(pBeginDl->FileSizeMsb) << 24;
 
-                            if (OK == cComCheckForSpace(&(GH.ComInstance.Files[FileHandle].Name[0]), pRxBuf->pFile->Size))
+                            if (OK == cComCheckForSpace(&(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name[0]), pRxBuf->pFile->Size))
                             {
 
                                 pRxBuf->pFile->Length = (ULONG)0;
                                 pRxBuf->pFile->Pointer = (ULONG)0;
 
                                 Tmp = 0;
-                                while ((GH.ComInstance.Files[FileHandle].Name[Tmp] != 0) && (Tmp < (MAX_FILENAME_SIZE - 1)))
+                                while ((GH.ComInstance.Files[*FileHandlecComSystemCommand].Name[Tmp] != 0) && (Tmp < (MAX_FILENAME_SIZE - 1)))
                                 {
-                                    Folder[Tmp] = GH.ComInstance.Files[FileHandle].Name[Tmp];
+                                    Folder[Tmp] = GH.ComInstance.Files[*FileHandlecComSystemCommand].Name[Tmp];
                                     if (Folder[Tmp] == '/')
                                     {
                                         Folder[Tmp + 1] = 0;
@@ -1009,23 +1010,23 @@ namespace Ev3CoreUnsafe.Ccom
                                     }
                                     pTxBuf->BlockLen = SIZEOF_RPLYBEGINDL;
 
-                                    if (BytesToWrite > (GH.ComInstance.Files[FileHandle].Size))
+                                    if (BytesToWrite > (GH.ComInstance.Files[*FileHandlecComSystemCommand].Size))
                                     {
                                         // If Bytes to write into the file is bigger than file size -> Error message
                                         pReplyDl->Status = SIZE_ERROR;
-                                        BytesToWrite = GH.ComInstance.Files[FileHandle].Size;
+                                        BytesToWrite = GH.ComInstance.Files[*FileHandlecComSystemCommand].Size;
                                     }
 
                                     File.WriteAllBytes(CommonHelper.GetString(pRxBuf->pFile->Name), CommonHelper.GetArray(&(pRxBuf->Buf[MsgHeaderSize]), (int)BytesToWrite));
-                                    GH.ComInstance.Files[FileHandle].Length += (ULONG)BytesToWrite;
+                                    GH.ComInstance.Files[*FileHandlecComSystemCommand].Length += (ULONG)BytesToWrite;
                                     pRxBuf->RxBytes = (ULONG)BytesToWrite;
                                     pRxBuf->pFile->Pointer = (ULONG)BytesToWrite;
 
                                     if (pRxBuf->pFile->Pointer >= pRxBuf->pFile->Size)
                                     {
                                         cComCloseFileHandle(&(pRxBuf->pFile->File));
-                                        // chmod(GH.ComInstance.Files[FileHandle].Name, S_IRWXU | S_IRWXG | S_IRWXO);
-                                        cComFreeHandle(FileHandle);
+                                        // chmod(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name, S_IRWXU | S_IRWXG | S_IRWXO);
+                                        cComFreeHandle(*FileHandlecComSystemCommand);
 
                                         pReplyDl->Status = END_OF_FILE;
                                         pRxBuf->State = RXIDLE;
@@ -1034,8 +1035,8 @@ namespace Ev3CoreUnsafe.Ccom
                                 else
                                 {
                                     // Error in opening file
-                                    GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} not created\r\n");
-                                    cComFreeHandle(FileHandle);
+                                    GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} not created\r\n");
+                                    cComFreeHandle(*FileHandlecComSystemCommand);
                                     pReplyDl->CmdType = SYSTEM_REPLY_ERROR;
                                     pReplyDl->Status = UNKNOWN_HANDLE;
                                     pReplyDl->Handle = byte.MaxValue;
@@ -1046,9 +1047,9 @@ namespace Ev3CoreUnsafe.Ccom
                             else
                             {
                                 //Not enough space for the file
-                                GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} is too big\r\n");
+                                GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} is too big\r\n");
 
-                                cComFreeHandle(FileHandle);
+                                cComFreeHandle(*FileHandlecComSystemCommand);
                                 pReplyDl->CmdType = SYSTEM_REPLY_ERROR;
                                 pReplyDl->Status = SIZE_ERROR;
                                 pReplyDl->Handle = byte.MaxValue;
@@ -1079,7 +1080,7 @@ namespace Ev3CoreUnsafe.Ccom
                         pRplyContiDl = (RPLY_CONTINUE_DL*)pTxBuf->Buf;
 
                         // Get handle
-                        FileHandle = (sbyte)pContiDl->Handle;
+                        *FileHandlecComSystemCommand = (sbyte)pContiDl->Handle;
 
                         // Fill the reply
                         pRplyContiDl->CmdSize = SIZEOF_RPLYCONTINUEDL - sizeof(CMDSIZE);
@@ -1087,13 +1088,13 @@ namespace Ev3CoreUnsafe.Ccom
                         pRplyContiDl->CmdType = SYSTEM_REPLY;
                         pRplyContiDl->Cmd = CONTINUE_DOWNLOAD;
                         pRplyContiDl->Status = SUCCESS;
-                        pRplyContiDl->Handle = (byte)FileHandle;
+                        pRplyContiDl->Handle = (byte)*FileHandlecComSystemCommand;
 
-                        if ((FileHandle >= 0) && (GH.ComInstance.Files[FileHandle].Name[0] != 0))
+                        if ((*FileHandlecComSystemCommand >= 0) && (GH.ComInstance.Files[*FileHandlecComSystemCommand].Name[0] != 0))
                         {
 
-                            pRxBuf->FileHandle = (byte)FileHandle;
-                            pRxBuf->pFile = &(GH.ComInstance.Files[FileHandle]);
+                            pRxBuf->FileHandle = (byte)*FileHandlecComSystemCommand;
+                            pRxBuf->pFile = &(GH.ComInstance.Files[*FileHandlecComSystemCommand]);
 
                             if (pRxBuf->pFile->File >= 0)
                             {
@@ -1122,19 +1123,19 @@ namespace Ev3CoreUnsafe.Ccom
                                     GH.printf("File size limited\r\n");
                                 }
 
-                                File.WriteAllBytes(CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name), CommonHelper.GetArray((pContiDl->PayLoad), (int)BytesToWriteLocal));
+                                File.WriteAllBytes(CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name), CommonHelper.GetArray((pContiDl->PayLoad), (int)BytesToWriteLocal));
                                 pRxBuf->pFile->Pointer += BytesToWriteLocal;
                                 pRxBuf->RxBytes = BytesToWriteLocal;
 
-                                GH.printf($"Size {(ulong)GH.ComInstance.Files[FileHandle].Size} - Loaded {(ulong)GH.ComInstance.Files[FileHandle].Length}\r\n");
+                                GH.printf($"Size {(ulong)GH.ComInstance.Files[*FileHandlecComSystemCommand].Size} - Loaded {(ulong)GH.ComInstance.Files[*FileHandlecComSystemCommand].Length}\r\n");
 
-                                if (pRxBuf->pFile->Pointer >= GH.ComInstance.Files[FileHandle].Size)
+                                if (pRxBuf->pFile->Pointer >= GH.ComInstance.Files[*FileHandlecComSystemCommand].Size)
                                 {
-                                    GH.printf($"{CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} {(ulong)GH.ComInstance.Files[FileHandle].Length} bytes downloaded\r\n");
+                                    GH.printf($"{CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} {(ulong)GH.ComInstance.Files[*FileHandlecComSystemCommand].Length} bytes downloaded\r\n");
 
-                                    cComCloseFileHandle(&(GH.ComInstance.Files[FileHandle].File));
-                                    // chmod(GH.ComInstance.Files[FileHandle].Name, S_IRWXU | S_IRWXG | S_IRWXO);
-                                    cComFreeHandle(FileHandle);
+                                    cComCloseFileHandle(&(GH.ComInstance.Files[*FileHandlecComSystemCommand].File));
+                                    // chmod(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name, S_IRWXU | S_IRWXG | S_IRWXO);
+                                    cComFreeHandle(*FileHandlecComSystemCommand);
                                     pRplyContiDl->Status = END_OF_FILE;
                                 }
                             }
@@ -1145,7 +1146,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 pRplyContiDl->Status = UNKNOWN_ERROR;
                                 pRplyContiDl->Handle = byte.MaxValue;
 								pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEDL;
-                                cComFreeHandle(FileHandle);
+                                cComFreeHandle(*FileHandlecComSystemCommand);
 
                                 GH.printf("Data not appended\r\n");
                             }
@@ -1175,19 +1176,19 @@ namespace Ev3CoreUnsafe.Ccom
                         pBeginRead = (BEGIN_READ*)pRxBuf->Buf;
                         pReplyBeginRead = (RPLY_BEGIN_READ*)pTxBuf->Buf;
 
-                        FileHandle = cComGetHandle((DATA8*)pBeginRead->Path);
+                        *FileHandlecComSystemCommand = cComGetHandle((DATA8*)pBeginRead->Path);
 
-                        pTxBuf->pFile = &GH.ComInstance.Files[FileHandle];  // Insert the file pointer into the ch struct
-                        pTxBuf->FileHandle = (byte)FileHandle;                      // Also save the File handle number
+                        pTxBuf->pFile = &GH.ComInstance.Files[*FileHandlecComSystemCommand];  // Insert the file pointer into the ch struct
+                        pTxBuf->FileHandle = (byte)*FileHandlecComSystemCommand;                      // Also save the File handle number
 
                         pReplyBeginRead->CmdSize = SIZEOF_RPLYBEGINREAD - sizeof(CMDSIZE);
                         pReplyBeginRead->MsgCount = pBeginRead->MsgCount;
                         pReplyBeginRead->CmdType = SYSTEM_REPLY;
                         pReplyBeginRead->Cmd = BEGIN_UPLOAD;
                         pReplyBeginRead->Status = SUCCESS;
-                        pReplyBeginRead->Handle = (byte)FileHandle;
+                        pReplyBeginRead->Handle = (byte)*FileHandlecComSystemCommand;
 
-                        if (FileHandle >= 0)
+                        if (*FileHandlecComSystemCommand >= 0)
                         {
                             BytesToRead = (ULONG)(pBeginRead->BytesToReadLsb);
                             BytesToRead += (ULONG)(pBeginRead->BytesToReadMsb) << 8;
@@ -1242,7 +1243,7 @@ namespace Ev3CoreUnsafe.Ccom
 
 							//        pReplyBeginRead->Status = END_OF_FILE;
 							//        cComCloseFileHandle(&(pTxBuf->pFile->File));
-							//        cComFreeHandle(FileHandle);
+							//        cComFreeHandle(*FileHandlecComSystemCommand);
 							//    }
 							//    cComPrintTxMsg(pTxBuf);
 							//}
@@ -1252,9 +1253,9 @@ namespace Ev3CoreUnsafe.Ccom
 							//    pReplyBeginRead->Status = UNKNOWN_HANDLE;
 							//    pReplyBeginRead->Handle = byte.MaxValue;
 							//    pTxBuf->BlockLen = SIZEOF_RPLYBEGINREAD;
-							//    cComFreeHandle(FileHandle);
+							//    cComFreeHandle(*FileHandlecComSystemCommand);
 
-							//    GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} is not present \r\n");
+							//    GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} is not present \r\n");
 							//}
 
 							GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
@@ -1284,7 +1285,7 @@ namespace Ev3CoreUnsafe.Ccom
                         pContinueRead = (CONTINUE_READ*)pRxBuf->Buf;
                         pReplyContinueRead = (RPLY_CONTINUE_READ*)pTxBuf->Buf;
 
-                        FileHandle = (sbyte)pContinueRead->Handle;
+                        *FileHandlecComSystemCommand = (sbyte)pContinueRead->Handle;
 
                         /* Fill out the default settings */
                         pReplyContinueRead->CmdSize = SIZEOF_RPLYCONTINUEREAD - sizeof(CMDSIZE);
@@ -1292,9 +1293,9 @@ namespace Ev3CoreUnsafe.Ccom
                         pReplyContinueRead->CmdType = SYSTEM_REPLY;
                         pReplyContinueRead->Cmd = CONTINUE_UPLOAD;
                         pReplyContinueRead->Status = SUCCESS;
-                        pReplyContinueRead->Handle = (byte)FileHandle;
+                        pReplyContinueRead->Handle = (byte)*FileHandlecComSystemCommand;
 
-                        if ((FileHandle >= 0) && (pTxBuf->pFile->Name[0] != 0))
+                        if ((*FileHandlecComSystemCommand >= 0) && (pTxBuf->pFile->Name[0] != 0))
                         {
 
                             if (pTxBuf->pFile->File >= 0)
@@ -1338,13 +1339,13 @@ namespace Ev3CoreUnsafe.Ccom
 
                                 GH.printf($"Size {(ulong)pTxBuf->pFile->Size} - Loaded {(ulong)pTxBuf->pFile->Length}\r\n");
 
-                                if (GH.ComInstance.Files[FileHandle].Pointer >= GH.ComInstance.Files[FileHandle].Size)
+                                if (GH.ComInstance.Files[*FileHandlecComSystemCommand].Pointer >= GH.ComInstance.Files[*FileHandlecComSystemCommand].Size)
                                 {
-                                    GH.printf($"{CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} {(ulong)pTxBuf->pFile->Length} bytes UpLoaded\r\n");
+                                    GH.printf($"{CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} {(ulong)pTxBuf->pFile->Length} bytes UpLoaded\r\n");
 
                                     pReplyContinueRead->Status = END_OF_FILE;
                                     cComCloseFileHandle(&(pTxBuf->pFile->File));
-                                    cComFreeHandle(FileHandle);
+                                    cComFreeHandle(*FileHandlecComSystemCommand);
                                 }
                             }
                             else
@@ -1353,7 +1354,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 pReplyContinueRead->Status = HANDLE_NOT_READY;
                                 pReplyContinueRead->Handle = byte.MaxValue;
                                 pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEREAD;
-                                cComFreeHandle(FileHandle);
+                                cComFreeHandle(*FileHandlecComSystemCommand);
                                 GH.printf("Data not read\r\n");
                             }
                         }
@@ -1380,19 +1381,19 @@ namespace Ev3CoreUnsafe.Ccom
                         pBeginGetFile = (BEGIN_GET_FILE*)pRxBuf->Buf;
                         pReplyBeginGetFile = (RPLY_BEGIN_GET_FILE*)pTxBuf->Buf;
 
-                        FileHandle = cComGetHandle((DATA8*)pBeginGetFile->Path);
-                        pTxBuf->pFile = &GH.ComInstance.Files[FileHandle];  // Insert the file pointer into the ch struct
-                        pTxBuf->FileHandle = (byte)FileHandle;                      // Also save the File handle number
+                        *FileHandlecComSystemCommand = cComGetHandle((DATA8*)pBeginGetFile->Path);
+                        pTxBuf->pFile = &GH.ComInstance.Files[*FileHandlecComSystemCommand];  // Insert the file pointer into the ch struct
+                        pTxBuf->FileHandle = (byte)*FileHandlecComSystemCommand;                      // Also save the File handle number
 
                         // Fill out the reply
                         pReplyBeginGetFile->CmdSize = SIZEOF_RPLYBEGINGETFILE - sizeof(CMDSIZE);
                         pReplyBeginGetFile->MsgCount = pBeginGetFile->MsgCount;
                         pReplyBeginGetFile->CmdType = SYSTEM_REPLY;
                         pReplyBeginGetFile->Cmd = BEGIN_GETFILE;
-                        pReplyBeginGetFile->Handle = (byte)FileHandle;
+                        pReplyBeginGetFile->Handle = (byte)*FileHandlecComSystemCommand;
                         pReplyBeginGetFile->Status = SUCCESS;
 
-                        if (FileHandle >= 0)
+                        if (*FileHandlecComSystemCommand >= 0)
                         {
                             /* How many bytes to be returned the in the reply for BEGIN_UPLOAD    */
                             /* Should actually only be 2 bytes as only we can hold into 2 length  */
@@ -1400,7 +1401,7 @@ namespace Ev3CoreUnsafe.Ccom
                             BytesToRead = (ULONG)(pBeginGetFile->BytesToReadLsb);
                             BytesToRead += (ULONG)(pBeginGetFile->BytesToReadMsb) << 8;
 
-                            GH.printf($"File to get:  {CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} \r\n");
+                            GH.printf($"File to get:  {CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} \r\n");
 
 							// TODO: some files shite
 							//pTxBuf->pFile->File = open(pTxBuf->pFile->Name, O_RDONLY, 0x444);
@@ -1453,7 +1454,7 @@ namespace Ev3CoreUnsafe.Ccom
 							//        {
 							//            pReplyBeginGetFile->Status = END_OF_FILE;
 							//            cComCloseFileHandle(&(pTxBuf->pFile->File));
-							//            cComFreeHandle(FileHandle);
+							//            cComFreeHandle(*FileHandlecComSystemCommand);
 							//        }
 							//    }
 
@@ -1465,9 +1466,9 @@ namespace Ev3CoreUnsafe.Ccom
 							//    pReplyBeginGetFile->Status = HANDLE_NOT_READY;
 							//    pReplyBeginGetFile->Handle = byte.MaxValue;
 							//    pTxBuf->BlockLen = SIZEOF_RPLYBEGINGETFILE;
-							//    cComFreeHandle(FileHandle);
+							//    cComFreeHandle(*FileHandlecComSystemCommand);
 
-							//    GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[FileHandle].Name)} is not present \r\n");
+							//    GH.printf($"File {CommonHelper.GetString(GH.ComInstance.Files[*FileHandlecComSystemCommand].Name)} is not present \r\n");
 							//}
 
 							GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
@@ -1495,7 +1496,7 @@ namespace Ev3CoreUnsafe.Ccom
                         pContinueGetFile = (CONTINUE_GET_FILE*)pRxBuf->Buf;
                         pReplyContinueGetFile = (RPLY_CONTINUE_GET_FILE*)pTxBuf->Buf;
 
-                        FileHandle = (sbyte)pContinueGetFile->Handle;
+                        *FileHandlecComSystemCommand = (sbyte)pContinueGetFile->Handle;
 
                         /* Fill out the default settings */
                         pReplyContinueGetFile->CmdSize = SIZEOF_RPLYCONTINUEGETFILE - sizeof(CMDSIZE);
@@ -1503,9 +1504,9 @@ namespace Ev3CoreUnsafe.Ccom
                         pReplyContinueGetFile->CmdType = SYSTEM_REPLY;
                         pReplyContinueGetFile->Cmd = CONTINUE_GETFILE;
                         pReplyContinueGetFile->Status = SUCCESS;
-                        pReplyContinueGetFile->Handle = (byte)FileHandle;
+                        pReplyContinueGetFile->Handle = (byte)*FileHandlecComSystemCommand;
 
-                        if ((FileHandle >= 0) && (pTxBuf->pFile->Name[0] != 0))
+                        if ((*FileHandlecComSystemCommand >= 0) && (pTxBuf->pFile->Name[0] != 0))
                         {
 
                             if (pTxBuf->pFile->File >= 0)
@@ -1565,7 +1566,7 @@ namespace Ev3CoreUnsafe.Ccom
                                     {
                                         pReplyContinueGetFile->Status = END_OF_FILE;
                                         cComCloseFileHandle(&(pTxBuf->pFile->File));
-                                        cComFreeHandle(FileHandle);
+                                        cComFreeHandle(*FileHandlecComSystemCommand);
                                     }
                                 }
 
@@ -1579,7 +1580,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 pReplyContinueGetFile->Status = HANDLE_NOT_READY;
                                 pReplyContinueGetFile->Handle = byte.MaxValue;
                                 pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEGETFILE;
-                                cComFreeHandle(FileHandle);
+                                cComFreeHandle(*FileHandlecComSystemCommand);
 
                                 GH.printf("Data not read\r\n");
                             }
@@ -1608,19 +1609,19 @@ namespace Ev3CoreUnsafe.Ccom
                         pBeginList = (BEGIN_LIST*)pRxBuf->Buf;
                         pReplyBeginList = (RPLY_BEGIN_LIST*)pTxBuf->Buf;
 
-                        FileHandle = cComGetHandle("ListFileHandle".AsSbytePointer());
-                        pTxBuf->pFile = &GH.ComInstance.Files[FileHandle];   // Insert the file pointer into the ch struct
-                        pTxBuf->FileHandle = (byte)FileHandle;                       // Also save the File handle number
+                        *FileHandlecComSystemCommand = cComGetHandle("ListFileHandle".AsSbytePointer());
+                        pTxBuf->pFile = &GH.ComInstance.Files[*FileHandlecComSystemCommand];   // Insert the file pointer into the ch struct
+                        pTxBuf->FileHandle = (byte)*FileHandlecComSystemCommand;                       // Also save the File handle number
 
                         pReplyBeginList->CmdSize = SIZEOF_RPLYBEGINLIST - sizeof(CMDSIZE);
                         pReplyBeginList->MsgCount = pBeginList->MsgCount;
                         pReplyBeginList->CmdType = SYSTEM_REPLY;
                         pReplyBeginList->Cmd = LIST_FILES;
                         pReplyBeginList->Status = SUCCESS;
-                        pReplyBeginList->Handle = (byte)FileHandle;
+                        pReplyBeginList->Handle = (byte)*FileHandlecComSystemCommand;
                         pTxBuf->MsgLen = 0;
 
-                        if (0 <= FileHandle)
+                        if (0 <= *FileHandlecComSystemCommand)
                         {
                             BytesToRead = (ULONG)pBeginList->BytesToReadLsb;
                             BytesToRead += (ULONG)pBeginList->BytesToReadMsb << 8;
@@ -1643,7 +1644,7 @@ namespace Ev3CoreUnsafe.Ccom
                                     pReplyBeginList->Handle = byte.MaxValue;
 
                                     pTxBuf->BlockLen = SIZEOF_RPLYBEGINLIST;
-                                    cComFreeHandle(FileHandle);
+                                    cComFreeHandle(*FileHandlecComSystemCommand);
                                 }
                                 else
                                 {
@@ -1657,7 +1658,7 @@ namespace Ev3CoreUnsafe.Ccom
                                     pReplyBeginList->Handle = byte.MaxValue;
 
 									pTxBuf->BlockLen = SIZEOF_RPLYBEGINLIST;
-                                    cComFreeHandle(FileHandle);
+                                    cComFreeHandle(*FileHandlecComSystemCommand);
                                 }
                             }
                             else
@@ -1786,7 +1787,7 @@ namespace Ev3CoreUnsafe.Ccom
                                     GH.printf($"Complete list of {(ulong)pTxBuf->pFile->Length} Bytes uploaded \r\n");
 
                                     pReplyBeginList->Status = END_OF_FILE;
-                                    cComFreeHandle(FileHandle);
+                                    cComFreeHandle(*FileHandlecComSystemCommand);
                                 }
                             }
                         }
@@ -1846,7 +1847,7 @@ namespace Ev3CoreUnsafe.Ccom
 
                             pTxBuf->MsgLen = 0;
                             pTxBuf->BlockLen = SIZEOF_RPLYCONTINUELIST;
-                            cComFreeHandle(FileHandle);
+                            cComFreeHandle(*FileHandlecComSystemCommand);
                         }
                         else
                         {
@@ -1989,9 +1990,9 @@ namespace Ev3CoreUnsafe.Ccom
                         pCloseHandle = (CLOSE_HANDLE*)pRxBuf->Buf;
                         pReplyCloseHandle = (RPLY_CLOSE_HANDLE*)pTxBuf->Buf;
 
-                        FileHandle = (sbyte)pCloseHandle->Handle;
+                        *FileHandlecComSystemCommand = (sbyte)pCloseHandle->Handle;
 
-                        GH.printf($"FileHandle to close = {FileHandle}, Linux Handle = {GH.ComInstance.Files[FileHandle].File}\r\n");
+                        GH.printf($"*FileHandlecComSystemCommand to close = {*FileHandlecComSystemCommand}, Linux Handle = {GH.ComInstance.Files[*FileHandlecComSystemCommand].File}\r\n");
 
                         pReplyCloseHandle->CmdSize = SIZEOF_RPLYCLOSEHANDLE - sizeof(CMDSIZE);
                         pReplyCloseHandle->MsgCount = pCloseHandle->MsgCount;
@@ -2000,9 +2001,9 @@ namespace Ev3CoreUnsafe.Ccom
                         pReplyCloseHandle->Handle = pCloseHandle->Handle;
                         pReplyCloseHandle->Status = SUCCESS;
 
-                        if (1 == cComFreeHandle(FileHandle))
+                        if (1 == cComFreeHandle(*FileHandlecComSystemCommand))
                         {
-                            cComCloseFileHandle(&(GH.ComInstance.Files[FileHandle].File));
+                            cComCloseFileHandle(&(GH.ComInstance.Files[*FileHandlecComSystemCommand].File));
                         }
                         else
                         {
@@ -2636,10 +2637,11 @@ namespace Ev3CoreUnsafe.Ccom
             return (sbyte)cComUsbDeviceConnected;
         }
 
-        public void cComTxUpdate(UBYTE ChNo)
+		private ULONG* ReadBytescComTxUpdate = (ULONG*)CommonHelper.AllocateByteArray(4);
+		public void cComTxUpdate(UBYTE ChNo)
         {
             TXBUF* pTxBuf;
-            ULONG ReadBytes = 0;
+            
 
             pTxBuf = &(GH.ComInstance.TxBuf[ChNo]);
 
@@ -2769,6 +2771,7 @@ namespace Ev3CoreUnsafe.Ccom
             if (0 == pTxBuf->Writing)
             {
                 // Tx buffer needs to be empty to fill new data into it....
+                GH.Ev3System.Logger.LogInfo($"Current com tx state: {pTxBuf->State}");
                 switch (pTxBuf->State)
                 {
                     case TXFILEUPLOAD:
@@ -2807,7 +2810,7 @@ namespace Ev3CoreUnsafe.Ccom
 							//}
 
 							GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-							if (ReadBytes != 0)
+							if (*ReadBytescComTxUpdate != 0)
                             {
                                 pTxBuf->Writing = 1;
                             }
@@ -2846,7 +2849,7 @@ namespace Ev3CoreUnsafe.Ccom
 							//    }
 							//}
 							GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-							if (ReadBytes != 0)
+							if (*ReadBytescComTxUpdate != 0)
                             {
                                 pTxBuf->Writing = 1;
                             }
@@ -2984,7 +2987,9 @@ namespace Ev3CoreUnsafe.Ccom
                         break;
                 }
             }
-        }
+
+			GH.Ev3System.Logger.LogInfo($"exit of cComTxUpdate");
+		}
 
 
         public UBYTE cComFindMailbox(UBYTE* pName, UBYTE* pNo)
@@ -3372,7 +3377,8 @@ namespace Ev3CoreUnsafe.Ccom
         /*! \brief  opMAILBOX_WRITE byte code
          *
          */
-        public void cComWriteMailBox()
+        
+		public void cComWriteMailBox()
         {
             DSPSTAT DspStat = DSPSTAT.FAILBREAK;
             DATA8* pBrickName;
@@ -3380,14 +3386,14 @@ namespace Ev3CoreUnsafe.Ccom
             DATA8* pBoxName;
             DATA8 Type;
             DATA8 Values;
-            DATA32* Payload = CommonHelper.Pointer1d<DATA32>((MAILBOX_CONTENT_SIZE / 4) + 1);
             UBYTE ChNos;
             UBYTE ComChNo;
             UBYTE* ChNoArr = CommonHelper.Pointer1d<UBYTE>(NO_OF_BT_CHS);
             UBYTE Cnt;
             UWORD PayloadSize = 0;
 
-            WRITE_MAILBOX* pComMbx;
+			DATA32* PayloadcComWriteMailBox = CommonHelper.Pointer1d<DATA32>((MAILBOX_CONTENT_SIZE / 4) + 1);
+		    WRITE_MAILBOX* pComMbx;
             WRITE_MAILBOX_PAYLOAD* pComMbxPayload;
 
             pBrickName = (DATA8*)GH.Lms.PrimParPointer();
@@ -3403,25 +3409,25 @@ namespace Ev3CoreUnsafe.Ccom
                 {
                     case DATA_8:
                         {
-                            ((DATA8*)(Payload))[Cnt] = *(DATA8*)GH.Lms.PrimParPointer();
+                            ((DATA8*)(PayloadcComWriteMailBox))[Cnt] = *(DATA8*)GH.Lms.PrimParPointer();
                             PayloadSize++;
                         }
                         break;
                     case DATA_16:
                         {
-                            ((DATA16*)(Payload))[Cnt] = *(DATA16*)GH.Lms.PrimParPointer();
+                            ((DATA16*)(PayloadcComWriteMailBox))[Cnt] = *(DATA16*)GH.Lms.PrimParPointer();
                             PayloadSize += 2;
                         }
                         break;
                     case DATA_32:
                         {
-                            ((DATA32*)(Payload))[Cnt] = *(DATA32*)GH.Lms.PrimParPointer();
+                            ((DATA32*)(PayloadcComWriteMailBox))[Cnt] = *(DATA32*)GH.Lms.PrimParPointer();
                             PayloadSize += 4;
                         }
                         break;
                     case DATA_F:
                         {
-                            ((DATAF*)(Payload))[Cnt] = *(DATAF*)GH.Lms.PrimParPointer();
+                            ((DATAF*)(PayloadcComWriteMailBox))[Cnt] = *(DATAF*)GH.Lms.PrimParPointer();
                             PayloadSize += 4;
                         }
                         break;
@@ -3432,7 +3438,7 @@ namespace Ev3CoreUnsafe.Ccom
 
                             pName = (DATA8*)GH.Lms.PrimParPointer();
 
-                            PayloadSize = (ushort)CommonHelper.snprintf((DATA8*)&Payload[0], MAILBOX_CONTENT_SIZE, CommonHelper.GetString((DATA8*)pName));
+                            PayloadSize = (ushort)CommonHelper.snprintf((DATA8*)&PayloadcComWriteMailBox[0], MAILBOX_CONTENT_SIZE, CommonHelper.GetString((DATA8*)pName));
                             PayloadSize++; // Include zero termination
                         }
                         break;
@@ -3463,7 +3469,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 Size = MAILBOX_CONTENT_SIZE;
                             }
 
-                            CommonHelper.memcpy((UBYTE*)&Payload[0], (UBYTE*)(pDescr->pArray), Size);
+                            CommonHelper.memcpy((UBYTE*)&PayloadcComWriteMailBox[0], (UBYTE*)(pDescr->pArray), Size);
                             PayloadSize = (ushort)Size;
                         }
                         break;
@@ -3496,7 +3502,7 @@ namespace Ev3CoreUnsafe.Ccom
                     pComMbxPayload = (WRITE_MAILBOX_PAYLOAD*)&(GH.ComInstance.TxBuf[ComChNo].Buf[(*pComMbx).CmdSize + sizeof(CMDSIZE)]);
                     (*pComMbxPayload).SizeLsb = (UBYTE)(PayloadSize & 0x00FF);
                     (*pComMbxPayload).SizeMsb = (UBYTE)((PayloadSize >> 8) & 0x00FF);
-                    CommonHelper.memcpy((*pComMbxPayload).Payload, (byte*)Payload, PayloadSize);
+                    CommonHelper.memcpy((*pComMbxPayload).Payload, (byte*)PayloadcComWriteMailBox, PayloadSize);
                     (*pComMbx).CmdSize += (ushort)(PayloadSize + SIZEOF_WRITETOMAILBOXPAYLOAD);
 
                     GH.ComInstance.TxBuf[ComChNo].BlockLen = (uint)((*pComMbx).CmdSize + sizeof(CMDSIZE));
@@ -3795,9 +3801,9 @@ namespace Ev3CoreUnsafe.Ccom
         }
 
 
-        //static    DATA8 BtParred      =  0;
+		//static    DATA8 BtParred      =  0;
 
-        /*! \page cCom
+		/*! \page cCom
          *  <hr size="1"/>
          *  <b>     opCOM_GET (CMD, ....)  </b>
          *
@@ -3945,12 +3951,15 @@ namespace Ev3CoreUnsafe.Ccom
          *\n
          *
          */
-        /*! \brief  opCOM_GET byte code
+		/*! \brief  opCOM_GET byte code
          *
          */
 
-
-        public void cComGet()
+		private DATA8* ParredcComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* ConnectedcComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* VisiblecComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* TypecComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
+		public void cComGet()
         {
             DSPSTAT DspStat = DSPSTAT.FAILBREAK;
             DATA8 Cmd;
@@ -3963,10 +3972,7 @@ namespace Ev3CoreUnsafe.Ccom
             DATA8 Length;
             DATA8* pPin;
             DATA8 Items;
-            DATA8 Parred = 0;
-            DATA8 Connected = 0;
-            DATA8 Visible = 0;
-            DATA8 Type = 0;
+            
             DATA8* pMac;
             DATA8* pIp;
 
@@ -4166,8 +4172,8 @@ namespace Ev3CoreUnsafe.Ccom
                                 {
                                     if (null != pName)
                                     {
-										GH.Bt.cBtGetConnListEntry((byte)Item, (UBYTE*)pName, Length, (UBYTE*)&Type);
-                                        *(DATA8*)GH.Lms.PrimParPointer() = Type;
+										GH.Bt.cBtGetConnListEntry((byte)Item, (UBYTE*)pName, Length, (UBYTE*)TypecComGet);
+                                        *(DATA8*)GH.Lms.PrimParPointer() = *TypecComGet;
                                     }
                                     DspStat = DSPSTAT.NOBREAK;
                                 }
@@ -4235,14 +4241,14 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                             case HW_BT:
                                 {
-                                    Parred = 0;
-                                    Connected = 0;
-                                    Type = ICON_UNKNOWN;
-                                    Visible = 1;
+                                    *ParredcComGet = 0;
+                                    *ConnectedcComGet = 0;
+									*TypecComGet = ICON_UNKNOWN;
+									*VisiblecComGet = 1;
 
                                     if (null != pName)
                                     {
-										GH.Bt.cBtGetSearchListEntry((byte)Item, &Connected, &Type, &Parred, (UBYTE*)pName, Length);
+										GH.Bt.cBtGetSearchListEntry((byte)Item, ConnectedcComGet, TypecComGet, ParredcComGet, (UBYTE*)pName, Length);
                                     }
 
                                     DspStat = DSPSTAT.NOBREAK;
@@ -4250,10 +4256,10 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                             case HW_WIFI:
                                 {
-                                    Parred = 0;
-                                    Connected = 0;
-                                    Type = 0;
-                                    Visible = 0;
+									*ParredcComGet = 0;
+                                    *ConnectedcComGet = 0;
+									*TypecComGet = 0;
+									*VisiblecComGet = 0;
 
                                     if (null != pName)
                                     {
@@ -4262,19 +4268,19 @@ namespace Ev3CoreUnsafe.Ccom
 
                                         if ((Flags & VISIBLE) != 0)
                                         {
-                                            Visible = 1;
+											*VisiblecComGet = 1;
                                         }
                                         if ((Flags & CONNECTED) != 0)
                                         {
-                                            Connected = 1;
+											*ConnectedcComGet = 1;
                                         }
                                         if ((Flags & KNOWN) != 0)
                                         {
-                                            Parred = 1;
+											*ParredcComGet = 1;
                                         }
                                         if ((Flags & WPA2) != 0)
                                         {
-                                            Type = 1;
+											*TypecComGet = 1;
                                         }
                                     }
 
@@ -4282,10 +4288,10 @@ namespace Ev3CoreUnsafe.Ccom
                                 }
                                 break;
                         }
-                        *(DATA8*)GH.Lms.PrimParPointer() = Parred;
-                        *(DATA8*)GH.Lms.PrimParPointer() = Connected;
-                        *(DATA8*)GH.Lms.PrimParPointer() = Type;
-                        *(DATA8*)GH.Lms.PrimParPointer() = Visible;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *ParredcComGet;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *ConnectedcComGet;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *TypecComGet;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *VisiblecComGet;
                     }
                     break;
 
@@ -4345,22 +4351,22 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                             case HW_BT:
                                 {
-                                    Parred = 1;                      // Only in favour list if parred
-                                    Connected = 0;
-                                    Type = ICON_UNKNOWN;
+									*ParredcComGet = 1;                      // Only in favour list if parred
+									*ConnectedcComGet = 0;
+									*TypecComGet = ICON_UNKNOWN;
 
                                     if (null != pName)
                                     {
-                                        GH.Bt.cBtGetDevListEntry((byte)Item, &Connected, &Type, (UBYTE*)pName, Length);
+                                        GH.Bt.cBtGetDevListEntry((byte)Item, ConnectedcComGet, TypecComGet, (UBYTE*)pName, Length);
                                     }
                                     DspStat = DSPSTAT.NOBREAK;
                                 }
                                 break;
                             case HW_WIFI:
                                 {
-                                    Parred = 0;                      // Only in favour list if parred
-                                    Connected = 0;
-                                    Type = 0;
+									*ParredcComGet = 0;                      // Only in favour list if parred
+									*ConnectedcComGet = 0;
+									*TypecComGet = 0;
 
                                     if (null != pName)
                                     {
@@ -4369,15 +4375,15 @@ namespace Ev3CoreUnsafe.Ccom
 
                                         if ((Flags & CONNECTED) != 0)
                                         {
-                                            Connected = 1;
+											*ConnectedcComGet = 1;
                                         }
                                         if ((Flags & KNOWN) != 0)
                                         {
-                                            Parred = 1;
+											*ParredcComGet = 1;
                                         }
                                         if ((Flags & WPA2) != 0)
                                         {
-                                            Type = 1;
+											*TypecComGet = 1;
                                         }
                                     }
 
@@ -4390,9 +4396,9 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                         }
 
-                        *(DATA8*)GH.Lms.PrimParPointer() = Parred;
-                        *(DATA8*)GH.Lms.PrimParPointer() = Connected;
-                        *(DATA8*)GH.Lms.PrimParPointer() = Type;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *ParredcComGet;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *ConnectedcComGet;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *TypecComGet;
                     }
                     break;
 
@@ -4601,7 +4607,7 @@ namespace Ev3CoreUnsafe.Ccom
                         Hardware = *(DATA8*)GH.Lms.PrimParPointer();
                         Item = *(DATA8*)GH.Lms.PrimParPointer();
 
-                        Type = 0;
+						*TypecComGet = 0;
                         switch (Hardware)
                         {
                             case HW_USB:
@@ -4619,7 +4625,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                         }
 
-                        *(DATA8*)GH.Lms.PrimParPointer() = Type;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *TypecComGet;
                     }
                     break;
 
@@ -4648,10 +4654,10 @@ namespace Ev3CoreUnsafe.Ccom
                                 {
                                     if (null != pName)
                                     {
-										GH.Bt.cBtGetIncoming((UBYTE*)pName, (UBYTE*)&Type, (byte)Length);
+										GH.Bt.cBtGetIncoming((UBYTE*)pName, (UBYTE*)TypecComGet, (byte)Length);
                                     }
 
-                                    *(DATA8*)GH.Lms.PrimParPointer() = Type;
+                                    *(DATA8*)GH.Lms.PrimParPointer() = *TypecComGet;
                                     DspStat = DSPSTAT.NOBREAK;
                                 }
                                 break;

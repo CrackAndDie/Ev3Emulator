@@ -145,8 +145,11 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
         [FieldOffset(10)]
         public TRIGGER TriggerCount;               //!< Trigger count used by BLOCK's trigger logic
 
+		// TODO: rewrite to poitner
         [FieldOffset(12)]
         public fixed VARDATA Local[100];                      //!< Poll of bytes used for local variables
+
+		// public VARDATA
 
 		public const int Sizeof = 12; // the truth sizeof of orig
 	}

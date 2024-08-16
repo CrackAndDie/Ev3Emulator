@@ -1179,7 +1179,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			{
 				if (cMemoryGetPointer(PrgId, Handle, (void**)&pFDescr) == OK)
 				{
-					GH.printf($"Close file {Handle}    {(*pFDescr).hFile} {CommonHelper.GetString((*pFDescr).Filename)}\r\n");
+					GH.printf($"Close file {Handle}   {CommonHelper.GetString((*pFDescr).Filename)}\r\n");
 				}
 			}
 			else
@@ -1975,6 +1975,7 @@ namespace Ev3CoreUnsafe.Cmemory
 		/*! \brief  opFILE byte code
 		 *
 		 */
+		private HANDLER* TmpHandlecMemoryFile = (HANDLER*)CommonHelper.AllocateByteArray(2);
 		public void cMemoryFile()
 		{
 
@@ -1984,7 +1985,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			long ImagePointer;
 			DATA32 ISize;
 			IP pImage;
-			HANDLER TmpHandle = 0;
+			
 			PRGID TmpPrgId;
 			DATA32 Data32;
 
@@ -2054,10 +2055,10 @@ namespace Ev3CoreUnsafe.Cmemory
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_APPEND [{CommonHelper.GetString(FilenameBuf)}]\r\n");
-							DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_APPEND, FilenameBuf, &TmpHandle, &ISize);
+							DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_APPEND, FilenameBuf, TmpHandlecMemoryFile, &ISize);
 						}
 
-						*(DATA16*)GH.Lms.PrimParPointer() = TmpHandle;
+						*(DATA16*)GH.Lms.PrimParPointer() = *TmpHandlecMemoryFile;
 					}
 					break;
 
@@ -2069,10 +2070,10 @@ namespace Ev3CoreUnsafe.Cmemory
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_READ   [{CommonHelper.GetString(FilenameBuf)}]\r\n");
-							DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_READ, FilenameBuf, &TmpHandle, &ISize);
+							DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_READ, FilenameBuf, TmpHandlecMemoryFile, &ISize);
 						}
 
-						*(DATA16*)GH.Lms.PrimParPointer() = TmpHandle;
+						*(DATA16*)GH.Lms.PrimParPointer() = *TmpHandlecMemoryFile;
 						*(DATA32*)GH.Lms.PrimParPointer() = ISize;
 					}
 					break;
@@ -2085,66 +2086,66 @@ namespace Ev3CoreUnsafe.Cmemory
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_WRITE  [{CommonHelper.GetString(FilenameBuf)}]\r\n");
-							DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_WRITE, FilenameBuf, &TmpHandle, &ISize);
+							DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_WRITE, FilenameBuf, TmpHandlecMemoryFile, &ISize);
 
 						}
 
-						*(DATA16*)GH.Lms.PrimParPointer() = TmpHandle;
+						*(DATA16*)GH.Lms.PrimParPointer() = *TmpHandlecMemoryFile;
 					}
 					break;
 
 				case CLOSE:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 
-						DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle);
+						DspStat = cMemoryCloseFile(TmpPrgId, *TmpHandlecMemoryFile);
 					}
 					break;
 
 				case WRITE_TEXT:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Del = *(DATA8*)GH.Lms.PrimParPointer();
 						pSource = (DATA8*)GH.Lms.PrimParPointer();
 
-						DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)CommonHelper.strlen(pSource), Del, pSource);
+						DspStat = cMemoryWriteFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)CommonHelper.strlen(pSource), Del, pSource);
 					}
 					break;
 
 				case READ_TEXT:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Del = *(DATA8*)GH.Lms.PrimParPointer();
 						Lng = (DATA8)(*(DATA16*)GH.Lms.PrimParPointer());
 						pDestination = (DATA8*)GH.Lms.PrimParPointer();
 
-						DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Lng, Del, pDestination);
+						DspStat = cMemoryReadFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Lng, Del, pDestination);
 					}
 					break;
 
 				case WRITE_VALUE:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Del = *(DATA8*)GH.Lms.PrimParPointer();
 						DataF = *(DATAF*)GH.Lms.PrimParPointer();
 						Figures = *(DATA8*)GH.Lms.PrimParPointer();
 						Decimals = *(DATA8*)GH.Lms.PrimParPointer();
 
 						CommonHelper.snprintf(Buffer, LOGBUFFER_SIZE, CommonHelper.GetString(DataF, Figures, Decimals));
-						DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)CommonHelper.strlen(Buffer), Del, (DATA8*)Buffer);
+						DspStat = cMemoryWriteFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)CommonHelper.strlen(Buffer), Del, (DATA8*)Buffer);
 					}
 					break;
 
 				case READ_VALUE:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Del = *(DATA8*)GH.Lms.PrimParPointer();
 
 						Lng = 64;
 						Buffer[0] = 0;
 						pDestination = (DATA8*)Buffer;
 						DataF = (DATAF)0;
-						DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Lng, Del, pDestination);
+						DspStat = cMemoryReadFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Lng, Del, pDestination);
 						CommonHelper.sscanf(Buffer, "%f", &DataF);
 
 						*(DATAF*)GH.Lms.PrimParPointer() = DataF;
@@ -2153,21 +2154,21 @@ namespace Ev3CoreUnsafe.Cmemory
 
 				case WRITE_BYTES:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Bytes = *(DATA16*)GH.Lms.PrimParPointer();
 						pSource = (DATA8*)GH.Lms.PrimParPointer();
 
-						DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, pSource);
+						DspStat = cMemoryWriteFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Bytes, DEL_NONE, pSource);
 					}
 					break;
 
 				case READ_BYTES:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Bytes = *(DATA16*)GH.Lms.PrimParPointer();
 						pDestination = (DATA8*)GH.Lms.PrimParPointer();
 
-						DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, pDestination);
+						DspStat = cMemoryReadFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Bytes, DEL_NONE, pDestination);
 					}
 					break;
 
@@ -2183,7 +2184,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 						pSData = (DATA8*)GH.Lms.PrimParPointer();
 
-						TmpHandle = 0;
+						*TmpHandlecMemoryFile = 0;
 
 						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, vmEXT_DATALOG.AsSbytePointer()) == OK)
 						{
@@ -2198,7 +2199,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 								if (FilenameBuf[0] != 0)
 								{
-									DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_LOG, FilenameBuf, &TmpHandle, &ISize);
+									DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_LOG, FilenameBuf, TmpHandlecMemoryFile, &ISize);
 								}
 								if (DspStat == DSPSTAT.NOBREAK)
 								{
@@ -2207,7 +2208,7 @@ namespace Ev3CoreUnsafe.Cmemory
 									ElementSize = sizeof(DATA8);
 									ISize = Elements * ElementSize + sizeof(DESCR);
 
-									if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, &TmpHandle) == OK)
+									if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pTmp, TmpHandlecMemoryFile) == OK)
 									{
 										(*(DESCR*)pTmp).Type = DATA_8;
 										(*(DESCR*)pTmp).ElementSize = (DATA8)ElementSize;
@@ -2216,13 +2217,13 @@ namespace Ev3CoreUnsafe.Cmemory
 
 										if (pFileName[0] != 0)
 										{
-											GH.printf($"LOG_OPEN  {TmpHandle} into ram file {CommonHelper.GetString(FilenameBuf)}\r\n");
-											GH.printf($"  header  {TmpHandle} into ram file %{Bytes} bytes\r\n");
+											GH.printf($"LOG_OPEN  {*TmpHandlecMemoryFile} into ram file {CommonHelper.GetString(FilenameBuf)}\r\n");
+											GH.printf($"  header  {*TmpHandlecMemoryFile} into ram file %{Bytes} bytes\r\n");
 										}
 										else
 										{
-											GH.printf($"LOG_OPEN  {TmpHandle} into ram\r\n");
-											GH.printf($"  header  {TmpHandle} into ram {Bytes} bytes\r\n");
+											GH.printf($"LOG_OPEN  {*TmpHandlecMemoryFile} into ram\r\n");
+											GH.printf($"  header  {*TmpHandlecMemoryFile} into ram {Bytes} bytes\r\n");
 										}
 										pDescr = (DESCR*)pTmp;
 
@@ -2248,22 +2249,22 @@ namespace Ev3CoreUnsafe.Cmemory
 							else
 							{ // Log in file
 
-								DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_LOG, FilenameBuf, &TmpHandle, &ISize);
+								DspStat = cMemoryOpenFile(TmpPrgId, OPEN_FOR_LOG, FilenameBuf, TmpHandlecMemoryFile, &ISize);
 								if (DspStat == DSPSTAT.NOBREAK)
 								{
-									DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
-									GH.printf($"LOG_OPEN  {TmpHandle} into file {CommonHelper.GetString(pFileName)}\r\n");
-									GH.printf($"  header  {TmpHandle} file {Bytes} bytes\r\n");
+									DspStat = cMemoryWriteFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
+									GH.printf($"LOG_OPEN  {*TmpHandlecMemoryFile} into file {CommonHelper.GetString(pFileName)}\r\n");
+									GH.printf($"  header  {*TmpHandlecMemoryFile} file {Bytes} bytes\r\n");
 								}
 							}
 						}
-						*(HANDLER*)GH.Lms.PrimParPointer() = (HANDLER)TmpHandle;
+						*(HANDLER*)GH.Lms.PrimParPointer() = (HANDLER)(*TmpHandlecMemoryFile);
 					}
 					break;
 
 				case WRITE_LOG:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						Time = *(DATA32*)GH.Lms.PrimParPointer();
 						Items = *(DATA8*)GH.Lms.PrimParPointer();
 						pValue = (DATAF*)GH.Lms.PrimParPointer();
@@ -2286,10 +2287,10 @@ namespace Ev3CoreUnsafe.Cmemory
 								}
 							}
 
-							if (GH.MemoryInstance.pPoolList[TmpPrgId][TmpHandle].Type == POOL_TYPE_MEMORY)
+							if (GH.MemoryInstance.pPoolList[TmpPrgId][*TmpHandlecMemoryFile].Type == POOL_TYPE_MEMORY)
 							{ // Log to memory
 
-								if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+								if (cMemoryGetPointer(TmpPrgId, *TmpHandlecMemoryFile, &pTmp) == OK)
 								{
 									pDescr = (DESCR*)pTmp;
 
@@ -2299,12 +2300,12 @@ namespace Ev3CoreUnsafe.Cmemory
 									if (UsedElements > Elements)
 									{
 										Elements += LOGBUFFER_SIZE;
-										GH.printf($"LOG_WRITE {TmpHandle} resizing ram to {Elements}\r\n");
+										GH.printf($"LOG_WRITE {*TmpHandlecMemoryFile} resizing ram to {Elements}\r\n");
 										cMemoryGetUsage(&TotalRam, &FreeRam, 0);
 										GH.printf($"Free memory {FreeRam} KB\r\n");
 										if (FreeRam > RESERVED_MEMORY)
 										{
-											if (cMemoryResize(TmpPrgId, TmpHandle, Elements) == null)
+											if (cMemoryResize(TmpPrgId, *TmpHandlecMemoryFile, Elements) == null)
 											{
 												Error = OUT_OF_MEMORY;
 											}
@@ -2317,14 +2318,14 @@ namespace Ev3CoreUnsafe.Cmemory
 									}
 									if (Error == 0)
 									{
-										if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+										if (cMemoryGetPointer(TmpPrgId, *TmpHandlecMemoryFile, &pTmp) == OK)
 										{
 											pDescr = (DESCR*)pTmp;
 
 											pDestination = (DATA8*)(*pDescr).pArray;
 											UsedElements = (*pDescr).UsedElements;
 
-											GH.printf($"LOG_WRITE {TmpHandle} ram {Bytes} bytes\r\n");
+											GH.printf($"LOG_WRITE {*TmpHandlecMemoryFile} ram {Bytes} bytes\r\n");
 											CommonHelper.memcpy((byte*)&pDestination[UsedElements], (byte*)Buffer, (int)Bytes);
 											(*pDescr).UsedElements = UsedElements + (DATA32)Bytes;
 
@@ -2342,8 +2343,8 @@ namespace Ev3CoreUnsafe.Cmemory
 							else
 							{ // Log to file
 
-								GH.printf($"LOG_WRITE {TmpHandle} file {Bytes} bytes\r\n");
-								DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
+								GH.printf($"LOG_WRITE {*TmpHandlecMemoryFile} file {Bytes} bytes\r\n");
+								DspStat = cMemoryWriteFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
 							}
 						}
 						DspStat = DSPSTAT.NOBREAK;
@@ -2352,7 +2353,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 				case CLOSE_LOG:
 					{
-						TmpHandle = *(DATA16*)GH.Lms.PrimParPointer();
+						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
 						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, vmEXT_DATALOG.AsSbytePointer()) == OK)
@@ -2360,12 +2361,12 @@ namespace Ev3CoreUnsafe.Cmemory
 							DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, &TmpHandle2, &Tmp);
 							GH.printf($"c_memory  cMemoryFile: CLOSE_LOG   [{CommonHelper.GetString(FilenameBuf)}]\r\n");
 
-							if (GH.MemoryInstance.pPoolList[TmpPrgId][TmpHandle].Type == POOL_TYPE_MEMORY)
+							if (GH.MemoryInstance.pPoolList[TmpPrgId][*TmpHandlecMemoryFile].Type == POOL_TYPE_MEMORY)
 							{ // Log to memory
 
 								if (FilenameBuf[0] != 0)
 								{
-									if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
+									if (cMemoryGetPointer(TmpPrgId, *TmpHandlecMemoryFile, &pTmp) == OK)
 									{
 										pDescr = (DESCR*)pTmp;
 
@@ -2388,7 +2389,7 @@ namespace Ev3CoreUnsafe.Cmemory
 											Bytes = 10;
 
 
-											GH.printf($"LOG_WRITE {TmpHandle} ram {Bytes} log end signature\r\n");
+											GH.printf($"LOG_WRITE {*TmpHandlecMemoryFile} ram {Bytes} log end signature\r\n");
 											CommonHelper.memcpy((byte*)&pSource[UsedElements], (byte*)Buffer, (int)Bytes);
 											UsedElements += (DATA32)Bytes;
 
@@ -2398,7 +2399,7 @@ namespace Ev3CoreUnsafe.Cmemory
 												UsedElements = (FreeRam - RESERVED_MEMORY) * KB;
 											}
 
-											GH.printf($"LOG_CLOSE {TmpHandle} ram and save {UsedElements} bytes to {CommonHelper.GetString(pFileName)}\r\n");
+											GH.printf($"LOG_CLOSE {*TmpHandlecMemoryFile} ram and save {UsedElements} bytes to {CommonHelper.GetString(pFileName)}\r\n");
 											DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle2, (DATA32)UsedElements, DEL_NONE, pSource);
 										}
 										if (DspStat == DSPSTAT.NOBREAK)
@@ -2409,7 +2410,7 @@ namespace Ev3CoreUnsafe.Cmemory
 								}
 								else
 								{
-									cMemoryFreeHandle(TmpPrgId, TmpHandle);
+									cMemoryFreeHandle(TmpPrgId, *TmpHandlecMemoryFile);
 
 									DspStat = DSPSTAT.NOBREAK;
 								}
@@ -2429,12 +2430,12 @@ namespace Ev3CoreUnsafe.Cmemory
 
 								Bytes = 10;
 
-								GH.printf($"LOG_WRITE {TmpHandle} file {Bytes} 0xFF\r\n");
-								DspStat = cMemoryWriteFile(TmpPrgId, TmpHandle, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
+								GH.printf($"LOG_WRITE {*TmpHandlecMemoryFile} file {Bytes} 0xFF\r\n");
+								DspStat = cMemoryWriteFile(TmpPrgId, *TmpHandlecMemoryFile, (DATA32)Bytes, DEL_NONE, (DATA8*)Buffer);
 
-								DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle);
+								DspStat = cMemoryCloseFile(TmpPrgId, *TmpHandlecMemoryFile);
 
-								GH.printf($"LOG_CLOSE {TmpHandle} file\r\n");
+								GH.printf($"LOG_CLOSE {*TmpHandlecMemoryFile} file\r\n");
 							}
 						}
 						DspStat = DSPSTAT.NOBREAK;
@@ -2470,16 +2471,16 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
-						TmpHandle = 0;
+						*TmpHandlecMemoryFile = 0;
 						Tmp = 0;
 
 						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
 						{
-							DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, &TmpHandle, &Tmp);
+							DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, TmpHandlecMemoryFile, &Tmp);
 							GH.printf($"c_memory  cMemoryFile: GET_HANDLE  [{CommonHelper.GetString(FilenameBuf)}]\r\n");
 						}
 
-						*(DATA16*)GH.Lms.PrimParPointer() = TmpHandle;
+						*(DATA16*)GH.Lms.PrimParPointer() = *TmpHandlecMemoryFile;
 						*(DATA8*)GH.Lms.PrimParPointer() = Tmp;
 					}
 					break;
@@ -2608,7 +2609,7 @@ namespace Ev3CoreUnsafe.Cmemory
 								ISize = (int)hFile.Length;
 
 								// allocate memory to contain the whole file:
-								if (cMemoryAlloc((ushort)PrgNo, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
+								if (cMemoryAlloc((ushort)PrgNo, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, TmpHandlecMemoryFile) == OK)
 								{
 									hFile.ReadUnsafe(pImage, 0, ISize);
 									ImagePointer = (DATA32)pImage;
@@ -2639,17 +2640,16 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						ISize = *(DATA32*)GH.Lms.PrimParPointer();
 						DspStat = DSPSTAT.FAILBREAK;
-						TmpHandle = -1;
+						*TmpHandlecMemoryFile = -1;
 
-						if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, &TmpHandle) == OK)
+						if (cMemoryAlloc(TmpPrgId, POOL_TYPE_MEMORY, (GBINDEX)ISize, (void**)&pImage, TmpHandlecMemoryFile) == OK)
 						{
 							ImagePointer = (DATA32)pImage;
 							DspStat = DSPSTAT.NOBREAK;
 						}
 
-						*(DATA16*)GH.Lms.PrimParPointer() = TmpHandle;
+						*(DATA16*)GH.Lms.PrimParPointer() = *TmpHandlecMemoryFile;
 						*(DATA32*)GH.Lms.PrimParPointer() = (int)ImagePointer;
-#warning (int)ImagePointer; won't work
 					}
 					break;
 
@@ -3691,6 +3691,7 @@ namespace Ev3CoreUnsafe.Cmemory
 		/*! \brief  opARRAY_APPEND byte code
 		 *
 		 */
+		private DATA32* IndexcMemoryArrayAppend = (DATA32*)CommonHelper.AllocateByteArray(4);
 		public void cMemoryArrayAppend()
 		{
 			DSPSTAT DspStat = DSPSTAT.FAILBREAK;
@@ -3700,7 +3701,6 @@ namespace Ev3CoreUnsafe.Cmemory
 			void* pValue;
 			DESCR* pDescr;
 			DATA32 Elements;
-			DATA32 Index = 0;
 			void* pArray;
 			DATA8* pData8;
 			DATA16* pData16;
@@ -3714,8 +3714,8 @@ namespace Ev3CoreUnsafe.Cmemory
 			if (cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp) == OK)
 			{
 				pDescr = (DESCR*)pTmp;
-				Index = (*pDescr).Elements;
-				Elements = Index + 1;
+				*IndexcMemoryArrayAppend = (*pDescr).Elements;
+				Elements = *IndexcMemoryArrayAppend + 1;
 
 				DspStat = DSPSTAT.NOBREAK;
 				if (Elements > (*pDescr).Elements)
@@ -3731,14 +3731,14 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						pDescr = (DESCR*)pTmp;
 						pArray = (*pDescr).pArray;
-						GH.printf($"  Append P={(uint)TmpPrgId} H={(uint)TmpHandle}     I={(ulong)Index} A={(long)pArray}");
+						GH.printf($"  Append P={(uint)TmpPrgId} H={(uint)TmpHandle}     I={(ulong)*IndexcMemoryArrayAppend} A={(long)pArray}");
 						switch ((*pDescr).Type)
 						{
 							case DATA_8:
 								{
 									GH.printf($" V={(int)*(DATA8*)pValue}");
 									pData8 = (DATA8*)pArray;
-									pData8[Index] = *(DATA8*)pValue;
+									pData8[*IndexcMemoryArrayAppend] = *(DATA8*)pValue;
 									DspStat = DSPSTAT.NOBREAK;
 								}
 								break;
@@ -3747,7 +3747,7 @@ namespace Ev3CoreUnsafe.Cmemory
 								{
 									GH.printf($" V={(int)*(DATA16*)pValue}");
 									pData16 = (DATA16*)pArray;
-									pData16[Index] = *(DATA16*)pValue;
+									pData16[*IndexcMemoryArrayAppend] = *(DATA16*)pValue;
 									DspStat = DSPSTAT.NOBREAK;
 								}
 								break;
@@ -3756,7 +3756,7 @@ namespace Ev3CoreUnsafe.Cmemory
 								{
 									GH.printf($" V={(int)*(DATA32*)pValue}");
 									pData32 = (DATA32*)pArray;
-									pData32[Index] = *(DATA32*)pValue;
+									pData32[*IndexcMemoryArrayAppend] = *(DATA32*)pValue;
 									DspStat = DSPSTAT.NOBREAK;
 								}
 								break;
@@ -3765,7 +3765,7 @@ namespace Ev3CoreUnsafe.Cmemory
 								{
 									GH.printf($" V={*(DATAF*)pValue}");
 									pDataF = (DATAF*)pArray;
-									pDataF[Index] = *(DATAF*)pValue;
+									pDataF[*IndexcMemoryArrayAppend] = *(DATAF*)pValue;
 									DspStat = DSPSTAT.NOBREAK;
 								}
 								break;
@@ -3777,7 +3777,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			}
 			if (DspStat != DSPSTAT.NOBREAK)
 			{
-				GH.printf($"  WR ERR P={(uint)TmpPrgId} H={(uint)TmpHandle}     I={(ulong)Index}\r\n");
+				GH.printf($"  WR ERR P={(uint)TmpPrgId} H={(uint)TmpHandle}     I={(ulong)*IndexcMemoryArrayAppend}\r\n");
 				GH.Lms.SetDispatchStatus(DspStat);
 			}
 		}

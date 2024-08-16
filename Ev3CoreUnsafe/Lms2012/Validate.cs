@@ -203,7 +203,11 @@ namespace Ev3CoreUnsafe.Lms2012
 			return (GH.ValidateInstance.ValidateErrorIndex);
 		}
 
-		private int* tmpParValueDissAss = (int*)CommonHelper.AllocateByteArray(4);
+		// private int* tmpParValueDissAss = (int*)CommonHelper.AllocateByteArray(4);
+		private ULONG* ValueValDis = (ULONG*)CommonHelper.AllocateByteArray(4);
+		private UBYTE* ParCodeValDis = (UBYTE*)CommonHelper.AllocateByteArray(1);
+		private void* pParValueValDis;
+
 		public RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 		{
 			RESULT Result = RESULT.FAIL;  // Current status
@@ -212,9 +216,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			UBYTE ParType;        // Current parameter type
 			UBYTE Sub = 0;            // Current sub code if any
 			UBYTE Tab;            // Sub code table index
-			ULONG Value;
-			UBYTE ParCode = 0;
-			void* pParValue = tmpParValueDissAss;
+			
 			DATA8 Parameters;
 			DATA32 Bytes = 0;
 			int Indent;
@@ -262,7 +264,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						{ // Prior plain parameter was a sub code
 
 							// Get sub code from last plain parameter
-							Sub = (byte)(*(DATA8*)pParValue); 
+							Sub = (byte)(*(DATA8*)pParValueValDis); 
 
 							// Isolate next parameter type
 							Pars >>= 4;
@@ -277,18 +279,18 @@ namespace Ev3CoreUnsafe.Lms2012
 								if (SubCodes[Tab][Sub].Name != null)
 								{ // Ok
 
-									if ((ParCode & PRIMPAR_LONG) != 0)
+									if ((*ParCodeValDis & PRIMPAR_LONG) != 0)
 									{ // long format
 
-										if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_1_BYTE)
+										if ((*ParCodeValDis & PRIMPAR_BYTES) == PRIMPAR_1_BYTE)
 										{
 											LineLength += GH.printf($"LC1({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 										}
-										if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_2_BYTES)
+										if ((*ParCodeValDis & PRIMPAR_BYTES) == PRIMPAR_2_BYTES)
 										{
 											LineLength += GH.printf($"LC2({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 										}
-										if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_4_BYTES)
+										if ((*ParCodeValDis & PRIMPAR_BYTES) == PRIMPAR_4_BYTES)
 										{
 											LineLength += GH.printf($"LC4({CommonHelper.GetString((sbyte*)SubCodes[Tab][Sub].Name)}),");
 										}
@@ -306,7 +308,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 						if (ParType == PARVALUES)
 						{
-							Bytes = *(DATA32*)pParValue;
+							Bytes = *(DATA32*)pParValueValDis;
 							// Next parameter
 							Pars >>= 4;
 							Pars &= 0x0F;
@@ -319,30 +321,30 @@ namespace Ev3CoreUnsafe.Lms2012
 									GH.printf($"\r\n{new string(' ', Indent)}");
 									LineLength = Indent;
 								}
-								Value = (ULONG)0;
-								pParValue = (void*)&Value;
-								ParCode = (byte)((UBYTE)pI[(*pIndex)++] & 0xFF);
+								*ValueValDis = (ULONG)0;
+								pParValueValDis = (void*)ValueValDis;
+								*ParCodeValDis = (byte)((UBYTE)pI[(*pIndex)++] & 0xFF);
 
 								// Calculate parameter value
 
-								if ((ParCode & PRIMPAR_LONG) != 0)
+								if ((*ParCodeValDis & PRIMPAR_LONG) != 0)
 								{ // long format
 
-									if ((ParCode & PRIMPAR_HANDLE) != 0)
+									if ((*ParCodeValDis & PRIMPAR_HANDLE) != 0)
 									{
 										LineLength += GH.printf("HND(");
 									}
 									else
 									{
-										if ((ParCode & PRIMPAR_ADDR) != 0)
+										if ((*ParCodeValDis & PRIMPAR_ADDR) != 0)
 										{
 											LineLength += GH.printf("ADR(");
 										}
 									}
-									if ((ParCode & PRIMPAR_VARIABEL) != 0)
+									if ((*ParCodeValDis & PRIMPAR_VARIABEL) != 0)
 									{ // variabel
 
-										if ((ParCode & PRIMPAR_GLOBAL) != 0)
+										if ((*ParCodeValDis & PRIMPAR_GLOBAL) != 0)
 										{ // global
 
 											LineLength += GH.printf("GV");
@@ -352,33 +354,33 @@ namespace Ev3CoreUnsafe.Lms2012
 
 											LineLength += GH.printf("LV");
 										}
-										switch (ParCode & PRIMPAR_BYTES)
+										switch (*ParCodeValDis & PRIMPAR_BYTES)
 										{
 											case PRIMPAR_1_BYTE:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
+													*ValueValDis = (ULONG)pI[(*pIndex)++];
 
-													LineLength += GH.printf($"1({(int)Value})");
+													LineLength += GH.printf($"1({(int)*ValueValDis})");
 												}
 												break;
 
 											case PRIMPAR_2_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
+													*ValueValDis = (ULONG)pI[(*pIndex)++];
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
 
-													LineLength += GH.printf($"2({(int)Value})");
+													LineLength += GH.printf($"2({(int)*ValueValDis})");
 												}
 												break;
 
 											case PRIMPAR_4_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
-													Value |= ((ULONG)pI[(*pIndex)++] << 16);
-													Value |= ((ULONG)pI[(*pIndex)++] << 24);
+													*ValueValDis = (ULONG)pI[(*pIndex)++];
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 16);
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 24);
 
-													LineLength += GH.printf($"4({(int)Value})");
+													LineLength += GH.printf($"4({(int)*ValueValDis})");
 												}
 												break;
 
@@ -387,33 +389,33 @@ namespace Ev3CoreUnsafe.Lms2012
 									else
 									{ // constant
 
-										if ((ParCode & PRIMPAR_HANDLE) != 0)
+										if ((*ParCodeValDis & PRIMPAR_HANDLE) != 0)
 										{
 											LineLength += GH.printf("HND(");
 										}
 										else
 										{
-											if ((ParCode & PRIMPAR_ADDR) != 0)
+											if ((*ParCodeValDis & PRIMPAR_ADDR) != 0)
 											{
 												LineLength += GH.printf("ADR(");
 											}
 										}
-										if ((ParCode & PRIMPAR_LABEL) != 0)
+										if ((*ParCodeValDis & PRIMPAR_LABEL) != 0)
 										{ // label
 
-											Value = (ULONG)pI[(*pIndex)++];
-											if ((Value & 0x00000080) != 0)
+											*ValueValDis = (ULONG)pI[(*pIndex)++];
+											if ((*ValueValDis & 0x00000080) != 0)
 											{ // Adjust if negative
 
-												Value |= 0xFFFFFF00;
+												*ValueValDis |= 0xFFFFFF00;
 											}
 
-											LineLength += GH.printf($"LAB1({(int)(Value & 0xFF)})");
+											LineLength += GH.printf($"LAB1({(int)(*ValueValDis & 0xFF)})");
 										}
 										else
 										{ // value
 
-											switch (ParCode & PRIMPAR_BYTES)
+											switch (*ParCodeValDis & PRIMPAR_BYTES)
 											{
 												case PRIMPAR_STRING_OLD:
 												case PRIMPAR_STRING:
@@ -467,44 +469,44 @@ namespace Ev3CoreUnsafe.Lms2012
 
 												case PRIMPAR_1_BYTE:
 													{
-														Value = (ULONG)pI[(*pIndex)++];
-														if ((Value & 0x00000080) != 0)
+														*ValueValDis = (ULONG)pI[(*pIndex)++];
+														if ((*ValueValDis & 0x00000080) != 0)
 														{ // Adjust if negative
 
-															Value |= 0xFFFFFF00;
+															*ValueValDis |= 0xFFFFFF00;
 														}
 														if ((Pars & 0x0f) != SUBP)
 														{
-															LineLength += GH.printf($"LC1({(int)Value})");
+															LineLength += GH.printf($"LC1({(int)*ValueValDis})");
 														}
 													}
 													break;
 
 												case PRIMPAR_2_BYTES:
 													{
-														Value = (ULONG)pI[(*pIndex)++];
-														Value |= ((ULONG)pI[(*pIndex)++] << 8);
-														if ((Value & 0x00008000) != 0)
+														*ValueValDis = (ULONG)pI[(*pIndex)++];
+														*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
+														if ((*ValueValDis & 0x00008000) != 0)
 														{ // Adjust if negative
 
-															Value |= 0xFFFF0000;
+															*ValueValDis |= 0xFFFF0000;
 														}
 														if ((Pars & 0x0f) != SUBP)
 														{
-															LineLength += GH.printf($"LC2({(int)Value})");
+															LineLength += GH.printf($"LC2({(int)*ValueValDis})");
 														}
 													}
 													break;
 
 												case PRIMPAR_4_BYTES:
 													{
-														Value = (ULONG)pI[(*pIndex)++];
-														Value |= ((ULONG)pI[(*pIndex)++] << 8);
-														Value |= ((ULONG)pI[(*pIndex)++] << 16);
-														Value |= ((ULONG)pI[(*pIndex)++] << 24);
+														*ValueValDis = (ULONG)pI[(*pIndex)++];
+														*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
+														*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 16);
+														*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 24);
 														if ((Pars & 0x0f) != SUBP)
 														{
-															LineLength += GH.printf($"LC4({(long)Value})");
+															LineLength += GH.printf($"LC4({(long)*ValueValDis})");
 														}
 													}
 													break;
@@ -512,13 +514,13 @@ namespace Ev3CoreUnsafe.Lms2012
 											}
 										}
 									}
-									if ((ParCode & PRIMPAR_HANDLE) != 0)
+									if ((*ParCodeValDis & PRIMPAR_HANDLE) != 0)
 									{
 										LineLength += GH.printf("),");
 									}
 									else
 									{
-										if ((ParCode & PRIMPAR_ADDR) != 0)
+										if ((*ParCodeValDis & PRIMPAR_ADDR) != 0)
 										{
 											LineLength += GH.printf("),");
 										}
@@ -531,45 +533,45 @@ namespace Ev3CoreUnsafe.Lms2012
 								else
 								{ // short format
 
-									if ((ParCode & PRIMPAR_VARIABEL) != 0)
+									if ((*ParCodeValDis & PRIMPAR_VARIABEL) != 0)
 									{ // variabel
 
-										if ((ParCode & PRIMPAR_GLOBAL) != 0)
+										if ((*ParCodeValDis & PRIMPAR_GLOBAL) != 0)
 										{ // global
 
-											LineLength += GH.printf($"GV0({(uint)(ParCode & PRIMPAR_INDEX)})");
+											LineLength += GH.printf($"GV0({(uint)(*ParCodeValDis & PRIMPAR_INDEX)})");
 										}
 										else
 										{ // local
 
-											LineLength += GH.printf($"LV0({(uint)(ParCode & PRIMPAR_INDEX)})");
+											LineLength += GH.printf($"LV0({(uint)(*ParCodeValDis & PRIMPAR_INDEX)})");
 										}
 									}
 									else
 									{ // constant
 
-										Value = (ULONG)(ParCode & PRIMPAR_VALUE);
+										*ValueValDis = (ULONG)(*ParCodeValDis & PRIMPAR_VALUE);
 
-										if ((ParCode & PRIMPAR_CONST_SIGN) != 0)
+										if ((*ParCodeValDis & PRIMPAR_CONST_SIGN) != 0)
 										{ // Adjust if negative
 
-											Value |= ~(ULONG)(PRIMPAR_VALUE);
+											*ValueValDis |= ~(ULONG)(PRIMPAR_VALUE);
 										}
-										LineLength += GH.printf($"LC0({(int)Value})");
+										LineLength += GH.printf($"LC0({(int)*ValueValDis})");
 
 									}
 									LineLength += GH.printf(",");
 								}
 								if (ParType == PARNO)
 								{
-									if ((ParCode & PRIMPAR_VARIABEL) == 0)
+									if ((*ParCodeValDis & PRIMPAR_VARIABEL) == 0)
 									{
-										Parameters = (DATA8)(*(DATA32*)pParValue);
+										Parameters = (DATA8)(*(DATA32*)pParValueValDis);
 									}
 								}
 								if (ParType == PARLAB)
 								{
-									if ((ParCode & PRIMPAR_VARIABEL) == 0)
+									if ((*ParCodeValDis & PRIMPAR_VARIABEL) == 0)
 									{
 									}
 								}
@@ -587,33 +589,33 @@ namespace Ev3CoreUnsafe.Lms2012
 								GH.printf($"\r\n{new string(' ', Indent)}"); 
 								LineLength = Indent;
 							}
-							Value = (ULONG)0;
-							pParValue = (void*)&Value;
-							ParCode = (UBYTE)(pI[(*pIndex)++] & 0xFF);
+							*ValueValDis = (ULONG)0;
+							pParValueValDis = (void*)ValueValDis;
+							*ParCodeValDis = (UBYTE)(pI[(*pIndex)++] & 0xFF);
 
 							// Next parameter
 							Pars >>= 4;
 
 							// Calculate parameter value
 
-							if ((ParCode & PRIMPAR_LONG) != 0)
+							if ((*ParCodeValDis & PRIMPAR_LONG) != 0)
 							{ // long format
 
-								if ((ParCode & PRIMPAR_HANDLE) != 0)
+								if ((*ParCodeValDis & PRIMPAR_HANDLE) != 0)
 								{
 									LineLength += GH.printf("HND(");
 								}
 								else
 								{
-									if ((ParCode & PRIMPAR_ADDR) != 0)
+									if ((*ParCodeValDis & PRIMPAR_ADDR) != 0)
 									{
 										LineLength += GH.printf("ADR(");
 									}
 								}
-								if ((ParCode & PRIMPAR_VARIABEL) != 0)
+								if ((*ParCodeValDis & PRIMPAR_VARIABEL) != 0)
 								{ // variabel
 
-									if ((ParCode & PRIMPAR_GLOBAL) != 0)
+									if ((*ParCodeValDis & PRIMPAR_GLOBAL) != 0)
 									{ // global
 
 										LineLength += GH.printf("GV");
@@ -623,33 +625,33 @@ namespace Ev3CoreUnsafe.Lms2012
 
 										LineLength += GH.printf("LV");
 									}
-									switch (ParCode & PRIMPAR_BYTES)
+									switch (*ParCodeValDis & PRIMPAR_BYTES)
 									{
 										case PRIMPAR_1_BYTE:
 											{
-												Value = (ULONG)pI[(*pIndex)++];
+												*ValueValDis = (ULONG)pI[(*pIndex)++];
 
-												LineLength += GH.printf($"1({(int)Value})");
+												LineLength += GH.printf($"1({(int)*ValueValDis})");
 											}
 											break;
 
 										case PRIMPAR_2_BYTES:
 											{
-												Value = (ULONG)pI[(*pIndex)++];
-												Value |= ((ULONG)pI[(*pIndex)++] << 8);
+												*ValueValDis = (ULONG)pI[(*pIndex)++];
+												*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
 
-												LineLength += GH.printf($"2({(int)Value})");
+												LineLength += GH.printf($"2({(int)*ValueValDis})");
 											}
 											break;
 
 										case PRIMPAR_4_BYTES:
 											{
-												Value = (ULONG)pI[(*pIndex)++];
-												Value |= ((ULONG)pI[(*pIndex)++] << 8);
-												Value |= ((ULONG)pI[(*pIndex)++] << 16);
-												Value |= ((ULONG)pI[(*pIndex)++] << 24);
+												*ValueValDis = (ULONG)pI[(*pIndex)++];
+												*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
+												*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 16);
+												*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 24);
 
-												LineLength += GH.printf($"4({(int)Value})");
+												LineLength += GH.printf($"4({(int)*ValueValDis})");
 											}
 											break;
 
@@ -658,33 +660,33 @@ namespace Ev3CoreUnsafe.Lms2012
 								else
 								{ // constant
 
-									if ((ParCode & PRIMPAR_HANDLE) != 0)
+									if ((*ParCodeValDis & PRIMPAR_HANDLE) != 0)
 									{
 										LineLength += GH.printf("HND(");
 									}
 									else
 									{
-										if ((ParCode & PRIMPAR_ADDR) != 0)
+										if ((*ParCodeValDis & PRIMPAR_ADDR) != 0)
 										{
 											LineLength += GH.printf("ADR(");
 										}
 									}
-									if ((ParCode & PRIMPAR_LABEL) != 0)
+									if ((*ParCodeValDis & PRIMPAR_LABEL) != 0)
 									{ // label
 
-										Value = (ULONG)pI[(*pIndex)++];
-										if ((Value & 0x00000080) != 0)
+										*ValueValDis = (ULONG)pI[(*pIndex)++];
+										if ((*ValueValDis & 0x00000080) != 0)
 										{ // Adjust if negative
 
-											Value |= 0xFFFFFF00;
+											*ValueValDis |= 0xFFFFFF00;
 										}
 
-										LineLength += GH.printf($"LAB1({(int)(Value & 0xFF)})");
+										LineLength += GH.printf($"LAB1({(int)(*ValueValDis & 0xFF)})");
 									}
 									else
 									{ // value
 
-										switch (ParCode & PRIMPAR_BYTES)
+										switch (*ParCodeValDis & PRIMPAR_BYTES)
 										{
 											case PRIMPAR_STRING_OLD:
 											case PRIMPAR_STRING:
@@ -738,44 +740,44 @@ namespace Ev3CoreUnsafe.Lms2012
 
 											case PRIMPAR_1_BYTE:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													if ((Value & 0x00000080) != 0)
+													*ValueValDis = (ULONG)pI[(*pIndex)++];
+													if ((*ValueValDis & 0x00000080) != 0)
 													{ // Adjust if negative
 
-														Value |= 0xFFFFFF00;
+														*ValueValDis |= 0xFFFFFF00;
 													}
 													if ((Pars & 0x0f) != SUBP)
 													{
-														LineLength += GH.printf($"LC1({(int)Value})");
+														LineLength += GH.printf($"LC1({(int)*ValueValDis})");
 													}
 												}
 												break;
 
 											case PRIMPAR_2_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
-													if ((Value & 0x00008000) != 0)
+													*ValueValDis = (ULONG)pI[(*pIndex)++];
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
+													if ((*ValueValDis & 0x00008000) != 0)
 													{ // Adjust if negative
 
-														Value |= 0xFFFF0000;
+														*ValueValDis |= 0xFFFF0000;
 													}
 													if ((Pars & 0x0f) != SUBP)
 													{
-														LineLength += GH.printf($"LC2({(int)Value})");
+														LineLength += GH.printf($"LC2({(int)*ValueValDis})");
 													}
 												}
 												break;
 
 											case PRIMPAR_4_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
-													Value |= ((ULONG)pI[(*pIndex)++] << 16);
-													Value |= ((ULONG)pI[(*pIndex)++] << 24);
+													*ValueValDis = (ULONG)pI[(*pIndex)++];
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 8);
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 16);
+													*ValueValDis |= ((ULONG)pI[(*pIndex)++] << 24);
 													if ((Pars & 0x0f) != SUBP)
 													{
-														LineLength += GH.printf($"LC4({(long)Value})");
+														LineLength += GH.printf($"LC4({(long)*ValueValDis})");
 													}
 												}
 												break;
@@ -783,13 +785,13 @@ namespace Ev3CoreUnsafe.Lms2012
 										}
 									}
 								}
-								if ((ParCode & PRIMPAR_HANDLE) != 0)
+								if ((*ParCodeValDis & PRIMPAR_HANDLE) != 0)
 								{
 									LineLength += GH.printf("),");
 								}
 								else
 								{
-									if ((ParCode & PRIMPAR_ADDR) != 0)
+									if ((*ParCodeValDis & PRIMPAR_ADDR) != 0)
 									{
 										LineLength += GH.printf("),");
 									}
@@ -802,33 +804,33 @@ namespace Ev3CoreUnsafe.Lms2012
 							else
 							{ // short format
 
-								if ((ParCode & PRIMPAR_VARIABEL) != 0)
+								if ((*ParCodeValDis & PRIMPAR_VARIABEL) != 0)
 								{ // variabel
 
-									if ((ParCode & PRIMPAR_GLOBAL) != 0)
+									if ((*ParCodeValDis & PRIMPAR_GLOBAL) != 0)
 									{ // global
 
-										LineLength += GH.printf($"GV0({(uint)(ParCode & PRIMPAR_INDEX)})");
+										LineLength += GH.printf($"GV0({(uint)(*ParCodeValDis & PRIMPAR_INDEX)})");
 									}
 									else
 									{ // local
 
-										LineLength += GH.printf($"LV0({(uint)(ParCode & PRIMPAR_INDEX)})");
+										LineLength += GH.printf($"LV0({(uint)(*ParCodeValDis & PRIMPAR_INDEX)})");
 									}
 								}
 								else
 								{ // constant
 
-									Value = (ULONG)(ParCode & PRIMPAR_VALUE);
+									*ValueValDis = (ULONG)(*ParCodeValDis & PRIMPAR_VALUE);
 
-									if ((ParCode & PRIMPAR_CONST_SIGN) != 0)
+									if ((*ParCodeValDis & PRIMPAR_CONST_SIGN) != 0)
 									{ // Adjust if negative
 
-										Value |= ~(ULONG)(PRIMPAR_VALUE);
+										*ValueValDis |= ~(ULONG)(PRIMPAR_VALUE);
 									}
 									if ((Pars & 0x0f) != SUBP)
 									{
-										LineLength += GH.printf($"LC0({(int)Value})");
+										LineLength += GH.printf($"LC0({(int)*ValueValDis})");
 									}
 
 								}
@@ -839,14 +841,14 @@ namespace Ev3CoreUnsafe.Lms2012
 							}
 							if (ParType == PARNO)
 							{
-								if ((ParCode & PRIMPAR_VARIABEL) == 0)
+								if ((*ParCodeValDis & PRIMPAR_VARIABEL) == 0)
 								{
-									Parameters = (DATA8)(*(DATA32*)pParValue);
+									Parameters = (DATA8)(*(DATA32*)pParValueValDis);
 								}
 							}
 							if (ParType == PARLAB)
 							{
-								if ((ParCode & PRIMPAR_VARIABEL) == 0)
+								if ((*ParCodeValDis & PRIMPAR_VARIABEL) == 0)
 								{
 
 
@@ -1107,8 +1109,11 @@ namespace Ev3CoreUnsafe.Lms2012
 			return (Result);
 		}
 
-		private int* tmpParValue = (int*)CommonHelper.AllocateByteArray(4);
-        public RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
+		// private int* tmpParValue = (int*)CommonHelper.AllocateByteArray(4);
+		private ULONG* ValueValBc = (ULONG*)CommonHelper.AllocateByteArray(4);
+		private UBYTE* ParCodeValBc = (UBYTE*)CommonHelper.AllocateByteArray(1);
+		private void* pParValueValBc;
+		public RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 		{
 			RESULT Result = RESULT.FAIL;
 			RESULT Aligned = OK;
@@ -1116,11 +1121,8 @@ namespace Ev3CoreUnsafe.Lms2012
 			ULONG Pars;
 			UBYTE Sub = 0;
 			IMGDATA Tab;
-			ULONG Value;
 			UBYTE ParType = PAR;
-			UBYTE ParCode;
 			
-			void* pParValue = tmpParValue;
 			DATA8 Parameters;
 			DATA8 ParNo;
 			DATA32 Bytes = 0;
@@ -1164,7 +1166,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						if (ParType == SUBP)
 						{ // Check existence of sub command
 
-							Sub = *(UBYTE*)pParValue;
+							Sub = *(UBYTE*)pParValueValBc;
 							Pars >>= 4;
 							Tab = (byte)(Pars & 0x0F);
 							Pars = 0;
@@ -1182,7 +1184,7 @@ namespace Ev3CoreUnsafe.Lms2012
 						if (ParType == PARVALUES)
 						{ // Last parameter tells number of bytes to follow
 
-							Bytes = *(DATA32*)pParValue;
+							Bytes = *(DATA32*)pParValueValBc;
 
 							Pars >>= 4;
 							Pars &= 0x0F;
@@ -1190,39 +1192,39 @@ namespace Ev3CoreUnsafe.Lms2012
 
 							while (Bytes != 0)
 							{
-								Value = (ULONG)0;
-								pParValue = (void*)&Value;
-								ParCode = (UBYTE)(pI[(*pIndex)++] & 0xFF);
+								*ValueValBc = (ULONG)0;
+								pParValueValBc = (void*)ValueValBc;
+								*ParCodeValBc = (UBYTE)(pI[(*pIndex)++] & 0xFF);
 								Aligned = OK;
 
 								// Calculate parameter value
-								if ((ParCode & PRIMPAR_LONG) != 0)
+								if ((*ParCodeValBc & PRIMPAR_LONG) != 0)
 								{ // long format
 
-									if ((ParCode & PRIMPAR_VARIABEL) != 0)
+									if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 									{ // variabel
 
-										switch (ParCode & PRIMPAR_BYTES)
+										switch (*ParCodeValBc & PRIMPAR_BYTES)
 										{
 											case PRIMPAR_1_BYTE:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
+													*ValueValBc = (ULONG)pI[(*pIndex)++];
 												}
 												break;
 
 											case PRIMPAR_2_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
+													*ValueValBc = (ULONG)pI[(*pIndex)++];
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
 												}
 												break;
 
 											case PRIMPAR_4_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
-													Value |= ((ULONG)pI[(*pIndex)++] << 16);
-													Value |= ((ULONG)pI[(*pIndex)++] << 24);
+													*ValueValBc = (ULONG)pI[(*pIndex)++];
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 16);
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 24);
 												}
 												break;
 
@@ -1231,20 +1233,20 @@ namespace Ev3CoreUnsafe.Lms2012
 									else
 									{ // constant
 
-										if ((ParCode & PRIMPAR_LABEL) != 0)
+										if ((*ParCodeValBc & PRIMPAR_LABEL) != 0)
 										{ // label
 
-											Value = (ULONG)pI[(*pIndex)++];
-											if ((Value & 0x00000080) != 0)
+											*ValueValBc = (ULONG)pI[(*pIndex)++];
+											if ((*ValueValBc & 0x00000080) != 0)
 											{ // Adjust if negative
 
-												Value |= 0xFFFFFF00;
+												*ValueValBc |= 0xFFFFFF00;
 											}
 										}
 										else
 										{ // value
 
-											switch (ParCode & PRIMPAR_BYTES)
+											switch (*ParCodeValBc & PRIMPAR_BYTES)
 											{
 												case PRIMPAR_STRING_OLD:
 												case PRIMPAR_STRING:
@@ -1259,33 +1261,33 @@ namespace Ev3CoreUnsafe.Lms2012
 
 												case PRIMPAR_1_BYTE:
 													{
-														Value = (ULONG)pI[(*pIndex)++];
-														if ((Value & 0x00000080) != 0)
+														*ValueValBc = (ULONG)pI[(*pIndex)++];
+														if ((*ValueValBc & 0x00000080) != 0)
 														{ // Adjust if negative
 
-															Value |= 0xFFFFFF00;
+															*ValueValBc |= 0xFFFFFF00;
 														}
 													}
 													break;
 
 												case PRIMPAR_2_BYTES:
 													{
-														Value = (ULONG)pI[(*pIndex)++];
-														Value |= ((ULONG)pI[(*pIndex)++] << 8);
-														if ((Value & 0x00008000) != 0)
+														*ValueValBc = (ULONG)pI[(*pIndex)++];
+														*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
+														if ((*ValueValBc & 0x00008000) != 0)
 														{ // Adjust if negative
 
-															Value |= 0xFFFF0000;
+															*ValueValBc |= 0xFFFF0000;
 														}
 													}
 													break;
 
 												case PRIMPAR_4_BYTES:
 													{
-														Value = (ULONG)pI[(*pIndex)++];
-														Value |= ((ULONG)pI[(*pIndex)++] << 8);
-														Value |= ((ULONG)pI[(*pIndex)++] << 16);
-														Value |= ((ULONG)pI[(*pIndex)++] << 24);
+														*ValueValBc = (ULONG)pI[(*pIndex)++];
+														*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
+														*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 16);
+														*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 24);
 													}
 													break;
 
@@ -1296,20 +1298,20 @@ namespace Ev3CoreUnsafe.Lms2012
 								else
 								{ // short format
 
-									if ((ParCode & PRIMPAR_VARIABEL) != 0)
+									if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 									{ // variabel
 
-										Value = (ULONG)(ParCode & PRIMPAR_VALUE);
+										*ValueValBc = (ULONG)(*ParCodeValBc & PRIMPAR_VALUE);
 									}
 									else
 									{ // constant
 
-										Value = (ULONG)(ParCode & PRIMPAR_VALUE);
+										*ValueValBc = (ULONG)(*ParCodeValBc & PRIMPAR_VALUE);
 
-										if ((ParCode & PRIMPAR_CONST_SIGN) != 0)
+										if ((*ParCodeValBc & PRIMPAR_CONST_SIGN) != 0)
 										{ // Adjust if negative
 
-											Value |= ~(ULONG)(PRIMPAR_VALUE);
+											*ValueValBc |= ~(ULONG)(PRIMPAR_VALUE);
 										}
 									}
 								}
@@ -1317,14 +1319,14 @@ namespace Ev3CoreUnsafe.Lms2012
 								// Check parameter value
 								if ((Pars >= PAR8) && (Pars <= PAR32))
 								{
-									if (((*(DATA32*)pParValue) >= ParMin[ParType - PAR]) && ((*(DATA32*)pParValue) <= ParMax[ParType - PAR]))
+									if (((*(DATA32*)pParValueValBc) >= ParMin[ParType - PAR]) && ((*(DATA32*)pParValueValBc) <= ParMax[ParType - PAR]))
 									{
 										Result = OK;
 									}
 								}
 								if ((Pars == PARF))
 								{
-									if ((*(DATAF*)pParValue >= DATAF_MIN) && (*(DATAF*)pParValue <= DATAF_MAX))
+									if ((*(DATAF*)pParValueValBc >= DATAF_MIN) && (*(DATAF*)pParValueValBc <= DATAF_MAX))
 									{
 										Result = OK;
 									}
@@ -1342,42 +1344,42 @@ namespace Ev3CoreUnsafe.Lms2012
 						if ((ParType >= PAR) || (ParType == PARNO) || (ParType == PARLAB))
 						{ // Check parameter
 
-							Value = (ULONG)0;
-							pParValue = (void*)&Value;
-							ParCode = (UBYTE)(pI[(*pIndex)++] & 0xFF);
+							*ValueValBc = (ULONG)0;
+							pParValueValBc = (void*)ValueValBc;
+							*ParCodeValBc = (UBYTE)(pI[(*pIndex)++] & 0xFF);
 							Aligned = OK;
 
 							// Calculate parameter value
 
 
 
-							if ((ParCode & PRIMPAR_LONG) != 0)
+							if ((*ParCodeValBc & PRIMPAR_LONG) != 0)
 							{ // long format
 
-								if ((ParCode & PRIMPAR_VARIABEL) != 0)
+								if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 								{ // variabel
 
-									switch (ParCode & PRIMPAR_BYTES)
+									switch (*ParCodeValBc & PRIMPAR_BYTES)
 									{
 										case PRIMPAR_1_BYTE:
 											{
-												Value = (ULONG)pI[(*pIndex)++];
+												*ValueValBc = (ULONG)pI[(*pIndex)++];
 											}
 											break;
 
 										case PRIMPAR_2_BYTES:
 											{
-												Value = (ULONG)pI[(*pIndex)++];
-												Value |= ((ULONG)pI[(*pIndex)++] << 8);
+												*ValueValBc = (ULONG)pI[(*pIndex)++];
+												*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
 											}
 											break;
 
 										case PRIMPAR_4_BYTES:
 											{
-												Value = (ULONG)pI[(*pIndex)++];
-												Value |= ((ULONG)pI[(*pIndex)++] << 8);
-												Value |= ((ULONG)pI[(*pIndex)++] << 16);
-												Value |= ((ULONG)pI[(*pIndex)++] << 24);
+												*ValueValBc = (ULONG)pI[(*pIndex)++];
+												*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
+												*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 16);
+												*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 24);
 											}
 											break;
 
@@ -1386,20 +1388,20 @@ namespace Ev3CoreUnsafe.Lms2012
 								else
 								{ // constant
 
-									if ((ParCode & PRIMPAR_LABEL) != 0)
+									if ((*ParCodeValBc & PRIMPAR_LABEL) != 0)
 									{ // label
 
-										Value = (ULONG)pI[(*pIndex)++];
-										if ((Value & 0x00000080) != 0)
+										*ValueValBc = (ULONG)pI[(*pIndex)++];
+										if ((*ValueValBc & 0x00000080) != 0)
 										{ // Adjust if negative
 
-											Value |= 0xFFFFFF00;
+											*ValueValBc |= 0xFFFFFF00;
 										}
 									}
 									else
 									{ // value
 
-										switch (ParCode & PRIMPAR_BYTES)
+										switch (*ParCodeValBc & PRIMPAR_BYTES)
 										{
 											case PRIMPAR_STRING_OLD:
 											case PRIMPAR_STRING:
@@ -1414,33 +1416,33 @@ namespace Ev3CoreUnsafe.Lms2012
 
 											case PRIMPAR_1_BYTE:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													if ((Value & 0x00000080) != 0)
+													*ValueValBc = (ULONG)pI[(*pIndex)++];
+													if ((*ValueValBc & 0x00000080) != 0)
 													{ // Adjust if negative
 
-														Value |= 0xFFFFFF00;
+														*ValueValBc |= 0xFFFFFF00;
 													}
 												}
 												break;
 
 											case PRIMPAR_2_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
-													if ((Value & 0x00008000) != 0)
+													*ValueValBc = (ULONG)pI[(*pIndex)++];
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
+													if ((*ValueValBc & 0x00008000) != 0)
 													{ // Adjust if negative
 
-														Value |= 0xFFFF0000;
+														*ValueValBc |= 0xFFFF0000;
 													}
 												}
 												break;
 
 											case PRIMPAR_4_BYTES:
 												{
-													Value = (ULONG)pI[(*pIndex)++];
-													Value |= ((ULONG)pI[(*pIndex)++] << 8);
-													Value |= ((ULONG)pI[(*pIndex)++] << 16);
-													Value |= ((ULONG)pI[(*pIndex)++] << 24);
+													*ValueValBc = (ULONG)pI[(*pIndex)++];
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 8);
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 16);
+													*ValueValBc |= ((ULONG)pI[(*pIndex)++] << 24);
 												}
 												break;
 
@@ -1451,25 +1453,25 @@ namespace Ev3CoreUnsafe.Lms2012
 							else
 							{ // short format
 
-								if ((ParCode & PRIMPAR_VARIABEL) != 0)
+								if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 								{ // variabel
 
-									Value = (ULONG)(ParCode & PRIMPAR_VALUE);
+									*ValueValBc = (ULONG)(*ParCodeValBc & PRIMPAR_VALUE);
 								}
 								else
 								{ // constant
 
-									Value = (ULONG)(ParCode & PRIMPAR_VALUE);
+									*ValueValBc = (ULONG)(*ParCodeValBc & PRIMPAR_VALUE);
 
-									if ((ParCode & PRIMPAR_CONST_SIGN) != 0)
+									if ((*ParCodeValBc & PRIMPAR_CONST_SIGN) != 0)
 									{ // Adjust if negative
 
-										Value |= ~(ULONG)(PRIMPAR_VALUE);
+										*ValueValBc |= ~(ULONG)(PRIMPAR_VALUE);
 									}
 								}
 							}
 
-							if ((ParCode & PRIMPAR_VARIABEL) != 0)
+							if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 							{
 								Result = OK;
 							}
@@ -1478,7 +1480,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 								if ((ParType >= PAR8) && (ParType <= PAR32))
 								{
-									if (((*(DATA32*)pParValue) >= ParMin[ParType - PAR]) && ((*(DATA32*)pParValue) <= ParMax[ParType - PAR]))
+									if (((*(DATA32*)pParValueValBc) >= ParMin[ParType - PAR]) && ((*(DATA32*)pParValueValBc) <= ParMax[ParType - PAR]))
 									{
 										Result = OK;
 									}
@@ -1496,13 +1498,13 @@ namespace Ev3CoreUnsafe.Lms2012
 							{ // Check number of parameters
 
 								ParNo = 1;
-								if ((ParCode & PRIMPAR_VARIABEL) == 0)
+								if ((*ParCodeValBc & PRIMPAR_VARIABEL) == 0)
 								{ // Must be constant
 
-									if (((*(DATA32*)pParValue) >= 0) && ((*(DATA32*)pParValue) <= DATA8_MAX))
+									if (((*(DATA32*)pParValueValBc) >= 0) && ((*(DATA32*)pParValueValBc) <= DATA8_MAX))
 									{ // Must be positive and than less than or equal to 127
 
-										Parameters = (DATA8)(*(DATA32*)pParValue);
+										Parameters = (DATA8)(*(DATA32*)pParValueValBc);
 										Result = OK;
 									}
 								}
@@ -1510,14 +1512,14 @@ namespace Ev3CoreUnsafe.Lms2012
 							if (ParType == PARLAB)
 							{ // Check number of parameters
 
-								if ((ParCode & PRIMPAR_VARIABEL) == 0)
+								if ((*ParCodeValBc & PRIMPAR_VARIABEL) == 0)
 								{ // Must be constant
 
-									if (((*(DATA32*)pParValue) >= 0) && ((*(DATA32*)pParValue) < MAX_LABELS))
+									if (((*(DATA32*)pParValueValBc) >= 0) && ((*(DATA32*)pParValueValBc) < MAX_LABELS))
 									{
 										if (pLabel != null)
 										{
-											pLabel[Value].Addr = *pIndex;
+											pLabel[*ValueValBc].Addr = *pIndex;
 										}
 
 										Result = OK;
@@ -1528,33 +1530,33 @@ namespace Ev3CoreUnsafe.Lms2012
 							// Check allocation
 							if (ParNo == 0)
 							{
-								if ((ParCode & PRIMPAR_LONG) != 0)
+								if ((*ParCodeValBc & PRIMPAR_LONG) != 0)
 								{ // long format
 
-									if ((ParCode & PRIMPAR_VARIABEL) != 0)
+									if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 									{ // variabel
 
-										if ((ParCode & PRIMPAR_HANDLE) != 0)
+										if ((*ParCodeValBc & PRIMPAR_HANDLE) != 0)
 										{ // handle
 
-											Aligned = cValidateCheckAlignment(Value, PAR16);
+											Aligned = cValidateCheckAlignment(*ValueValBc, PAR16);
 										}
 										else
 										{
 
-											if ((ParCode & PRIMPAR_GLOBAL) != 0)
+											if ((*ParCodeValBc & PRIMPAR_GLOBAL) != 0)
 											{ // global
 											}
 											else
 											{ // local
 											}
-											Aligned = cValidateCheckAlignment(Value, (sbyte)ParType);
+											Aligned = cValidateCheckAlignment(*ValueValBc, (sbyte)ParType);
 										}
 									}
 									else
 									{ // constant
 
-										if ((ParCode & PRIMPAR_LABEL) != 0)
+										if ((*ParCodeValBc & PRIMPAR_LABEL) != 0)
 										{ // label
 
 										}
@@ -1567,16 +1569,16 @@ namespace Ev3CoreUnsafe.Lms2012
 								else
 								{ // short format
 
-									if ((ParCode & PRIMPAR_VARIABEL) != 0)
+									if ((*ParCodeValBc & PRIMPAR_VARIABEL) != 0)
 									{ // variabel
 
-										if ((ParCode & PRIMPAR_GLOBAL) != 0)
+										if ((*ParCodeValBc & PRIMPAR_GLOBAL) != 0)
 										{ // global
 										}
 										else
 										{ // local
 										}
-										Aligned = cValidateCheckAlignment(Value, (sbyte)ParType);
+										Aligned = cValidateCheckAlignment(*ValueValBc, (sbyte)ParType);
 									}
 								}
 							}

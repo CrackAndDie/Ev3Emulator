@@ -904,7 +904,7 @@ namespace Ev3CoreUnsafe.Lms2012
                     }
                 }
             }
-          (*GH.VMInstance.pObjList[Id]).Ip = TypeIp;
+            (*GH.VMInstance.pObjList[Id]).Ip = TypeIp;
 
             // Rewind caller Ip
             GH.VMInstance.ObjectIp = TmpIp;
@@ -2439,7 +2439,7 @@ namespace Ev3CoreUnsafe.Lms2012
             }
             if (Flag == 0)
             {
-                //    LogErrorNumber(VM_PROGRAM_NOT_STARTED);
+                LogErrorNumber(ERR.VM_PROGRAM_NOT_STARTED);
             }
         }
 
@@ -2593,14 +2593,20 @@ namespace Ev3CoreUnsafe.Lms2012
             // Get caller id from saved
             ObjectIdCaller = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).CallerId;
 
+            GH.Ev3System.Logger.LogInfo($"ObjectReturn: ObjectIdCaller: {ObjectIdCaller}");
+
             // Copy local variables to parameters
             GH.VMInstance.ObjectLocal = (*GH.VMInstance.pObjList[ObjectIdCaller]).pLocal;
             CopyLocalsToPars(ObjectIdCaller);
 
-            // Stop called object and start calling object
-            ObjectDeQueue(GH.VMInstance.ObjectId);
+			GH.Ev3System.Logger.LogInfo($"ObjectReturn: GH.VMInstance.ObjectLocal: {(int)GH.VMInstance.ObjectLocal}");
+
+			// Stop called object and start calling object
+			ObjectDeQueue(GH.VMInstance.ObjectId);
             ObjectEnQueue(ObjectIdCaller);
-        }
+
+			GH.Ev3System.Logger.LogInfo($"ObjectReturn: GH.VMInstance.ObjectId: {GH.VMInstance.ObjectId}");
+		}
 
 
         /*! \page VM
@@ -2632,6 +2638,8 @@ namespace Ev3CoreUnsafe.Lms2012
             // Save IP in case object are locked
             TmpIp = GetObjectIp();
 
+            GH.Ev3System.Logger.LogInfo($"ObjectCall: TmpIp: {(int)TmpIp}");
+
             // Get object to call from byte stream
             ObjectIdToCall = *(OBJID*)PrimParPointer();
             if ((*GH.VMInstance.pObjList[ObjectIdToCall]).ObjStatus == STOPPED)
@@ -2646,8 +2654,10 @@ namespace Ev3CoreUnsafe.Lms2012
                 // Save mother id
                 (*GH.VMInstance.pObjList[ObjectIdToCall]).CallerId = GH.VMInstance.ObjectId;
 
-                // Copy parameters to local variables
-                CopyParsToLocals(ObjectIdToCall);
+				GH.Ev3System.Logger.LogInfo($"ObjectCall: GH.VMInstance.ObjectId: {GH.VMInstance.ObjectId}");
+
+				// Copy parameters to local variables
+				CopyParsToLocals(ObjectIdToCall);
 
                 // Halt calling object
                 (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = GH.VMInstance.ObjectIp;
@@ -2687,7 +2697,8 @@ namespace Ev3CoreUnsafe.Lms2012
         {
             (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = &GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage[(ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pObjHead[GH.VMInstance.ObjectId].OffsetToInstructions];
             (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus = STOPPED;
-            SetDispatchStatus(DSPSTAT.STOPBREAK);
+			GH.Ev3System.Logger.LogInfo($"ObjectEnd: ObjStatus: {(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus}");
+			SetDispatchStatus(DSPSTAT.STOPBREAK);
         }
 
 

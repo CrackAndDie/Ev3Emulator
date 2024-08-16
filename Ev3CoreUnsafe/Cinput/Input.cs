@@ -2417,10 +2417,11 @@ namespace Ev3CoreUnsafe.Cinput
 			return (OK);
 		}
 
+		private DATAF* ValuecInputUpdate = (DATAF*)CommonHelper.AllocateByteArray(4);
 		public void cInputUpdate(UWORD Time)
 		{
 			DATA8 Device;
-			DATAF Value = 0;
+			
 			DATAF Diff;
 
 			cInputDcmUpdate(Time);
@@ -2432,14 +2433,14 @@ namespace Ev3CoreUnsafe.Cinput
 				{
 					if (GH.InputInstance.DeviceType[Device] == 1)
 					{
-						Value = (DATAF)(*GH.InputInstance.pAnalog).InPin1[Device];
+						*ValuecInputUpdate = (DATAF)(*GH.InputInstance.pAnalog).InPin1[Device];
 					}
 					if (GH.InputInstance.DeviceType[Device] == 16)
 					{
-						Value = (DATAF)(*GH.InputInstance.pAnalog).InPin6[Device];
+						*ValuecInputUpdate = (DATAF)(*GH.InputInstance.pAnalog).InPin6[Device];
 					}
 
-					Diff = Value - GH.InputInstance.DeviceData[Device].OldRaw;
+					Diff = *ValuecInputUpdate - GH.InputInstance.DeviceData[Device].OldRaw;
 
 					if (Diff >= (DATAF)500)
 					{
@@ -2450,7 +2451,7 @@ namespace Ev3CoreUnsafe.Cinput
 						GH.InputInstance.DeviceData[Device].Changes += (DATA32)1;
 					}
 
-					GH.InputInstance.DeviceData[Device].OldRaw = Value;
+					GH.InputInstance.DeviceData[Device].OldRaw = *ValuecInputUpdate;
 				}
 				else
 				{

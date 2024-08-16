@@ -15,26 +15,40 @@ namespace Ev3ConsoleTest
     {
         static unsafe void Main(string[] args)
         {
-            EnumlatorTest();
-            // CommonTest();
+            // EnumlatorTest();
+            CommonTest();
+			// var th = new Thread(EnumlatorTest);
+			//var th = new Thread(CommonTest);
+			//         th.Start();
+			// th.Join();
 
-            Console.ReadKey();
+
+
+			Console.ReadKey();
 		}
 
 		#region common test
         private unsafe static void CommonTest()
         {
-			byte* notAllocated = CommonHelper.AllocateByteArray(3);
+			byte* notAllocated = CommonHelper.AllocateByteArray(1001);
 
-			// notAllocated[4] = 3;
+            for (int i = 0; i < 20; ++i)
+            {
+				notAllocated[1000 + i] = 3;
+			}
+            
 
-			CommonHelper.DeleteByteArray(&notAllocated[3]);
+            // CommonHelper.memset(notAllocated, 0, 1000);
 
-            System.Console.WriteLine("asdasd");
-            System.Console.WriteLine("asdasd");
-            System.Console.WriteLine("asdasd");
-            System.Console.WriteLine("asdasd");
-            System.Console.WriteLine("asdasd");
+            // var a = *(&notAllocated[1000]);
+
+			// CommonHelper.DeleteByteArray(&notAllocated[3]);
+
+			System.Console.WriteLine("asdasd");
+   //         System.Console.WriteLine("asdasd");
+   //         System.Console.WriteLine("asdasd");
+   //         System.Console.WriteLine("asdasd");
+   //         System.Console.WriteLine("asdasd");
 		}
 		#endregion
 

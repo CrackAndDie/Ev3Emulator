@@ -3,7 +3,6 @@ using Ev3CoreUnsafe.Enums;
 using Ev3CoreUnsafe.Extensions;
 using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
-using System.Runtime.CompilerServices;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Csound
@@ -187,14 +186,13 @@ namespace Ev3CoreUnsafe.Csound
 
 							if (GH.SoundInstance.SoundFileFormat == FILEFORMAT_ADPCM_SOUND)
 							{
-								// TODO: careful - no adjust
-								//// Adjust the chunk size for ADPCM (nibbles) if necessary
-								//if (GH.SoundInstance.SoundDataLength > SOUND_ADPCM_CHUNK)
-								//	BytesToRead = SOUND_ADPCM_CHUNK;
-								//else
-								BytesToRead = GH.SoundInstance.SoundDataLength;
+								// Adjust the chunk size for ADPCM (nibbles) if necessary
+								if (GH.SoundInstance.SoundDataLength > SOUND_ADPCM_CHUNK)
+									BytesToRead = SOUND_ADPCM_CHUNK;
+								else
+									BytesToRead = GH.SoundInstance.SoundDataLength;
 
-								if (*GH.SoundInstance.hSoundFile >= 0)  // Valid file
+								if (GH.SoundInstance.hSoundFile != null)  // Valid file
 								{
 									using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
 									BytesRead = hand.ReadUnsafe(AdPcmData, 0, BytesToRead);
@@ -210,22 +208,19 @@ namespace Ev3CoreUnsafe.Csound
 							}
 							else // Non compressed data
 							{
-								// TODO: careful - no adjust
-								//// Adjust the chunk size if necessary
-								//if (GH.SoundInstance.SoundDataLength > SOUND_CHUNK)
-								//	BytesToRead = SOUND_CHUNK;
-								//else
-								BytesToRead = GH.SoundInstance.SoundDataLength;
+								// Adjust the chunk size if necessary
+								if (GH.SoundInstance.SoundDataLength > SOUND_CHUNK)
+									BytesToRead = SOUND_CHUNK;
+								else
+									BytesToRead = GH.SoundInstance.SoundDataLength;
 
 								if (GH.SoundInstance.hSoundFile != null)  // Valid file
 								{
-                                    // TODO: UNCOMMENT!!!!
-                                    //using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
-                                    //BytesRead = hand.ReadUnsafe(&(GH.SoundInstance.SoundData[1]), 0, BytesToRead);
+									using var hand = File.OpenRead(CommonHelper.GetString(GH.SoundInstance.hSoundFile));
+									BytesRead = hand.ReadUnsafe(&(GH.SoundInstance.SoundData[1]), 0, BytesToRead);
 
-                                    //GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
-                                    GH.SoundInstance.BytesToWrite = (byte)(BytesToRead + 1); // REMOVE!!!!!
-                                }
+									GH.SoundInstance.BytesToWrite = (byte)(BytesRead + 1);
+								}
 							}
 							// Now we have or should have some bytes to write down into the driver
 							GH.Ev3System.SoundHandler.PlayChunk(CommonHelper.GetArray(GH.SoundInstance.SoundData, GH.SoundInstance.BytesToWrite));
@@ -261,10 +256,10 @@ namespace Ev3CoreUnsafe.Csound
 							{
 								GH.SoundInstance.cSoundState = SOUND_STOPPED;
 
-								if (*GH.SoundInstance.hSoundFile >= 0)
+								if (GH.SoundInstance.hSoundFile != null)
 								{
 									// close(GH.SoundInstance.hSoundFile);
-									*GH.SoundInstance.hSoundFile = 0;
+									GH.SoundInstance.hSoundFile = null;
 								}
 
 								if (GH.SoundInstance.SoundDriverDescriptor >= 0)
@@ -291,10 +286,10 @@ namespace Ev3CoreUnsafe.Csound
 							GH.SoundInstance.SoundDriverDescriptor = -1;
 						}
 
-						if (*GH.SoundInstance.hSoundFile >= 0)
+						if (GH.SoundInstance.hSoundFile != null)
 						{
 							// close(GH.SoundInstance.hSoundFile);
-							*GH.SoundInstance.hSoundFile = 0;
+							GH.SoundInstance.hSoundFile = null;
 						}
 
 						Result = OK;
@@ -490,10 +485,10 @@ namespace Ev3CoreUnsafe.Csound
 					BytesToWrite = 1;
 					GH.SoundInstance.cSoundState = SOUND_STOPPED;
 
-					if (*GH.SoundInstance.hSoundFile >= 0)
+					if (GH.SoundInstance.hSoundFile != null)
 					{
 						// close(GH.SoundInstance.hSoundFile);
-						*GH.SoundInstance.hSoundFile = 0;
+						GH.SoundInstance.hSoundFile = null;
 					}
 
 					break;
@@ -511,7 +506,7 @@ namespace Ev3CoreUnsafe.Csound
 
 					GH.SoundInstance.cSoundState = SOUND_STOPPED;  // Yes but only shortly
 
-					if ((int)GH.SoundInstance.hSoundFile >= 0)  // An active handle?
+					if (GH.SoundInstance.hSoundFile != null)  // An active handle?
 					{
 						// close(GH.SoundInstance.hSoundFile);  // No more use
 						GH.SoundInstance.hSoundFile = null;   // Signal it

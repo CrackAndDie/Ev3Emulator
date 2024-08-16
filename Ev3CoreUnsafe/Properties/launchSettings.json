@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Ev3CoreUnsafe": {
+      "commandName": "Project"
+    },
+    "Профиль 1": {
+      "commandName": "Executable",
+      "executablePath": "D:\\kakish\\Ev3Emulator\\Ev3ConsoleTest\\bin\\Debug\\net8.0\\Ev3ConsoleTest.exe",
+      "nativeDebugging": true
+    }
+  }
+}
