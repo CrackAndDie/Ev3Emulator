@@ -346,6 +346,8 @@ namespace Ev3CoreUnsafe.Csound
 		/*! \brief  opSOUND byte code
 		 *
 		 */
+		private UBYTE* Tmp1cSoundEntry = CommonHelper.AllocateByteArray(1);
+		private UBYTE* Tmp2cSoundEntry = CommonHelper.AllocateByteArray(1);
 		public void cSoundEntry()
 		{
 			int Cmd;
@@ -360,8 +362,7 @@ namespace Ev3CoreUnsafe.Csound
 
 			DATA8* pFileName;
 			DATA8* PathName = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
-			UBYTE Tmp1;
-			UBYTE Tmp2;
+			
 
 
 			Cmd = *(DATA8*)GH.Lms.PrimParPointer();
@@ -609,21 +610,21 @@ namespace Ev3CoreUnsafe.Csound
 
 							// BIG Endianess
 
-							fileH.ReadUnsafe(&Tmp1, 0, 1);
-							fileH.ReadUnsafe(&Tmp2, 0, 1);
-							GH.SoundInstance.SoundFileFormat = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
+							fileH.ReadUnsafe(Tmp1cSoundEntry, 0, 1);
+							fileH.ReadUnsafe(Tmp2cSoundEntry, 0, 1);
+							GH.SoundInstance.SoundFileFormat = (ushort)((UWORD)(*Tmp1cSoundEntry) << 8 | (UWORD)(*Tmp2cSoundEntry));
 
-							fileH.ReadUnsafe(&Tmp1, 0, 1);
-							fileH.ReadUnsafe(&Tmp2, 0, 1);
-							GH.SoundInstance.SoundDataLength = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
+							fileH.ReadUnsafe(Tmp1cSoundEntry, 0, 1);
+							fileH.ReadUnsafe(Tmp2cSoundEntry, 0, 1);
+							GH.SoundInstance.SoundDataLength = (ushort)((UWORD)(*Tmp1cSoundEntry) << 8 | (UWORD)(*Tmp2cSoundEntry));
 
-							fileH.ReadUnsafe(&Tmp1, 0, 1);
-							fileH.ReadUnsafe(&Tmp2, 0, 1);
-							GH.SoundInstance.SoundSampleRate = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
+							fileH.ReadUnsafe(Tmp1cSoundEntry, 0, 1);
+							fileH.ReadUnsafe(Tmp2cSoundEntry, 0, 1);
+							GH.SoundInstance.SoundSampleRate = (ushort)((UWORD)(*Tmp1cSoundEntry) << 8 | (UWORD)(*Tmp2cSoundEntry));
 
-							fileH.ReadUnsafe(&Tmp1, 0, 1);
-							fileH.ReadUnsafe(&Tmp2, 0, 1);
-							GH.SoundInstance.SoundPlayMode = (ushort)((UWORD)Tmp1 << 8 | (UWORD)Tmp2);
+							fileH.ReadUnsafe(Tmp1cSoundEntry, 0, 1);
+							fileH.ReadUnsafe(Tmp2cSoundEntry, 0, 1);
+							GH.SoundInstance.SoundPlayMode = (ushort)((UWORD)(*Tmp1cSoundEntry) << 8 | (UWORD)(*Tmp2cSoundEntry));
 
 							GH.SoundInstance.cSoundState = SOUND_SETUP_FILE;
 
