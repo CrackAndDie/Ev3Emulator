@@ -8,290 +8,290 @@ using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Lms2012
 {
-    public unsafe class Lms : ILms
-    {
-        /*! \brief    Get calling object id
- *
- *  \return   OBJID Current object id
- *
- */
-        public OBJID CallingObjectId()
-        {
-            return (GH.VMInstance.ObjectId);
-        }
+	public unsafe class Lms : ILms
+	{
+		/*! \brief    Get calling object id
+         *
+         *  \return   OBJID Current object id
+         *
+         */
+		public OBJID CallingObjectId()
+		{
+			return (GH.VMInstance.ObjectId);
+		}
 
 
-        /*! \brief    Get current program id
+		/*! \brief    Get current program id
 		 *
 		 *  \return   PRGID Current program id
 		 *
 		 */
-        public PRGID CurrentProgramId()
-        {
-            return (GH.VMInstance.ProgramId);
-        }
+		public PRGID CurrentProgramId()
+		{
+			return (GH.VMInstance.ProgramId);
+		}
 
 
-        /*! \brief    Get program status
+		/*! \brief    Get program status
 		 *
 		 *  \return   OBJSTAT Program status
 		 *
 		 */
-        public OBJSTAT ProgramStatus(PRGID PrgId)
-        {
-            return (GH.VMInstance.Program[PrgId].Status);
-        }
+		public OBJSTAT ProgramStatus(PRGID PrgId)
+		{
+			return (GH.VMInstance.Program[PrgId].Status);
+		}
 
 
-        /*! \brief    Get program status change
+		/*! \brief    Get program status change
 		 *
 		 *  \return   OBJSTAT Program status change
 		 *
 		 */
-        public OBJSTAT ProgramStatusChange(PRGID PrgId)
-        {
-            OBJSTAT Status;
+		public OBJSTAT ProgramStatusChange(PRGID PrgId)
+		{
+			OBJSTAT Status;
 
-            Status = (OBJSTAT)(DATA8)GH.VMInstance.Program[PrgId].StatusChange;
-            GH.VMInstance.Program[PrgId].StatusChange = 0;
+			Status = (OBJSTAT)(DATA8)GH.VMInstance.Program[PrgId].StatusChange;
+			GH.VMInstance.Program[PrgId].StatusChange = 0;
 
-            return (Status);
-        }
+			return (Status);
+		}
 
 
-        /*! \brief    Get pointer to actual start of byte code image
+		/*! \brief    Get pointer to actual start of byte code image
 		 *
 		 *  \return   IP Pointer to image
 		 *
 		 */
-        public IP GetImageStart()
-        {
-            return (GH.VMInstance.pImage);
-        }
+		public IP GetImageStart()
+		{
+			return (GH.VMInstance.pImage);
+		}
 
 
-        /*! \brief    Set object (dispatch) status
+		/*! \brief    Set object (dispatch) status
 		 *
 		 *  \param    DspStat New dispatch status
 		 *
 		 */
-        public void SetDispatchStatus(DSPSTAT DspStat)
-        {
-            GH.VMInstance.DispatchStatus = DspStat;
+		public void SetDispatchStatus(DSPSTAT DspStat)
+		{
+			GH.VMInstance.DispatchStatus = DspStat;
 
-            if (GH.VMInstance.DispatchStatus != DSPSTAT.NOBREAK)
-            {
-                GH.VMInstance.Priority = 0;
-            }
+			if (GH.VMInstance.DispatchStatus != DSPSTAT.NOBREAK)
+			{
+				GH.VMInstance.Priority = 0;
+			}
 
-        }
+		}
 
 
-        /*! \brief    Set instructions
+		/*! \brief    Set instructions
 		 *
 		 *  \param    ULONG Instructions
 		 *
 		 */
-        public void SetInstructions(ULONG Instructions)
-        {
-            if (Instructions <= PRG_PRIORITY)
-            {
-                GH.VMInstance.Priority = Instructions;
-            }
-        }
+		public void SetInstructions(ULONG Instructions)
+		{
+			if (Instructions <= PRG_PRIORITY)
+			{
+				GH.VMInstance.Priority = Instructions;
+			}
+		}
 
 
-        /*! \brief    Adjust current instruction pointer
+		/*! \brief    Adjust current instruction pointer
 		 *
 		 *  \param    Value Signed offset to add
 		 *
 		 */
-        public void AdjustObjectIp(IMOFFS Value)
-        {
-            GH.VMInstance.ObjectIp += Value;
-        }
+		public void AdjustObjectIp(IMOFFS Value)
+		{
+			GH.VMInstance.ObjectIp += Value;
+		}
 
 
-        /*! \brief    Get current instruction pointer
+		/*! \brief    Get current instruction pointer
 		 *
 		 *  \return   Current instruction pointer
 		 *
 		 */
-        public IP GetObjectIp()
-        {
-            return (GH.VMInstance.ObjectIp);
-        }
+		public IP GetObjectIp()
+		{
+			return (GH.VMInstance.ObjectIp);
+		}
 
 
-        /*! \brief    Set current instruction pointer
+		/*! \brief    Set current instruction pointer
 		 *
 		 *  \param    Ip New instruction pointer value
 		 *
 		 */
-        public void SetObjectIp(IP Ip)
-        {
-            GH.VMInstance.ObjectIp = Ip;
-        }
+		public void SetObjectIp(IP Ip)
+		{
+			GH.VMInstance.ObjectIp = Ip;
+		}
 
 
-        public ULONG GetTime()
-        {
-            return (GH.Timer.cTimerGetuS() - GH.VMInstance.Program[GH.VMInstance.ProgramId].RunTime);
-        }
+		public ULONG GetTime()
+		{
+			return (GH.Timer.cTimerGetuS() - GH.VMInstance.Program[GH.VMInstance.ProgramId].RunTime);
+		}
 
 
-        public ULONG GetTimeMS()
-        {
-            return (GH.Timer.cTimerGetmS());
-        }
+		public ULONG GetTimeMS()
+		{
+			return (GH.Timer.cTimerGetmS());
+		}
 
 
-        public ULONG GetTimeUS()
-        {
-            return (GH.Timer.cTimerGetuS());
-        }
+		public ULONG GetTimeUS()
+		{
+			return (GH.Timer.cTimerGetuS());
+		}
 
 
-        public ULONG CurrentObjectIp()
-        {
-            return ((ULONG)(GH.VMInstance.ObjectIp - GH.VMInstance.pImage));
-        }
+		public ULONG CurrentObjectIp()
+		{
+			return ((ULONG)(GH.VMInstance.ObjectIp - GH.VMInstance.pImage));
+		}
 
 
-        public void VmPrint(DATA8* pString)
-        {
-            GH.printf(CommonHelper.GetString(pString));
-        }
+		public void VmPrint(DATA8* pString)
+		{
+			GH.printf(CommonHelper.GetString(pString));
+		}
 
 
-        public void SetTerminalEnable(DATA8 Value)
-        {
-            GH.VMInstance.TerminalEnabled = Value;
-        }
+		public void SetTerminalEnable(DATA8 Value)
+		{
+			GH.VMInstance.TerminalEnabled = Value;
+		}
 
 
-        public DATA8 GetTerminalEnable()
-        {
-            return (GH.VMInstance.TerminalEnabled);
-        }
+		public DATA8 GetTerminalEnable()
+		{
+			return (GH.VMInstance.TerminalEnabled);
+		}
 
 
-        public void GetResourcePath(DATA8* pString, DATA8 MaxLength)
-        {
-            GH.Memory.cMemoryGetResourcePath(GH.VMInstance.ProgramId, pString, MaxLength);
-        }
+		public void GetResourcePath(DATA8* pString, DATA8 MaxLength)
+		{
+			GH.Memory.cMemoryGetResourcePath(GH.VMInstance.ProgramId, pString, MaxLength);
+		}
 
 
-        public void* VmMemoryResize(HANDLER Handle, DATA32 Elements)
-        {
-            return (GH.Memory.cMemoryResize(GH.VMInstance.ProgramId, Handle, Elements));
-        }
+		public void* VmMemoryResize(HANDLER Handle, DATA32 Elements)
+		{
+			return (GH.Memory.cMemoryResize(GH.VMInstance.ProgramId, Handle, Elements));
+		}
 
 
-        public void SetVolumePercent(DATA8 Volume)
-        {
-            (*GH.VMInstance.NonVol).VolumePercent = Volume;
-        }
+		public void SetVolumePercent(DATA8 Volume)
+		{
+			(*GH.VMInstance.NonVol).VolumePercent = Volume;
+		}
 
 
-        public DATA8 GetVolumePercent()
-        {
-            return ((*GH.VMInstance.NonVol).VolumePercent);
-        }
+		public DATA8 GetVolumePercent()
+		{
+			return ((*GH.VMInstance.NonVol).VolumePercent);
+		}
 
 
-        public void SetSleepMinutes(DATA8 Minutes)
-        {
-            (*GH.VMInstance.NonVol).SleepMinutes = Minutes;
-        }
+		public void SetSleepMinutes(DATA8 Minutes)
+		{
+			(*GH.VMInstance.NonVol).SleepMinutes = Minutes;
+		}
 
 
-        public DATA8 GetSleepMinutes()
-        {
-            return ((*GH.VMInstance.NonVol).SleepMinutes);
-        }
+		public DATA8 GetSleepMinutes()
+		{
+			return ((*GH.VMInstance.NonVol).SleepMinutes);
+		}
 
 
-        public void SetUiUpdate()
-        {
-            GH.UiInstance.UiUpdate = 1;
-        }
+		public void SetUiUpdate()
+		{
+			GH.UiInstance.UiUpdate = 1;
+		}
 
-        public void LogErrorNumber(ERR Err)
-        {
-            UBYTE Tmp;
+		public void LogErrorNumber(ERR Err)
+		{
+			UBYTE Tmp;
 
-            if (Err > TOO_MANY_ERRORS_TO_BUFFER)
-            {
-                Tmp = GH.VMInstance.ErrorIn;
-                if (++Tmp >= ERROR_BUFFER_SIZE)
-                {
-                    Tmp = 0;
-                }
-                if (Tmp != GH.VMInstance.ErrorOut)
-                {
-                    GH.VMInstance.Errors[GH.VMInstance.ErrorIn] = Err;
-                    GH.VMInstance.ErrorIn = Tmp;
-                }
-                else
-                {
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\n#### {nameof(TOO_MANY_ERRORS_TO_BUFFER)} ####\r\n\n");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                }
-            }
-        }
-
-
-        public DATA8 LogErrorNumberExists(ERR Error)
-        {
-            DATA8 Result = 0;
-            UBYTE Tmp;
-
-            Tmp = GH.VMInstance.ErrorOut;
-            while ((Tmp != GH.VMInstance.ErrorIn) && (Result == 0))
-            {
-                if (GH.VMInstance.Errors[Tmp] == Error)
-                {
-                    Result = 1;
-                }
-                else
-                {
-                    if (++Tmp >= ERROR_BUFFER_SIZE)
-                    {
-                        Tmp = 0;
-                    }
-                }
-            }
-
-            return (Result);
-        }
+			if (Err > TOO_MANY_ERRORS_TO_BUFFER)
+			{
+				Tmp = GH.VMInstance.ErrorIn;
+				if (++Tmp >= ERROR_BUFFER_SIZE)
+				{
+					Tmp = 0;
+				}
+				if (Tmp != GH.VMInstance.ErrorOut)
+				{
+					GH.VMInstance.Errors[GH.VMInstance.ErrorIn] = Err;
+					GH.VMInstance.ErrorIn = Tmp;
+				}
+				else
+				{
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\n#### {nameof(TOO_MANY_ERRORS_TO_BUFFER)} ####\r\n\n");
+					VmPrint(GH.VMInstance.PrintBuffer);
+				}
+			}
+		}
 
 
-        public ERR LogErrorGet()
-        {
-            ERR Number = 0;
+		public DATA8 LogErrorNumberExists(ERR Error)
+		{
+			DATA8 Result = 0;
+			UBYTE Tmp;
 
-            if (GH.VMInstance.ErrorIn != GH.VMInstance.ErrorOut)
-            {
-                Number = GH.VMInstance.Errors[GH.VMInstance.ErrorOut];
-                if (++GH.VMInstance.ErrorOut >= ERROR_BUFFER_SIZE)
-                {
-                    GH.VMInstance.ErrorOut = 0;
-                }
-            }
+			Tmp = GH.VMInstance.ErrorOut;
+			while ((Tmp != GH.VMInstance.ErrorIn) && (Result == 0))
+			{
+				if (GH.VMInstance.Errors[Tmp] == Error)
+				{
+					Result = 1;
+				}
+				else
+				{
+					if (++Tmp >= ERROR_BUFFER_SIZE)
+					{
+						Tmp = 0;
+					}
+				}
+			}
 
-            return (Number);
-        }
+			return (Result);
+		}
 
 
-        public void CleanLogErrors()
-        {
-            GH.VMInstance.ErrorIn = 0;
-            GH.VMInstance.ErrorOut = 0;
-        }
+		public ERR LogErrorGet()
+		{
+			ERR Number = 0;
+
+			if (GH.VMInstance.ErrorIn != GH.VMInstance.ErrorOut)
+			{
+				Number = GH.VMInstance.Errors[GH.VMInstance.ErrorOut];
+				if (++GH.VMInstance.ErrorOut >= ERROR_BUFFER_SIZE)
+				{
+					GH.VMInstance.ErrorOut = 0;
+				}
+			}
+
+			return (Number);
+		}
 
 
-        /*! \brief    Execute byte code stream (C-call)
+		public void CleanLogErrors()
+		{
+			GH.VMInstance.ErrorIn = 0;
+			GH.VMInstance.ErrorOut = 0;
+		}
+
+
+		/*! \brief    Execute byte code stream (C-call)
 		 *
 		 *  This call is able to execute up to "C_PRIORITY" byte codes instructions (no header necessary)
 		 *
@@ -307,79 +307,79 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *
 		 */
-        public DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals)
-        {
-            DSPSTAT Result;
-            ULONG Time;
+		public DSPSTAT ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals)
+		{
+			DSPSTAT Result;
+			ULONG Time;
 
-            // Save running object parameters
-            GH.VMInstance.ObjIpSave = GH.VMInstance.ObjectIp;
-            GH.VMInstance.ObjGlobalSave = GH.VMInstance.pGlobal;
-            GH.VMInstance.ObjLocalSave = GH.VMInstance.ObjectLocal;
-            GH.VMInstance.DispatchStatusSave = GH.VMInstance.DispatchStatus;
-            GH.VMInstance.PrioritySave = GH.VMInstance.Priority;
+			// Save running object parameters
+			GH.VMInstance.ObjIpSave = GH.VMInstance.ObjectIp;
+			GH.VMInstance.ObjGlobalSave = GH.VMInstance.pGlobal;
+			GH.VMInstance.ObjLocalSave = GH.VMInstance.ObjectLocal;
+			GH.VMInstance.DispatchStatusSave = GH.VMInstance.DispatchStatus;
+			GH.VMInstance.PrioritySave = GH.VMInstance.Priority;
 
-            // InitExecute special byte code stream
-            GH.VMInstance.ObjectIp = pByteCode;
-            GH.VMInstance.pGlobal = pGlobals;
-            GH.VMInstance.ObjectLocal = pLocals;
-            GH.VMInstance.Priority = 1;
+			// InitExecute special byte code stream
+			GH.VMInstance.ObjectIp = pByteCode;
+			GH.VMInstance.pGlobal = pGlobals;
+			GH.VMInstance.ObjectLocal = pLocals;
+			GH.VMInstance.Priority = 1;
 
-            // Execute special byte code stream
-            GH.UiInstance.ButtonState[IDX_BACK_BUTTON] &= ~BUTTON_LONGPRESS;
-            while ((*GH.VMInstance.ObjectIp != opOBJECT_END) && ((GH.UiInstance.ButtonState[IDX_BACK_BUTTON] & BUTTON_LONGPRESS) == 0))
-            {
-                GH.VMInstance.DispatchStatus = DSPSTAT.NOBREAK;
-                GH.VMInstance.Priority = C_PRIORITY;
+			// Execute special byte code stream
+			GH.UiInstance.ButtonState[IDX_BACK_BUTTON] &= ~BUTTON_LONGPRESS;
+			while ((*GH.VMInstance.ObjectIp != opOBJECT_END) && ((GH.UiInstance.ButtonState[IDX_BACK_BUTTON] & BUTTON_LONGPRESS) == 0))
+			{
+				GH.VMInstance.DispatchStatus = DSPSTAT.NOBREAK;
+				GH.VMInstance.Priority = C_PRIORITY;
 
-                while ((GH.VMInstance.Priority != 0) && (*GH.VMInstance.ObjectIp != opOBJECT_END))
-                {
-                    GH.VMInstance.Priority--;
-                    PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
-                }
+				while ((GH.VMInstance.Priority != 0) && (*GH.VMInstance.ObjectIp != opOBJECT_END))
+				{
+					GH.VMInstance.Priority--;
+					PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
+				}
 
-                GH.VMInstance.NewTime = GetTimeMS();
+				GH.VMInstance.NewTime = GetTimeMS();
 
-                Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime1;
+				Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime1;
 
-                if (Time >= UPDATE_TIME1)
-                {
-                    GH.VMInstance.OldTime1 += Time;
+				if (Time >= UPDATE_TIME1)
+				{
+					GH.VMInstance.OldTime1 += Time;
 
-                    GH.Com.cComUpdate();
-                    GH.Sound.cSoundUpdate();
-                }
+					GH.Com.cComUpdate();
+					GH.Sound.cSoundUpdate();
+				}
 
-                Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime2;
+				Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime2;
 
-                if (Time >= UPDATE_TIME2)
-                {
-                    GH.VMInstance.OldTime2 += Time;
+				if (Time >= UPDATE_TIME2)
+				{
+					GH.VMInstance.OldTime2 += Time;
 
-                    Thread.Sleep(1); // TODO: do i need the sleep?
-                    GH.Input.cInputUpdate((UWORD)Time);
-                    GH.Ui.cUiUpdate((UWORD)Time);
-                }
-            }
-            Result = GH.VMInstance.DispatchStatus;
-            GH.Ev3System.Logger.LogInfo($"Getting dspstat {Result} in ExecuteByteCode");
+					Thread.Sleep(1); // TODO: do i need the sleep?
+					GH.Input.cInputUpdate((UWORD)Time);
+					GH.Ui.cUiUpdate((UWORD)Time);
+				}
+			}
+			Result = GH.VMInstance.DispatchStatus;
+			GH.Ev3System.Logger.LogInfo($"Getting dspstat {Result} in ExecuteByteCode");
 
-            GH.UiInstance.ButtonState[IDX_BACK_BUTTON] &= ~BUTTON_LONGPRESS;
+			GH.UiInstance.ButtonState[IDX_BACK_BUTTON] &= ~BUTTON_LONGPRESS;
 
-            // Restore running object parameters
-            GH.VMInstance.Priority = GH.VMInstance.PrioritySave;
-            GH.VMInstance.DispatchStatus = GH.VMInstance.DispatchStatusSave;
-            GH.VMInstance.ObjectLocal = GH.VMInstance.ObjLocalSave;
-            GH.VMInstance.pGlobal = GH.VMInstance.ObjGlobalSave;
-            GH.VMInstance.ObjectIp = GH.VMInstance.ObjIpSave;
+			// Restore running object parameters
+			GH.VMInstance.Priority = GH.VMInstance.PrioritySave;
+			GH.VMInstance.DispatchStatus = GH.VMInstance.DispatchStatusSave;
+			GH.VMInstance.ObjectLocal = GH.VMInstance.ObjLocalSave;
+			GH.VMInstance.pGlobal = GH.VMInstance.ObjGlobalSave;
+			GH.VMInstance.ObjectIp = GH.VMInstance.ObjIpSave;
 
-            GH.Ev3System.Logger.LogInfo($"Exit in ExecuteByteCode");
+			GH.Ev3System.Logger.LogInfo($"Exit in ExecuteByteCode");
 
-            return (Result);
-        }
+			return (Result);
+		}
 
 
-        /*! \page howtobytecodes How To Pass Parameters
+		/*! \page howtobytecodes How To Pass Parameters
 		 *
 		 *  Examples of parsing parameters to byte codes :
 		 *
@@ -419,7 +419,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 */
 
 
-        /*! \page parameterencoding Parameter Encoding
+		/*! \page parameterencoding Parameter Encoding
 		 *
 		 *  Parameter types and values for primitives, system calls and subroutine calls are encoded in the callers byte code stream as follows:
 		 *
@@ -463,286 +463,287 @@ namespace Ev3CoreUnsafe.Lms2012
 		 */
 
 
-        /*! \brief    Get next encoded parameter from byte code stream
+		/*! \brief    Get next encoded parameter from byte code stream
 		 *
 		 *  \return   void Pointer to value
 		 *
 		 *
 		 */
-        public void* PrimParPointer()
-        {
-            void* Result;
-            IMGDATA Data;
+		private void* ResultPrimParPointer;
+		public void* PrimParPointer()
+		{
+			IMGDATA Data;
 
-            Result = (void*)Unsafe.AsPointer(ref GH.VMInstance.Value);
-            Data = *((IMGDATA*)GH.VMInstance.ObjectIp++);
-            GH.VMInstance.Handle = -1;
+			ResultPrimParPointer = (void*)Unsafe.AsPointer(ref GH.VMInstance.Value);
+			Data = *((IMGDATA*)GH.VMInstance.ObjectIp++);
+			GH.VMInstance.Handle = -1;
 
-            if ((Data & PRIMPAR_LONG) != 0)
-            { // long format
+			if ((Data & PRIMPAR_LONG) != 0)
+			{ // long format
 
-                if ((Data & PRIMPAR_VARIABEL) != 0)
-                { // variabel
+				if ((Data & PRIMPAR_VARIABEL) != 0)
+				{ // variabel
 
-                    switch (Data & PRIMPAR_BYTES)
-                    {
+					switch (Data & PRIMPAR_BYTES)
+					{
 
-                        case PRIMPAR_1_BYTE:
-                            { // One byte to follow
+						case PRIMPAR_1_BYTE:
+							{ // One byte to follow
 
-                                GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-                            }
-                            break;
+								GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+							}
+							break;
 
-                        case PRIMPAR_2_BYTES:
-                            { // Two bytes to follow
+						case PRIMPAR_2_BYTES:
+							{ // Two bytes to follow
 
-                                GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-                                GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-                            }
-                            break;
+								GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+							}
+							break;
 
-                        case PRIMPAR_4_BYTES:
-                            { // Four bytes to follow
+						case PRIMPAR_4_BYTES:
+							{ // Four bytes to follow
 
-                                GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-                                GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-                                GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
-                                GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
-                            }
-                            break;
+								GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
+								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
+							}
+							break;
 
-                    }
-                    if ((Data & PRIMPAR_GLOBAL) != 0)
-                    { // global
+					}
+					if ((Data & PRIMPAR_GLOBAL) != 0)
+					{ // global
 
-                        Result = (void*)(&GH.VMInstance.pGlobal[GH.VMInstance.Value]);
-                    }
-                    else
-                    { // local
+						ResultPrimParPointer = (void*)(&GH.VMInstance.pGlobal[GH.VMInstance.Value]);
+					}
+					else
+					{ // local
 
-                        Result = (void*)(&GH.VMInstance.ObjectLocal[GH.VMInstance.Value]);
-                    }
-                }
-                else
-                { // constant
+						ResultPrimParPointer = (void*)(&GH.VMInstance.ObjectLocal[GH.VMInstance.Value]);
+					}
+				}
+				else
+				{ // constant
 
-                    if ((Data & PRIMPAR_LABEL) != 0)
-                    { // label
+					if ((Data & PRIMPAR_LABEL) != 0)
+					{ // label
 
-                        GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+						GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
 
-                        if ((GH.VMInstance.Value > 0) && (GH.VMInstance.Value < MAX_LABELS))
-                        {
-                            GH.VMInstance.Value = (ULONG)((LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label)[GH.VMInstance.Value].Addr;
-                            GH.VMInstance.Value -= ((ULONG)GH.VMInstance.ObjectIp - (ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage);
-                            Result = (void*)Unsafe.AsPointer(ref GH.VMInstance.Value);
-                        }
-                    }
-                    else
-                    { // value
+						if ((GH.VMInstance.Value > 0) && (GH.VMInstance.Value < MAX_LABELS))
+						{
+							GH.VMInstance.Value = (ULONG)((LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label)[GH.VMInstance.Value].Addr;
+							GH.VMInstance.Value -= ((ULONG)GH.VMInstance.ObjectIp - (ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage);
+							ResultPrimParPointer = (void*)Unsafe.AsPointer(ref GH.VMInstance.Value);
+						}
+					}
+					else
+					{ // value
 
-                        switch (Data & PRIMPAR_BYTES)
-                        {
-                            case PRIMPAR_STRING_OLD:
-                            case PRIMPAR_STRING:
-                                { // Zero terminated
+						switch (Data & PRIMPAR_BYTES)
+						{
+							case PRIMPAR_STRING_OLD:
+							case PRIMPAR_STRING:
+								{ // Zero terminated
 
-                                    Result = (DATA8*)GH.VMInstance.ObjectIp;
-                                    while (*((IMGDATA*)GH.VMInstance.ObjectIp++) != 0)
-                                    { // Adjust Ip
-                                    }
-                                }
-                                break;
+									ResultPrimParPointer = (DATA8*)GH.VMInstance.ObjectIp;
+									while (*((IMGDATA*)GH.VMInstance.ObjectIp++) != 0)
+									{ // Adjust Ip
+									}
+								}
+								break;
 
-                            case PRIMPAR_1_BYTE:
-                                { // One byte to follow
+							case PRIMPAR_1_BYTE:
+								{ // One byte to follow
 
-                                    GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-                                    if ((GH.VMInstance.Value & 0x00000080) != 0)
-                                    { // Adjust if negative
+									GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+									if ((GH.VMInstance.Value & 0x00000080) != 0)
+									{ // Adjust if negative
 
-                                        GH.VMInstance.Value |= 0xFFFFFF00;
-                                    }
-                                }
-                                break;
+										GH.VMInstance.Value |= 0xFFFFFF00;
+									}
+								}
+								break;
 
-                            case PRIMPAR_2_BYTES:
-                                { // Two bytes to follow
+							case PRIMPAR_2_BYTES:
+								{ // Two bytes to follow
 
-                                    GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-                                    GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-                                    if ((GH.VMInstance.Value & 0x00008000) != 0)
-                                    { // Adjust if negative
+									GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+									if ((GH.VMInstance.Value & 0x00008000) != 0)
+									{ // Adjust if negative
 
-                                        GH.VMInstance.Value |= 0xFFFF0000;
-                                    }
-                                }
-                                break;
+										GH.VMInstance.Value |= 0xFFFF0000;
+									}
+								}
+								break;
 
-                            case PRIMPAR_4_BYTES:
-                                { // Four bytes to follow
+							case PRIMPAR_4_BYTES:
+								{ // Four bytes to follow
 
-                                    GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-                                    GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-                                    GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
-                                    GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
-                                }
-                                break;
-                        }
-                    }
-                }
-                if ((Data & PRIMPAR_HANDLE) != 0)
-                {
-                    GH.VMInstance.Handle = *(HANDLER*)Result;
-                    GH.Memory.cMemoryArraryPointer(GH.VMInstance.ProgramId, GH.VMInstance.Handle, &Result);
-                }
-                else
-                {
-                    if ((Data & PRIMPAR_ADDR) != 0)
-                    {
-                        Result = (void*)*(DATA32*)Result;
-                        GH.VMInstance.Value = (uint)(DATA32)Result;
-                    }
-                }
-            }
-            else
-            { // short format
+									GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
+									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
+								}
+								break;
+						}
+					}
+				}
+				if ((Data & PRIMPAR_HANDLE) != 0)
+				{
+					GH.VMInstance.Handle = *(HANDLER*)ResultPrimParPointer;
+					fixed (void** pp = &ResultPrimParPointer)
+						GH.Memory.cMemoryArraryPointer(GH.VMInstance.ProgramId, GH.VMInstance.Handle, pp);
+				}
+				else
+				{
+					if ((Data & PRIMPAR_ADDR) != 0)
+					{
+						ResultPrimParPointer = (void*)*(DATA32*)ResultPrimParPointer;
+						GH.VMInstance.Value = (uint)(DATA32)ResultPrimParPointer;
+					}
+				}
+			}
+			else
+			{ // short format
 
-                if ((Data & PRIMPAR_VARIABEL) != 0)
-                { // variabel
+				if ((Data & PRIMPAR_VARIABEL) != 0)
+				{ // variabel
 
-                    GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_INDEX);
+					GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_INDEX);
 
-                    if ((Data & PRIMPAR_GLOBAL) != 0)
-                    { // global
+					if ((Data & PRIMPAR_GLOBAL) != 0)
+					{ // global
 
-                        Result = (void*)(&GH.VMInstance.pGlobal[GH.VMInstance.Value]);
-                    }
-                    else
-                    { // local
+						ResultPrimParPointer = (void*)(&GH.VMInstance.pGlobal[GH.VMInstance.Value]);
+					}
+					else
+					{ // local
 
-                        Result = (void*)(&GH.VMInstance.ObjectLocal[GH.VMInstance.Value]);
-                    }
-                }
-                else
-                { // constant
+						ResultPrimParPointer = (void*)(&GH.VMInstance.ObjectLocal[GH.VMInstance.Value]);
+					}
+				}
+				else
+				{ // constant
 
-                    GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_VALUE);
+					GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_VALUE);
 
-                    if ((Data & PRIMPAR_CONST_SIGN) != 0)
-                    { // Adjust if negative
+					if ((Data & PRIMPAR_CONST_SIGN) != 0)
+					{ // Adjust if negative
 
-                        GH.VMInstance.Value |= ~(ULONG)(PRIMPAR_VALUE);
-                    }
-                }
-            }
+						GH.VMInstance.Value |= ~(ULONG)(PRIMPAR_VALUE);
+					}
+				}
+			}
 
-            return (Result);
-        }
+			return (ResultPrimParPointer);
+		}
 
 
-        /*! \brief    Skip next encoded parameter from byte code stream
+		/*! \brief    Skip next encoded parameter from byte code stream
 		 *
 		 *
 		 */
-        public void PrimParAdvance()
-        {
-            IMGDATA Data;
+		public void PrimParAdvance()
+		{
+			IMGDATA Data;
 
-            Data = *((IMGDATA*)GH.VMInstance.ObjectIp++);
+			Data = *((IMGDATA*)GH.VMInstance.ObjectIp++);
 
-            if ((Data & PRIMPAR_LONG) != 0)
-            { // long format
+			if ((Data & PRIMPAR_LONG) != 0)
+			{ // long format
 
-                if ((Data & PRIMPAR_VARIABEL) != 0)
-                { // variabel
+				if ((Data & PRIMPAR_VARIABEL) != 0)
+				{ // variabel
 
-                    switch (Data & PRIMPAR_BYTES)
-                    {
+					switch (Data & PRIMPAR_BYTES)
+					{
 
-                        case PRIMPAR_1_BYTE:
-                            { // One byte to follow
+						case PRIMPAR_1_BYTE:
+							{ // One byte to follow
 
-                                GH.VMInstance.ObjectIp++;
-                            }
-                            break;
+								GH.VMInstance.ObjectIp++;
+							}
+							break;
 
-                        case PRIMPAR_2_BYTES:
-                            { // Two bytes to follow
+						case PRIMPAR_2_BYTES:
+							{ // Two bytes to follow
 
-                                GH.VMInstance.ObjectIp++;
-                                GH.VMInstance.ObjectIp++;
-                            }
-                            break;
+								GH.VMInstance.ObjectIp++;
+								GH.VMInstance.ObjectIp++;
+							}
+							break;
 
-                        case PRIMPAR_4_BYTES:
-                            { // Four bytes to follow
+						case PRIMPAR_4_BYTES:
+							{ // Four bytes to follow
 
-                                GH.VMInstance.ObjectIp++;
-                                GH.VMInstance.ObjectIp++;
-                                GH.VMInstance.ObjectIp++;
-                                GH.VMInstance.ObjectIp++;
-                            }
-                            break;
-                    }
-                }
-                else
-                { // constant
+								GH.VMInstance.ObjectIp++;
+								GH.VMInstance.ObjectIp++;
+								GH.VMInstance.ObjectIp++;
+								GH.VMInstance.ObjectIp++;
+							}
+							break;
+					}
+				}
+				else
+				{ // constant
 
-                    if ((Data & PRIMPAR_LABEL) != 0)
-                    { // label
+					if ((Data & PRIMPAR_LABEL) != 0)
+					{ // label
 
-                        GH.VMInstance.ObjectIp++;
+						GH.VMInstance.ObjectIp++;
 
-                    }
-                    else
-                    { // value
+					}
+					else
+					{ // value
 
-                        switch (Data & PRIMPAR_BYTES)
-                        {
-                            case PRIMPAR_STRING_OLD:
-                            case PRIMPAR_STRING:
-                                { // Zero terminated
+						switch (Data & PRIMPAR_BYTES)
+						{
+							case PRIMPAR_STRING_OLD:
+							case PRIMPAR_STRING:
+								{ // Zero terminated
 
-                                    while (*((IMGDATA*)GH.VMInstance.ObjectIp++) != 0)
-                                    { // Adjust Ip
-                                    }
-                                }
-                                break;
+									while (*((IMGDATA*)GH.VMInstance.ObjectIp++) != 0)
+									{ // Adjust Ip
+									}
+								}
+								break;
 
-                            case PRIMPAR_1_BYTE:
-                                { // One byte to follow
+							case PRIMPAR_1_BYTE:
+								{ // One byte to follow
 
-                                    GH.VMInstance.ObjectIp++;
-                                }
-                                break;
+									GH.VMInstance.ObjectIp++;
+								}
+								break;
 
-                            case PRIMPAR_2_BYTES:
-                                { // Two bytes to follow
+							case PRIMPAR_2_BYTES:
+								{ // Two bytes to follow
 
-                                    GH.VMInstance.ObjectIp++;
-                                    GH.VMInstance.ObjectIp++;
-                                }
-                                break;
+									GH.VMInstance.ObjectIp++;
+									GH.VMInstance.ObjectIp++;
+								}
+								break;
 
-                            case PRIMPAR_4_BYTES:
-                                { // Four bytes to follow
+							case PRIMPAR_4_BYTES:
+								{ // Four bytes to follow
 
-                                    GH.VMInstance.ObjectIp++;
-                                    GH.VMInstance.ObjectIp++;
-                                    GH.VMInstance.ObjectIp++;
-                                    GH.VMInstance.ObjectIp++;
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+									GH.VMInstance.ObjectIp++;
+									GH.VMInstance.ObjectIp++;
+									GH.VMInstance.ObjectIp++;
+									GH.VMInstance.ObjectIp++;
+								}
+								break;
+						}
+					}
+				}
+			}
+		}
 
 
-        /*! \page parameterencoding
+		/*! \page parameterencoding
 		 *
 		 *  \anchor subpar
 		 *
@@ -765,366 +766,366 @@ namespace Ev3CoreUnsafe.Lms2012
 				   100    Zero terminated string (next byte tells allocated size) \endverbatim
 		 *
 		 */
-        /*! \brief    Copy encoded parameters to local variables
+		/*! \brief    Copy encoded parameters to local variables
 		 *
 		 *  \param    Id Object to copy to
 		 *
 		 *
 		 */
-        public void CopyParsToLocals(OBJID Id)
-        {
-            IP TmpIp;      // Save calling Ip
-            IP TypeIp;     // Called Ip
-            void* pLocals;    // Called locals
-            PARS NoOfPars;   // Called no of parameters
-            IMGDATA Type;       // Coded type
-            void* Result;     // Pointer to value
-            DATA32 Size;
-            DATA8 Flag;
+		public void CopyParsToLocals(OBJID Id)
+		{
+			IP TmpIp;      // Save calling Ip
+			IP TypeIp;     // Called Ip
+			void* pLocals;    // Called locals
+			PARS NoOfPars;   // Called no of parameters
+			IMGDATA Type;       // Coded type
+			void* Result;     // Pointer to value
+			DATA32 Size;
+			DATA8 Flag;
 
-            TmpIp = GH.VMInstance.ObjectIp;
-            TypeIp = GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage;
-            TypeIp = &TypeIp[(ULONG)GH.VMInstance.pObjHead[Id].OffsetToInstructions];
-            pLocals = (*GH.VMInstance.pObjList[Id]).pLocal;
+			TmpIp = GH.VMInstance.ObjectIp;
+			TypeIp = GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage;
+			TypeIp = &TypeIp[(ULONG)GH.VMInstance.pObjHead[Id].OffsetToInstructions];
+			pLocals = (*GH.VMInstance.pObjList[Id]).pLocal;
 
-            NoOfPars = (PARS)(*((IMGDATA*)TypeIp++));
+			NoOfPars = (PARS)(*((IMGDATA*)TypeIp++));
 
-            while (NoOfPars-- != 0)
-            {
-                // Get type from sub preamble
-                Type = (IMGDATA)(*((IMGDATA*)TypeIp++));
+			while (NoOfPars-- != 0)
+			{
+				// Get type from sub preamble
+				Type = (IMGDATA)(*((IMGDATA*)TypeIp++));
 
-                // Get pointer to value and increment GH.VMInstance.ObjectIP
+				// Get pointer to value and increment GH.VMInstance.ObjectIP
 
-                Result = PrimParPointer();
+				Result = PrimParPointer();
 
-                if ((Type & CALLPAR_IN) != 0)
-                { // Input
+				if ((Type & CALLPAR_IN) != 0)
+				{ // Input
 
-                    switch (Type & CALLPAR_TYPE)
-                    {
+					switch (Type & CALLPAR_TYPE)
+					{
 
-                        case CALLPAR_DATA8:
-                            {
-                                (*(DATA8*)pLocals) = *(DATA8*)Result;
-                                pLocals = ((DATA8*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATA8:
+							{
+								(*(DATA8*)pLocals) = *(DATA8*)Result;
+								pLocals = ((DATA8*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_DATA16:
-                            {
-                                pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
-                                (*(DATA16*)pLocals) = *(DATA16*)Result;
-                                pLocals = ((DATA16*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATA16:
+							{
+								pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
+								(*(DATA16*)pLocals) = *(DATA16*)Result;
+								pLocals = ((DATA16*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_DATA32:
-                            {
-                                pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                (*(DATA32*)pLocals) = *(DATA32*)Result;
-                                pLocals = ((DATA32*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATA32:
+							{
+								pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+								(*(DATA32*)pLocals) = *(DATA32*)Result;
+								pLocals = ((DATA32*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_DATAF:
-                            {
-                                pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                (*(DATAF*)pLocals) = *(DATAF*)Result;
-                                pLocals = ((DATAF*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATAF:
+							{
+								pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+								(*(DATAF*)pLocals) = *(DATAF*)Result;
+								pLocals = ((DATAF*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_STRING:
-                            {
-                                Size = (DATA32)(*((IMGDATA*)TypeIp++));
-                                Flag = 1;
-                                while (Size != 0)
-                                {
-                                    if (Flag != 0)
-                                    {
-                                        Flag = *(DATA8*)Result;
-                                    }
-                                    (*(DATA8*)pLocals) = Flag;
-                                    Result = ((DATA8*)Result) + 1;
-                                    pLocals = ((DATA8*)pLocals) + 1;
-                                    Size--;
-                                }
-                                pLocals = ((DATA8*)pLocals) - 1;
-                                (*(DATA8*)pLocals) = 0;
-                                pLocals = ((DATA8*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_STRING:
+							{
+								Size = (DATA32)(*((IMGDATA*)TypeIp++));
+								Flag = 1;
+								while (Size != 0)
+								{
+									if (Flag != 0)
+									{
+										Flag = *(DATA8*)Result;
+									}
+									(*(DATA8*)pLocals) = Flag;
+									Result = ((DATA8*)Result) + 1;
+									pLocals = ((DATA8*)pLocals) + 1;
+									Size--;
+								}
+								pLocals = ((DATA8*)pLocals) - 1;
+								(*(DATA8*)pLocals) = 0;
+								pLocals = ((DATA8*)pLocals) + 1;
+							}
+							break;
 
-                    }
-                }
-                else
-                {
-                    if ((Type & CALLPAR_OUT) != 0)
-                    { // Output
+					}
+				}
+				else
+				{
+					if ((Type & CALLPAR_OUT) != 0)
+					{ // Output
 
-                        switch (Type & CALLPAR_TYPE)
-                        {
+						switch (Type & CALLPAR_TYPE)
+						{
 
-                            case CALLPAR_DATA8:
-                                {
-                                    pLocals = ((DATA8*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATA8:
+								{
+									pLocals = ((DATA8*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_DATA16:
-                                {
-                                    pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
-                                    pLocals = ((DATA16*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATA16:
+								{
+									pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
+									pLocals = ((DATA16*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_DATA32:
-                                {
-                                    pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                    pLocals = ((DATA32*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATA32:
+								{
+									pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+									pLocals = ((DATA32*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_DATAF:
-                                {
-                                    pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                    pLocals = ((DATAF*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATAF:
+								{
+									pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+									pLocals = ((DATAF*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_STRING:
-                                {
-                                    Size = (DATA32)(*((IMGDATA*)TypeIp++));
-                                    pLocals = ((DATA8*)pLocals) + Size;
-                                }
-                                break;
+							case CALLPAR_STRING:
+								{
+									Size = (DATA32)(*((IMGDATA*)TypeIp++));
+									pLocals = ((DATA8*)pLocals) + Size;
+								}
+								break;
 
-                        }
-                    }
-                }
-            }
-            (*GH.VMInstance.pObjList[Id]).Ip = TypeIp;
+						}
+					}
+				}
+			}
+			(*GH.VMInstance.pObjList[Id]).Ip = TypeIp;
 
-            // Rewind caller Ip
-            GH.VMInstance.ObjectIp = TmpIp;
-        }
+			// Rewind caller Ip
+			GH.VMInstance.ObjectIp = TmpIp;
+		}
 
 
-        /*! \brief    Copy local variables to encoded parameters
+		/*! \brief    Copy local variables to encoded parameters
 		 *
 		 *  \param    Id Object to copy to
 		 *
 		 *
 		 */
-        public void CopyLocalsToPars(OBJID Id)
-        {
-            IP TmpIp;      // Calling Ip
-            IP TypeIp;     // Called Ip
-            void* pLocals;    // Called locals
-            PARS NoOfPars;   // Called no of parameters
-            IMGDATA Type;       // Coded type
-            void* Result;     // Pointer to value
-            DATA32 Size;
-            DATA8 Flag;
+		public void CopyLocalsToPars(OBJID Id)
+		{
+			IP TmpIp;      // Calling Ip
+			IP TypeIp;     // Called Ip
+			void* pLocals;    // Called locals
+			PARS NoOfPars;   // Called no of parameters
+			IMGDATA Type;       // Coded type
+			void* Result;     // Pointer to value
+			DATA32 Size;
+			DATA8 Flag;
 
-            // Point to start of parameters
-            TmpIp = GH.VMInstance.ObjectIp;
-            GH.VMInstance.ObjectIp = (*GH.VMInstance.pObjList[Id]).Ip;
+			// Point to start of parameters
+			TmpIp = GH.VMInstance.ObjectIp;
+			GH.VMInstance.ObjectIp = (*GH.VMInstance.pObjList[Id]).Ip;
 
-            // Point to start of sub
-            TypeIp = GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage;
-            TypeIp = &TypeIp[(ULONG)GH.VMInstance.pObjHead[GH.VMInstance.ObjectId].OffsetToInstructions];
-            pLocals = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).pLocal;
+			// Point to start of sub
+			TypeIp = GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage;
+			TypeIp = &TypeIp[(ULONG)GH.VMInstance.pObjHead[GH.VMInstance.ObjectId].OffsetToInstructions];
+			pLocals = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).pLocal;
 
-            NoOfPars = (PARS)(*((IMGDATA*)TypeIp++));
+			NoOfPars = (PARS)(*((IMGDATA*)TypeIp++));
 
-            while (NoOfPars-- != 0)
-            {
-                // Get type from sub preamble
-                Type = (IMGDATA)(*((IMGDATA*)TypeIp++));
+			while (NoOfPars-- != 0)
+			{
+				// Get type from sub preamble
+				Type = (IMGDATA)(*((IMGDATA*)TypeIp++));
 
-                // Get pointer to value and increment GH.VMInstance.ObjectIp
-                Result = PrimParPointer();
+				// Get pointer to value and increment GH.VMInstance.ObjectIp
+				Result = PrimParPointer();
 
-                if ((Type & CALLPAR_OUT) != 0)
-                { // Output
+				if ((Type & CALLPAR_OUT) != 0)
+				{ // Output
 
-                    switch (Type & CALLPAR_TYPE)
-                    {
+					switch (Type & CALLPAR_TYPE)
+					{
 
-                        case CALLPAR_DATA8:
-                            {
-                                *(DATA8*)Result = (*(DATA8*)pLocals);
-                                pLocals = ((DATA8*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATA8:
+							{
+								*(DATA8*)Result = (*(DATA8*)pLocals);
+								pLocals = ((DATA8*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_DATA16:
-                            {
-                                pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
-                                *(DATA16*)Result = (*(DATA16*)pLocals);
-                                pLocals = ((DATA16*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATA16:
+							{
+								pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
+								*(DATA16*)Result = (*(DATA16*)pLocals);
+								pLocals = ((DATA16*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_DATA32:
-                            {
-                                pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                *(DATA32*)Result = (*(DATA32*)pLocals);
-                                pLocals = ((DATA32*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATA32:
+							{
+								pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+								*(DATA32*)Result = (*(DATA32*)pLocals);
+								pLocals = ((DATA32*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_DATAF:
-                            {
-                                pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                *(DATAF*)Result = (*(DATAF*)pLocals);
-                                pLocals = ((DATAF*)pLocals) + 1;
-                            }
-                            break;
+						case CALLPAR_DATAF:
+							{
+								pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+								*(DATAF*)Result = (*(DATAF*)pLocals);
+								pLocals = ((DATAF*)pLocals) + 1;
+							}
+							break;
 
-                        case CALLPAR_STRING:
-                            {
-                                Size = (DATA32)(*((IMGDATA*)TypeIp++));
-                                Flag = 1;
-                                while (Size != 0)
-                                {
-                                    if (Flag != 0)
-                                    {
-                                        Flag = (*(DATA8*)pLocals);
-                                    }
-                                    *(DATA8*)Result = Flag;
-                                    Result = ((DATA8*)Result) + 1;
-                                    pLocals = ((DATA8*)pLocals) + 1;
-                                    Size--;
-                                }
-                                Result = ((DATA8*)Result) - 1;
-                                *(DATA8*)Result = 0;
-                            }
-                            break;
+						case CALLPAR_STRING:
+							{
+								Size = (DATA32)(*((IMGDATA*)TypeIp++));
+								Flag = 1;
+								while (Size != 0)
+								{
+									if (Flag != 0)
+									{
+										Flag = (*(DATA8*)pLocals);
+									}
+									*(DATA8*)Result = Flag;
+									Result = ((DATA8*)Result) + 1;
+									pLocals = ((DATA8*)pLocals) + 1;
+									Size--;
+								}
+								Result = ((DATA8*)Result) - 1;
+								*(DATA8*)Result = 0;
+							}
+							break;
 
-                    }
-                }
-                else
-                {
-                    if ((Type & CALLPAR_IN) != 0)
-                    { // Input
+					}
+				}
+				else
+				{
+					if ((Type & CALLPAR_IN) != 0)
+					{ // Input
 
-                        switch (Type & CALLPAR_TYPE)
-                        {
+						switch (Type & CALLPAR_TYPE)
+						{
 
-                            case CALLPAR_DATA8:
-                                {
-                                    pLocals = ((DATA8*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATA8:
+								{
+									pLocals = ((DATA8*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_DATA16:
-                                {
-                                    pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
-                                    pLocals = ((DATA16*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATA16:
+								{
+									pLocals = (void*)(((IMINDEX)pLocals + 1) & ~1);
+									pLocals = ((DATA16*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_DATA32:
-                                {
-                                    pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                    pLocals = ((DATA32*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATA32:
+								{
+									pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+									pLocals = ((DATA32*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_DATAF:
-                                {
-                                    pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
-                                    pLocals = ((DATAF*)pLocals) + 1;
-                                }
-                                break;
+							case CALLPAR_DATAF:
+								{
+									pLocals = (void*)(((IMINDEX)pLocals + 3) & ~3);
+									pLocals = ((DATAF*)pLocals) + 1;
+								}
+								break;
 
-                            case CALLPAR_STRING:
-                                {
-                                    Size = (DATA32)(*((IMGDATA*)TypeIp++));
-                                    pLocals = ((DATA8*)pLocals) + Size;
-                                }
-                                break;
+							case CALLPAR_STRING:
+								{
+									Size = (DATA32)(*((IMGDATA*)TypeIp++));
+									pLocals = ((DATA8*)pLocals) + Size;
+								}
+								break;
 
-                        }
-                    }
-                }
-            }
+						}
+					}
+				}
+			}
 
-          // Adjust caller Ip
-          (*GH.VMInstance.pObjList[Id]).Ip = GH.VMInstance.ObjectIp;
-            // Restore calling Ip
-            GH.VMInstance.ObjectIp = TmpIp;
-        }
+		  // Adjust caller Ip
+		  (*GH.VMInstance.pObjList[Id]).Ip = GH.VMInstance.ObjectIp;
+			// Restore calling Ip
+			GH.VMInstance.ObjectIp = TmpIp;
+		}
 
 
-        //*****************************************************************************
-        // VM routines
-        //*****************************************************************************
+		//*****************************************************************************
+		// VM routines
+		//*****************************************************************************
 
-        /*! \brief    Initialise object instruction pointer and trigger counter
+		/*! \brief    Initialise object instruction pointer and trigger counter
 		 *
 		 *  \param    ObjId Object to reset
 		 *
 		 */
-        public void ObjectReset(OBJID ObjId)
-        {
-            (*GH.VMInstance.pObjList[ObjId]).Ip = &GH.VMInstance.pImage[(ULONG)GH.VMInstance.pObjHead[ObjId].OffsetToInstructions];
+		public void ObjectReset(OBJID ObjId)
+		{
+			(*GH.VMInstance.pObjList[ObjId]).Ip = &GH.VMInstance.pImage[(ULONG)GH.VMInstance.pObjHead[ObjId].OffsetToInstructions];
 
-            (*GH.VMInstance.pObjList[ObjId]).TriggerCount = GH.VMInstance.pObjHead[ObjId].TriggerCount;
-        }
+			(*GH.VMInstance.pObjList[ObjId]).TriggerCount = GH.VMInstance.pObjHead[ObjId].TriggerCount;
+		}
 
 
-        /*! \brief    Get amount of ram to allocate for program
+		/*! \brief    Get amount of ram to allocate for program
 		 *
 		 *  \param    pI Pointer to image
 		 *
 		 */
-        public GBINDEX GetAmountOfRamForImage(IP pI)
-        {
-            GBINDEX Bytes = 0;
-            OBJID NoOfObj;
-            OBJID ObjId;
-            OBJHEAD* pHead;
+		public GBINDEX GetAmountOfRamForImage(IP pI)
+		{
+			GBINDEX Bytes = 0;
+			OBJID NoOfObj;
+			OBJID ObjId;
+			OBJHEAD* pHead;
 
-            NoOfObj = (*(IMGHEAD*)pI).NumberOfObjects;
+			NoOfObj = (*(IMGHEAD*)pI).NumberOfObjects;
 
-            Bytes += (*(IMGHEAD*)pI).GlobalBytes;
-            Bytes = (Bytes + 3) & 0xFFFFFFFC;
-            Bytes += (uint)(8 * (NoOfObj + 1));
+			Bytes += (*(IMGHEAD*)pI).GlobalBytes;
+			Bytes = (Bytes + 3) & 0xFFFFFFFC;
+			Bytes += (uint)(8 * (NoOfObj + 1));
 
-            pHead = (OBJHEAD*)&pI[sizeof(IMGHEAD)];
+			pHead = (OBJHEAD*)&pI[sizeof(IMGHEAD)];
 
-            for (ObjId = 1; ObjId <= NoOfObj; ObjId++)
-            {
-                Bytes = (Bytes + 3) & 0xFFFFFFFC;
-                Bytes += (uint)(OBJ.Sizeof + (*pHead).LocalBytes);
-                pHead++;
-            }
+			for (ObjId = 1; ObjId <= NoOfObj; ObjId++)
+			{
+				Bytes = (Bytes + 3) & 0xFFFFFFFC;
+				Bytes += (uint)(OBJ.Sizeof + (*pHead).LocalBytes);
+				pHead++;
+			}
 
-            Bytes = 0;
+			Bytes = 0;
 
-            NoOfObj = (*(IMGHEAD*)pI).NumberOfObjects;
+			NoOfObj = (*(IMGHEAD*)pI).NumberOfObjects;
 
-            Bytes += (*(IMGHEAD*)pI).GlobalBytes;
-            Bytes = (Bytes + 3) & 0xFFFFFFFC;
-            Bytes += (uint)(8 * (NoOfObj + 1));
+			Bytes += (*(IMGHEAD*)pI).GlobalBytes;
+			Bytes = (Bytes + 3) & 0xFFFFFFFC;
+			Bytes += (uint)(8 * (NoOfObj + 1));
 
-            pHead = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
+			pHead = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
 
-            for (ObjId = 1; ObjId <= NoOfObj; ObjId++)
-            {
-                Bytes = (Bytes + 3) & 0xFFFFFFFC;
-                Bytes += (uint)(OBJ.Sizeof + pHead[ObjId].LocalBytes);
-            }
+			for (ObjId = 1; ObjId <= NoOfObj; ObjId++)
+			{
+				Bytes = (Bytes + 3) & 0xFFFFFFFC;
+				Bytes += (uint)(OBJ.Sizeof + pHead[ObjId].LocalBytes);
+			}
 
-            return (Bytes);
-        }
+			return (Bytes);
+		}
 
 
-        /*! \brief    Initialise program for execution
+		/*! \brief    Initialise program for execution
 		 *
 		 *  \param    PrgId Program id (index)
 		 *  \param    pI    Pointer to image
@@ -1133,325 +1134,326 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *
 		 */
-        public RESULT ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
-        {
+		private VARDATA* pDataProgramReset;
+		public RESULT ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
+		{
+			RESULT Result = RESULT.FAIL;
+			GBINDEX Index;
+			GBINDEX RamSize;
 
-            RESULT Result = RESULT.FAIL;
-            GBINDEX Index;
-            GBINDEX RamSize;
-            VARDATA* pData;
-            OBJID ObjIndex;
-            DATA8 No;
+			OBJID ObjIndex;
+			DATA8 No;
 
-            GH.VMInstance.Program[PrgId].Status = OBJSTAT.STOPPED;
-            GH.VMInstance.Program[PrgId].StatusChange = OBJSTAT.STOPPED;
-            GH.VMInstance.Program[PrgId].Result = RESULT.FAIL;
+			GH.VMInstance.Program[PrgId].Status = OBJSTAT.STOPPED;
+			GH.VMInstance.Program[PrgId].StatusChange = OBJSTAT.STOPPED;
+			GH.VMInstance.Program[PrgId].Result = RESULT.FAIL;
 
-            if (pI != null)
-            {
+			if (pI != null)
+			{
 
-                // Allocate memory for globals and objects
+				// Allocate memory for globals and objects
 
-                RamSize = GetAmountOfRamForImage(pI);
+				RamSize = GetAmountOfRamForImage(pI);
 
-                if (GH.Memory.cMemoryOpen(PrgId, RamSize, (void**)&pData) == OK)
-                { // Memory reserved
+				fixed (VARDATA** pp = &pDataProgramReset)
+					if (GH.Memory.cMemoryOpen(PrgId, RamSize, (void**)pp) == OK)
+					{ // Memory reserved
 
-                    // Save start of image
-                    if (Deb == 1)
-                    {
-                        GH.VMInstance.Program[PrgId].Debug = 1;
-                    }
-                    else
-                    {
-                        GH.VMInstance.Program[PrgId].Debug = 0;
-                    }
-                    GH.VMInstance.Program[PrgId].pImage = pI;
+						// Save start of image
+						if (Deb == 1)
+						{
+							GH.VMInstance.Program[PrgId].Debug = 1;
+						}
+						else
+						{
+							GH.VMInstance.Program[PrgId].Debug = 0;
+						}
+						GH.VMInstance.Program[PrgId].pImage = pI;
 
-                    if (GH.Validate.cValidateProgram(PrgId, pI, (LABEL*)GH.VMInstance.Program[PrgId].Label, GH.VMInstance.TerminalEnabled) != OK)
-                    {
-                        if (PrgId != CMD_SLOT)
-                        {
-                            LogErrorNumber((ERR)VM_PROGRAM_VALIDATION);
-                        }
-                    }
-                    else
-                    {
+						if (GH.Validate.cValidateProgram(PrgId, pI, (LABEL*)GH.VMInstance.Program[PrgId].Label, GH.VMInstance.TerminalEnabled) != OK)
+						{
+							if (PrgId != CMD_SLOT)
+							{
+								LogErrorNumber((ERR)VM_PROGRAM_VALIDATION);
+							}
+						}
+						else
+						{
 
-                        // Clear memory
+							// Clear memory
 
-                        for (Index = 0; Index < RamSize; Index++)
-                        {
-                            pData[Index] = 0;
-                        }
+							for (Index = 0; Index < RamSize; Index++)
+							{
+								pDataProgramReset[Index] = 0;
+							}
 
-                        for (No = 0; No < MAX_BREAKPOINTS; No++)
-                        {
-                            ((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr = 0;
-                            ((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode = 0;
-                        }
+							for (No = 0; No < MAX_BREAKPOINTS; No++)
+							{
+								((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr = 0;
+								((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode = 0;
+							}
 
-                        // Get GH.VMInstance.Objects
+							// Get GH.VMInstance.Objects
 
-                        GH.VMInstance.Program[PrgId].Objects = (*(IMGHEAD*)pI).NumberOfObjects;
+							GH.VMInstance.Program[PrgId].Objects = (*(IMGHEAD*)pI).NumberOfObjects;
 
-                        // Allocate GlobalVariables
+							// Allocate GlobalVariables
 
-                        GH.VMInstance.Program[PrgId].pData = pData;
-                        if (pG != null)
-                        {
-                            GH.VMInstance.Program[PrgId].pGlobal = pG;
-                        }
-                        else
-                        {
-                            GH.VMInstance.Program[PrgId].pGlobal = pData;
-                        }
+							GH.VMInstance.Program[PrgId].pData = pDataProgramReset;
+							if (pG != null)
+							{
+								GH.VMInstance.Program[PrgId].pGlobal = pG;
+							}
+							else
+							{
+								GH.VMInstance.Program[PrgId].pGlobal = pDataProgramReset;
+							}
 
-                        pData = &pData[(*(IMGHEAD*)pI).GlobalBytes];
+							pDataProgramReset = &pDataProgramReset[(*(IMGHEAD*)pI).GlobalBytes];
 
-                        // Align & allocate ObjectPointerList (+1)
+							// Align & allocate ObjectPointerList (+1)
 
-                        pData = (VARDATA*)(((ULONG)pData + 3) & 0xFFFFFFFC);
-                        GH.VMInstance.Program[PrgId].pObjList = (OBJ**)pData;
-                        pData = &pData[8 * (GH.VMInstance.Program[PrgId].Objects + 1)];
+							pDataProgramReset = (VARDATA*)(((ULONG)pDataProgramReset + 3) & 0xFFFFFFFC);
+							GH.VMInstance.Program[PrgId].pObjList = (OBJ**)pDataProgramReset;
+							pDataProgramReset = &pDataProgramReset[8 * (GH.VMInstance.Program[PrgId].Objects + 1)];
 
-                        // Make pointer to access object headers starting at one (not zero)
+							// Make pointer to access object headers starting at one (not zero)
 
-                        GH.VMInstance.Program[PrgId].pObjHead = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
+							GH.VMInstance.Program[PrgId].pObjHead = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
 
-                        for (ObjIndex = 1; ObjIndex <= GH.VMInstance.Program[PrgId].Objects; ObjIndex++)
-                        {
-                            // Align
+							for (ObjIndex = 1; ObjIndex <= GH.VMInstance.Program[PrgId].Objects; ObjIndex++)
+							{
+								// Align
 
-                            pData = (VARDATA*)(((ULONG)pData + 3) & 0xFFFFFFFC);
+								pDataProgramReset = (VARDATA*)(((ULONG)pDataProgramReset + 3) & 0xFFFFFFFC);
 
-                            // Save object pointer in Object list
+								// Save object pointer in Object list
 
-                            OBJ* dataTmp = (OBJ*)pData;
-                            GH.VMInstance.Program[PrgId].pObjList[ObjIndex] = dataTmp;
+								OBJ* dataTmp = (OBJ*)pDataProgramReset;
+								GH.VMInstance.Program[PrgId].pObjList[ObjIndex] = dataTmp;
 
-                            // Initialise instruction pointer, trigger counts and status
+								// Initialise instruction pointer, trigger counts and status
 
-                            (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &pI[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
+								(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &pI[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
 
-                            (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
+								(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
 
-                            if (((*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount != 0) || (ObjIndex > 1))
-                            {
-                                (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = (ushort)OBJSTAT.STOPPED;
-                            }
-                            else
-                            {
-                                if (Deb == 2)
-                                {
-                                    (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = WAITING;
-                                }
-                                else
-                                {
-                                    (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = (ushort)OBJSTAT.RUNNING;
-                                }
-                            }
+								if (((*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount != 0) || (ObjIndex > 1))
+								{
+									(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = (ushort)OBJSTAT.STOPPED;
+								}
+								else
+								{
+									if (Deb == 2)
+									{
+										(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = WAITING;
+									}
+									else
+									{
+										(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = (ushort)OBJSTAT.RUNNING;
+									}
+								}
 
-                            if (GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OwnerObjectId != 0)
-                            {
-                                (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).pLocal = (*GH.VMInstance.Program[PrgId].pObjList[GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OwnerObjectId]).Local;
-                            }
-                            else
-                            {
-                                (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).pLocal = (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Local;
-                            }
+								if (GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OwnerObjectId != 0)
+								{
+									(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).pLocal = (*GH.VMInstance.Program[PrgId].pObjList[GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OwnerObjectId]).Local;
+								}
+								else
+								{
+									(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).pLocal = (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Local;
+								}
 
-                            // Advance data pointer
+								// Advance data pointer
 
-                            pData = &pData[OBJ.Sizeof + GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes];
-                        }
+								pDataProgramReset = &pDataProgramReset[OBJ.Sizeof + GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes];
+							}
 
-                        GH.VMInstance.Program[PrgId].ObjectId = 1;
-                        GH.VMInstance.Program[PrgId].Status = OBJSTAT.RUNNING;
-                        GH.VMInstance.Program[PrgId].StatusChange = OBJSTAT.RUNNING;
+							GH.VMInstance.Program[PrgId].ObjectId = 1;
+							GH.VMInstance.Program[PrgId].Status = OBJSTAT.RUNNING;
+							GH.VMInstance.Program[PrgId].StatusChange = OBJSTAT.RUNNING;
 
-                        GH.VMInstance.Program[PrgId].Result = RESULT.BUSY;
+							GH.VMInstance.Program[PrgId].Result = RESULT.BUSY;
 
-                        Result = OK;
+							Result = OK;
 
-                        if (PrgId == USER_SLOT)
-                        {
+							if (PrgId == USER_SLOT)
+							{
 
-                            if (GH.VMInstance.RefCount == 0)
-                            {
-                                Result = 0;
-                                Result |= GH.Ui.cUiOpen();
-                                Result |= GH.Output.cOutputOpen();
-                                Result |= GH.Input.cInputOpen();
-                                Result |= GH.Com.cComOpen();
-                                Result |= GH.Sound.cSoundOpen();
-                            }
-                            GH.VMInstance.RefCount++;
-                        }
-                        GH.VMInstance.Program[PrgId].InstrCnt = 0;
-                        GH.VMInstance.Program[PrgId].StartTime = GetTimeMS();
-                        GH.VMInstance.Program[PrgId].RunTime = GH.Timer.cTimerGetuS();
-                    }
-                }
-            }
+								if (GH.VMInstance.RefCount == 0)
+								{
+									Result = 0;
+									Result |= GH.Ui.cUiOpen();
+									Result |= GH.Output.cOutputOpen();
+									Result |= GH.Input.cInputOpen();
+									Result |= GH.Com.cComOpen();
+									Result |= GH.Sound.cSoundOpen();
+								}
+								GH.VMInstance.RefCount++;
+							}
+							GH.VMInstance.Program[PrgId].InstrCnt = 0;
+							GH.VMInstance.Program[PrgId].StartTime = GetTimeMS();
+							GH.VMInstance.Program[PrgId].RunTime = GH.Timer.cTimerGetuS();
+						}
+					}
+			}
 
-            return (Result);
-        }
+			return (Result);
+		}
 
 
-        /*! \brief    Exit program nicely (freeing up memory)
+		/*! \brief    Exit program nicely (freeing up memory)
 		 *
 		 *  \param    PrgId Program id (index)
 		 *
 		 *
 		 */
-        public void ProgramEnd(PRGID PrgId)
-        {
-            if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
-            {
+		public void ProgramEnd(PRGID PrgId)
+		{
+			if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
+			{
 
-                GH.VMInstance.Program[PrgId].InstrTime = GH.Timer.cTimerGetuS() - GH.VMInstance.Program[PrgId].RunTime;
+				GH.VMInstance.Program[PrgId].InstrTime = GH.Timer.cTimerGetuS() - GH.VMInstance.Program[PrgId].RunTime;
 
-                GH.VMInstance.Program[PrgId].Objects = 0;
-                GH.VMInstance.Program[PrgId].Status = OBJSTAT.STOPPED;
-                GH.VMInstance.Program[PrgId].StatusChange = OBJSTAT.STOPPED;
-                if (PrgId != 0)
-                {
-                    if (PrgId != GH.VMInstance.ProgramId)
-                    {
-                        GH.VMInstance.Program[PrgId].InstrCnt += GH.VMInstance.InstrCnt;
-                    }
-                }
+				GH.VMInstance.Program[PrgId].Objects = 0;
+				GH.VMInstance.Program[PrgId].Status = OBJSTAT.STOPPED;
+				GH.VMInstance.Program[PrgId].StatusChange = OBJSTAT.STOPPED;
+				if (PrgId != 0)
+				{
+					if (PrgId != GH.VMInstance.ProgramId)
+					{
+						GH.VMInstance.Program[PrgId].InstrCnt += GH.VMInstance.InstrCnt;
+					}
+				}
 
-                if (PrgId == USER_SLOT)
-                {
-                    if (GH.VMInstance.RefCount != 0)
-                    {
-                        GH.VMInstance.RefCount--;
-                    }
-                    if (GH.VMInstance.RefCount == 0)
-                    {
-                        GH.Sound.cSoundClose();
-                        GH.Com.cComClose();
-                        GH.Input.cInputClose();
-                        GH.Output.cOutputClose();
-                        GH.Ui.cUiClose();
-                    }
-                }
+				if (PrgId == USER_SLOT)
+				{
+					if (GH.VMInstance.RefCount != 0)
+					{
+						GH.VMInstance.RefCount--;
+					}
+					if (GH.VMInstance.RefCount == 0)
+					{
+						GH.Sound.cSoundClose();
+						GH.Com.cComClose();
+						GH.Input.cInputClose();
+						GH.Output.cOutputClose();
+						GH.Ui.cUiClose();
+					}
+				}
 
-                GH.Memory.cMemoryClose(PrgId);
+				GH.Memory.cMemoryClose(PrgId);
 
-                if (PrgId == GH.VMInstance.ProgramId)
-                {
-                    SetDispatchStatus(DSPSTAT.PRGBREAK);
-                }
+				if (PrgId == GH.VMInstance.ProgramId)
+				{
+					SetDispatchStatus(DSPSTAT.PRGBREAK);
+				}
 
-                GH.VMInstance.Program[PrgId].Result = OK;
-            }
-        }
+				GH.VMInstance.Program[PrgId].Result = OK;
+			}
+		}
 
 
-        /*! \brief    Switch in current program
+		/*! \brief    Switch in current program
 		 *            ProgramId holds program to switch to
 		 *
 		 */
-        public void ProgramInit()
-        {
-            PRG* pProgram;
+		public void ProgramInit()
+		{
+			PRG* pProgram;
 
-            if (GH.VMInstance.ProgramId < MAX_PROGRAMS)
-            {
-                pProgram = &GH.VMInstance.Program[GH.VMInstance.ProgramId];
+			if (GH.VMInstance.ProgramId < MAX_PROGRAMS)
+			{
+				pProgram = &GH.VMInstance.Program[GH.VMInstance.ProgramId];
 
-                if (((*pProgram).Status == OBJSTAT.RUNNING) || ((*pProgram).Status == OBJSTAT.WAITING))
-                {
-                    GH.VMInstance.pGlobal = (*pProgram).pGlobal;
-                    GH.VMInstance.pImage = (*pProgram).pImage;
-                    GH.VMInstance.pObjHead = (*pProgram).pObjHead;
-                    GH.VMInstance.pObjList = (*pProgram).pObjList;
-                    GH.VMInstance.Objects = (*pProgram).Objects;
-                    GH.VMInstance.ObjectId = (*pProgram).ObjectId;
-                    GH.VMInstance.ObjectIp = (*pProgram).ObjectIp;
-                    GH.VMInstance.ObjectLocal = (*pProgram).ObjectLocal;
-                    GH.VMInstance.InstrCnt = 0;
-                    GH.VMInstance.Debug = (*pProgram).Debug;
+				if (((*pProgram).Status == OBJSTAT.RUNNING) || ((*pProgram).Status == OBJSTAT.WAITING))
+				{
+					GH.VMInstance.pGlobal = (*pProgram).pGlobal;
+					GH.VMInstance.pImage = (*pProgram).pImage;
+					GH.VMInstance.pObjHead = (*pProgram).pObjHead;
+					GH.VMInstance.pObjList = (*pProgram).pObjList;
+					GH.VMInstance.Objects = (*pProgram).Objects;
+					GH.VMInstance.ObjectId = (*pProgram).ObjectId;
+					GH.VMInstance.ObjectIp = (*pProgram).ObjectIp;
+					GH.VMInstance.ObjectLocal = (*pProgram).ObjectLocal;
+					GH.VMInstance.InstrCnt = 0;
+					GH.VMInstance.Debug = (*pProgram).Debug;
 
-                }
-            }
-        }
+				}
+			}
+		}
 
 
-        /*! \brief    Switch out current program
+		/*! \brief    Switch out current program
 		 *            ProgramId holds program to switch from
 		 *
 		 */
-        public void ProgramExit()
-        {
-            PRG* pProgram;
+		public void ProgramExit()
+		{
+			PRG* pProgram;
 
-            if (GH.VMInstance.ProgramId < MAX_PROGRAMS)
-            {
-                pProgram = &GH.VMInstance.Program[GH.VMInstance.ProgramId];
-                (*pProgram).pGlobal = GH.VMInstance.pGlobal;
-                (*pProgram).pImage = GH.VMInstance.pImage;
-                (*pProgram).pObjHead = GH.VMInstance.pObjHead;
-                (*pProgram).pObjList = GH.VMInstance.pObjList;
-                (*pProgram).Objects = GH.VMInstance.Objects;
-                (*pProgram).ObjectId = GH.VMInstance.ObjectId;
-                (*pProgram).ObjectIp = GH.VMInstance.ObjectIp;
-                (*pProgram).ObjectLocal = GH.VMInstance.ObjectLocal;
-                (*pProgram).InstrCnt += GH.VMInstance.InstrCnt;
-                (*pProgram).Debug = GH.VMInstance.Debug;
+			if (GH.VMInstance.ProgramId < MAX_PROGRAMS)
+			{
+				pProgram = &GH.VMInstance.Program[GH.VMInstance.ProgramId];
+				(*pProgram).pGlobal = GH.VMInstance.pGlobal;
+				(*pProgram).pImage = GH.VMInstance.pImage;
+				(*pProgram).pObjHead = GH.VMInstance.pObjHead;
+				(*pProgram).pObjList = GH.VMInstance.pObjList;
+				(*pProgram).Objects = GH.VMInstance.Objects;
+				(*pProgram).ObjectId = GH.VMInstance.ObjectId;
+				(*pProgram).ObjectIp = GH.VMInstance.ObjectIp;
+				(*pProgram).ObjectLocal = GH.VMInstance.ObjectLocal;
+				(*pProgram).InstrCnt += GH.VMInstance.InstrCnt;
+				(*pProgram).Debug = GH.VMInstance.Debug;
 
-                GH.VMInstance.InstrCnt = 0;
-                (*pProgram).Debug = GH.VMInstance.Debug;
-            }
-        }
+				GH.VMInstance.InstrCnt = 0;
+				(*pProgram).Debug = GH.VMInstance.Debug;
+			}
+		}
 
 
-        /*! \brief    Find a program to run
+		/*! \brief    Find a program to run
 		 *            ProgramId holds found program
 		 *
 		 *  \return   RESULT Succes [OK or RESULT.STOP]
 		 */
-        public RESULT ProgramExec()
-        {
-            RESULT Result = RESULT.STOP;
-            OBJID TmpId = 0;
+		public RESULT ProgramExec()
+		{
+			RESULT Result = RESULT.STOP;
+			OBJID TmpId = 0;
 
 
-            GH.Ev3System.Logger.LogInfo($"begin in ProgramExec");
-            for (TmpId = 0; (TmpId < MAX_PROGRAMS) && (Result == RESULT.STOP); TmpId++)
-            {
-                if (GH.VMInstance.Program[TmpId].Status != OBJSTAT.STOPPED)
-                {
-                    Result = OK;
-                }
-            }
-            GH.Ev3System.Logger.LogInfo($"after loop in ProgramExec");
-            if (Result == OK)
-            {
-                do
-                {
-                    // next program
+			GH.Ev3System.Logger.LogInfo($"begin in ProgramExec");
+			for (TmpId = 0; (TmpId < MAX_PROGRAMS) && (Result == RESULT.STOP); TmpId++)
+			{
+				if (GH.VMInstance.Program[TmpId].Status != OBJSTAT.STOPPED)
+				{
+					Result = OK;
+				}
+			}
+			GH.Ev3System.Logger.LogInfo($"after loop in ProgramExec");
+			if (Result == OK)
+			{
+				do
+				{
+					// next program
 
-                    if (++GH.VMInstance.ProgramId >= MAX_PROGRAMS)
-                    {
-                        // wrap around
+					if (++GH.VMInstance.ProgramId >= MAX_PROGRAMS)
+					{
+						// wrap around
 
-                        GH.VMInstance.ProgramId = 0;
-                    }
+						GH.VMInstance.ProgramId = 0;
+					}
 
-                }
-                while (GH.VMInstance.Program[GH.VMInstance.ProgramId].Status == OBJSTAT.STOPPED);
-            }
-            GH.Ev3System.Logger.LogInfo($"exit in ProgramExec");
+				}
+				while (GH.VMInstance.Program[GH.VMInstance.ProgramId].Status == OBJSTAT.STOPPED);
+			}
+			GH.Ev3System.Logger.LogInfo($"exit in ProgramExec");
 
-            return (Result);
-        }
+			return (Result);
+		}
 
 
-        /*! \brief    Restore object context
+		/*! \brief    Restore object context
 		 *
 		 *            Restore object context if id is valid and running by loading current IP and current pointer to Locals
 		 *
@@ -1462,40 +1464,40 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *
 		 */
-        public DSPSTAT ObjectInit()
-        {
-            DSPSTAT Result = DSPSTAT.STOPBREAK;
+		public DSPSTAT ObjectInit()
+		{
+			DSPSTAT Result = DSPSTAT.STOPBREAK;
 
-            if ((GH.VMInstance.ObjectId > 0) && (GH.VMInstance.ObjectId <= GH.VMInstance.Objects))
-            { // object valid
+			if ((GH.VMInstance.ObjectId > 0) && (GH.VMInstance.ObjectId <= GH.VMInstance.Objects))
+			{ // object valid
 
-                if ((*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus == RUNNING)
-                { // Restore object context
+				if ((*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus == RUNNING)
+				{ // Restore object context
 
-                    GH.VMInstance.ObjectIp = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip;
+					GH.VMInstance.ObjectIp = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip;
 
-                    GH.VMInstance.ObjectLocal = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).pLocal;
+					GH.VMInstance.ObjectLocal = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).pLocal;
 
-                    Result = DSPSTAT.NOBREAK;
-                }
-            }
+					Result = DSPSTAT.NOBREAK;
+				}
+			}
 
-            if ((GH.VMInstance.ProgramId == GUI_SLOT) || (GH.VMInstance.ProgramId == DEBUG_SLOT))
-            { // UI
+			if ((GH.VMInstance.ProgramId == GUI_SLOT) || (GH.VMInstance.ProgramId == DEBUG_SLOT))
+			{ // UI
 
-                GH.VMInstance.Priority = UI_PRIORITY;
-            }
-            else
-            { // user program
+				GH.VMInstance.Priority = UI_PRIORITY;
+			}
+			else
+			{ // user program
 
-                GH.VMInstance.Priority = PRG_PRIORITY;
-            }
+				GH.VMInstance.Priority = PRG_PRIORITY;
+			}
 
-            return (Result);
-        }
+			return (Result);
+		}
 
 
-        /*! \brief    Save object context
+		/*! \brief    Save object context
 		 *
 		 *            ObjectId holds object to switch from
 		 *
@@ -1505,759 +1507,760 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            ObjectId, Objects, pObjList, ObjectIp
 		 *
 		 */
-        public void ObjectExit()
-        {
-            if ((GH.VMInstance.ObjectId > 0) && (GH.VMInstance.ObjectId <= GH.VMInstance.Objects) && (GH.VMInstance.Program[GH.VMInstance.ProgramId].Status != OBJSTAT.STOPPED))
-            { // object valid
+		public void ObjectExit()
+		{
+			if ((GH.VMInstance.ObjectId > 0) && (GH.VMInstance.ObjectId <= GH.VMInstance.Objects) && (GH.VMInstance.Program[GH.VMInstance.ProgramId].Status != OBJSTAT.STOPPED))
+			{ // object valid
 
-                if ((*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus == RUNNING)
-                { // Save object context
+				if ((*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus == RUNNING)
+				{ // Save object context
 
-                    (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = GH.VMInstance.ObjectIp;
-                }
-            }
-        }
+					(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = GH.VMInstance.ObjectIp;
+				}
+			}
+		}
 
 
-        /*! \brief    Find next object to run
+		/*! \brief    Find next object to run
 		 *
 		 *            Uses following from current program context:
 		 *            ObjectId, Objects, pObjList
 		 *
 		 *  \return   RESULT  Succes [OK or RESULT.STOP]
 		 */
-        public RESULT ObjectExec()
-        {
-            RESULT Result = OK;
-            OBJID TmpId = 0;
+		public RESULT ObjectExec()
+		{
+			RESULT Result = OK;
+			OBJID TmpId = 0;
 
 
-            if ((GH.VMInstance.ProgramId == GUI_SLOT) && (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED))
-            { // When user program is running - only schedule UI background task
+			if ((GH.VMInstance.ProgramId == GUI_SLOT) && (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED))
+			{ // When user program is running - only schedule UI background task
 
-                if ((GH.VMInstance.Objects >= 3) && (GH.VMInstance.Program[GUI_SLOT].Status != OBJSTAT.STOPPED))
-                {
-                    if (GH.VMInstance.ObjectId != 2)
-                    {
-                        GH.VMInstance.ObjectId = 2;
-                    }
-                    else
-                    {
-                        GH.VMInstance.ObjectId = 3;
-                    }
-                }
-            }
-            else
-            {
-                do
-                {
-                    // Next object
-                    if (++GH.VMInstance.ObjectId > GH.VMInstance.Objects)
-                    {
-                        // wrap around
+				if ((GH.VMInstance.Objects >= 3) && (GH.VMInstance.Program[GUI_SLOT].Status != OBJSTAT.STOPPED))
+				{
+					if (GH.VMInstance.ObjectId != 2)
+					{
+						GH.VMInstance.ObjectId = 2;
+					}
+					else
+					{
+						GH.VMInstance.ObjectId = 3;
+					}
+				}
+			}
+			else
+			{
+				do
+				{
+					// Next object
+					if (++GH.VMInstance.ObjectId > GH.VMInstance.Objects)
+					{
+						// wrap around
 
-                        GH.VMInstance.ObjectId = 1;
-                    }
+						GH.VMInstance.ObjectId = 1;
+					}
 
-                    if (++TmpId > GH.VMInstance.Objects)
-                    {
-                        // no programs running
+					if (++TmpId > GH.VMInstance.Objects)
+					{
+						// no programs running
 
-                        Result = RESULT.STOP;
-                    }
+						Result = RESULT.STOP;
+					}
 
-                }
-                while ((Result == OK) && ((*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus != RUNNING));
-            }
+				}
+				while ((Result == OK) && ((*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus != RUNNING));
+			}
 
-            return (Result);
-        }
+			return (Result);
+		}
 
 
-        /*! \brief    Put object on run queue
+		/*! \brief    Put object on run queue
 		 *
 		 *  \param    Id Object to queue
 		 *
 		 */
-        public void ObjectEnQueue(OBJID Id)
-        {
-            if ((Id > 0) && (Id <= GH.VMInstance.Objects))
-            {
-                (*GH.VMInstance.pObjList[Id]).ObjStatus = RUNNING;
-                (*GH.VMInstance.pObjList[Id]).Ip = &GH.VMInstance.pImage[(ULONG)GH.VMInstance.pObjHead[Id].OffsetToInstructions];
-                (*GH.VMInstance.pObjList[Id]).TriggerCount = GH.VMInstance.pObjHead[Id].TriggerCount;
-            }
-        }
+		public void ObjectEnQueue(OBJID Id)
+		{
+			if ((Id > 0) && (Id <= GH.VMInstance.Objects))
+			{
+				(*GH.VMInstance.pObjList[Id]).ObjStatus = RUNNING;
+				(*GH.VMInstance.pObjList[Id]).Ip = &GH.VMInstance.pImage[(ULONG)GH.VMInstance.pObjHead[Id].OffsetToInstructions];
+				(*GH.VMInstance.pObjList[Id]).TriggerCount = GH.VMInstance.pObjHead[Id].TriggerCount;
+			}
+		}
 
 
-        /*! \brief    Remove object from run queue
+		/*! \brief    Remove object from run queue
 		 *
 		 *  \param    Id Object to enqueue
 		 *
 		 */
-        public void ObjectDeQueue(OBJID Id)
-        {
-            if ((Id > 0) && (Id <= GH.VMInstance.Objects))
-            {
-                (*GH.VMInstance.pObjList[Id]).Ip = GH.VMInstance.ObjectIp;
-                (*GH.VMInstance.pObjList[Id]).ObjStatus = STOPPED;
-
-                SetDispatchStatus(DSPSTAT.STOPBREAK);
-            }
-        }
-
-
-        public DATA8 CheckSdcard(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force)
-        {
-            DATA8 Result = 0;
-            DATAF Tmp;
-            DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmNAMESIZE);
-            DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(250);
-
-            *pChanged = 0;
-            *pTotal = 0;
-            *pFree = 0;
-
-            ULONG Time;
-            // struct statvfs Status;
-
-            Time = GH.VMInstance.NewTime - GH.VMInstance.SdcardTimer;
-
-            if ((Time >= UPDATE_SDCARD) || (GH.VMInstance.SdcardTimer == 0) || (Force != 0))
-            { // Update values
-
-                GH.VMInstance.SdcardTimer += Time;
-
-                if (GH.Memory.cMemoryGetMediaName("m".AsSbytePointer(), Name) == OK)
-                {
-                    // TODO: probably no need
-                    //if (GH.VMInstance.SdcardOk == 0)
-                    //{
-                    //	GH.VMInstance.SdcardOk = 1;
-                    //	CommonHelper.snprintf(Buffer, 250, "ln -s /media/card %s &> /dev/null", vmSDCARD_FOLDER);
-                    //	system(Buffer);
-                    //	sync();
-                    //	*pChanged = 1;
-                    //	GH.printf("system(%s)\r\n", Buffer);
-                    //}
-                    //CommonHelper.snprintf(Buffer, 250, "/media/card");
-                    //statvfs(Buffer, &Status);
-                    //if (*pChanged != 0)
-                    //{
-                    //	GH.printf("statvfs(%s)\r\n", Buffer);
-
-                    //	GH.printf("f_bsize   %ld\r\n", Status.f_bsize);
-                    //	GH.printf("f_frsize  %ld\r\n", Status.f_frsize);
-                    //	GH.printf("f_blocks  %ld\r\n", Status.f_blocks);
-                    //	GH.printf("f_bavail  %ld\r\n", Status.f_bavail);
-                    //	GH.printf("f_files   %ld\r\n", Status.f_files);
-                    //	GH.printf("f_ffree   %ld\r\n", Status.f_ffree);
-                    //	GH.printf("f_favail  %ld\r\n", Status.f_favail);
-                    //	GH.printf("f_fside   %ld\r\n", Status.f_fsid);
-                    //	GH.printf("f_flag    %ld\r\n", Status.f_flag);
-                    //	GH.printf("f_namemax %ld\r\n", Status.f_namemax);
-                    //}
-                    //Tmp = (DATAF)Status.f_blocks;
-                    //Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
-                    //Tmp *= (DATAF)Status.f_bsize;
-                    //GH.VMInstance.SdcardSize = (DATA32)Tmp;
-                    //Tmp = (DATAF)Status.f_bavail;
-                    //Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
-                    //Tmp *= (DATAF)Status.f_bsize;
-
-                    //if (GH.VMInstance.SdcardFree != (DATA32)Tmp)
-                    //{
-                    //	GH.printf("%d T=%-8d F=%-8d\r\n", GH.VMInstance.SdcardOk, GH.VMInstance.SdcardSize, GH.VMInstance.SdcardFree);
-                    //}
-                    //GH.VMInstance.SdcardFree = (DATA32)Tmp;
-
-                    GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                }
-
-                else
-                {
-                    if (GH.VMInstance.SdcardOk == 1)
-                    {
-                        GH.VMInstance.SdcardOk = 0;
-                        //CommonHelper.snprintf(Buffer, 250, "rm -r %s &> /dev/null", vmSDCARD_FOLDER);
-                        //system(Buffer);
-                        //*pChanged = 1;
-                        //if (*pChanged)
-                        //{
-                        //	GH.printf("system(%s)\r\n", Buffer);
-                        //}
-                        GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                    }
-                    GH.VMInstance.SdcardSize = 0;
-                    GH.VMInstance.SdcardFree = 0;
-                }
-                if (*pChanged != 0)
-                {
-                    GH.printf($"{GH.VMInstance.SdcardOk} T={GH.VMInstance.SdcardSize} F={GH.VMInstance.SdcardFree}\r\n");
-                }
-            }
-            *pTotal = GH.VMInstance.SdcardSize;
-            *pFree = GH.VMInstance.SdcardFree;
-            Result = GH.VMInstance.SdcardOk;
-
-            return (Result);
-        }
-
-
-        public DATA8 CheckUsbstick(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force)
-        {
-            DATA8 Result = 0;
-
-            *pChanged = 0;
-            *pTotal = 0;
-            *pFree = 0;
-
-            ULONG Time;
-            // struct statvfs Status;
-            DATAF Tmp;
-            DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmNAMESIZE);
-            DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(250);
-
-            Time = GH.VMInstance.NewTime - GH.VMInstance.UsbstickTimer;
-
-            if ((Time >= UPDATE_USBSTICK) || (GH.VMInstance.UsbstickTimer == 0) || (Force != 0))
-            { // Update values
-
-                GH.VMInstance.UsbstickTimer += Time;
-
-                if (GH.Memory.cMemoryGetMediaName("s".AsSbytePointer(), Name) == OK)
-                {
-                    //					if (GH.VMInstance.UsbstickOk == 0)
-                    //					{
-                    //						GH.VMInstance.UsbstickOk = 1;
-                    //						CommonHelper.snprintf(Buffer, 250, "ln -s /media/usb %s &> /dev/null", vmUSBSTICK_FOLDER);
-                    //						system(Buffer);
-                    //						sync();
-                    //						*pChanged = 1;
-                    //# ifdef DEBUG_USBSTICK
-                    //						GH.printf("system(%s)\r\n", Buffer);
-                    //#endif
-                    //					}
-                    //					CommonHelper.snprintf(Buffer, 250, "/media/usb");
-                    //					statvfs(Buffer, &Status);
-                    //# ifdef DEBUG_USBSTICK
-                    //					if (*pChanged)
-                    //					{
-                    //						GH.printf("statvfs(%s)\r\n", Buffer);
-
-                    //						GH.printf("f_bsize   %ld\r\n", Status.f_bsize);
-                    //						GH.printf("f_frsize  %ld\r\n", Status.f_frsize);
-                    //						GH.printf("f_blocks  %ld\r\n", Status.f_blocks);
-                    //						GH.printf("f_bavail  %ld\r\n", Status.f_bavail);
-                    //						GH.printf("f_files   %ld\r\n", Status.f_files);
-                    //						GH.printf("f_ffree   %ld\r\n", Status.f_ffree);
-                    //						GH.printf("f_favail  %ld\r\n", Status.f_favail);
-                    //						GH.printf("f_fside   %ld\r\n", Status.f_fsid);
-                    //						GH.printf("f_flag    %ld\r\n", Status.f_flag);
-                    //						GH.printf("f_namemax %ld\r\n", Status.f_namemax);
-                    //					}
-                    //#endif
-                    //					Tmp = (DATAF)Status.f_blocks;
-                    //					Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
-                    //					Tmp *= (DATAF)Status.f_bsize;
-                    //					GH.VMInstance.UsbstickSize = (DATA32)Tmp;
-                    //					Tmp = (DATAF)Status.f_bavail;
-                    //					Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
-                    //					Tmp *= (DATAF)Status.f_bsize;
-
-                    //# ifdef DEBUG_USBSTICK
-                    //					if (GH.VMInstance.UsbstickFree != (DATA32)Tmp)
-                    //					{
-                    //						GH.printf("%d T=%-8d F=%-8d\r\n", GH.VMInstance.UsbstickOk, GH.VMInstance.UsbstickSize, GH.VMInstance.UsbstickFree);
-                    //					}
-                    //#endif
-                    //					GH.VMInstance.UsbstickFree = (DATA32)Tmp;
-                    GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                }
-                else
-                {
-                    if (GH.VMInstance.UsbstickOk == 1)
-                    {
-                        GH.VMInstance.UsbstickOk = 0;
-                        //CommonHelper.snprintf(Buffer, 250, "rm -r %s &> /dev/null", vmUSBSTICK_FOLDER);
-                        //system(Buffer);
-                        //*pChanged = 1;
-                        //if (*pChanged)
-                        //{
-                        //	GH.printf("system(%s)\r\n", Buffer);
-                        //}
-                        GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                    }
-                    GH.VMInstance.UsbstickSize = 0;
-                    GH.VMInstance.UsbstickFree = 0;
-                }
-                //    if (*pChanged)
-                {
-                    GH.printf($"{GH.VMInstance.UsbstickOk} T={GH.VMInstance.UsbstickSize} F={GH.VMInstance.UsbstickFree}\r\n");
-                }
-            }
-            *pTotal = GH.VMInstance.UsbstickSize;
-            *pFree = GH.VMInstance.UsbstickFree;
-            Result = GH.VMInstance.UsbstickOk;
-
-            return (Result);
-        }
-
-
-        public RESULT mSchedInit(int argc, string[] argv)
-        {
-            DATA32 Result = OK;
-            PRGID PrgId;
-            IMGHEAD* pImgHead;
-            DATA16 Loop;
-            DATA8 Ok;
-            DATA32 Total;
-            DATA32 Free;
-            float Tmp;
-            DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
-            DATA8* ParBuf = CommonHelper.Pointer1d<DATA8>(255);
-
-            GH.VMInstance.Status = 0x00;
-
-            ANALOG* pAdcTmp;
-
-            GH.VMInstance.pAnalog = (ANALOG*)GH.VMInstance.Analog;
-            // TODO: analog shite
-            //GH.VMInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
-
-            //if (GH.VMInstance.AdcFile >= MIN_HANDLE)
-            //{
-            //	pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.VMInstance.AdcFile, 0);
-
-            //	if (pAdcTmp == MAP_FAILED)
-            //	{
-            //		//#ifndef Linux_X86
-            //		LogErrorNumber(ANALOG_SHARED_MEMORY);
-            //		//#endif
-            //	}
-            //	else
-            //	{
-            //		GH.VMInstance.pAnalog = pAdcTmp;
-            //	}
-            //	close(GH.VMInstance.AdcFile);
-            //}
-            //else
-            //{
-            //	//#ifndef Linux_X86
-            //	LogErrorNumber(ANALOG_DEVICE_FILE_NOT_FOUND);
-            //	//#endif
-            //}
-
-            GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-
-            // Fill holes in PrimDispatchTabel
-            for (Loop = 0; Loop < PRIMDISPATHTABLE_SIZE; Loop++)
-            {
-                if (!PrimDispatchTabel.ContainsKey(Loop))
-                {
-                    PrimDispatchTabel.Add(Loop, Error);
-                }
-            }
-
-            // Be sure necessary folders exist
-            if (Directory.CreateDirectory(vmSETTINGS_DIR) != null)
-            {
-                // chmod(vmSETTINGS_DIR, DIRPERMISSIONS);
-            }
-
-            CheckUsbstick(&Ok, &Total, &Free, 0);
-            CheckSdcard(&Ok, &Total, &Free, 0);
-
-            // Be sure necessary files exist
-            Ok = 0;
-            CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmWIFI_FILE_NAME}{vmEXT_TEXT}");
-            using FileStream wifiFs = File.OpenWrite(CommonHelper.GetString(PrgNameBuf));
-            if (wifiFs != null)
-            {
-                CommonHelper.sprintf(ParBuf, "-\t");
-                wifiFs.WriteUnsafe((byte*)ParBuf, 0, CommonHelper.strlen(ParBuf));
-                wifiFs.Close();
-            }
-
-            // TODO: no need for bluetooth probably
-            //Ok = 0;
-            //CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmBLUETOOTH_FILE_NAME, vmEXT_TEXT);
-            //File = open(PrgNameBuf, O_RDONLY);
-            //if (File >= MIN_HANDLE)
-            //{
-            //	close(File);
-            //}
-            //else
-            //{
-            //	File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
-            //	if (File >= MIN_HANDLE)
-            //	{
-            //		CommonHelper.sprintf(ParBuf, "-\t");
-            //		write(File, ParBuf, CommonHelper.strlen(ParBuf));
-            //		close(File);
-            //	}
-            //}
-
-            // TODO: wtf is this ahahaha sleep in file ahahaha wtf
-            //Ok = 0;
-            //CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmSLEEP_FILE_NAME, vmEXT_TEXT);
-            //File = open(PrgNameBuf, O_RDONLY);
-            //if (File >= MIN_HANDLE)
-            //{
-            //	ParBuf[0] = 0;
-            //	read(File, ParBuf, sizeof(ParBuf));
-            //	if (sscanf(ParBuf, "%f", &Tmp) > 0)
-            //	{
-            //		if ((Tmp >= (float)0) && (Tmp <= (float)127))
-            //		{
-            //			SetSleepMinutes((DATA8)Tmp);
-            //			Ok = 1;
-            //		}
-            //	}
-            //	else
-            //	{
-            //		ParBuf[5] = 0;
-            //		if (CommonHelper.strcmp(ParBuf, "never") == 0)
-            //		{
-            //			SetSleepMinutes(0);
-            //			Ok = 1;
-            //		}
-            //	}
-            //	close(File);
-            //}
-            //if (!Ok)
-            //{
-            //	File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
-            //	if (File >= MIN_HANDLE)
-            //	{
-            //		SetSleepMinutes((DATA8)DEFAULT_SLEEPMINUTES);
-            //		CommonHelper.sprintf(ParBuf, "%dmin\t", DEFAULT_SLEEPMINUTES);
-            //		write(File, ParBuf, CommonHelper.strlen(ParBuf));
-            //		close(File);
-            //	}
-            //}
-
-            // TODO: sound file (probably no need)
-            //Ok = 0;
-            //CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmVOLUME_FILE_NAME, vmEXT_TEXT);
-            //File = open(PrgNameBuf, O_RDONLY);
-            //if (File >= MIN_HANDLE)
-            //{
-            //	ParBuf[0] = 0;
-            //	read(File, ParBuf, sizeof(ParBuf));
-            //	if (sscanf(ParBuf, "%f", &Tmp) > 0)
-            //	{
-            //		if ((Tmp >= (float)0) && (Tmp <= (float)100))
-            //		{
-            //			SetVolumePercent((DATA8)Tmp);
-            //			Ok = 1;
-            //		}
-            //	}
-            //	close(File);
-            //}
-            //if (!Ok)
-            //{
-            //	SetVolumePercent((DATA8)DEFAULT_VOLUME);
-            //	File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
-            //	if (File >= MIN_HANDLE)
-            //	{
-            //		CommonHelper.sprintf(ParBuf, "%d%%\t", DEFAULT_VOLUME);
-            //		write(File, ParBuf, CommonHelper.strlen(ParBuf));
-            //		close(File);
-            //	}
-            //}
-
-            GH.VMInstance.RefCount = 0;
-
-            Result |= (int)GH.Output.cOutputInit();
-            Result |= (int)GH.Input.cInputInit();
-            Result |= (int)GH.Ui.cUiInit();
-            Result |= (int)GH.Memory.cMemoryInit();
-            Result |= (int)GH.Com.cComInit();
-            Result |= (int)GH.Sound.cSoundInit();
-
-            GH.Validate.cValidateInit();
-
-            for (PrgId = 0; PrgId < MAX_PROGRAMS; PrgId++)
-            {
-                GH.VMInstance.Program[PrgId].Status = OBJSTAT.STOPPED;
-                GH.VMInstance.Program[PrgId].StatusChange = 0;
-            }
-
-            SetTerminalEnable(TERMINAL_ENABLED);
-
-            GH.VMInstance.Test = 0;
-
-            VmPrint("\r\n\n\n\n\n\nLMS2012 VM STARTED\r\n{\r\n".AsSbytePointer());
-            GH.VMInstance.ProgramId = DEBUG_SLOT;
-            pImgHead = (IMGHEAD*)UiImage;
-            (*pImgHead).ImageSize = 40; // sizeof(UiImage); 
-
-            GH.Ev3System.Logger.LogInfo("VM Started");
-
-            if (argc >= 2)
-            {
-                CommonHelper.snprintf((DATA8*)GH.VMInstance.FirstProgram, MAX_FILENAME_SIZE, argv[1]);
-            }
-            else
-            {
-                CommonHelper.snprintf((DATA8*)GH.VMInstance.FirstProgram, MAX_FILENAME_SIZE, DEFAULT_UI);
-            }
-
-            ProgramReset(GH.VMInstance.ProgramId, UiImage, (GP)GH.VMInstance.FirstProgram, 0);
-
-            return (RESULT)(Result);
-        }
-
-        public RESULT mSchedCtrl(UBYTE* pRestart)
-        {
-            RESULT Result = RESULT.FAIL;
-            ULONG Time;
-            IP TmpIp;
-            IMINDEX Index;
-
-            GH.Ev3System.Logger.LogInfo($"begin in mSchedCtrl");
-
-            if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
-            {
-                ProgramInit();
-            }
-
-            SetDispatchStatus(ObjectInit());
-
-            if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)
-            {
-                GH.printf($"\r\n  {GH.VMInstance.ProgramId}  {GH.VMInstance.ObjectId}");
-            }
-
-            Time = GH.Timer.cTimerGetuS();
-            Time -= GH.VMInstance.PerformTimer;
-            GH.VMInstance.PerformTime *= (DATAF)199;
-            GH.VMInstance.PerformTime += (DATAF)Time;
-            GH.VMInstance.PerformTime /= (DATAF)200;
-
-            /*** Execute BYTECODES *******************************************************/
-
-            GH.VMInstance.InstrCnt = 0;
-
-            (*GH.VMInstance.pAnalog).PreemptMilliSeconds = 0;
-
-            while (GH.VMInstance.Priority != 0)
-            {
-                if (GH.VMInstance.Debug != 0)
-                {
-                    Monitor();
-                }
-                else
-                {
-                    GH.VMInstance.Priority--;
-                    if (GH.VMInstance.ProgramId != GUI_SLOT)
-                    {
-                        Index = (IMINDEX)GH.VMInstance.ObjectIp - (IMINDEX)GH.VMInstance.pImage;
-                        GH.Validate.cValidateDisassemble(GH.VMInstance.pImage, &Index, (LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label);
-                    }
-
-                    GH.Ev3System.Logger.LogError($"CURRENT OBJECTIP: {*GH.VMInstance.ObjectIp}");
-                    PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
-
-                    GH.VMInstance.InstrCnt++;
-                    if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)
-                    {
-                        GH.printf(".");
-                    }
-                }
-            }
-
-            /*****************************************************************************/
-
-            GH.VMInstance.PerformTimer = GH.Timer.cTimerGetuS();
-
-            GH.VMInstance.NewTime = GetTimeMS();
-
-            Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime1;
-
-            if (Time >= UPDATE_TIME1)
-            {
-                GH.VMInstance.OldTime1 += Time;
-
-                if (Time >= 3)
-                {
-                    GH.printf($"{Time} {GH.VMInstance.InstrCnt}\r\n");
-                }
-                GH.Com.cComUpdate();
-                GH.Ev3System.Logger.LogInfo($"after cComUpdate in mSchedCtrl");
-                GH.Sound.cSoundUpdate();
-            }
-            GH.Ev3System.Logger.LogInfo($"after Time if stmt in mSchedCtrl");
-
-            Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime2;
-
-            if (Time >= UPDATE_TIME2)
-            {
-                GH.VMInstance.OldTime2 += Time;
-
-                Thread.Sleep(1); // TODO: do i really need it?
-                GH.Input.cInputUpdate((UWORD)Time);
-                GH.Ui.cUiUpdate((UWORD)Time);
-
-                if (GH.VMInstance.Test != 0)
-                {
-                    if (GH.VMInstance.Test > (UWORD)Time)
-                    {
-                        GH.VMInstance.Test -= (UWORD)Time;
-                    }
-                    else
-                    {
-                        TstClose();
-                    }
-                }
-            }
-            GH.Ev3System.Logger.LogInfo($"After if stmt with ui update in mSchedCtrl");
-
-            if (GH.VMInstance.DispatchStatus == DSPSTAT.FAILBREAK)
-            {
-                if (GH.VMInstance.ProgramId != GUI_SLOT)
-                {
-                    if (GH.VMInstance.ProgramId != CMD_SLOT)
-                    {
-                        GH.UiInstance.Warning |= WARNING_DSPSTAT;
-                    }
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"}}\r\nPROGRAM \"{GH.VMInstance.ProgramId}\" RESULT.FAIL BREAK just before {(ulong)(GH.VMInstance.ObjectIp - GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage)}!\r\n");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                    ProgramEnd(GH.VMInstance.ProgramId);
-                    GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
-                }
-                else
-                {
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"UI RESULT.FAIL BREAK just before {(ulong)(GH.VMInstance.ObjectIp - GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage)}!\r\n");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                    LogErrorNumber((ERR)VM_INTERNAL);
-                    *pRestart = 1;
-                }
-            }
-            else
-            {
-
-                if (GH.VMInstance.DispatchStatus == DSPSTAT.INSTRBREAK)
-                {
-                    if (GH.VMInstance.ProgramId != CMD_SLOT)
-                    {
-                        LogErrorNumber((ERR)VM_PROGRAM_INSTRUCTION_BREAK);
-                    }
-                    TmpIp = GH.VMInstance.ObjectIp - 1;
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\n{(UWORD)(((ULONG)TmpIp) - (ULONG)GH.VMInstance.pImage)} [{GH.VMInstance.ObjectId}] ");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"VM       ERROR    [0x{*TmpIp:B}]\r\n");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                    GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
-                }
-
-                ObjectExit();
-
-                Result = ObjectExec();
-
-                if (Result == RESULT.STOP)
-                {
-                    ProgramExit();
-                    ProgramEnd(GH.VMInstance.ProgramId);
-                    GH.VMInstance.DispatchStatus = DSPSTAT.NOBREAK;
-                }
-                else
-                {
-                    if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
-                    {
-                        ProgramExit();
-                    }
-                }
-            }
-
-            GH.Ev3System.Logger.LogInfo($"After big if stmt in mSchedCtrl");
-
-            if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
-            {
-                Result = ProgramExec();
-            }
-
-            if (*pRestart == 1)
-            {
-                Result = RESULT.FAIL;
-            }
-
-            Thread.Sleep(1); // TODO: do i really need it?
-
-            GH.Ev3System.Logger.LogInfo($"exit in mSchedCtrl");
-
-            return (Result);
-        }
-
-
-        public RESULT mSchedExit()
-        {
-            DATA32 Result = OK;
-
-            VmPrint("}\r\nVM OBJSTAT.STOPPED\r\n\n".AsSbytePointer());
-
-            // TODO: usb and sd card shite
-            //# ifndef DISABLE_SDCARD_SUPPORT
-            //			char SDBuffer[250];
-            //			if (GH.VMInstance.SdcardOk == 1)
-            //			{
-            //				sync();
-            //				GH.VMInstance.SdcardOk = 0;
-            //				CommonHelper.snprintf(SDBuffer, 250, "rm -r %s &> /dev/null", vmSDCARD_FOLDER);
-            //				system(SDBuffer);
-            //			}
-            //#endif
-
-            //# ifndef DISABLE_USBSTICK_SUPPORT
-            //			char USBBuffer[250];
-            //			if (GH.VMInstance.UsbstickOk == 1)
-            //			{
-            //				sync();
-            //				GH.VMInstance.UsbstickOk = 0;
-            //				CommonHelper.snprintf(USBBuffer, 250, "rm -r %s &> /dev/null", vmUSBSTICK_FOLDER);
-            //				system(USBBuffer);
-            //			}
-            //#endif
-
-            Result |= (int)GH.Validate.cValidateExit();
-            Result |= (int)GH.Sound.cSoundExit();
-            Result |= (int)GH.Com.cComExit();
-            Result |= (int)GH.Memory.cMemoryExit();
-            Result |= (int)GH.Ui.cUiExit();
-            Result |= (int)GH.Input.cInputExit();
-            Result |= (int)GH.Output.cOutputExit();
-
-            return (RESULT)(Result);
-        }
-
-        public int Main()
-        {
-            return main(0, new string[0]);
-        }
-
-
-        public int main(int argc, string[] argv)
-        {
-            RESULT Result = RESULT.FAIL;
-            UBYTE* Restart = CommonHelper.AllocateByteArray(1);
-
-            Console.WriteLine("ANIME");
-
-            do
-            {
-                *Restart = 0;
-                Result = mSchedInit(argc, argv);
-
-                if (Result == OK)
-                {
-
-                    do
-                    {
-
-                        GH.Ev3System.Logger.LogInfo($"begin in main loop {(int)Restart}");
-                        Result = mSchedCtrl(Restart);
-                        /*
+		public void ObjectDeQueue(OBJID Id)
+		{
+			if ((Id > 0) && (Id <= GH.VMInstance.Objects))
+			{
+				(*GH.VMInstance.pObjList[Id]).Ip = GH.VMInstance.ObjectIp;
+				(*GH.VMInstance.pObjList[Id]).ObjStatus = STOPPED;
+
+				SetDispatchStatus(DSPSTAT.STOPBREAK);
+			}
+		}
+
+
+		public DATA8 CheckSdcard(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force)
+		{
+			DATA8 Result = 0;
+			DATAF Tmp;
+			DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmNAMESIZE);
+			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(250);
+
+			*pChanged = 0;
+			*pTotal = 0;
+			*pFree = 0;
+
+			ULONG Time;
+			// struct statvfs Status;
+
+			Time = GH.VMInstance.NewTime - GH.VMInstance.SdcardTimer;
+
+			if ((Time >= UPDATE_SDCARD) || (GH.VMInstance.SdcardTimer == 0) || (Force != 0))
+			{ // Update values
+
+				GH.VMInstance.SdcardTimer += Time;
+
+				if (GH.Memory.cMemoryGetMediaName("m".AsSbytePointer(), Name) == OK)
+				{
+					// TODO: probably no need
+					//if (GH.VMInstance.SdcardOk == 0)
+					//{
+					//	GH.VMInstance.SdcardOk = 1;
+					//	CommonHelper.snprintf(Buffer, 250, "ln -s /media/card %s &> /dev/null", vmSDCARD_FOLDER);
+					//	system(Buffer);
+					//	sync();
+					//	*pChanged = 1;
+					//	GH.printf("system(%s)\r\n", Buffer);
+					//}
+					//CommonHelper.snprintf(Buffer, 250, "/media/card");
+					//statvfs(Buffer, &Status);
+					//if (*pChanged != 0)
+					//{
+					//	GH.printf("statvfs(%s)\r\n", Buffer);
+
+					//	GH.printf("f_bsize   %ld\r\n", Status.f_bsize);
+					//	GH.printf("f_frsize  %ld\r\n", Status.f_frsize);
+					//	GH.printf("f_blocks  %ld\r\n", Status.f_blocks);
+					//	GH.printf("f_bavail  %ld\r\n", Status.f_bavail);
+					//	GH.printf("f_files   %ld\r\n", Status.f_files);
+					//	GH.printf("f_ffree   %ld\r\n", Status.f_ffree);
+					//	GH.printf("f_favail  %ld\r\n", Status.f_favail);
+					//	GH.printf("f_fside   %ld\r\n", Status.f_fsid);
+					//	GH.printf("f_flag    %ld\r\n", Status.f_flag);
+					//	GH.printf("f_namemax %ld\r\n", Status.f_namemax);
+					//}
+					//Tmp = (DATAF)Status.f_blocks;
+					//Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
+					//Tmp *= (DATAF)Status.f_bsize;
+					//GH.VMInstance.SdcardSize = (DATA32)Tmp;
+					//Tmp = (DATAF)Status.f_bavail;
+					//Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
+					//Tmp *= (DATAF)Status.f_bsize;
+
+					//if (GH.VMInstance.SdcardFree != (DATA32)Tmp)
+					//{
+					//	GH.printf("%d T=%-8d F=%-8d\r\n", GH.VMInstance.SdcardOk, GH.VMInstance.SdcardSize, GH.VMInstance.SdcardFree);
+					//}
+					//GH.VMInstance.SdcardFree = (DATA32)Tmp;
+
+					GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+				}
+
+				else
+				{
+					if (GH.VMInstance.SdcardOk == 1)
+					{
+						GH.VMInstance.SdcardOk = 0;
+						//CommonHelper.snprintf(Buffer, 250, "rm -r %s &> /dev/null", vmSDCARD_FOLDER);
+						//system(Buffer);
+						//*pChanged = 1;
+						//if (*pChanged)
+						//{
+						//	GH.printf("system(%s)\r\n", Buffer);
+						//}
+						GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+					}
+					GH.VMInstance.SdcardSize = 0;
+					GH.VMInstance.SdcardFree = 0;
+				}
+				if (*pChanged != 0)
+				{
+					GH.printf($"{GH.VMInstance.SdcardOk} T={GH.VMInstance.SdcardSize} F={GH.VMInstance.SdcardFree}\r\n");
+				}
+			}
+			*pTotal = GH.VMInstance.SdcardSize;
+			*pFree = GH.VMInstance.SdcardFree;
+			Result = GH.VMInstance.SdcardOk;
+
+			return (Result);
+		}
+
+
+		public DATA8 CheckUsbstick(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force)
+		{
+			DATA8 Result = 0;
+
+			*pChanged = 0;
+			*pTotal = 0;
+			*pFree = 0;
+
+			ULONG Time;
+			// struct statvfs Status;
+			DATAF Tmp;
+			DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmNAMESIZE);
+			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(250);
+
+			Time = GH.VMInstance.NewTime - GH.VMInstance.UsbstickTimer;
+
+			if ((Time >= UPDATE_USBSTICK) || (GH.VMInstance.UsbstickTimer == 0) || (Force != 0))
+			{ // Update values
+
+				GH.VMInstance.UsbstickTimer += Time;
+
+				if (GH.Memory.cMemoryGetMediaName("s".AsSbytePointer(), Name) == OK)
+				{
+					//					if (GH.VMInstance.UsbstickOk == 0)
+					//					{
+					//						GH.VMInstance.UsbstickOk = 1;
+					//						CommonHelper.snprintf(Buffer, 250, "ln -s /media/usb %s &> /dev/null", vmUSBSTICK_FOLDER);
+					//						system(Buffer);
+					//						sync();
+					//						*pChanged = 1;
+					//# ifdef DEBUG_USBSTICK
+					//						GH.printf("system(%s)\r\n", Buffer);
+					//#endif
+					//					}
+					//					CommonHelper.snprintf(Buffer, 250, "/media/usb");
+					//					statvfs(Buffer, &Status);
+					//# ifdef DEBUG_USBSTICK
+					//					if (*pChanged)
+					//					{
+					//						GH.printf("statvfs(%s)\r\n", Buffer);
+
+					//						GH.printf("f_bsize   %ld\r\n", Status.f_bsize);
+					//						GH.printf("f_frsize  %ld\r\n", Status.f_frsize);
+					//						GH.printf("f_blocks  %ld\r\n", Status.f_blocks);
+					//						GH.printf("f_bavail  %ld\r\n", Status.f_bavail);
+					//						GH.printf("f_files   %ld\r\n", Status.f_files);
+					//						GH.printf("f_ffree   %ld\r\n", Status.f_ffree);
+					//						GH.printf("f_favail  %ld\r\n", Status.f_favail);
+					//						GH.printf("f_fside   %ld\r\n", Status.f_fsid);
+					//						GH.printf("f_flag    %ld\r\n", Status.f_flag);
+					//						GH.printf("f_namemax %ld\r\n", Status.f_namemax);
+					//					}
+					//#endif
+					//					Tmp = (DATAF)Status.f_blocks;
+					//					Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
+					//					Tmp *= (DATAF)Status.f_bsize;
+					//					GH.VMInstance.UsbstickSize = (DATA32)Tmp;
+					//					Tmp = (DATAF)Status.f_bavail;
+					//					Tmp = (Tmp + (DATAF)(KB - 1)) / (DATAF)KB;
+					//					Tmp *= (DATAF)Status.f_bsize;
+
+					//# ifdef DEBUG_USBSTICK
+					//					if (GH.VMInstance.UsbstickFree != (DATA32)Tmp)
+					//					{
+					//						GH.printf("%d T=%-8d F=%-8d\r\n", GH.VMInstance.UsbstickOk, GH.VMInstance.UsbstickSize, GH.VMInstance.UsbstickFree);
+					//					}
+					//#endif
+					//					GH.VMInstance.UsbstickFree = (DATA32)Tmp;
+					GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+				}
+				else
+				{
+					if (GH.VMInstance.UsbstickOk == 1)
+					{
+						GH.VMInstance.UsbstickOk = 0;
+						//CommonHelper.snprintf(Buffer, 250, "rm -r %s &> /dev/null", vmUSBSTICK_FOLDER);
+						//system(Buffer);
+						//*pChanged = 1;
+						//if (*pChanged)
+						//{
+						//	GH.printf("system(%s)\r\n", Buffer);
+						//}
+						GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+					}
+					GH.VMInstance.UsbstickSize = 0;
+					GH.VMInstance.UsbstickFree = 0;
+				}
+				//    if (*pChanged)
+				{
+					GH.printf($"{GH.VMInstance.UsbstickOk} T={GH.VMInstance.UsbstickSize} F={GH.VMInstance.UsbstickFree}\r\n");
+				}
+			}
+			*pTotal = GH.VMInstance.UsbstickSize;
+			*pFree = GH.VMInstance.UsbstickFree;
+			Result = GH.VMInstance.UsbstickOk;
+
+			return (Result);
+		}
+
+		private DATA8* OkmSchedInit = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA32* TotalmSchedInit = (DATA32*)CommonHelper.AllocateByteArray(4);
+		private DATA32* FreemSchedInit = (DATA32*)CommonHelper.AllocateByteArray(4);
+		public RESULT mSchedInit(int argc, string[] argv)
+		{
+			DATA32 Result = OK;
+			PRGID PrgId;
+			IMGHEAD* pImgHead;
+			DATA16 Loop;
+			
+			float Tmp;
+			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
+			DATA8* ParBuf = CommonHelper.Pointer1d<DATA8>(255);
+
+			GH.VMInstance.Status = 0x00;
+
+			ANALOG* pAdcTmp;
+
+			GH.VMInstance.pAnalog = (ANALOG*)GH.VMInstance.Analog;
+			// TODO: analog shite
+			//GH.VMInstance.AdcFile = open(ANALOG_DEVICE_NAME, O_RDWR | O_SYNC);
+
+			//if (GH.VMInstance.AdcFile >= MIN_HANDLE)
+			//{
+			//	pAdcTmp = (ANALOG*)mmap(0, sizeof(ANALOG), PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, GH.VMInstance.AdcFile, 0);
+
+			//	if (pAdcTmp == MAP_FAILED)
+			//	{
+			//		//#ifndef Linux_X86
+			//		LogErrorNumber(ANALOG_SHARED_MEMORY);
+			//		//#endif
+			//	}
+			//	else
+			//	{
+			//		GH.VMInstance.pAnalog = pAdcTmp;
+			//	}
+			//	close(GH.VMInstance.AdcFile);
+			//}
+			//else
+			//{
+			//	//#ifndef Linux_X86
+			//	LogErrorNumber(ANALOG_DEVICE_FILE_NOT_FOUND);
+			//	//#endif
+			//}
+
+			GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+
+			// Fill holes in PrimDispatchTabel
+			for (Loop = 0; Loop < PRIMDISPATHTABLE_SIZE; Loop++)
+			{
+				if (!PrimDispatchTabel.ContainsKey(Loop))
+				{
+					PrimDispatchTabel.Add(Loop, Error);
+				}
+			}
+
+			// Be sure necessary folders exist
+			if (Directory.CreateDirectory(vmSETTINGS_DIR) != null)
+			{
+				// chmod(vmSETTINGS_DIR, DIRPERMISSIONS);
+			}
+
+			CheckUsbstick(OkmSchedInit, TotalmSchedInit, FreemSchedInit, 0);
+			CheckSdcard(OkmSchedInit, TotalmSchedInit, FreemSchedInit, 0);
+
+			// Be sure necessary files exist
+			*OkmSchedInit = 0;
+			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmWIFI_FILE_NAME}{vmEXT_TEXT}");
+			using FileStream wifiFs = File.OpenWrite(CommonHelper.GetString(PrgNameBuf));
+			if (wifiFs != null)
+			{
+				CommonHelper.sprintf(ParBuf, "-\t");
+				wifiFs.WriteUnsafe((byte*)ParBuf, 0, CommonHelper.strlen(ParBuf));
+				wifiFs.Close();
+			}
+
+			// TODO: no need for bluetooth probably
+			//Ok = 0;
+			//CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmBLUETOOTH_FILE_NAME, vmEXT_TEXT);
+			//File = open(PrgNameBuf, O_RDONLY);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	close(File);
+			//}
+			//else
+			//{
+			//	File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
+			//	if (File >= MIN_HANDLE)
+			//	{
+			//		CommonHelper.sprintf(ParBuf, "-\t");
+			//		write(File, ParBuf, CommonHelper.strlen(ParBuf));
+			//		close(File);
+			//	}
+			//}
+
+			// TODO: wtf is this ahahaha sleep in file ahahaha wtf
+			//Ok = 0;
+			//CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmSLEEP_FILE_NAME, vmEXT_TEXT);
+			//File = open(PrgNameBuf, O_RDONLY);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	ParBuf[0] = 0;
+			//	read(File, ParBuf, sizeof(ParBuf));
+			//	if (sscanf(ParBuf, "%f", &Tmp) > 0)
+			//	{
+			//		if ((Tmp >= (float)0) && (Tmp <= (float)127))
+			//		{
+			//			SetSleepMinutes((DATA8)Tmp);
+			//			Ok = 1;
+			//		}
+			//	}
+			//	else
+			//	{
+			//		ParBuf[5] = 0;
+			//		if (CommonHelper.strcmp(ParBuf, "never") == 0)
+			//		{
+			//			SetSleepMinutes(0);
+			//			Ok = 1;
+			//		}
+			//	}
+			//	close(File);
+			//}
+			//if (!Ok)
+			//{
+			//	File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
+			//	if (File >= MIN_HANDLE)
+			//	{
+			//		SetSleepMinutes((DATA8)DEFAULT_SLEEPMINUTES);
+			//		CommonHelper.sprintf(ParBuf, "%dmin\t", DEFAULT_SLEEPMINUTES);
+			//		write(File, ParBuf, CommonHelper.strlen(ParBuf));
+			//		close(File);
+			//	}
+			//}
+
+			// TODO: sound file (probably no need)
+			//Ok = 0;
+			//CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmVOLUME_FILE_NAME, vmEXT_TEXT);
+			//File = open(PrgNameBuf, O_RDONLY);
+			//if (File >= MIN_HANDLE)
+			//{
+			//	ParBuf[0] = 0;
+			//	read(File, ParBuf, sizeof(ParBuf));
+			//	if (sscanf(ParBuf, "%f", &Tmp) > 0)
+			//	{
+			//		if ((Tmp >= (float)0) && (Tmp <= (float)100))
+			//		{
+			//			SetVolumePercent((DATA8)Tmp);
+			//			Ok = 1;
+			//		}
+			//	}
+			//	close(File);
+			//}
+			//if (!Ok)
+			//{
+			//	SetVolumePercent((DATA8)DEFAULT_VOLUME);
+			//	File = open(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC, SYSPERMISSIONS);
+			//	if (File >= MIN_HANDLE)
+			//	{
+			//		CommonHelper.sprintf(ParBuf, "%d%%\t", DEFAULT_VOLUME);
+			//		write(File, ParBuf, CommonHelper.strlen(ParBuf));
+			//		close(File);
+			//	}
+			//}
+
+			GH.VMInstance.RefCount = 0;
+
+			Result |= (int)GH.Output.cOutputInit();
+			Result |= (int)GH.Input.cInputInit();
+			Result |= (int)GH.Ui.cUiInit();
+			Result |= (int)GH.Memory.cMemoryInit();
+			Result |= (int)GH.Com.cComInit();
+			Result |= (int)GH.Sound.cSoundInit();
+
+			GH.Validate.cValidateInit();
+
+			for (PrgId = 0; PrgId < MAX_PROGRAMS; PrgId++)
+			{
+				GH.VMInstance.Program[PrgId].Status = OBJSTAT.STOPPED;
+				GH.VMInstance.Program[PrgId].StatusChange = 0;
+			}
+
+			SetTerminalEnable(TERMINAL_ENABLED);
+
+			GH.VMInstance.Test = 0;
+
+			VmPrint("\r\n\n\n\n\n\nLMS2012 VM STARTED\r\n{\r\n".AsSbytePointer());
+			GH.VMInstance.ProgramId = DEBUG_SLOT;
+			pImgHead = (IMGHEAD*)UiImage;
+			(*pImgHead).ImageSize = 40; // sizeof(UiImage); 
+
+			GH.Ev3System.Logger.LogInfo("VM Started");
+
+			if (argc >= 2)
+			{
+				CommonHelper.snprintf((DATA8*)GH.VMInstance.FirstProgram, MAX_FILENAME_SIZE, argv[1]);
+			}
+			else
+			{
+				CommonHelper.snprintf((DATA8*)GH.VMInstance.FirstProgram, MAX_FILENAME_SIZE, DEFAULT_UI);
+			}
+
+			ProgramReset(GH.VMInstance.ProgramId, UiImage, (GP)GH.VMInstance.FirstProgram, 0);
+
+			return (RESULT)(Result);
+		}
+
+		private IMINDEX* IndexmSchedCtrl = (IMINDEX*)CommonHelper.AllocateByteArray(4);
+		public RESULT mSchedCtrl(UBYTE* pRestart)
+		{
+			RESULT Result = RESULT.FAIL;
+			ULONG Time;
+			IP TmpIp;
+			
+
+			GH.Ev3System.Logger.LogInfo($"begin in mSchedCtrl");
+
+			if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
+			{
+				ProgramInit();
+			}
+
+			SetDispatchStatus(ObjectInit());
+
+			if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)
+			{
+				GH.printf($"\r\n  {GH.VMInstance.ProgramId}  {GH.VMInstance.ObjectId}");
+			}
+
+			Time = GH.Timer.cTimerGetuS();
+			Time -= GH.VMInstance.PerformTimer;
+			GH.VMInstance.PerformTime *= (DATAF)199;
+			GH.VMInstance.PerformTime += (DATAF)Time;
+			GH.VMInstance.PerformTime /= (DATAF)200;
+
+			/*** Execute BYTECODES *******************************************************/
+
+			GH.VMInstance.InstrCnt = 0;
+
+			(*GH.VMInstance.pAnalog).PreemptMilliSeconds = 0;
+
+			while (GH.VMInstance.Priority != 0)
+			{
+				if (GH.VMInstance.Debug != 0)
+				{
+					Monitor();
+				}
+				else
+				{
+					GH.VMInstance.Priority--;
+					if (GH.VMInstance.ProgramId != GUI_SLOT)
+					{
+						*IndexmSchedCtrl = (IMINDEX)GH.VMInstance.ObjectIp - (IMINDEX)GH.VMInstance.pImage;
+						GH.Validate.cValidateDisassemble(GH.VMInstance.pImage, IndexmSchedCtrl, (LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label);
+					}
+
+					GH.Ev3System.Logger.LogError($"CURRENT OBJECTIP: {*GH.VMInstance.ObjectIp}");
+					PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
+
+					GH.VMInstance.InstrCnt++;
+					if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)
+					{
+						GH.printf(".");
+					}
+				}
+			}
+
+			/*****************************************************************************/
+
+			GH.VMInstance.PerformTimer = GH.Timer.cTimerGetuS();
+
+			GH.VMInstance.NewTime = GetTimeMS();
+
+			Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime1;
+
+			if (Time >= UPDATE_TIME1)
+			{
+				GH.VMInstance.OldTime1 += Time;
+
+				if (Time >= 3)
+				{
+					GH.printf($"{Time} {GH.VMInstance.InstrCnt}\r\n");
+				}
+				GH.Com.cComUpdate();
+				GH.Ev3System.Logger.LogInfo($"after cComUpdate in mSchedCtrl");
+				GH.Sound.cSoundUpdate();
+			}
+			GH.Ev3System.Logger.LogInfo($"after Time if stmt in mSchedCtrl");
+
+			Time = GH.VMInstance.NewTime - GH.VMInstance.OldTime2;
+
+			if (Time >= UPDATE_TIME2)
+			{
+				GH.VMInstance.OldTime2 += Time;
+
+				Thread.Sleep(1); // TODO: do i really need it?
+				GH.Input.cInputUpdate((UWORD)Time);
+				GH.Ui.cUiUpdate((UWORD)Time);
+
+				if (GH.VMInstance.Test != 0)
+				{
+					if (GH.VMInstance.Test > (UWORD)Time)
+					{
+						GH.VMInstance.Test -= (UWORD)Time;
+					}
+					else
+					{
+						TstClose();
+					}
+				}
+			}
+			GH.Ev3System.Logger.LogInfo($"After if stmt with ui update in mSchedCtrl");
+
+			if (GH.VMInstance.DispatchStatus == DSPSTAT.FAILBREAK)
+			{
+				if (GH.VMInstance.ProgramId != GUI_SLOT)
+				{
+					if (GH.VMInstance.ProgramId != CMD_SLOT)
+					{
+						GH.UiInstance.Warning |= WARNING_DSPSTAT;
+					}
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"}}\r\nPROGRAM \"{GH.VMInstance.ProgramId}\" RESULT.FAIL BREAK just before {(ulong)(GH.VMInstance.ObjectIp - GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage)}!\r\n");
+					VmPrint(GH.VMInstance.PrintBuffer);
+					ProgramEnd(GH.VMInstance.ProgramId);
+					GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
+				}
+				else
+				{
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"UI RESULT.FAIL BREAK just before {(ulong)(GH.VMInstance.ObjectIp - GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage)}!\r\n");
+					VmPrint(GH.VMInstance.PrintBuffer);
+					LogErrorNumber((ERR)VM_INTERNAL);
+					*pRestart = 1;
+				}
+			}
+			else
+			{
+
+				if (GH.VMInstance.DispatchStatus == DSPSTAT.INSTRBREAK)
+				{
+					if (GH.VMInstance.ProgramId != CMD_SLOT)
+					{
+						LogErrorNumber((ERR)VM_PROGRAM_INSTRUCTION_BREAK);
+					}
+					TmpIp = GH.VMInstance.ObjectIp - 1;
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\n{(UWORD)(((ULONG)TmpIp) - (ULONG)GH.VMInstance.pImage)} [{GH.VMInstance.ObjectId}] ");
+					VmPrint(GH.VMInstance.PrintBuffer);
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"VM       ERROR    [0x{*TmpIp:B}]\r\n");
+					VmPrint(GH.VMInstance.PrintBuffer);
+					GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
+				}
+
+				ObjectExit();
+
+				Result = ObjectExec();
+
+				if (Result == RESULT.STOP)
+				{
+					ProgramExit();
+					ProgramEnd(GH.VMInstance.ProgramId);
+					GH.VMInstance.DispatchStatus = DSPSTAT.NOBREAK;
+				}
+				else
+				{
+					if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
+					{
+						ProgramExit();
+					}
+				}
+			}
+
+			GH.Ev3System.Logger.LogInfo($"After big if stmt in mSchedCtrl");
+
+			if (GH.VMInstance.DispatchStatus != DSPSTAT.STOPBREAK)
+			{
+				Result = ProgramExec();
+			}
+
+			if (*pRestart == 1)
+			{
+				Result = RESULT.FAIL;
+			}
+
+			Thread.Sleep(1); // TODO: do i really need it?
+
+			GH.Ev3System.Logger.LogInfo($"exit in mSchedCtrl");
+
+			return (Result);
+		}
+
+
+		public RESULT mSchedExit()
+		{
+			DATA32 Result = OK;
+
+			VmPrint("}\r\nVM OBJSTAT.STOPPED\r\n\n".AsSbytePointer());
+
+			// TODO: usb and sd card shite
+			//# ifndef DISABLE_SDCARD_SUPPORT
+			//			char SDBuffer[250];
+			//			if (GH.VMInstance.SdcardOk == 1)
+			//			{
+			//				sync();
+			//				GH.VMInstance.SdcardOk = 0;
+			//				CommonHelper.snprintf(SDBuffer, 250, "rm -r %s &> /dev/null", vmSDCARD_FOLDER);
+			//				system(SDBuffer);
+			//			}
+			//#endif
+
+			//# ifndef DISABLE_USBSTICK_SUPPORT
+			//			char USBBuffer[250];
+			//			if (GH.VMInstance.UsbstickOk == 1)
+			//			{
+			//				sync();
+			//				GH.VMInstance.UsbstickOk = 0;
+			//				CommonHelper.snprintf(USBBuffer, 250, "rm -r %s &> /dev/null", vmUSBSTICK_FOLDER);
+			//				system(USBBuffer);
+			//			}
+			//#endif
+
+			Result |= (int)GH.Validate.cValidateExit();
+			Result |= (int)GH.Sound.cSoundExit();
+			Result |= (int)GH.Com.cComExit();
+			Result |= (int)GH.Memory.cMemoryExit();
+			Result |= (int)GH.Ui.cUiExit();
+			Result |= (int)GH.Input.cInputExit();
+			Result |= (int)GH.Output.cOutputExit();
+
+			return (RESULT)(Result);
+		}
+
+		public int Main()
+		{
+			return main(0, new string[0]);
+		}
+
+
+		public int main(int argc, string[] argv)
+		{
+			RESULT Result = RESULT.FAIL;
+			UBYTE* Restart = CommonHelper.AllocateByteArray(1);
+
+			Console.WriteLine("ANIME");
+
+			do
+			{
+				*Restart = 0;
+				Result = mSchedInit(argc, argv);
+
+				if (Result == OK)
+				{
+
+					do
+					{
+
+						GH.Ev3System.Logger.LogInfo($"begin in main loop {(int)Restart}");
+						Result = mSchedCtrl(Restart);
+						/*
                                 if ((*GH.UiInstance.pUi).State[BACK_BUTTON] & BUTTON_LONGPRESS)
                                 {
                                     Restart  =  1;
@@ -2265,31 +2268,31 @@ namespace Ev3CoreUnsafe.Lms2012
                                 }
                         */
 
-                        // TODO: comment
-                        // DEBUG SLOWER
-                        Thread.Sleep(400);
-                        GC.Collect();
+						// TODO: comment
+						// DEBUG SLOWER
+						Thread.Sleep(400);
+						GC.Collect();
 
-                    }
-                    while (Result == OK);
+					}
+					while (Result == OK);
 
 
 
-                    GH.Ev3System.Logger.LogInfo($"normal exit in main");
+					GH.Ev3System.Logger.LogInfo($"normal exit in main");
 
-                    Result = mSchedExit();
-                }
-                else
-                {
-                    //TCP      system("reboot");
-                }
-            }
-            while (*Restart != 0);
+					Result = mSchedExit();
+				}
+				else
+				{
+					//TCP      system("reboot");
+				}
+			}
+			while (*Restart != 0);
 
-            return ((int)Result);
-        }
+			return ((int)Result);
+		}
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opERROR </b>
 		 *
@@ -2297,37 +2300,37 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *- Dispatch status changes to INSTRBREAK
 		 *
 		 */
-        /*! \brief    opOUTPUT_READY byte code
+		/*! \brief    opOUTPUT_READY byte code
 		 *
 		 *            Uses following from current program context:
 		 *            DispatchStatus
 		 */
-        public void Error()
-        {
-            // TODO: probably uncomment
-            // ProgramEnd(GH.VMInstance.ProgramId);
-            // GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
-            // SetDispatchStatus((DSPSTAT)INSTRBREAK);
-            GH.Ev3System.Logger.LogError($"An error occured in prgId: {GH.VMInstance.ProgramId}");
-        }
+		public void Error()
+		{
+			// TODO: probably uncomment
+			// ProgramEnd(GH.VMInstance.ProgramId);
+			// GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
+			// SetDispatchStatus((DSPSTAT)INSTRBREAK);
+			GH.Ev3System.Logger.LogError($"An error occured in prgId: {GH.VMInstance.ProgramId}");
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opNOP </b>
 		 *
 		 *- This code does absolutely nothing\n
 		 *
 		 */
-        /*! \brief  opNOP byte code
+		/*! \brief  opNOP byte code
 		 *
 		 */
-        public void Nop()
-        {
-        }
+		public void Nop()
+		{
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opPROGRAM_STOP (PRGID)</b>
 		 *
@@ -2336,7 +2339,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \param  (DATA16)  PRGID  - Program id (GUI_SLOT = all, CURRENT_SLOT = current) (see \ref prgid)
 		 */
-        /*! \brief    opPROGRAM_STOP byte code
+		/*! \brief    opPROGRAM_STOP byte code
 		 *
 		 *            Stops specific program id slot
 		 *
@@ -2344,37 +2347,37 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            Program[], DispatchStatus
 		 *
 		 */
-        public void ProgramStop()
-        {
-            DATA16 PrgId;
+		public void ProgramStop()
+		{
+			DATA16 PrgId;
 
-            PrgId = *(DATA16*)PrimParPointer();
+			PrgId = *(DATA16*)PrimParPointer();
 
-            if (PrgId == GUI_SLOT)
-            {
-                PrgId = MAX_PROGRAMS;
-                do
-                {
-                    PrgId--;
-                    ProgramEnd((ushort)PrgId);
-                }
-                while (PrgId != 0);
-            }
-            else
-            {
-                unchecked
-                {
-                    if (PrgId == (short)CURRENT_SLOT)
-                    {
-                        PrgId = (short)CurrentProgramId();
-                    }
-                    ProgramEnd((ushort)PrgId);
-                }
-            }
-        }
+			if (PrgId == GUI_SLOT)
+			{
+				PrgId = MAX_PROGRAMS;
+				do
+				{
+					PrgId--;
+					ProgramEnd((ushort)PrgId);
+				}
+				while (PrgId != 0);
+			}
+			else
+			{
+				unchecked
+				{
+					if (PrgId == (short)CURRENT_SLOT)
+					{
+						PrgId = (short)CurrentProgramId();
+					}
+					ProgramEnd((ushort)PrgId);
+				}
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opPROGRAM_START (PRGID, SIZE, *IP, DEBUG)</b>
 		 *
@@ -2386,7 +2389,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \param  (DATA32)    *IP    - Address of image (value from opFILE(LOAD_IMAGE,..)  )
 		 *  \param  (DATA8)     DEBUG  - Debug mode (0=normal, 1=debug, 2=don't execute)
 		 */
-        /*! \brief    opPROGRAM_START byte code
+		/*! \brief    opPROGRAM_START byte code
 		 *
 		 *            Start program id slot
 		 *
@@ -2394,57 +2397,57 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            Program[], DispatchStatus
 		 *
 		 */
-        public void ProgramStart()
-        {
-            PRGID PrgId;
-            PRGID TmpPrgId;
-            IP pI;
-            UBYTE DB;
-            UBYTE Flag = 0;
+		public void ProgramStart()
+		{
+			PRGID PrgId;
+			PRGID TmpPrgId;
+			IP pI;
+			UBYTE DB;
+			UBYTE Flag = 0;
 
 
-            PrgId = *(PRGID*)PrimParPointer();
+			PrgId = *(PRGID*)PrimParPointer();
 
-            // Dummy
-            pI = *(IP*)PrimParPointer();
+			// Dummy
+			pI = *(IP*)PrimParPointer();
 
-            pI = *(IP*)PrimParPointer();
-            DB = *(UBYTE*)PrimParPointer();
-
-
-            if (GH.VMInstance.Program[PrgId].Status == OBJSTAT.STOPPED)
-            {
-                TmpPrgId = CurrentProgramId();
-
-                if ((TmpPrgId == CMD_SLOT) || (TmpPrgId == TERM_SLOT))
-                { // Direct command starting a program
-
-                    if ((GH.VMInstance.Program[USER_SLOT].Status == OBJSTAT.STOPPED) && (GH.VMInstance.Program[DEBUG_SLOT].Status == OBJSTAT.STOPPED))
-                    { // User and debug must be stooped
-
-                        if (ProgramReset(PrgId, pI, null, DB) == OK)
-                        {
-                            Flag = 1;
-                        }
-                    }
-                }
-                else
-                { // Gui, user or debug starting a program
-
-                    if (ProgramReset(PrgId, pI, null, DB) == OK)
-                    {
-                        Flag = 1;
-                    }
-                }
-            }
-            if (Flag == 0)
-            {
-                LogErrorNumber(ERR.VM_PROGRAM_NOT_STARTED);
-            }
-        }
+			pI = *(IP*)PrimParPointer();
+			DB = *(UBYTE*)PrimParPointer();
 
 
-        /*! \page VM
+			if (GH.VMInstance.Program[PrgId].Status == OBJSTAT.STOPPED)
+			{
+				TmpPrgId = CurrentProgramId();
+
+				if ((TmpPrgId == CMD_SLOT) || (TmpPrgId == TERM_SLOT))
+				{ // Direct command starting a program
+
+					if ((GH.VMInstance.Program[USER_SLOT].Status == OBJSTAT.STOPPED) && (GH.VMInstance.Program[DEBUG_SLOT].Status == OBJSTAT.STOPPED))
+					{ // User and debug must be stooped
+
+						if (ProgramReset(PrgId, pI, null, DB) == OK)
+						{
+							Flag = 1;
+						}
+					}
+				}
+				else
+				{ // Gui, user or debug starting a program
+
+					if (ProgramReset(PrgId, pI, null, DB) == OK)
+					{
+						Flag = 1;
+					}
+				}
+			}
+			if (Flag == 0)
+			{
+				LogErrorNumber(ERR.VM_PROGRAM_NOT_STARTED);
+			}
+		}
+
+
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opOBJECT_STOP (OBJID)</b>
 		 *
@@ -2453,7 +2456,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \param  (DATA16)  OBJID  - Object id
 		 */
-        /*! \brief    opOBJECT_STOP byte code
+		/*! \brief    opOBJECT_STOP byte code
 		 *
 		 *            Stops specific object
 		 *
@@ -2461,13 +2464,13 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            pObjectList, ObjectIp, DispatchStatus
 		 *
 		 */
-        public void ObjectStop()
-        {
-            ObjectDeQueue(*(OBJID*)PrimParPointer());
-        }
+		public void ObjectStop()
+		{
+			ObjectDeQueue(*(OBJID*)PrimParPointer());
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opOBJECT_START (OBJID)</b>
 		 *
@@ -2476,7 +2479,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \param  (DATA16)  OBJID  - Object id
 		 */
-        /*! \brief    opOBJECT_START byte code
+		/*! \brief    opOBJECT_START byte code
 		 *
 		 *            Start specific object
 		 *
@@ -2484,13 +2487,13 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            pObjectList
 		 *
 		 */
-        public void ObjectStart()
-        {
-            ObjectEnQueue(*(OBJID*)PrimParPointer());
-        }
+		public void ObjectStart()
+		{
+			ObjectEnQueue(*(OBJID*)PrimParPointer());
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opOBJECT_TRIG (OBJID)</b>
 		 *
@@ -2499,7 +2502,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \param  (DATA16)  OBJID  - Object id
 		 */
-        /*! \brief    opOBJECT_TRIG byte code
+		/*! \brief    opOBJECT_TRIG byte code
 		 *
 		 *            Triggers object and run the object if fully triggered
 		 *
@@ -2507,21 +2510,21 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            pObjList
 		 *
 		 */
-        public void ObjectTrig()
-        {
-            OBJID TmpId;
+		public void ObjectTrig()
+		{
+			OBJID TmpId;
 
-            TmpId = *(OBJID*)PrimParPointer();
+			TmpId = *(OBJID*)PrimParPointer();
 
-            (*GH.VMInstance.pObjList[TmpId]).ObjStatus = WAITING;
-            if ((*GH.VMInstance.pObjList[TmpId]).TriggerCount != 0)
-            {
-                ((*GH.VMInstance.pObjList[TmpId]).TriggerCount)--;
-                if ((*GH.VMInstance.pObjList[TmpId]).TriggerCount == 0)
-                {
-                    ObjectReset(TmpId);
-                    ObjectEnQueue(TmpId);
-                    /*
+			(*GH.VMInstance.pObjList[TmpId]).ObjStatus = WAITING;
+			if ((*GH.VMInstance.pObjList[TmpId]).TriggerCount != 0)
+			{
+				((*GH.VMInstance.pObjList[TmpId]).TriggerCount)--;
+				if ((*GH.VMInstance.pObjList[TmpId]).TriggerCount == 0)
+				{
+					ObjectReset(TmpId);
+					ObjectEnQueue(TmpId);
+					/*
 					  #ifdef OLDCALL
 						  ObjectEnQueue(TmpId);
 					  #else
@@ -2532,12 +2535,12 @@ namespace Ev3CoreUnsafe.Lms2012
 						  GH.VMInstance.ObjectLocal     =  (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).pLocal;
 					  #endif
 					*/
-                }
-            }
-        }
+				}
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opOBJECT_WAIT (OBJID)</b>
 		 *
@@ -2546,7 +2549,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \param  (DATA16)  OBJID  - Object id
 		 */
-        /*! \brief    opOBJECT_WAIT byte code
+		/*! \brief    opOBJECT_WAIT byte code
 		 *
 		 *            Wait until object has run
 		 *
@@ -2554,23 +2557,23 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            ObjectIp, pObjList, DispatchStatus
 		 *
 		 */
-        public void ObjectWait()
-        {
-            OBJID TmpId;
-            IP TmpIp;
+		public void ObjectWait()
+		{
+			OBJID TmpId;
+			IP TmpIp;
 
-            TmpIp = GH.VMInstance.ObjectIp;
-            TmpId = *(OBJID*)PrimParPointer();
+			TmpIp = GH.VMInstance.ObjectIp;
+			TmpId = *(OBJID*)PrimParPointer();
 
-            if ((*GH.VMInstance.pObjList[TmpId]).ObjStatus != STOPPED)
-            {
-                GH.VMInstance.ObjectIp = TmpIp - 1;
-                SetDispatchStatus(DSPSTAT.BUSYBREAK);
-            }
-        }
+			if ((*GH.VMInstance.pObjList[TmpId]).ObjStatus != STOPPED)
+			{
+				GH.VMInstance.ObjectIp = TmpIp - 1;
+				SetDispatchStatus(DSPSTAT.BUSYBREAK);
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opRETURN </b>
 		 *
@@ -2578,7 +2581,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *- Dispatch status changes to DSPSTAT.STOPBREAK
 		 *
 		 */
-        /*! \brief    opRETURN byte code
+		/*! \brief    opRETURN byte code
 		 *
 		 *            Return from byte code subroutine
 		 *
@@ -2586,30 +2589,30 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            ObjectId, pObjList, DispatchStatus
 		 *
 		 */
-        public void ObjectReturn()
-        {
-            OBJID ObjectIdCaller;
+		public void ObjectReturn()
+		{
+			OBJID ObjectIdCaller;
 
-            // Get caller id from saved
-            ObjectIdCaller = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).CallerId;
+			// Get caller id from saved
+			ObjectIdCaller = (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).CallerId;
 
-            GH.Ev3System.Logger.LogInfo($"ObjectReturn: ObjectIdCaller: {ObjectIdCaller}");
+			GH.Ev3System.Logger.LogInfo($"ObjectReturn: ObjectIdCaller: {ObjectIdCaller}");
 
-            // Copy local variables to parameters
-            GH.VMInstance.ObjectLocal = (*GH.VMInstance.pObjList[ObjectIdCaller]).pLocal;
-            CopyLocalsToPars(ObjectIdCaller);
+			// Copy local variables to parameters
+			GH.VMInstance.ObjectLocal = (*GH.VMInstance.pObjList[ObjectIdCaller]).pLocal;
+			CopyLocalsToPars(ObjectIdCaller);
 
 			GH.Ev3System.Logger.LogInfo($"ObjectReturn: GH.VMInstance.ObjectLocal: {(int)GH.VMInstance.ObjectLocal}");
 
 			// Stop called object and start calling object
 			ObjectDeQueue(GH.VMInstance.ObjectId);
-            ObjectEnQueue(ObjectIdCaller);
+			ObjectEnQueue(ObjectIdCaller);
 
 			GH.Ev3System.Logger.LogInfo($"ObjectReturn: GH.VMInstance.ObjectId: {GH.VMInstance.ObjectId}");
 		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opCALL (OBJID, PARAMETERS, ....)</b>
 		 *
@@ -2622,7 +2625,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *- \ref parameterencoding
 		 *
 		 */
-        /*! \brief    opCALL byte code
+		/*! \brief    opCALL byte code
 		 *
 		 *            Calls byte code subroutine
 		 *
@@ -2630,54 +2633,54 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            ObjectIp, pObjList, pObjHead, DispatchStatus
 		 *
 		 */
-        public void ObjectCall()
-        {
-            IP TmpIp;
-            OBJID ObjectIdToCall;
+		public void ObjectCall()
+		{
+			IP TmpIp;
+			OBJID ObjectIdToCall;
 
-            // Save IP in case object are locked
-            TmpIp = GetObjectIp();
+			// Save IP in case object are locked
+			TmpIp = GetObjectIp();
 
-            GH.Ev3System.Logger.LogInfo($"ObjectCall: TmpIp: {(int)TmpIp}");
+			GH.Ev3System.Logger.LogInfo($"ObjectCall: TmpIp: {(int)TmpIp}");
 
-            // Get object to call from byte stream
-            ObjectIdToCall = *(OBJID*)PrimParPointer();
-            if ((*GH.VMInstance.pObjList[ObjectIdToCall]).ObjStatus == STOPPED)
-            { // Object free
+			// Get object to call from byte stream
+			ObjectIdToCall = *(OBJID*)PrimParPointer();
+			if ((*GH.VMInstance.pObjList[ObjectIdToCall]).ObjStatus == STOPPED)
+			{ // Object free
 
-                // Get number of parameters
-                PrimParPointer();
+				// Get number of parameters
+				PrimParPointer();
 
-                // Initialise  object
-                ObjectReset(ObjectIdToCall);
+				// Initialise  object
+				ObjectReset(ObjectIdToCall);
 
-                // Save mother id
-                (*GH.VMInstance.pObjList[ObjectIdToCall]).CallerId = GH.VMInstance.ObjectId;
+				// Save mother id
+				(*GH.VMInstance.pObjList[ObjectIdToCall]).CallerId = GH.VMInstance.ObjectId;
 
 				GH.Ev3System.Logger.LogInfo($"ObjectCall: GH.VMInstance.ObjectId: {GH.VMInstance.ObjectId}");
 
 				// Copy parameters to local variables
 				CopyParsToLocals(ObjectIdToCall);
 
-                // Halt calling object
-                (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = GH.VMInstance.ObjectIp;
-                (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus = HALTED;
+				// Halt calling object
+				(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = GH.VMInstance.ObjectIp;
+				(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus = HALTED;
 
-                // Start called object
-                SetDispatchStatus(DSPSTAT.STOPBREAK);
-                ObjectEnQueue(ObjectIdToCall);
-            }
-            else
-            { // Object locked - rewind IP
+				// Start called object
+				SetDispatchStatus(DSPSTAT.STOPBREAK);
+				ObjectEnQueue(ObjectIdToCall);
+			}
+			else
+			{ // Object locked - rewind IP
 
-                GH.printf($"SUBCALL {ObjectIdToCall} RESULT.BUSY status = {(*GH.VMInstance.pObjList[ObjectIdToCall]).ObjStatus}\r\n");
-                SetObjectIp(TmpIp - 1);
-                SetDispatchStatus(DSPSTAT.BUSYBREAK);
-            }
-        }
+				GH.printf($"SUBCALL {ObjectIdToCall} RESULT.BUSY status = {(*GH.VMInstance.pObjList[ObjectIdToCall]).ObjStatus}\r\n");
+				SetObjectIp(TmpIp - 1);
+				SetDispatchStatus(DSPSTAT.BUSYBREAK);
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opOBJECT_END </b>
 		 *
@@ -2685,7 +2688,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *- Dispatch status changes to DSPSTAT.STOPBREAK
 		 *
 		 */
-        /*! \brief    opOBJECT_END byte code
+		/*! \brief    opOBJECT_END byte code
 		 *
 		 *            Stops current object
 		 *
@@ -2693,16 +2696,16 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            pObjectList, ObjectIp, DispatchStatus
 		 *
 		 */
-        public void ObjectEnd()
-        {
-            (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = &GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage[(ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pObjHead[GH.VMInstance.ObjectId].OffsetToInstructions];
-            (*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus = STOPPED;
+		public void ObjectEnd()
+		{
+			(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).Ip = &GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage[(ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pObjHead[GH.VMInstance.ObjectId].OffsetToInstructions];
+			(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus = STOPPED;
 			GH.Ev3System.Logger.LogInfo($"ObjectEnd: ObjStatus: {(*GH.VMInstance.pObjList[GH.VMInstance.ObjectId]).ObjStatus}");
 			SetDispatchStatus(DSPSTAT.STOPBREAK);
-        }
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opSLEEP </b>
 		 *
@@ -2710,7 +2713,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *- Dispatch status changes to INSTRBREAK
 		 *
 		 */
-        /*! \brief    opSLEEP byte code
+		/*! \brief    opSLEEP byte code
 		 *
 		 *            Breaks execution of current VMTHREAD
 		 *
@@ -2719,13 +2722,13 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *
 		 */
-        public void Sleep()
-        {
-            SetDispatchStatus(DSPSTAT.SLEEPBREAK);
-        }
+		public void Sleep()
+		{
+			SetDispatchStatus(DSPSTAT.SLEEPBREAK);
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opPROGRAM_INFO (CMD, PRGID, DATA)</b>
 		 *
@@ -2761,7 +2764,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *\n
 		 */
-        /*! \brief    opPROGRAM_INFO byte code
+		/*! \brief    opPROGRAM_INFO byte code
 		 *
 		 *            Get program informations
 		 *
@@ -2769,81 +2772,81 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            None
 		 *
 		 */
-        public void ProgramInfo()
-        {
-            DATA8 Cmd;
-            DATA16 Instr;
-            PRGID PrgId;
-            OBJID ObjIndex;
+		public void ProgramInfo()
+		{
+			DATA8 Cmd;
+			DATA16 Instr;
+			PRGID PrgId;
+			OBJID ObjIndex;
 
-            Cmd = *(DATA8*)PrimParPointer();
-            PrgId = *(PRGID*)PrimParPointer();
+			Cmd = *(DATA8*)PrimParPointer();
+			PrgId = *(PRGID*)PrimParPointer();
 
-            switch (Cmd)
-            {
-                case OBJ_STOP:
-                    {
-                        ObjIndex = *(OBJID*)PrimParPointer();
-                        if ((ObjIndex > 0) && (ObjIndex <= GH.VMInstance.Program[PrgId].Objects) && (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED))
-                        {
-                            (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = STOPPED;
-                        }
-                    }
-                    break;
+			switch (Cmd)
+			{
+				case OBJ_STOP:
+					{
+						ObjIndex = *(OBJID*)PrimParPointer();
+						if ((ObjIndex > 0) && (ObjIndex <= GH.VMInstance.Program[PrgId].Objects) && (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED))
+						{
+							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = STOPPED;
+						}
+					}
+					break;
 
-                case OBJ_START:
-                    {
-                        ObjIndex = *(OBJID*)PrimParPointer();
-                        if ((ObjIndex > 0) && (ObjIndex <= GH.VMInstance.Program[PrgId].Objects) && (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED))
-                        {
-                            if (ObjIndex == 1)
-                            {
-                                GH.VMInstance.Program[PrgId].StartTime = GetTimeMS();
-                                GH.VMInstance.Program[PrgId].RunTime = GH.Timer.cTimerGetuS();
-                            }
-                          (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = RUNNING;
-                            (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &GH.VMInstance.Program[PrgId].pImage[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
-                            (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
-                        }
-                    }
-                    break;
+				case OBJ_START:
+					{
+						ObjIndex = *(OBJID*)PrimParPointer();
+						if ((ObjIndex > 0) && (ObjIndex <= GH.VMInstance.Program[PrgId].Objects) && (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED))
+						{
+							if (ObjIndex == 1)
+							{
+								GH.VMInstance.Program[PrgId].StartTime = GetTimeMS();
+								GH.VMInstance.Program[PrgId].RunTime = GH.Timer.cTimerGetuS();
+							}
+						  (*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).ObjStatus = RUNNING;
+							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &GH.VMInstance.Program[PrgId].pImage[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
+							(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
+						}
+					}
+					break;
 
-                case GET_STATUS:
-                    {
-                        *(DATA8*)PrimParPointer() = (DATA8)GH.VMInstance.Program[PrgId].Status;
-                    }
-                    break;
+				case GET_STATUS:
+					{
+						*(DATA8*)PrimParPointer() = (DATA8)GH.VMInstance.Program[PrgId].Status;
+					}
+					break;
 
-                case GET_PRGRESULT:
-                    {
-                        *(DATA8*)PrimParPointer() = (DATA8)GH.VMInstance.Program[PrgId].Result;
-                    }
-                    break;
+				case GET_PRGRESULT:
+					{
+						*(DATA8*)PrimParPointer() = (DATA8)GH.VMInstance.Program[PrgId].Result;
+					}
+					break;
 
-                case GET_SPEED:
-                    {
-                        *(DATA32*)PrimParPointer() = (DATA32)(((float)GH.VMInstance.Program[PrgId].InstrCnt * (float)1000000) / (float)GH.VMInstance.Program[PrgId].InstrTime);
-                    }
-                    break;
+				case GET_SPEED:
+					{
+						*(DATA32*)PrimParPointer() = (DATA32)(((float)GH.VMInstance.Program[PrgId].InstrCnt * (float)1000000) / (float)GH.VMInstance.Program[PrgId].InstrTime);
+					}
+					break;
 
-                case SET_INSTR:
-                    {
-                        Instr = *(DATA16*)PrimParPointer();
-                        SetInstructions((ULONG)Instr);
-                    }
-                    break;
+				case SET_INSTR:
+					{
+						Instr = *(DATA16*)PrimParPointer();
+						SetInstructions((ULONG)Instr);
+					}
+					break;
 
-                default:
-                    {
-                        SetDispatchStatus(DSPSTAT.FAILBREAK);
-                    }
-                    break;
+				default:
+					{
+						SetDispatchStatus(DSPSTAT.FAILBREAK);
+					}
+					break;
 
-            }
-        }
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opLABEL (NO)</b>
 		 *
@@ -2851,16 +2854,16 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \param    (DATA8)   NO - Label number
 		 */
-        /*! \brief  opLABEL byte code
+		/*! \brief  opLABEL byte code
 		 *
 		 */
-        public void DefLabel()
-        {
-            PrimParPointer();
-        }
+		public void DefLabel()
+		{
+			PrimParPointer();
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opPROBE (PRGID, OBJID, OFFSET, SIZE)</b>
 		 *
@@ -2872,7 +2875,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \param  (DATA32)  OFFSET  - Offset (start from)
 		 *  \param  (DATA32)  SIZE    - Size (length of dump) zero means all (max 1024)
 		 */
-        /*! \brief    opPROBE byte code
+		/*! \brief    opPROBE byte code
 		 *
 		 *            Display globals or object locals on terminal
 		 *
@@ -2880,66 +2883,66 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            None
 		 *
 		 */
-        public void Probe()
-        {
-            PRGID PrgId;
-            OBJID ObjId;
-            GBINDEX RamOffset;
-            VARDATA* Ram;
-            GBINDEX Size;
-            GBINDEX Tmp;
-            GBINDEX Lng;
+		public void Probe()
+		{
+			PRGID PrgId;
+			OBJID ObjId;
+			GBINDEX RamOffset;
+			VARDATA* Ram;
+			GBINDEX Size;
+			GBINDEX Tmp;
+			GBINDEX Lng;
 
-            PrgId = *(PRGID*)PrimParPointer();
-            ObjId = *(OBJID*)PrimParPointer();
-            RamOffset = *(GBINDEX*)PrimParPointer();
-            Size = *(GBINDEX*)PrimParPointer();
+			PrgId = *(PRGID*)PrimParPointer();
+			ObjId = *(OBJID*)PrimParPointer();
+			RamOffset = *(GBINDEX*)PrimParPointer();
+			Size = *(GBINDEX*)PrimParPointer();
 
-            if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
-            {
-                if (ObjId == 0)
-                {
-                    Ram = GH.VMInstance.Program[PrgId].pGlobal;
-                    Lng = (*(IMGHEAD*)GH.VMInstance.Program[PrgId].pImage).GlobalBytes;
-                }
-                else
-                {
-                    Ram = (*GH.VMInstance.Program[PrgId].pObjList[ObjId]).pLocal;
-                    Lng = GH.VMInstance.Program[PrgId].pObjHead[ObjId].LocalBytes;
-                }
-                Ram += RamOffset;
-                if (Size == 0)
-                {
-                    Size = Lng;
-                }
-                if (Size != 0)
-                {
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"    PROBE  Prg={PrgId} Obj={ObjId} Offs={(ulong)RamOffset} Lng={(ulong)Size}\r\n    {{\r\n  ");
-                    VmPrint(GH.VMInstance.PrintBuffer);
+			if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
+			{
+				if (ObjId == 0)
+				{
+					Ram = GH.VMInstance.Program[PrgId].pGlobal;
+					Lng = (*(IMGHEAD*)GH.VMInstance.Program[PrgId].pImage).GlobalBytes;
+				}
+				else
+				{
+					Ram = (*GH.VMInstance.Program[PrgId].pObjList[ObjId]).pLocal;
+					Lng = GH.VMInstance.Program[PrgId].pObjHead[ObjId].LocalBytes;
+				}
+				Ram += RamOffset;
+				if (Size == 0)
+				{
+					Size = Lng;
+				}
+				if (Size != 0)
+				{
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"    PROBE  Prg={PrgId} Obj={ObjId} Offs={(ulong)RamOffset} Lng={(ulong)Size}\r\n    {{\r\n  ");
+					VmPrint(GH.VMInstance.PrintBuffer);
 
-                    for (Tmp = 0; (Tmp < Size) && (Tmp < Lng) && (Tmp < 1024); Tmp++)
-                    {
-                        if ((Tmp & 0x0F) == 0)
-                        {
-                            CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"    {(ulong)(RamOffset + (GBINDEX)Tmp):B} ");
-                            VmPrint(GH.VMInstance.PrintBuffer);
-                        }
-                        CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{(UBYTE)(*Ram & 0xFF):B} ");
-                        VmPrint(GH.VMInstance.PrintBuffer);
-                        if (((Tmp & 0x0F) == 0xF) && (Tmp < (Size - 1)))
-                        {
-                            VmPrint("\r\n    ".AsSbytePointer());
-                        }
-                        Ram++;
-                    }
+					for (Tmp = 0; (Tmp < Size) && (Tmp < Lng) && (Tmp < 1024); Tmp++)
+					{
+						if ((Tmp & 0x0F) == 0)
+						{
+							CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"    {(ulong)(RamOffset + (GBINDEX)Tmp):B} ");
+							VmPrint(GH.VMInstance.PrintBuffer);
+						}
+						CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{(UBYTE)(*Ram & 0xFF):B} ");
+						VmPrint(GH.VMInstance.PrintBuffer);
+						if (((Tmp & 0x0F) == 0xF) && (Tmp < (Size - 1)))
+						{
+							VmPrint("\r\n    ".AsSbytePointer());
+						}
+						Ram++;
+					}
 
-                    VmPrint("\r\n    }\r\n".AsSbytePointer());
-                }
-            }
-        }
+					VmPrint("\r\n    }\r\n".AsSbytePointer());
+				}
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opDO (PRGID, IMAGE)</b>
 		 *
@@ -2950,7 +2953,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \param    (DATA32)   *IMAGE   - Address of image
 		 *  \param    (DATA32)   *GLOBAL  - Address of global variables
 		 */
-        /*! \brief    opDO byte code
+		/*! \brief    opDO byte code
 		 *
 		 *            Run byte code snippet
 		 *
@@ -2958,36 +2961,36 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            ObjectIp, ProgramId
 		 *
 		 */
-        public void Do()
-        {
-            DATA16 PrgId;
-            DATA32 pImage;
-            DATA32 pGlobal;
+		public void Do()
+		{
+			DATA16 PrgId;
+			DATA32 pImage;
+			DATA32 pGlobal;
 
-            PrgId = *(DATA16*)PrimParPointer();
-            pImage = *(DATA32*)PrimParPointer();
-            pGlobal = *(DATA32*)PrimParPointer();
+			PrgId = *(DATA16*)PrimParPointer();
+			pImage = *(DATA32*)PrimParPointer();
+			pGlobal = *(DATA32*)PrimParPointer();
 
-            if (ProgramStatus((ushort)PrgId) != OBJSTAT.STOPPED)
-            {
-                ProgramEnd((ushort)PrgId);
-            }
-            if (ProgramStatus((ushort)PrgId) == OBJSTAT.STOPPED)
-            {
-                if (ProgramReset((ushort)PrgId, (IP)pImage, (GP)pGlobal, 0) != OK)
-                {
-                    if (PrgId != CMD_SLOT)
-                    {
-                        LogErrorNumber(ERR.VM_PROGRAM_NOT_STARTED);
-                    }
-                }
-            }
-            GH.Ui.cUiAlive();
+			if (ProgramStatus((ushort)PrgId) != OBJSTAT.STOPPED)
+			{
+				ProgramEnd((ushort)PrgId);
+			}
+			if (ProgramStatus((ushort)PrgId) == OBJSTAT.STOPPED)
+			{
+				if (ProgramReset((ushort)PrgId, (IP)pImage, (GP)pGlobal, 0) != OK)
+				{
+					if (PrgId != CMD_SLOT)
+					{
+						LogErrorNumber(ERR.VM_PROGRAM_NOT_STARTED);
+					}
+				}
+			}
+			GH.Ui.cUiAlive();
 
-        }
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opBP0 - opBP3 </b>
 		 *
@@ -2996,7 +2999,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *- Dispatch status unchanged
 		 *
 		 */
-        /*! \brief    opBP0 - opBP3 byte code
+		/*! \brief    opBP0 - opBP3 byte code
 		 *
 		 *            Display globals or object locals on terminal
 		 *
@@ -3004,44 +3007,44 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            pObjHead, ObjectIp, ProgramId
 		 *
 		 */
-        public void BreakPoint()
-        {
-            IP TmpIp;
-            DATA8 No;
-            float Instr;
+		public void BreakPoint()
+		{
+			IP TmpIp;
+			DATA8 No;
+			float Instr;
 
-            TmpIp = (--GH.VMInstance.ObjectIp);
-            No = *(DATA8*)TmpIp;
+			TmpIp = (--GH.VMInstance.ObjectIp);
+			No = *(DATA8*)TmpIp;
 
-            if (((BRKP*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Brkp)[No & 0x03].OpCode != 0)
-            {
-                *(DATA8*)TmpIp = (sbyte)((BRKP*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Brkp)[No & 0x03].OpCode;
-            }
-            else
-            {
-                GH.VMInstance.ObjectIp++;
-            }
+			if (((BRKP*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Brkp)[No & 0x03].OpCode != 0)
+			{
+				*(DATA8*)TmpIp = (sbyte)((BRKP*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Brkp)[No & 0x03].OpCode;
+			}
+			else
+			{
+				GH.VMInstance.ObjectIp++;
+			}
 
-            if ((No & 0x03) == 3)
-            {
-                GH.Ui.cUiTestpin(1);
-                GH.Ui.cUiTestpin(0);
-            }
-            else
-            {
-                Instr = GH.VMInstance.Program[GH.VMInstance.ProgramId].InstrCnt + GH.VMInstance.InstrCnt;
+			if ((No & 0x03) == 3)
+			{
+				GH.Ui.cUiTestpin(1);
+				GH.Ui.cUiTestpin(0);
+			}
+			else
+			{
+				Instr = GH.VMInstance.Program[GH.VMInstance.ProgramId].InstrCnt + GH.VMInstance.InstrCnt;
 
-                CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\nBREAKPOINT #{No & 0x03} ({Instr})");
-                VmPrint(GH.VMInstance.PrintBuffer);
+				CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\nBREAKPOINT #{No & 0x03} ({Instr})");
+				VmPrint(GH.VMInstance.PrintBuffer);
 
-                GH.VMInstance.Debug = 1;
-            }
-            PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
-            *(DATA8*)TmpIp = No;
-        }
+				GH.VMInstance.Debug = 1;
+			}
+			PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
+			*(DATA8*)TmpIp = No;
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opBP_SET (PRGID, NO, ADDRESS)</b>
 		 *
@@ -3052,7 +3055,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \param  (DATA8)   NO      - Breakpoint number [0..2] (3 = trigger out on TP4)
 		 *  \param  (DATA32)  ADDRESS - Address (Offset from start of image) (0 = remove breakpoint)
 		 */
-        /*! \brief    opBP_SET byte code
+		/*! \brief    opBP_SET byte code
 		 *
 		 *            Set break point in byte code program
 		 *
@@ -3060,42 +3063,42 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            None
 		 *
 		 */
-        public void BreakSet()
-        {
-            PRGID PrgId;
-            DATA8 No;
-            DATA32 Addr;
+		public void BreakSet()
+		{
+			PRGID PrgId;
+			DATA8 No;
+			DATA32 Addr;
 
-            PrgId = *(PRGID*)PrimParPointer();
-            No = *(DATA8*)PrimParPointer();
-            Addr = *(DATA32*)PrimParPointer();
+			PrgId = *(PRGID*)PrimParPointer();
+			No = *(DATA8*)PrimParPointer();
+			Addr = *(DATA32*)PrimParPointer();
 
-            if (No < MAX_BREAKPOINTS)
-            {
-                if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
-                {
-                    if (Addr != 0)
-                    {
-                        ((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr = (uint)Addr;
-                        ((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode = (OP)GH.VMInstance.Program[PrgId].pImage[Addr];
-                        GH.VMInstance.Program[PrgId].pImage[Addr] = (byte)(opBP0 + No);
-                    }
-                    else
-                    {
-                        if ((((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr != 0) && (((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode != 0))
-                        {
-                            Addr = (int)((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr;
-                            GH.VMInstance.Program[PrgId].pImage[Addr] = (byte)((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode;
-                        }
-                        ((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr = 0;
-                        ((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode = 0;
-                    }
-                }
-            }
-        }
+			if (No < MAX_BREAKPOINTS)
+			{
+				if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
+				{
+					if (Addr != 0)
+					{
+						((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr = (uint)Addr;
+						((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode = (OP)GH.VMInstance.Program[PrgId].pImage[Addr];
+						GH.VMInstance.Program[PrgId].pImage[Addr] = (byte)(opBP0 + No);
+					}
+					else
+					{
+						if ((((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr != 0) && (((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode != 0))
+						{
+							Addr = (int)((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr;
+							GH.VMInstance.Program[PrgId].pImage[Addr] = (byte)((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode;
+						}
+						((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].Addr = 0;
+						((BRKP*)GH.VMInstance.Program[PrgId].Brkp)[No].OpCode = 0;
+					}
+				}
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opRANDOM (MIN, MAX, VALUE)</b>
 		 *
@@ -3106,7 +3109,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \param  (DATA16)  MAX     - Maximum value
 		 *  \return (DATA16)  VALUE   - Value
 		 */
-        /*! \brief    opRANDOM byte code
+		/*! \brief    opRANDOM byte code
 		 *
 		 *            Get random VALUE between MIN and MAX
 		 *
@@ -3114,30 +3117,30 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            None
 		 *
 		 */
-        public void Random()
-        {
-            DATA16 Min;
-            DATA16 Max;
-            DATA16 Result;
+		public void Random()
+		{
+			DATA16 Min;
+			DATA16 Max;
+			DATA16 Result;
 
-            Min = *(DATA16*)PrimParPointer();
-            Max = *(DATA16*)PrimParPointer();
+			Min = *(DATA16*)PrimParPointer();
+			Max = *(DATA16*)PrimParPointer();
 
-            Result = (DATA16)(new System.Random()).Next(DATA16.MinValue, DATA16.MaxValue);
+			Result = (DATA16)(new System.Random()).Next(DATA16.MinValue, DATA16.MaxValue);
 
-            if (Result < 0)
-            {
-                Result = (short)(0 - Result);
-            }
+			if (Result < 0)
+			{
+				Result = (short)(0 - Result);
+			}
 
-            Result = ((short)(((Result * (Max - Min)) + 16383) / 32767));
-            Result += Min;
+			Result = ((short)(((Result * (Max - Min)) + 16383) / 32767));
+			Result += Min;
 
-            *(DATA16*)PrimParPointer() = Result;
-        }
+			*(DATA16*)PrimParPointer() = Result;
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opINFO (CMD, ....)  </b>
 		 *
@@ -3180,103 +3183,103 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *\n
 		 *
 		 */
-        /*! \brief  opINFO byte code
+		/*! \brief  opINFO byte code
 		 *
 		 */
-        public void Info()
-        {
-            DATA8 Cmd;
-            DATA8 Tmp;
-            DATA8 Length;
-            DATA8* pDestination;
-            DATA8 Number;
+		public void Info()
+		{
+			DATA8 Cmd;
+			DATA8 Tmp;
+			DATA8 Length;
+			DATA8* pDestination;
+			DATA8 Number;
 
-            Cmd = *(DATA8*)PrimParPointer();
-            switch (Cmd)
-            { // Function
+			Cmd = *(DATA8*)PrimParPointer();
+			switch (Cmd)
+			{ // Function
 
-                case SET_ERROR:
-                    {
-                        LogErrorNumber((ERR)(*(DATA8*)PrimParPointer()));
-                    }
-                    break;
+				case SET_ERROR:
+					{
+						LogErrorNumber((ERR)(*(DATA8*)PrimParPointer()));
+					}
+					break;
 
-                case GET_ERROR:
-                    {
-                        *(DATA8*)PrimParPointer() = (sbyte)LogErrorGet();
-                    }
-                    break;
+				case GET_ERROR:
+					{
+						*(DATA8*)PrimParPointer() = (sbyte)LogErrorGet();
+					}
+					break;
 
-                case ERRORTEXT:
-                    {
-                        Number = *(DATA8*)PrimParPointer();
-                        Length = *(DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
+				case ERRORTEXT:
+					{
+						Number = *(DATA8*)PrimParPointer();
+						Length = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
 
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            if (Number < ERRORS)
-                            {
-                                Tmp = (sbyte)(Number + 1);
-                            }
-                            else
-                            {
-                                Tmp = 10;
-                            }
-                            if ((Length > Tmp) || (Length == -1))
-                            {
-                                Length = Tmp;
-                            }
-                            pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
-                        }
-                        if (pDestination != null)
-                        {
-                            *pDestination = 0;
+						if (GH.VMInstance.Handle >= 0)
+						{
+							if (Number < ERRORS)
+							{
+								Tmp = (sbyte)(Number + 1);
+							}
+							else
+							{
+								Tmp = 10;
+							}
+							if ((Length > Tmp) || (Length == -1))
+							{
+								Length = Tmp;
+							}
+							pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
+						}
+						if (pDestination != null)
+						{
+							*pDestination = 0;
 
-                            if (Number != 0)
-                            {
-                                if (Number < ERRORS)
-                                {
-                                    CommonHelper.snprintf((DATA8*)pDestination, Length, $"{Number}");
-                                }
-                                else
-                                {
-                                    CommonHelper.snprintf((DATA8*)pDestination, Length, $"Number {Number}");
-                                }
-                            }
-                        }
-                    }
-                    break;
+							if (Number != 0)
+							{
+								if (Number < ERRORS)
+								{
+									CommonHelper.snprintf((DATA8*)pDestination, Length, $"{Number}");
+								}
+								else
+								{
+									CommonHelper.snprintf((DATA8*)pDestination, Length, $"Number {Number}");
+								}
+							}
+						}
+					}
+					break;
 
-                case GET_VOLUME:
-                    {
-                        *(DATA8*)PrimParPointer() = GetVolumePercent();
-                    }
-                    break;
+				case GET_VOLUME:
+					{
+						*(DATA8*)PrimParPointer() = GetVolumePercent();
+					}
+					break;
 
-                case SET_VOLUME:
-                    {
-                        SetVolumePercent(*(DATA8*)PrimParPointer());
-                    }
-                    break;
+				case SET_VOLUME:
+					{
+						SetVolumePercent(*(DATA8*)PrimParPointer());
+					}
+					break;
 
-                case GET_MINUTES:
-                    {
-                        *(DATA8*)PrimParPointer() = GetSleepMinutes();
-                    }
-                    break;
+				case GET_MINUTES:
+					{
+						*(DATA8*)PrimParPointer() = GetSleepMinutes();
+					}
+					break;
 
-                case SET_MINUTES:
-                    {
-                        SetSleepMinutes(*(DATA8*)PrimParPointer());
-                    }
-                    break;
+				case SET_MINUTES:
+					{
+						SetSleepMinutes(*(DATA8*)PrimParPointer());
+					}
+					break;
 
-            }
-        }
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opSTRINGS (CMD, ....)  </b>
 		 *
@@ -3365,338 +3368,338 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *\ref stringexample1 "Program Example"
 		 */
-        /*! \brief  opSTRINGS byte code
+		/*! \brief  opSTRINGS byte code
 		 *
 		 */
-        public void Strings()
-        {
-            DATA8 Cmd;
-            DATA8* pSource1;
-            DATA8* pSource2;
-            DATA8* pDestination;
-            DATAF DataF;
-            DATA16 Data16;
-            DATA32 Data32;
-            DATA32 Start;
-            DATA8 Tmp;
-            DATA8 Figures;
-            DATA8 Decimals;
-            DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(1024);
+		public void Strings()
+		{
+			DATA8 Cmd;
+			DATA8* pSource1;
+			DATA8* pSource2;
+			DATA8* pDestination;
+			DATAF DataF;
+			DATA16 Data16;
+			DATA32 Data32;
+			DATA32 Start;
+			DATA8 Tmp;
+			DATA8 Figures;
+			DATA8 Decimals;
+			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(1024);
 
-            Cmd = *(DATA8*)PrimParPointer();
-            switch (Cmd)
-            { // Function
+			Cmd = *(DATA8*)PrimParPointer();
+			switch (Cmd)
+			{ // Function
 
-                case GET_SIZE:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
-                        *(DATA16*)PrimParPointer() = (DATA16)CommonHelper.strlen((DATA8*)pSource1);
-                    }
-                    break;
+				case GET_SIZE:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
+						*(DATA16*)PrimParPointer() = (DATA16)CommonHelper.strlen((DATA8*)pSource1);
+					}
+					break;
 
-                case ADD:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
-                        pSource2 = (DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
-                            Data32 += (DATA32)CommonHelper.strlen((DATA8*)pSource2);
-                            Data32 += 1;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                        }
-                        if (pDestination != null)
-                        {
-                            CommonHelper.sprintf((DATA8*)pDestination, $"{CommonHelper.GetString((DATA8*)pSource1)}{CommonHelper.GetString((DATA8*)pSource2)}");
-                        }
-                    }
-                    break;
+				case ADD:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
+						pSource2 = (DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
+							Data32 += (DATA32)CommonHelper.strlen((DATA8*)pSource2);
+							Data32 += 1;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.sprintf((DATA8*)pDestination, $"{CommonHelper.GetString((DATA8*)pSource1)}{CommonHelper.GetString((DATA8*)pSource2)}");
+						}
+					}
+					break;
 
-                case COMPARE:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
-                        pSource2 = (DATA8*)PrimParPointer();
+				case COMPARE:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
+						pSource2 = (DATA8*)PrimParPointer();
 
-                        if (CommonHelper.strcmp((DATA8*)pSource1, (DATA8*)pSource2) == 0)
-                        {
-                            *(DATA8*)PrimParPointer() = 1;
-                        }
-                        else
-                        {
-                            *(DATA8*)PrimParPointer() = 0;
-                        }
-                    }
-                    break;
+						if (CommonHelper.strcmp((DATA8*)pSource1, (DATA8*)pSource2) == 0)
+						{
+							*(DATA8*)PrimParPointer() = 1;
+						}
+						else
+						{
+							*(DATA8*)PrimParPointer() = 0;
+						}
+					}
+					break;
 
-                case DUPLICATE:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
-                            Data32 += 1;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                        }
-                        if (pDestination != null)
-                        {
-                            CommonHelper.strcpy((DATA8*)pDestination, (DATA8*)pSource1);
-                        }
-                    }
-                    break;
+				case DUPLICATE:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
+							Data32 += 1;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.strcpy((DATA8*)pDestination, (DATA8*)pSource1);
+						}
+					}
+					break;
 
-                case VALUE_TO_STRING:
-                    {
-                        DataF = *(DATAF*)PrimParPointer();
-                        Figures = *(DATA8*)PrimParPointer();
-                        Decimals = *(DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            if (Figures >= 0)
-                            {
-                                Data32 = (DATA32)Figures;
-                            }
-                            else
-                            {
-                                Data32 = (DATA32)(0 - Figures);
-                            }
-                            Data32 += 2;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                        }
-                        if (pDestination != null)
-                        {
-                            if (float.IsNaN(DataF))
-                            {
-                                if (Figures < 0)
-                                { // "----    "
-                                    Figures = (sbyte)(0 - Figures);
+				case VALUE_TO_STRING:
+					{
+						DataF = *(DATAF*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						Decimals = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+						if (GH.VMInstance.Handle >= 0)
+						{
+							if (Figures >= 0)
+							{
+								Data32 = (DATA32)Figures;
+							}
+							else
+							{
+								Data32 = (DATA32)(0 - Figures);
+							}
+							Data32 += 2;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+						}
+						if (pDestination != null)
+						{
+							if (float.IsNaN(DataF))
+							{
+								if (Figures < 0)
+								{ // "----    "
+									Figures = (sbyte)(0 - Figures);
 
-                                    Tmp = 0;
-                                    while ((Tmp < 4) && (Tmp < Figures))
-                                    {
-                                        pDestination[Tmp] = (sbyte)'-';
-                                        Tmp++;
-                                    }
-                                    while (Tmp < Figures)
-                                    {
-                                        pDestination[Tmp] = (sbyte)' ';
-                                        Tmp++;
-                                    }
-                                }
-                                else
-                                { // "    ----"
+									Tmp = 0;
+									while ((Tmp < 4) && (Tmp < Figures))
+									{
+										pDestination[Tmp] = (sbyte)'-';
+										Tmp++;
+									}
+									while (Tmp < Figures)
+									{
+										pDestination[Tmp] = (sbyte)' ';
+										Tmp++;
+									}
+								}
+								else
+								{ // "    ----"
 
-                                    Tmp = 0;
-                                    while (Tmp < (Figures - 4))
-                                    {
-                                        pDestination[Tmp] = (sbyte)' ';
-                                        Tmp++;
-                                    }
-                                    while (Tmp < Figures)
-                                    {
-                                        pDestination[Tmp] = (sbyte)'-';
-                                        Tmp++;
-                                    }
-                                }
-                                pDestination[Tmp] = 0;
-                            }
-                            else
-                            {
-                                if (Figures >= 0)
-                                {
-                                    CommonHelper.snprintf((DATA8*)pDestination, Figures + 1, CommonHelper.GetString(DataF, Figures, Decimals));
-                                }
-                                else
-                                {
-                                    Figures = (sbyte)(0 - Figures);
-                                    CommonHelper.snprintf((DATA8*)pDestination, Figures + 1, CommonHelper.GetString(DataF, -1, Decimals));
-                                }
-                                if (Decimals != 0)
-                                { // Strip trailing zeroes
+									Tmp = 0;
+									while (Tmp < (Figures - 4))
+									{
+										pDestination[Tmp] = (sbyte)' ';
+										Tmp++;
+									}
+									while (Tmp < Figures)
+									{
+										pDestination[Tmp] = (sbyte)'-';
+										Tmp++;
+									}
+								}
+								pDestination[Tmp] = 0;
+							}
+							else
+							{
+								if (Figures >= 0)
+								{
+									CommonHelper.snprintf((DATA8*)pDestination, Figures + 1, CommonHelper.GetString(DataF, Figures, Decimals));
+								}
+								else
+								{
+									Figures = (sbyte)(0 - Figures);
+									CommonHelper.snprintf((DATA8*)pDestination, Figures + 1, CommonHelper.GetString(DataF, -1, Decimals));
+								}
+								if (Decimals != 0)
+								{ // Strip trailing zeroes
 
-                                    Figures = (DATA8)CommonHelper.strlen((DATA8*)pDestination);
+									Figures = (DATA8)CommonHelper.strlen((DATA8*)pDestination);
 
-                                    while ((Figures != 0) && ((pDestination[Figures] == '0') || (pDestination[Figures] == 0)))
-                                    {
-                                        pDestination[Figures] = 0;
-                                        Figures--;
-                                    }
-                                    if (pDestination[Figures] == '.')
-                                    {
-                                        pDestination[Figures] = 0;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    break;
+									while ((Figures != 0) && ((pDestination[Figures] == '0') || (pDestination[Figures] == 0)))
+									{
+										pDestination[Figures] = 0;
+										Figures--;
+									}
+									if (pDestination[Figures] == '.')
+									{
+										pDestination[Figures] = 0;
+									}
+								}
+							}
+						}
+					}
+					break;
 
-                case NUMBER_TO_STRING:
-                    {
-                        Data16 = *(DATA16*)PrimParPointer();
-                        Figures = *(DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)Figures;
-                            Data32 += 2;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                        }
-                        if (pDestination != null)
-                        {
-                            CommonHelper.snprintf((DATA8*)pDestination, Figures + 1, $"{Data16}");
-                        }
-                    }
-                    break;
+				case NUMBER_TO_STRING:
+					{
+						Data16 = *(DATA16*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)Figures;
+							Data32 += 2;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.snprintf((DATA8*)pDestination, Figures + 1, $"{Data16}");
+						}
+					}
+					break;
 
-                case STRING_TO_VALUE:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
+				case STRING_TO_VALUE:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
 
-                        Data16 = 0;
-                        while (pSource1[Data16] != 0)
-                        {
-                            if (pSource1[Data16] == ',')
-                            {
-                                pSource1[Data16] = (sbyte)'.';
-                            }
-                            Data16++;
-                        }
+						Data16 = 0;
+						while (pSource1[Data16] != 0)
+						{
+							if (pSource1[Data16] == ',')
+							{
+								pSource1[Data16] = (sbyte)'.';
+							}
+							Data16++;
+						}
 
-                        CommonHelper.sscanf((DATA8*)pSource1, "%f", &DataF);
+						CommonHelper.sscanf((DATA8*)pSource1, "%f", &DataF);
 
-                        *(DATAF*)PrimParPointer() = DataF;
-                    }
-                    break;
+						*(DATAF*)PrimParPointer() = DataF;
+					}
+					break;
 
-                case STRIP:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
-                            Data32 += 1;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                        }
-                        if (pDestination != null)
-                        {
-                            while (*pSource1 != 0)
-                            {
-                                if ((*pSource1 != ' '))
-                                {
-                                    *pDestination = *pSource1;
-                                    pDestination++;
-                                }
-                                pSource1++;
-                            }
-                            *pDestination = *pSource1;
-                        }
-                    }
-                    break;
+				case STRIP:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
+							Data32 += 1;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+						}
+						if (pDestination != null)
+						{
+							while (*pSource1 != 0)
+							{
+								if ((*pSource1 != ' '))
+								{
+									*pDestination = *pSource1;
+									pDestination++;
+								}
+								pSource1++;
+							}
+							*pDestination = *pSource1;
+						}
+					}
+					break;
 
-                case SUB:
-                    {
-                        pSource1 = (DATA8*)PrimParPointer();
-                        pSource2 = (DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
+				case SUB:
+					{
+						pSource1 = (DATA8*)PrimParPointer();
+						pSource2 = (DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
 
-                        Start = (DATA32)CommonHelper.strlen((DATA8*)pSource2);
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
-                            Data32 += 1;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                        }
-                        if (pDestination != null)
-                        {
-                            CommonHelper.snprintf(Buffer, 1024, CommonHelper.GetString(CommonHelper.strstr((DATA8*)pSource1, (DATA8*)pSource2)));
-                            CommonHelper.sprintf((DATA8*)pDestination, CommonHelper.GetString(&Buffer[(DATA16)Start]));
-                        }
-                    }
-                    break;
+						Start = (DATA32)CommonHelper.strlen((DATA8*)pSource2);
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)CommonHelper.strlen((DATA8*)pSource1);
+							Data32 += 1;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.snprintf(Buffer, 1024, CommonHelper.GetString(CommonHelper.strstr((DATA8*)pSource1, (DATA8*)pSource2)));
+							CommonHelper.sprintf((DATA8*)pDestination, CommonHelper.GetString(&Buffer[(DATA16)Start]));
+						}
+					}
+					break;
 
-                case VALUE_FORMATTED:
-                    {
-                        DataF = *(DATAF*)PrimParPointer();
-                        pSource1 = (DATA8*)PrimParPointer();
-                        Figures = *(DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
+				case VALUE_FORMATTED:
+					{
+						DataF = *(DATAF*)PrimParPointer();
+						pSource1 = (DATA8*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
 
-                        // TODO: WARNING: format is not implemented
-                        //CommonHelper.snprintf(Buffer, 1024, (DATA8*)pSource1, DataF);
-                        CommonHelper.snprintf(Buffer, 1024, DataF.ToString());
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)CommonHelper.strlen((DATA8*)Buffer);
-                            Data32 += 1;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                            Figures = (DATA8)Data32;
-                        }
-                        if (pDestination != null)
-                        {
-                            CommonHelper.snprintf((DATA8*)pDestination, Figures, CommonHelper.GetString(Buffer));
-                        }
+						// TODO: WARNING: format is not implemented
+						//CommonHelper.snprintf(Buffer, 1024, (DATA8*)pSource1, DataF);
+						CommonHelper.snprintf(Buffer, 1024, DataF.ToString());
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)CommonHelper.strlen((DATA8*)Buffer);
+							Data32 += 1;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+							Figures = (DATA8)Data32;
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.snprintf((DATA8*)pDestination, Figures, CommonHelper.GetString(Buffer));
+						}
 
-                    }
-                    break;
+					}
+					break;
 
-                case NUMBER_FORMATTED:
-                    {
-                        Data32 = *(DATA32*)PrimParPointer();
-                        pSource1 = (DATA8*)PrimParPointer();
-                        Figures = *(DATA8*)PrimParPointer();
-                        pDestination = (DATA8*)PrimParPointer();
+				case NUMBER_FORMATTED:
+					{
+						Data32 = *(DATA32*)PrimParPointer();
+						pSource1 = (DATA8*)PrimParPointer();
+						Figures = *(DATA8*)PrimParPointer();
+						pDestination = (DATA8*)PrimParPointer();
 
-                        // TODO: WARNING: format is not implemented
-                        //CommonHelper.snprintf(Buffer, 1024, (DATA8*)pSource1, Data32);
-                        CommonHelper.snprintf(Buffer, 1024, Data32.ToString());
-                        if (GH.VMInstance.Handle >= 0)
-                        {
-                            Data32 = (DATA32)CommonHelper.strlen((DATA8*)Buffer);
-                            Data32 += 1;
-                            if (Data32 > MIN_ARRAY_ELEMENTS)
-                            {
-                                pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
-                            }
-                            Figures = (DATA8)Data32;
-                        }
-                        if (pDestination != null)
-                        {
-                            CommonHelper.snprintf((DATA8*)pDestination, Figures, CommonHelper.GetString(Buffer));
-                        }
+						// TODO: WARNING: format is not implemented
+						//CommonHelper.snprintf(Buffer, 1024, (DATA8*)pSource1, Data32);
+						CommonHelper.snprintf(Buffer, 1024, Data32.ToString());
+						if (GH.VMInstance.Handle >= 0)
+						{
+							Data32 = (DATA32)CommonHelper.strlen((DATA8*)Buffer);
+							Data32 += 1;
+							if (Data32 > MIN_ARRAY_ELEMENTS)
+							{
+								pDestination = (DATA8*)VmMemoryResize(GH.VMInstance.Handle, Data32);
+							}
+							Figures = (DATA8)Data32;
+						}
+						if (pDestination != null)
+						{
+							CommonHelper.snprintf((DATA8*)pDestination, Figures, CommonHelper.GetString(Buffer));
+						}
 
-                    }
-                    break;
+					}
+					break;
 
-            }
-        }
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opMEMORY_WRITE (PRGID, OBJID, OFFSET, SIZE, ARRAY)</b>
 		 *
@@ -3711,7 +3714,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *\ref opMEMORY_WRITE1 "Direct command example"
 		 */
-        /*! \brief    opMEMORY_WRITE byte code
+		/*! \brief    opMEMORY_WRITE byte code
 		 *
 		 *            Write to  VM memory
 		 *
@@ -3719,56 +3722,56 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            None
 		 *
 		 */
-        public void MemoryWrite()
-        {
-            PRGID PrgId;
-            OBJID ObjId;
-            GBINDEX Offset;
-            GBINDEX Size;
-            DATA8* pArray;
-            VARDATA* Ram;
-            GBINDEX Tmp;
-            GBINDEX Lng;
+		public void MemoryWrite()
+		{
+			PRGID PrgId;
+			OBJID ObjId;
+			GBINDEX Offset;
+			GBINDEX Size;
+			DATA8* pArray;
+			VARDATA* Ram;
+			GBINDEX Tmp;
+			GBINDEX Lng;
 
-            PrgId = *(PRGID*)PrimParPointer();
-            ObjId = *(OBJID*)PrimParPointer();
-            Offset = *(GBINDEX*)PrimParPointer();
-            Size = *(GBINDEX*)PrimParPointer();
-            pArray = (DATA8*)PrimParPointer();
+			PrgId = *(PRGID*)PrimParPointer();
+			ObjId = *(OBJID*)PrimParPointer();
+			Offset = *(GBINDEX*)PrimParPointer();
+			Size = *(GBINDEX*)PrimParPointer();
+			pArray = (DATA8*)PrimParPointer();
 
-            //  GH.printf("p=%-1d o=%-2d f=%-4d s=%-4d d=0x%02X\r\n",PrgId,ObjId,Offset,Size,*pArray);
+			//  GH.printf("p=%-1d o=%-2d f=%-4d s=%-4d d=0x%02X\r\n",PrgId,ObjId,Offset,Size,*pArray);
 
-            if (PrgId < MAX_PROGRAMS)
-            {
-                if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
-                {
-                    if ((ObjId >= 0) && (ObjId <= GH.VMInstance.Program[PrgId].Objects))
-                    {
-                        if (ObjId == 0)
-                        {
-                            Ram = GH.VMInstance.Program[PrgId].pGlobal;
-                            Lng = (*(IMGHEAD*)GH.VMInstance.Program[PrgId].pImage).GlobalBytes;
-                        }
-                        else
-                        {
-                            Ram = (*GH.VMInstance.Program[PrgId].pObjList[ObjId]).pLocal;
-                            Lng = GH.VMInstance.Program[PrgId].pObjHead[ObjId].LocalBytes;
-                        }
+			if (PrgId < MAX_PROGRAMS)
+			{
+				if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
+				{
+					if ((ObjId >= 0) && (ObjId <= GH.VMInstance.Program[PrgId].Objects))
+					{
+						if (ObjId == 0)
+						{
+							Ram = GH.VMInstance.Program[PrgId].pGlobal;
+							Lng = (*(IMGHEAD*)GH.VMInstance.Program[PrgId].pImage).GlobalBytes;
+						}
+						else
+						{
+							Ram = (*GH.VMInstance.Program[PrgId].pObjList[ObjId]).pLocal;
+							Lng = GH.VMInstance.Program[PrgId].pObjHead[ObjId].LocalBytes;
+						}
 
-                        for (Tmp = 0; Tmp < Size; Tmp++)
-                        {
-                            if ((Tmp + Offset) < Lng)
-                            {
-                                Ram[Tmp + Offset] = (byte)pArray[Tmp];
-                            }
-                        }
-                    }
-                }
-            }
-        }
+						for (Tmp = 0; Tmp < Size; Tmp++)
+						{
+							if ((Tmp + Offset) < Lng)
+							{
+								Ram[Tmp + Offset] = (byte)pArray[Tmp];
+							}
+						}
+					}
+				}
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opMEMORY_READ (PRGID, OBJID, OFFSET, SIZE, ARRAY)</b>
 		 *
@@ -3783,7 +3786,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *  \ref opMEMORY_READ1 "Direct command example"
 		 */
-        /*! \brief    opMEMORY_READ byte code
+		/*! \brief    opMEMORY_READ byte code
 		 *
 		 *            Read VM memory
 		 *
@@ -3791,58 +3794,58 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *            None
 		 *
 		 */
-        public void MemoryRead()
-        {
-            PRGID PrgId;
-            OBJID ObjId;
-            GBINDEX Offset;
-            GBINDEX Size;
-            DATA8* pArray;
-            VARDATA* Ram;
-            GBINDEX Tmp;
-            GBINDEX Lng;
+		public void MemoryRead()
+		{
+			PRGID PrgId;
+			OBJID ObjId;
+			GBINDEX Offset;
+			GBINDEX Size;
+			DATA8* pArray;
+			VARDATA* Ram;
+			GBINDEX Tmp;
+			GBINDEX Lng;
 
-            PrgId = *(PRGID*)PrimParPointer();
-            ObjId = *(OBJID*)PrimParPointer();
-            Offset = *(GBINDEX*)PrimParPointer();
-            Size = *(GBINDEX*)PrimParPointer();
-            pArray = (DATA8*)PrimParPointer();
+			PrgId = *(PRGID*)PrimParPointer();
+			ObjId = *(OBJID*)PrimParPointer();
+			Offset = *(GBINDEX*)PrimParPointer();
+			Size = *(GBINDEX*)PrimParPointer();
+			pArray = (DATA8*)PrimParPointer();
 
-            if (PrgId < MAX_PROGRAMS)
-            {
-                if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
-                {
-                    if ((ObjId >= 0) && (ObjId <= GH.VMInstance.Program[PrgId].Objects))
-                    {
-                        if (ObjId == 0)
-                        {
-                            Ram = GH.VMInstance.Program[PrgId].pGlobal;
-                            Lng = (*(IMGHEAD*)GH.VMInstance.Program[PrgId].pImage).GlobalBytes;
-                        }
-                        else
-                        {
-                            Ram = (*GH.VMInstance.Program[PrgId].pObjList[ObjId]).pLocal;
-                            Lng = GH.VMInstance.Program[PrgId].pObjHead[ObjId].LocalBytes;
-                        }
+			if (PrgId < MAX_PROGRAMS)
+			{
+				if (GH.VMInstance.Program[PrgId].Status != OBJSTAT.STOPPED)
+				{
+					if ((ObjId >= 0) && (ObjId <= GH.VMInstance.Program[PrgId].Objects))
+					{
+						if (ObjId == 0)
+						{
+							Ram = GH.VMInstance.Program[PrgId].pGlobal;
+							Lng = (*(IMGHEAD*)GH.VMInstance.Program[PrgId].pImage).GlobalBytes;
+						}
+						else
+						{
+							Ram = (*GH.VMInstance.Program[PrgId].pObjList[ObjId]).pLocal;
+							Lng = GH.VMInstance.Program[PrgId].pObjHead[ObjId].LocalBytes;
+						}
 
-                        for (Tmp = 0; Tmp < Size; Tmp++)
-                        {
-                            if ((Tmp + Offset) < Lng)
-                            {
-                                pArray[Tmp] = (sbyte)Ram[Tmp + Offset];
-                            }
-                            else
-                            {
-                                pArray[Tmp] = 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+						for (Tmp = 0; Tmp < Size; Tmp++)
+						{
+							if ((Tmp + Offset) < Lng)
+							{
+								pArray[Tmp] = (sbyte)Ram[Tmp + Offset];
+							}
+							else
+							{
+								pArray[Tmp] = 0;
+							}
+						}
+					}
+				}
+			}
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opPORT_CNV_OUTPUT (PortIn, Layer, Bitfield, Inverted)</b>
 		 *
@@ -3855,27 +3858,27 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \return (DATA8)   Inverted - True if left/right motor are inverted (ie, C&A)
 		 *
 		 */
-        public void PortCnvOutput()
-        {
-            DATA32 Ports = *(DATA32*)PrimParPointer();
-            DATA32 inputPorts = Ports;
-            DATA8 secondPortBitfield = (sbyte)((DATA8)1 << ((inputPorts % 10) - 1));
-            inputPorts /= 10;
-            DATA8 firstPortBitfield = (sbyte)((DATA8)1 << ((inputPorts % 10) - 1));
-            inputPorts /= 10;
-            DATA8 layer = (sbyte)((DATA8)(inputPorts % 10) - 1);
-            if (layer < 0)
-            {
-                layer = 0;
-            }
-            DATA8 bitfield = (sbyte)(firstPortBitfield | secondPortBitfield);
-            *(DATA8*)PrimParPointer() = layer;
-            *(DATA8*)PrimParPointer() = bitfield;
-            *(DATA8*)PrimParPointer() = (sbyte)(firstPortBitfield > secondPortBitfield ? 1 : 0);
-        }
+		public void PortCnvOutput()
+		{
+			DATA32 Ports = *(DATA32*)PrimParPointer();
+			DATA32 inputPorts = Ports;
+			DATA8 secondPortBitfield = (sbyte)((DATA8)1 << ((inputPorts % 10) - 1));
+			inputPorts /= 10;
+			DATA8 firstPortBitfield = (sbyte)((DATA8)1 << ((inputPorts % 10) - 1));
+			inputPorts /= 10;
+			DATA8 layer = (sbyte)((DATA8)(inputPorts % 10) - 1);
+			if (layer < 0)
+			{
+				layer = 0;
+			}
+			DATA8 bitfield = (sbyte)(firstPortBitfield | secondPortBitfield);
+			*(DATA8*)PrimParPointer() = layer;
+			*(DATA8*)PrimParPointer() = bitfield;
+			*(DATA8*)PrimParPointer() = (sbyte)(firstPortBitfield > secondPortBitfield ? 1 : 0);
+		}
 
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opPORT_CNV_INPUT (PortIn, Layer, PortOut)</b>
 		 *
@@ -3887,21 +3890,21 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \return (DATA8)   PortOut - 0-index port for use with VM commands
 		 *
 		 */
-        public void PortCnvInput()
-        {
-            DATA32 inputPorts = *(DATA32*)PrimParPointer();
-            DATA8 port = (sbyte)((DATA8)(inputPorts % 10) - 1);
-            inputPorts /= 100;
-            DATA8 layer = (sbyte)((DATA8)(inputPorts % 10) - 1);
-            if (layer < 0)
-            {
-                layer = 0;
-            }
-            *(DATA8*)PrimParPointer() = layer;
-            *(DATA8*)PrimParPointer() = port;
-        }
+		public void PortCnvInput()
+		{
+			DATA32 inputPorts = *(DATA32*)PrimParPointer();
+			DATA8 port = (sbyte)((DATA8)(inputPorts % 10) - 1);
+			inputPorts /= 100;
+			DATA8 layer = (sbyte)((DATA8)(inputPorts % 10) - 1);
+			if (layer < 0)
+			{
+				layer = 0;
+			}
+			*(DATA8*)PrimParPointer() = layer;
+			*(DATA8*)PrimParPointer() = port;
+		}
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opNOTE_TO_FREQ (NOTE, FREQ)</b>
 		 *
@@ -3912,29 +3915,29 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \return (DATA16)  FREQ     - Frequency [Hz]
 		 *
 		 */
-        public void NoteToFreq()
-        {
-            DATA8* pNote;
-            DATA16 Freq;
-            DATA8 Note;
+		public void NoteToFreq()
+		{
+			DATA8* pNote;
+			DATA16 Freq;
+			DATA8 Note;
 
-            Freq = 440;
+			Freq = 440;
 
-            pNote = (DATA8*)PrimParPointer();
+			pNote = (DATA8*)PrimParPointer();
 
-            for (Note = 0; Note < NOTES; Note++)
-            {
-                fixed (NOTEFREQ* tmpP = &NoteFreq[0])
-                    if (CommonHelper.strcmp((DATA8*)tmpP[Note].Note, (DATA8*)pNote) == 0)
-                    {
-                        Freq = NoteFreq[Note].Freq;
-                    }
-            }
+			for (Note = 0; Note < NOTES; Note++)
+			{
+				fixed (NOTEFREQ* tmpP = &NoteFreq[0])
+					if (CommonHelper.strcmp((DATA8*)tmpP[Note].Note, (DATA8*)pNote) == 0)
+					{
+						Freq = NoteFreq[Note].Freq;
+					}
+			}
 
-            *(DATA16*)PrimParPointer() = Freq;
-        }
+			*(DATA16*)PrimParPointer() = Freq;
+		}
 
-        /*! \page VM
+		/*! \page VM
 		 *  <hr size="1"/>
 		 *  <b>     opSYSTEM(COMMAND, STATUS)</b>
 		 *
@@ -3945,262 +3948,262 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *  \return (DATA32)  STATUS   - Return status of the command
 		 *
 		 */
-        public void System_()
-        {
-            DATA32 Status = -1;
-            DATA8* pCmd;
+		public void System_()
+		{
+			DATA32 Status = -1;
+			DATA8* pCmd;
 
-            pCmd = (DATA8*)PrimParPointer();
+			pCmd = (DATA8*)PrimParPointer();
 
-            // TODO: no system bytecode execute
-            //Status = (DATA32)system((char*)pCmd);
-            //sync();
+			// TODO: no system bytecode execute
+			//Status = (DATA32)system((char*)pCmd);
+			//sync();
 
-            *(DATA32*)PrimParPointer() = Status;
-        }
-
-
-        //*****************************************************************************
-
-        ULONG SavedPriority;
-        public void Monitor()
-        {
-            IMINDEX Index;
-            LBINDEX Lv, Ln;
-            OBJID ObjId;
-            OBJID OwnerObjId;
-            LP pObjectLocal;
-            char ObjStat;
-            DATA8 Esc;
+			*(DATA32*)PrimParPointer() = Status;
+		}
 
 
-            if (GH.VMInstance.Debug == 1)
-            {
-                SavedPriority = GH.VMInstance.Priority;
+		//*****************************************************************************
 
-                CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\n         {GH.VMInstance.ProgramId} {GH.VMInstance.ObjectId} IP={(ulong)GH.VMInstance.ObjectIp:B} -> ");
-                VmPrint(GH.VMInstance.PrintBuffer);
-
-                Ln = 16;
-
-                for (Lv = 0; Lv < Ln; Lv++)
-                {
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{GH.VMInstance.ObjectIp[Lv] & 0xFF:B} ");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                    if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
-                    {
-                        VmPrint(" ".AsSbytePointer());
-                    }
-                    if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
-                    {
-                        VmPrint("\r\n".AsSbytePointer());
-                    }
-                }
-                VmPrint("\r\n".AsSbytePointer());
-
-                CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"              GV={(ulong)GH.VMInstance.pGlobal:B} -> ");
-                VmPrint(GH.VMInstance.PrintBuffer);
-
-                Ln = (*(IMGHEAD*)GH.VMInstance.pImage).GlobalBytes;
-
-                for (Lv = 0; Lv < Ln; Lv++)
-                {
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{GH.VMInstance.pGlobal[Lv] & 0xFF:B} ");
-                    VmPrint(GH.VMInstance.PrintBuffer);
-                    if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
-                    {
-                        VmPrint(" ".AsSbytePointer());
-                    }
-                    if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
-                    {
-                        VmPrint("\r\n                             ".AsSbytePointer());
-                    }
-                }
-                VmPrint("\r\n".AsSbytePointer());
-
-                for (ObjId = 1; ObjId <= GH.VMInstance.Objects; ObjId++)
-                {
-                    switch ((*GH.VMInstance.pObjList[ObjId]).ObjStatus)
-                    {
-                        case RUNNING:
-                            {
-                                ObjStat = 'r';
-                            }
-                            break;
-
-                        case WAITING:
-                            {
-                                ObjStat = 'w';
-                            }
-                            break;
-
-                        case STOPPED:
-                            {
-                                ObjStat = 's';
-                            }
-                            break;
-
-                        case HALTED:
-                            {
-                                ObjStat = 'h';
-                            }
-                            break;
-
-                        default:
-                            {
-                                ObjStat = '?';
-                            }
-                            break;
-
-                    }
-                    if (ObjId == GH.VMInstance.ObjectId)
-                    {
-                        ObjStat = '>';
-                    }
-
-                    OwnerObjId = GH.VMInstance.pObjHead[ObjId].OwnerObjectId;
-                    pObjectLocal = (*GH.VMInstance.pObjList[ObjId]).pLocal;
-
-                    if (OwnerObjId != 0)
-                    { // Reuse locals from owner
-
-                        Ln = GH.VMInstance.pObjHead[OwnerObjId].LocalBytes;
-
-                    }
-                    else
-                    { // Use local allocated to object
-
-                        Ln = GH.VMInstance.pObjHead[ObjId].LocalBytes;
-                    }
+		ULONG SavedPriority;
+		public void Monitor()
+		{
+			IMINDEX Index;
+			LBINDEX Lv, Ln;
+			OBJID ObjId;
+			OBJID OwnerObjId;
+			LP pObjectLocal;
+			char ObjStat;
+			DATA8 Esc;
 
 
+			if (GH.VMInstance.Debug == 1)
+			{
+				SavedPriority = GH.VMInstance.Priority;
 
-                    CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"         {(char)ObjStat} {ObjId} LV={(ulong)pObjectLocal:B} -> ");
-                    VmPrint(GH.VMInstance.PrintBuffer);
+				CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"\r\n         {GH.VMInstance.ProgramId} {GH.VMInstance.ObjectId} IP={(ulong)GH.VMInstance.ObjectIp:B} -> ");
+				VmPrint(GH.VMInstance.PrintBuffer);
 
-                    for (Lv = 0; Lv < Ln; Lv++)
-                    {
-                        CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{pObjectLocal[Lv] & 0xFF:B} ");
-                        VmPrint(GH.VMInstance.PrintBuffer);
-                        if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
-                        {
-                            VmPrint(" ".AsSbytePointer());
-                        }
-                        if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
-                        {
-                            VmPrint("\r\n                             ".AsSbytePointer());
-                        }
-                    }
-                    VmPrint("\r\n".AsSbytePointer());
+				Ln = 16;
 
-                }
+				for (Lv = 0; Lv < Ln; Lv++)
+				{
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{GH.VMInstance.ObjectIp[Lv] & 0xFF:B} ");
+					VmPrint(GH.VMInstance.PrintBuffer);
+					if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
+					{
+						VmPrint(" ".AsSbytePointer());
+					}
+					if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
+					{
+						VmPrint("\r\n".AsSbytePointer());
+					}
+				}
+				VmPrint("\r\n".AsSbytePointer());
 
-                VmPrint("\r\n".AsSbytePointer());
+				CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"              GV={(ulong)GH.VMInstance.pGlobal:B} -> ");
+				VmPrint(GH.VMInstance.PrintBuffer);
 
-                Index = (IMINDEX)GH.VMInstance.ObjectIp - (IMINDEX)GH.VMInstance.pImage;
-                GH.Validate.cValidateDisassemble(GH.VMInstance.pImage, &Index, (LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label);
-                GH.VMInstance.Debug++;
-                GH.Ui.cUiEscape();
-            }
-            if (GH.VMInstance.Debug == 2)
-            {
-                Esc = GH.Ui.cUiEscape();
-                switch (Esc)
-                {
-                    case (sbyte)' ':
-                        {
-                            GH.VMInstance.Priority = SavedPriority;
-                            GH.VMInstance.Priority--;
-                            PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
-                            GH.VMInstance.Debug--;
-                        }
-                        break;
+				Ln = (*(IMGHEAD*)GH.VMInstance.pImage).GlobalBytes;
 
-                    case (sbyte)'<':
-                        {
-                            GH.VMInstance.Priority = SavedPriority;
-                            GH.VMInstance.Priority--;
-                            PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
-                            GH.VMInstance.Debug = 0;
-                        }
-                        break;
+				for (Lv = 0; Lv < Ln; Lv++)
+				{
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{GH.VMInstance.pGlobal[Lv] & 0xFF:B} ");
+					VmPrint(GH.VMInstance.PrintBuffer);
+					if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
+					{
+						VmPrint(" ".AsSbytePointer());
+					}
+					if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
+					{
+						VmPrint("\r\n                             ".AsSbytePointer());
+					}
+				}
+				VmPrint("\r\n".AsSbytePointer());
 
-                    default:
-                        {
-                            GH.VMInstance.Priority = 0;
-                        }
-                        break;
+				for (ObjId = 1; ObjId <= GH.VMInstance.Objects; ObjId++)
+				{
+					switch ((*GH.VMInstance.pObjList[ObjId]).ObjStatus)
+					{
+						case RUNNING:
+							{
+								ObjStat = 'r';
+							}
+							break;
 
-                }
-            }
-        }
+						case WAITING:
+							{
+								ObjStat = 'w';
+							}
+							break;
 
+						case STOPPED:
+							{
+								ObjStat = 's';
+							}
+							break;
 
-        public RESULT TstOpen(UWORD Time)
-        {
-            RESULT Result = RESULT.FAIL;
-            int File;
+						case HALTED:
+							{
+								ObjStat = 'h';
+							}
+							break;
 
-            if ((Time > 0) && (Time <= 30000))
-            {
-                if (GH.VMInstance.Test == 0)
-                {
-                    // TODO: tst pin shite
-                    //File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
-                    //if (File >= MIN_HANDLE)
-                    //{
-                    //	ioctl(File, TST_PIN_ON, null);
-                    //	close(File);
+						default:
+							{
+								ObjStat = '?';
+							}
+							break;
 
-                    //	File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
-                    //	if (File >= MIN_HANDLE)
-                    //	{
-                    //		ioctl(File, TST_UART_ON, null);
-                    //		close(File);
-                    //		GH.VMInstance.Test = Time;
-                    //		Result = OK;
-                    //	}
-                    //}
-                    GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                }
-                else
-                {
-                    GH.VMInstance.Test = Time;
-                    Result = OK;
-                }
-            }
+					}
+					if (ObjId == GH.VMInstance.ObjectId)
+					{
+						ObjStat = '>';
+					}
 
-            return (Result);
-        }
+					OwnerObjId = GH.VMInstance.pObjHead[ObjId].OwnerObjectId;
+					pObjectLocal = (*GH.VMInstance.pObjList[ObjId]).pLocal;
 
+					if (OwnerObjId != 0)
+					{ // Reuse locals from owner
 
-        public void TstClose()
-        {
-            int File;
+						Ln = GH.VMInstance.pObjHead[OwnerObjId].LocalBytes;
 
-            if (GH.VMInstance.Test != 0)
-            {
-                // TODO: tst pin shite
-                //File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
-                //if (File >= MIN_HANDLE)
-                //{
-                //	ioctl(File, TST_UART_OFF, null);
-                //	close(File);
+					}
+					else
+					{ // Use local allocated to object
 
-                //	File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
-                //	if (File >= MIN_HANDLE)
-                //	{
-                //		ioctl(File, TST_PIN_OFF, null);
-                //		close(File);
-                //		GH.VMInstance.Test = 0;
-                //	}
-                //}
-                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-            }
-        }
+						Ln = GH.VMInstance.pObjHead[ObjId].LocalBytes;
+					}
 
 
-        /*! \page TST
+
+					CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"         {(char)ObjStat} {ObjId} LV={(ulong)pObjectLocal:B} -> ");
+					VmPrint(GH.VMInstance.PrintBuffer);
+
+					for (Lv = 0; Lv < Ln; Lv++)
+					{
+						CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"{pObjectLocal[Lv] & 0xFF:B} ");
+						VmPrint(GH.VMInstance.PrintBuffer);
+						if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
+						{
+							VmPrint(" ".AsSbytePointer());
+						}
+						if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
+						{
+							VmPrint("\r\n                             ".AsSbytePointer());
+						}
+					}
+					VmPrint("\r\n".AsSbytePointer());
+
+				}
+
+				VmPrint("\r\n".AsSbytePointer());
+
+				Index = (IMINDEX)GH.VMInstance.ObjectIp - (IMINDEX)GH.VMInstance.pImage;
+				GH.Validate.cValidateDisassemble(GH.VMInstance.pImage, &Index, (LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label);
+				GH.VMInstance.Debug++;
+				GH.Ui.cUiEscape();
+			}
+			if (GH.VMInstance.Debug == 2)
+			{
+				Esc = GH.Ui.cUiEscape();
+				switch (Esc)
+				{
+					case (sbyte)' ':
+						{
+							GH.VMInstance.Priority = SavedPriority;
+							GH.VMInstance.Priority--;
+							PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
+							GH.VMInstance.Debug--;
+						}
+						break;
+
+					case (sbyte)'<':
+						{
+							GH.VMInstance.Priority = SavedPriority;
+							GH.VMInstance.Priority--;
+							PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
+							GH.VMInstance.Debug = 0;
+						}
+						break;
+
+					default:
+						{
+							GH.VMInstance.Priority = 0;
+						}
+						break;
+
+				}
+			}
+		}
+
+
+		public RESULT TstOpen(UWORD Time)
+		{
+			RESULT Result = RESULT.FAIL;
+			int File;
+
+			if ((Time > 0) && (Time <= 30000))
+			{
+				if (GH.VMInstance.Test == 0)
+				{
+					// TODO: tst pin shite
+					//File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
+					//if (File >= MIN_HANDLE)
+					//{
+					//	ioctl(File, TST_PIN_ON, null);
+					//	close(File);
+
+					//	File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
+					//	if (File >= MIN_HANDLE)
+					//	{
+					//		ioctl(File, TST_UART_ON, null);
+					//		close(File);
+					//		GH.VMInstance.Test = Time;
+					//		Result = OK;
+					//	}
+					//}
+					GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+				}
+				else
+				{
+					GH.VMInstance.Test = Time;
+					Result = OK;
+				}
+			}
+
+			return (Result);
+		}
+
+
+		public void TstClose()
+		{
+			int File;
+
+			if (GH.VMInstance.Test != 0)
+			{
+				// TODO: tst pin shite
+				//File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
+				//if (File >= MIN_HANDLE)
+				//{
+				//	ioctl(File, TST_UART_OFF, null);
+				//	close(File);
+
+				//	File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
+				//	if (File >= MIN_HANDLE)
+				//	{
+				//		ioctl(File, TST_PIN_OFF, null);
+				//		close(File);
+				//		GH.VMInstance.Test = 0;
+				//	}
+				//}
+				GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+			}
+		}
+
+
+		/*! \page TST
 		 *  <hr size="1"/>
 		 *  <b>     opTST (CMD, ....)  </b>
 		 *
@@ -4555,303 +4558,303 @@ namespace Ev3CoreUnsafe.Lms2012
 		 *
 		 *
 		 */
-        /*! \brief  opTST byte code
+		/*! \brief  opTST byte code
 		 *
 		 */
-        public void Tst()
-        {
-            DATA8 Cmd;
-            DATA8* pPins;
-            DATA8 Index;
-            DATA8 Data8;
-            DATA16 Value;
-            DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(2);
-            TSTPIN Tstpin;
-            TSTUART Tstuart;
-            int File;
+		public void Tst()
+		{
+			DATA8 Cmd;
+			DATA8* pPins;
+			DATA8 Index;
+			DATA8 Data8;
+			DATA16 Value;
+			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(2);
+			TSTPIN Tstpin;
+			TSTUART Tstuart;
+			int File;
 
-            Cmd = *(DATA8*)PrimParPointer();
+			Cmd = *(DATA8*)PrimParPointer();
 
-            if (Cmd == TST_OPEN)
-            { // Test open
+			if (Cmd == TST_OPEN)
+			{ // Test open
 
-                TstOpen(10000);
-            }
-            else
-            {
-                if (GH.VMInstance.Test != 0)
-                {
-                    TstOpen(10000);
+				TstOpen(10000);
+			}
+			else
+			{
+				if (GH.VMInstance.Test != 0)
+				{
+					TstOpen(10000);
 
-                    switch (Cmd)
-                    { // Function
+					switch (Cmd)
+					{ // Function
 
-                        case TST_READ_PINS:
-                            { // Read pins
+						case TST_READ_PINS:
+							{ // Read pins
 
-                                Tstpin.Port = *(DATA8*)PrimParPointer();
-                                Tstpin.Length = *(DATA8*)PrimParPointer();
-                                pPins = (DATA8*)PrimParPointer();
+								Tstpin.Port = *(DATA8*)PrimParPointer();
+								Tstpin.Length = *(DATA8*)PrimParPointer();
+								pPins = (DATA8*)PrimParPointer();
 
-                                // TODO: tst pin shite
-                                //File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
-                                //if (File >= 0)
-                                //{
-                                //	ioctl(File, TST_PIN_READ, &Tstpin);
-                                //	close(File);
-                                //	for (Index = 0; Index < Tstpin.Length; Index++)
-                                //	{
-                                //		pPins[Index] = Tstpin.String[Index];
-                                //	}
-                                //}
-                                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                            }
-                            break;
+								// TODO: tst pin shite
+								//File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
+								//if (File >= 0)
+								//{
+								//	ioctl(File, TST_PIN_READ, &Tstpin);
+								//	close(File);
+								//	for (Index = 0; Index < Tstpin.Length; Index++)
+								//	{
+								//		pPins[Index] = Tstpin.String[Index];
+								//	}
+								//}
+								GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+							}
+							break;
 
-                        case TST_WRITE_PINS:
-                            { // Write to pins
+						case TST_WRITE_PINS:
+							{ // Write to pins
 
-                                Tstpin.Port = *(DATA8*)PrimParPointer();
-                                Tstpin.Length = *(DATA8*)PrimParPointer();
-                                pPins = (DATA8*)PrimParPointer();
+								Tstpin.Port = *(DATA8*)PrimParPointer();
+								Tstpin.Length = *(DATA8*)PrimParPointer();
+								pPins = (DATA8*)PrimParPointer();
 
-                                for (Index = 0; Index < Tstpin.Length; Index++)
-                                {
-                                    Tstpin.String[Index] = pPins[Index];
-                                }
+								for (Index = 0; Index < Tstpin.Length; Index++)
+								{
+									Tstpin.String[Index] = pPins[Index];
+								}
 
-                                // TODO: tst pin shite
-                                //File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
-                                //if (File >= MIN_HANDLE)
-                                //{
-                                //	ioctl(File, TST_PIN_WRITE, &Tstpin);
-                                //	close(File);
-                                //}
-                                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+								// TODO: tst pin shite
+								//File = open(TEST_PIN_DEVICE_NAME, O_RDWR | O_SYNC);
+								//if (File >= MIN_HANDLE)
+								//{
+								//	ioctl(File, TST_PIN_WRITE, &Tstpin);
+								//	close(File);
+								//}
+								GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
 
-                            }
-                            break;
+							}
+							break;
 
-                        case TST_READ_ADC:
-                            {
-                                Index = *(DATA8*)PrimParPointer();
-                                Value = DATA16_NAN;
+						case TST_READ_ADC:
+							{
+								Index = *(DATA8*)PrimParPointer();
+								Value = DATA16_NAN;
 
-                                if ((Index >= 0) && (Index < 4))
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).InPin1[Index];
-                                }
-                                if ((Index >= 4) && (Index < 8))
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).InPin6[Index - 4];
-                                }
-                                if ((Index >= 8) && (Index < 12))
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).OutPin5[Index - 8];
-                                }
-                                if (Index == 12)
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).BatteryTemp;
-                                }
-                                if (Index == 13)
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).MotorCurrent;
-                                }
-                                if (Index == 14)
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).BatteryCurrent;
-                                }
-                                if (Index == 15)
-                                {
-                                    Value = (*GH.InputInstance.pAnalog).Cell123456;
-                                }
+								if ((Index >= 0) && (Index < 4))
+								{
+									Value = (*GH.InputInstance.pAnalog).InPin1[Index];
+								}
+								if ((Index >= 4) && (Index < 8))
+								{
+									Value = (*GH.InputInstance.pAnalog).InPin6[Index - 4];
+								}
+								if ((Index >= 8) && (Index < 12))
+								{
+									Value = (*GH.InputInstance.pAnalog).OutPin5[Index - 8];
+								}
+								if (Index == 12)
+								{
+									Value = (*GH.InputInstance.pAnalog).BatteryTemp;
+								}
+								if (Index == 13)
+								{
+									Value = (*GH.InputInstance.pAnalog).MotorCurrent;
+								}
+								if (Index == 14)
+								{
+									Value = (*GH.InputInstance.pAnalog).BatteryCurrent;
+								}
+								if (Index == 15)
+								{
+									Value = (*GH.InputInstance.pAnalog).Cell123456;
+								}
 
-                                *(DATA16*)PrimParPointer() = Value;
-                            }
-                            break;
+								*(DATA16*)PrimParPointer() = Value;
+							}
+							break;
 
-                        case TST_ENABLE_UART:
-                            {
-                                Tstuart.Bitrate = *(DATA32*)PrimParPointer();
-                                // TODO: tst pin shite
-                                //File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
-                                //if (File >= 0)
-                                //{
-                                //	ioctl(File, TST_UART_EN, &Tstuart);
-                                //	close(File);
-                                //}
-                                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                            }
-                            break;
+						case TST_ENABLE_UART:
+							{
+								Tstuart.Bitrate = *(DATA32*)PrimParPointer();
+								// TODO: tst pin shite
+								//File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
+								//if (File >= 0)
+								//{
+								//	ioctl(File, TST_UART_EN, &Tstuart);
+								//	close(File);
+								//}
+								GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+							}
+							break;
 
-                        case TST_DISABLE_UART:
-                            {
-                                // TODO: tst pin shite
-                                //File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
-                                //if (File >= MIN_HANDLE)
-                                //{
-                                //	ioctl(File, TST_UART_DIS, &Tstuart);
-                                //	close(File);
-                                //}
-                                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                            }
-                            break;
+						case TST_DISABLE_UART:
+							{
+								// TODO: tst pin shite
+								//File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
+								//if (File >= MIN_HANDLE)
+								//{
+								//	ioctl(File, TST_UART_DIS, &Tstuart);
+								//	close(File);
+								//}
+								GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+							}
+							break;
 
-                        case TST_WRITE_UART:
-                            {
-                                Tstuart.Port = *(DATA8*)PrimParPointer();
-                                Tstuart.Length = *(DATA8*)PrimParPointer();
-                                pPins = (DATA8*)PrimParPointer();
+						case TST_WRITE_UART:
+							{
+								Tstuart.Port = *(DATA8*)PrimParPointer();
+								Tstuart.Length = *(DATA8*)PrimParPointer();
+								pPins = (DATA8*)PrimParPointer();
 
-                                if (Tstuart.Port < INPUTS)
-                                {
-                                    for (Index = 0; (Index < Tstuart.Length) && (Index < TST_UART_LENGTH); Index++)
-                                    {
-                                        Tstuart.String[Index] = pPins[Index];
-                                    }
-                                    // TODO: tst pin shite
-                                    //File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
-                                    //if (File >= MIN_HANDLE)
-                                    //{
-                                    //	ioctl(File, TST_UART_WRITE, &Tstuart);
-                                    //	close(File);
-                                    //}
-                                    GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                                }
-                            }
-                            break;
+								if (Tstuart.Port < INPUTS)
+								{
+									for (Index = 0; (Index < Tstuart.Length) && (Index < TST_UART_LENGTH); Index++)
+									{
+										Tstuart.String[Index] = pPins[Index];
+									}
+									// TODO: tst pin shite
+									//File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
+									//if (File >= MIN_HANDLE)
+									//{
+									//	ioctl(File, TST_UART_WRITE, &Tstuart);
+									//	close(File);
+									//}
+									GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+								}
+							}
+							break;
 
-                        case TST_READ_UART:
-                            {
-                                Tstuart.Port = *(DATA8*)PrimParPointer();
-                                Tstuart.Length = *(DATA8*)PrimParPointer();
-                                pPins = (DATA8*)PrimParPointer();
+						case TST_READ_UART:
+							{
+								Tstuart.Port = *(DATA8*)PrimParPointer();
+								Tstuart.Length = *(DATA8*)PrimParPointer();
+								pPins = (DATA8*)PrimParPointer();
 
-                                for (Index = 0; (Index < Tstuart.Length) && (Index < TST_UART_LENGTH); Index++)
-                                {
-                                    Tstuart.String[Index] = 0;
-                                }
-                                if (Tstuart.Port < INPUTS)
-                                {
-                                    // TODO: tst pin shite
-                                    //File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
-                                    //if (File >= MIN_HANDLE)
-                                    //{
-                                    //	ioctl(File, TST_UART_READ, &Tstuart);
-                                    //	close(File);
-                                    //}
-                                    GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                                }
-                                for (Index = 0; (Index < Tstuart.Length) && (Index < TST_UART_LENGTH); Index++)
-                                {
-                                    pPins[Index] = Tstuart.String[Index];
-                                }
-                            }
-                            break;
+								for (Index = 0; (Index < Tstuart.Length) && (Index < TST_UART_LENGTH); Index++)
+								{
+									Tstuart.String[Index] = 0;
+								}
+								if (Tstuart.Port < INPUTS)
+								{
+									// TODO: tst pin shite
+									//File = open(TEST_UART_DEVICE_NAME, O_RDWR | O_SYNC);
+									//if (File >= MIN_HANDLE)
+									//{
+									//	ioctl(File, TST_UART_READ, &Tstuart);
+									//	close(File);
+									//}
+									GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+								}
+								for (Index = 0; (Index < Tstuart.Length) && (Index < TST_UART_LENGTH); Index++)
+								{
+									pPins[Index] = Tstuart.String[Index];
+								}
+							}
+							break;
 
-                        case TST_ACCU_SWITCH:
-                            {
-                                Data8 = 0;
-                                // TODO: accu shite
-                                //if (GH.UiInstance.PowerFile >= MIN_HANDLE)
-                                //{
-                                //	read(GH.UiInstance.PowerFile, Buffer, 2);
-                                //	if (Buffer[0] == '1')
-                                //	{
-                                //		Data8 = 1;
-                                //	}
-                                //}
-                                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                                *(DATA8*)PrimParPointer() = Data8;
-                            }
-                            break;
+						case TST_ACCU_SWITCH:
+							{
+								Data8 = 0;
+								// TODO: accu shite
+								//if (GH.UiInstance.PowerFile >= MIN_HANDLE)
+								//{
+								//	read(GH.UiInstance.PowerFile, Buffer, 2);
+								//	if (Buffer[0] == '1')
+								//	{
+								//		Data8 = 1;
+								//	}
+								//}
+								GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+								*(DATA8*)PrimParPointer() = Data8;
+							}
+							break;
 
-                        case TST_BOOT_MODE2:
-                            {
-                                GH.I2c.I2cStart();
-                            }
-                            break;
+						case TST_BOOT_MODE2:
+							{
+								GH.I2c.I2cStart();
+							}
+							break;
 
-                        case TST_POLL_MODE2:
-                            {
-                                Data8 = (sbyte)GH.I2c.I2cGetBootStatus();
-                                *(DATA8*)PrimParPointer() = Data8;
-                            }
-                            break;
+						case TST_POLL_MODE2:
+							{
+								Data8 = (sbyte)GH.I2c.I2cGetBootStatus();
+								*(DATA8*)PrimParPointer() = Data8;
+							}
+							break;
 
-                        case TST_CLOSE_MODE2:
-                            {
-                                GH.I2c.I2cStop();
-                            }
-                            break;
+						case TST_CLOSE_MODE2:
+							{
+								GH.I2c.I2cStop();
+							}
+							break;
 
-                        case TST_RAM_CHECK:
-                            {
-                                ULONG RamCheckFile;
-                                // TODO: ram check
-                                //UBYTE RamStatus[2];
+						case TST_RAM_CHECK:
+							{
+								ULONG RamCheckFile;
+								// TODO: ram check
+								//UBYTE RamStatus[2];
 
-                                //RamCheckFile = open(UPDATE_DEVICE_NAME, O_RDWR);
-                                Data8 = FAIL;
-                                //if (RamCheckFile >= 0)
-                                //{
-                                //	read(RamCheckFile, RamStatus, 2);
-                                //	close(RamCheckFile);
+								//RamCheckFile = open(UPDATE_DEVICE_NAME, O_RDWR);
+								Data8 = FAIL;
+								//if (RamCheckFile >= 0)
+								//{
+								//	read(RamCheckFile, RamStatus, 2);
+								//	close(RamCheckFile);
 
-                                //	if ((RamStatus[0] == ((UBYTE)(~(RamStatus[1])))) && (0 == RamStatus[0]))
-                                //	{
-                                //		Data8 = OK;
-                                //	}
-                                //}
-                                GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
-                                *(DATA8*)PrimParPointer() = Data8;
-                            }
-                            break;
+								//	if ((RamStatus[0] == ((UBYTE)(~(RamStatus[1])))) && (0 == RamStatus[0]))
+								//	{
+								//		Data8 = OK;
+								//	}
+								//}
+								GH.Ev3System.Logger.LogWarning($"Usage of unimplemented shite in {Environment.StackTrace}");
+								*(DATA8*)PrimParPointer() = Data8;
+							}
+							break;
 
-                        default:
-                            { // Test close
+						default:
+							{ // Test close
 
-                                TstClose();
-                            }
-                            break;
+								TstClose();
+							}
+							break;
 
-                    }
-                }
-                else
-                {
-                    ProgramEnd(GH.VMInstance.ProgramId);
-                    GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
-                    SetDispatchStatus(DSPSTAT.INSTRBREAK);
-                }
-            }
-        }
+					}
+				}
+				else
+				{
+					ProgramEnd(GH.VMInstance.ProgramId);
+					GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
+					SetDispatchStatus(DSPSTAT.INSTRBREAK);
+				}
+			}
+		}
 
-        public RESULT ValidateChar(DATA8* pChar, DATA8 Set)
-        {
-            RESULT Result = OK;
+		public RESULT ValidateChar(DATA8* pChar, DATA8 Set)
+		{
+			RESULT Result = OK;
 
-            var num = (byte)*pChar;
-            if ((ValidChars[num] & Set) == 0)
-            {
-                *pChar = (sbyte)'_';
-                Result = RESULT.FAIL;
-            }
+			var num = (byte)*pChar;
+			if ((ValidChars[num] & Set) == 0)
+			{
+				*pChar = (sbyte)'_';
+				Result = RESULT.FAIL;
+			}
 
-            return (Result);
-        }
+			return (Result);
+		}
 
 
-        public RESULT ValidateString(DATA8* pString, DATA8 Set)
-        {
-            RESULT Result = OK;
+		public RESULT ValidateString(DATA8* pString, DATA8 Set)
+		{
+			RESULT Result = OK;
 
-            while (*pString != 0)
-            {
-                Result |= ValidateChar(pString, Set);
-                pString++;
-            }
+			while (*pString != 0)
+			{
+				Result |= ValidateChar(pString, Set);
+				pString++;
+			}
 
-            return (Result);
-        }
-    }
+			return (Result);
+		}
+	}
 }

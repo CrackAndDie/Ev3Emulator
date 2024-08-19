@@ -1604,6 +1604,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			return (Result);
 		}
 
+		private IMINDEX* ImageIndexcValidateProgram = (IMINDEX*)CommonHelper.AllocateByteArray(4);       // Index into total image
 		public RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 		{
 			RESULT Result;
@@ -1613,7 +1614,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			IMINDEX TmpSize;
 			OBJHEAD* pOH;
 			OBJID ObjIndex;
-			IMINDEX ImageIndex;       // Index into total image
+			
 			IMINDEX TmpIndex = 0;     // Lached "ImageIndex"
 			UBYTE ParIndex;
 			UBYTE Type;
@@ -1627,9 +1628,9 @@ namespace Ev3CoreUnsafe.Lms2012
 			Objects = (*(IMGHEAD*)pI).NumberOfObjects;
 
 			// Check size
-			ImageIndex = (uint)(Unsafe.SizeOf<IMGHEAD>() + Objects * Unsafe.SizeOf<OBJHEAD>());
+			*ImageIndexcValidateProgram = (uint)(Unsafe.SizeOf<IMGHEAD>() + Objects * Unsafe.SizeOf<OBJHEAD>());
 
-			if ((TotalSize < ImageIndex) || (Objects == 0))
+			if ((TotalSize < *ImageIndexcValidateProgram) || (Objects == 0))
 			{ // Size too small
 
 				cValidateSetErrorIndex(4);
@@ -1651,23 +1652,23 @@ namespace Ev3CoreUnsafe.Lms2012
 				{
 					if ((long)pOH[ObjIndex].OffsetToInstructions == 0)
 					{
-						pOH[ObjIndex].OffsetToInstructions = (IP)ImageIndex;
+						pOH[ObjIndex].OffsetToInstructions = (IP)(*ImageIndexcValidateProgram);
 					}
 
 					// Check for SUBCALL parameter description
 					if ((pOH[ObjIndex].OwnerObjectId == 0) && (pOH[ObjIndex].TriggerCount == 1))
 					{ // SUBCALL object
 
-						if (pOH[ObjIndex].OffsetToInstructions >= (IP)ImageIndex)
+						if (pOH[ObjIndex].OffsetToInstructions >= (IP)(*ImageIndexcValidateProgram))
 						{ // Only if not alias
 
-							ParIndex = (byte)pI[ImageIndex++];
+							ParIndex = (byte)pI[(*ImageIndexcValidateProgram)++];
 							while (ParIndex != 0)
 							{
-								Type = pI[ImageIndex++];
+								Type = pI[(*ImageIndexcValidateProgram)++];
 								if ((Type & CALLPAR_TYPE) == CALLPAR_STRING)
 								{
-									ImageIndex++;
+									(*ImageIndexcValidateProgram)++;
 								}
 								ParIndex--;
 							}
@@ -1679,10 +1680,10 @@ namespace Ev3CoreUnsafe.Lms2012
 					}
 
 					// Scan all byte codes in object
-					while ((Result == OK) && (ImageIndex < TotalSize))
+					while ((Result == OK) && (*ImageIndexcValidateProgram < TotalSize))
 					{
-						TmpIndex = ImageIndex;
-						Result = cValidateBytecode(pI, &ImageIndex, pLabel);
+						TmpIndex = *ImageIndexcValidateProgram;
+						Result = cValidateBytecode(pI, ImageIndexcValidateProgram, pLabel);
 					}
 					if (Result == RESULT.FAIL)
 					{
@@ -1693,9 +1694,9 @@ namespace Ev3CoreUnsafe.Lms2012
 						Result = OK;
 					}
 				}
-				if (ImageIndex != TotalSize)
+				if (*ImageIndexcValidateProgram != TotalSize)
 				{
-					GH.printf($"{ImageIndex} {TotalSize}\r\n");
+					GH.printf($"{*ImageIndexcValidateProgram} {TotalSize}\r\n");
 					cValidateSetErrorIndex(TmpIndex);
 				}
 			}
