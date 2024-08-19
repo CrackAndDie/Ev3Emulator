@@ -264,10 +264,10 @@ namespace Ev3CoreUnsafe.Cinput
 		}
 
 
+		private IICSTR* pTmpcInputInsertNewIicString;
 		public RESULT cInputInsertNewIicString(DATA8 Type, DATA8 Mode, DATA8* pManufacturer, DATA8* pSensorType, DATA8 SetupLng, ULONG SetupString, DATA8 PollLng, ULONG PollString, DATA8 ReadLng)
 		{
 			RESULT Result = RESULT.FAIL;  // RESULT.FAIL=full, OK=new, RESULT.BUSY=found
-			IICSTR* pTmp;
 			UWORD Index = 0;
 
 			if ((Type >= 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
@@ -290,25 +290,26 @@ namespace Ev3CoreUnsafe.Cinput
 					if (GH.InputInstance.IicDeviceTypes < MAX_DEVICE_TYPES)
 					{ // Allocate room for a new type/mode
 
-						if (GH.Memory.cMemoryRealloc((void*)GH.InputInstance.IicString, (void**)&pTmp, (DATA32)(sizeof(IICSTR) * (GH.InputInstance.IicDeviceTypes + 1))) == OK)
-						{ // Success
+						fixed (IICSTR** pp = &pTmpcInputInsertNewIicString)
+							if (GH.Memory.cMemoryRealloc((void*)GH.InputInstance.IicString, (void**)pp, (DATA32)(sizeof(IICSTR) * (GH.InputInstance.IicDeviceTypes + 1))) == OK)
+							{ // Success
 
-							GH.InputInstance.IicString = pTmp;
+								GH.InputInstance.IicString = pTmpcInputInsertNewIicString;
 
-							GH.InputInstance.IicString[Index].Type = Type;
-							GH.InputInstance.IicString[Index].Mode = Mode;
-							CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].Manufacturer, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pManufacturer));
-							CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].SensorType, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pSensorType));
-							GH.InputInstance.IicString[Index].SetupLng = SetupLng;
-							GH.InputInstance.IicString[Index].SetupString = SetupString;
-							GH.InputInstance.IicString[Index].PollLng = PollLng;
-							GH.InputInstance.IicString[Index].PollString = PollString;
-							GH.InputInstance.IicString[Index].ReadLng = ReadLng;
-							//          GH.printf("cInputInsertNewIicString  %-3u %01u IIC %u 0x%08X %u 0x%08X %s %s\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,pManufacturer,pSensorType);
+								GH.InputInstance.IicString[Index].Type = Type;
+								GH.InputInstance.IicString[Index].Mode = Mode;
+								CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].Manufacturer, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pManufacturer));
+								CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].SensorType, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pSensorType));
+								GH.InputInstance.IicString[Index].SetupLng = SetupLng;
+								GH.InputInstance.IicString[Index].SetupString = SetupString;
+								GH.InputInstance.IicString[Index].PollLng = PollLng;
+								GH.InputInstance.IicString[Index].PollString = PollString;
+								GH.InputInstance.IicString[Index].ReadLng = ReadLng;
+								//          GH.printf("cInputInsertNewIicString  %-3u %01u IIC %u 0x%08X %u 0x%08X %s %s\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,pManufacturer,pSensorType);
 
-							GH.InputInstance.IicDeviceTypes++;
-							Result = OK;
-						}
+								GH.InputInstance.IicDeviceTypes++;
+								Result = OK;
+							}
 					}
 				}
 				if (Result == RESULT.FAIL)
@@ -426,7 +427,7 @@ namespace Ev3CoreUnsafe.Cinput
 			return (Result);
 		}
 
-
+		private TYPES* pTypescInputInsertTypeData;
 		public RESULT cInputInsertTypeData(DATA8* pFilename)
 		{
 			RESULT Result = RESULT.FAIL;
@@ -453,7 +454,6 @@ namespace Ev3CoreUnsafe.Cinput
 			int ReadLng;
 			string Buf2;
 			TYPES Tmp = new TYPES();
-			TYPES* pTypes;
 			int Count;
 
 			var fileNameee = CommonHelper.GetString(pFilename);
@@ -506,30 +506,31 @@ namespace Ev3CoreUnsafe.Cinput
 							Tmp.InvalidTime = (UWORD)Time;
 							Tmp.IdValue = (UWORD)IdValue;
 
-							Result = cInputGetNewTypeDataPointer((SBYTE*)Name, (DATA8)Type, (DATA8)Mode, (DATA8)Connection, &pTypes);
+							fixed (TYPES** pp = &pTypescInputInsertTypeData)
+								Result = cInputGetNewTypeDataPointer((SBYTE*)Name, (DATA8)Type, (DATA8)Mode, (DATA8)Connection, pp);
 							//            GH.printf("cInputTypeDataInit\r\n");
 							if (Result == OK)
 							{
-								(*pTypes) = Tmp;
+								(*pTypescInputInsertTypeData) = Tmp;
 
 								Count = 0;
 								while ((Name[Count] != 0) && (Count < TYPE_NAME_LENGTH))
 								{
 									if (Name[Count] == '_')
 									{
-										(*pTypes).Name[Count] = (byte)' ';
+										(*pTypescInputInsertTypeData).Name[Count] = (byte)' ';
 									}
 									else
 									{
-										(*pTypes).Name[Count] = (byte)Name[Count];
+										(*pTypescInputInsertTypeData).Name[Count] = (byte)Name[Count];
 									}
 									Count++;
 								}
-								(*pTypes).Name[Count] = 0;
+								(*pTypescInputInsertTypeData).Name[Count] = 0;
 
 								if (Symbol[0] == '_')
 								{
-									(*pTypes).Symbol[0] = 0;
+									(*pTypescInputInsertTypeData).Symbol[0] = 0;
 								}
 								else
 								{
@@ -538,15 +539,15 @@ namespace Ev3CoreUnsafe.Cinput
 									{
 										if (Symbol[Count] == '_')
 										{
-											(*pTypes).Symbol[Count] = (sbyte)' ';
+											(*pTypescInputInsertTypeData).Symbol[Count] = (sbyte)' ';
 										}
 										else
 										{
-											(*pTypes).Symbol[Count] = Symbol[Count];
+											(*pTypescInputInsertTypeData).Symbol[Count] = Symbol[Count];
 										}
 										Count++;
 									}
-									(*pTypes).Symbol[Count] = 0;
+									(*pTypescInputInsertTypeData).Symbol[Count] = 0;
 								}
 								if (Tmp.Connection == CONN_NXT_IIC)
 								{ // NXT IIC sensor
@@ -861,17 +862,18 @@ namespace Ev3CoreUnsafe.Cinput
 			}
 		}
 
-
+		private DATA8* LayercInputSetDeviceType = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* PortcInputSetDeviceType = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* OutputcInputSetDeviceType = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private UWORD* TypeIndexcInputSetDeviceType = (UWORD*)CommonHelper.AllocateByteArray(2);
 		public void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 		{
 			UWORD Index;
 			DATA8* Buf = CommonHelper.Pointer1d<DATA8>(INPUTS * 2 + 1);
-			UWORD TypeIndex;
-			DATA8 Layer;
-			DATA8 Port;
-			DATA8 Output;
+			
+			
 
-			if (cInputExpandDevice(Device, &Layer, &Port, &Output) == OK)
+			if (cInputExpandDevice(Device, LayercInputSetDeviceType, PortcInputSetDeviceType, OutputcInputSetDeviceType) == OK)
 			{ // Device within range
 
 				if (GH.InputInstance.DeviceData[Device].Connection == CONN_NONE)
@@ -879,32 +881,32 @@ namespace Ev3CoreUnsafe.Cinput
 					Type = TYPE_NONE;
 				}
 				// default type is unknown!
-				TypeIndex = GH.InputInstance.UnknownIndex;
+				*TypeIndexcInputSetDeviceType = GH.InputInstance.UnknownIndex;
 
-				if (Layer == 0)
+				if (*LayercInputSetDeviceType == 0)
 				{ // Local device
 
-					if (Output == 0)
+					if (*OutputcInputSetDeviceType == 0)
 					{ // Input device
 
 						// TRY TO FIND DUMB INPUT DEVICE
 						if (GH.InputInstance.DeviceData[Device].Connection == CONN_INPUT_DUMB)
 						{ // search "type data" for matching "dumb" input device
 
-							cInputFindDumbInputDevice(Device, Type, Mode, &TypeIndex);
+							cInputFindDumbInputDevice(Device, Type, Mode, TypeIndexcInputSetDeviceType);
 						}
 
 						// IF NOT FOUND YET - TRY TO FIND TYPE ANYWAY
-						if (TypeIndex == GH.InputInstance.UnknownIndex)
+						if (*TypeIndexcInputSetDeviceType == GH.InputInstance.UnknownIndex)
 						{ // device not found or not "dumb" input/output device
 
-							cInputFindDevice(Type, Mode, &TypeIndex);
+							cInputFindDevice(Type, Mode, TypeIndexcInputSetDeviceType);
 						}
 
-						if (GH.InputInstance.DeviceData[Device].TypeIndex != TypeIndex)
+						if (GH.InputInstance.DeviceData[Device].TypeIndex != *TypeIndexcInputSetDeviceType)
 						{ // type or mode has changed
 
-							cInputResetDevice(Device, TypeIndex);
+							cInputResetDevice(Device, *TypeIndexcInputSetDeviceType);
 
 							(*GH.InputInstance.pUart).Status[Device] &= ~UART_DATA_READY;
 							(*GH.InputInstance.pIic).Status[Device] &= ~IIC_DATA_READY;
@@ -966,20 +968,20 @@ namespace Ev3CoreUnsafe.Cinput
 						if (GH.InputInstance.DeviceData[Device].Connection == CONN_OUTPUT_DUMB)
 						{ // search "type data" for matching "dumb" output device
 
-							cInputFindDumbInputDevice(Device, Type, Mode, &TypeIndex);
+							cInputFindDumbInputDevice(Device, Type, Mode, TypeIndexcInputSetDeviceType);
 						}
 
 						// IF NOT FOUND YET - TRY TO FIND TYPE ANYWAY
-						if (TypeIndex == GH.InputInstance.UnknownIndex)
+						if (*TypeIndexcInputSetDeviceType == GH.InputInstance.UnknownIndex)
 						{ // device not found or not "dumb" input/output device
 
-							cInputFindDevice(Type, Mode, &TypeIndex);
+							cInputFindDevice(Type, Mode, TypeIndexcInputSetDeviceType);
 						}
 
-						if (GH.InputInstance.DeviceData[Device].TypeIndex != TypeIndex)
+						if (GH.InputInstance.DeviceData[Device].TypeIndex != *TypeIndexcInputSetDeviceType)
 						{ // type or mode has changed
 
-							cInputResetDevice(Device, TypeIndex);
+							cInputResetDevice(Device, *TypeIndexcInputSetDeviceType);
 
 							for (Index = 0; Index < OUTPUT_PORTS; Index++)
 							{ // build setup string "type" for output
@@ -999,13 +1001,13 @@ namespace Ev3CoreUnsafe.Cinput
 				{ // Not local device
 
 					// IF NOT FOUND YET - TRY TO FIND TYPE ANYWAY
-					if (TypeIndex == GH.InputInstance.UnknownIndex)
+					if (*TypeIndexcInputSetDeviceType == GH.InputInstance.UnknownIndex)
 					{ // device not found or not "dumb" input/output device
 
-						cInputFindDevice(Type, Mode, &TypeIndex);
+						cInputFindDevice(Type, Mode, TypeIndexcInputSetDeviceType);
 					}
 
-					if (GH.InputInstance.DeviceData[Device].TypeIndex != TypeIndex)
+					if (GH.InputInstance.DeviceData[Device].TypeIndex != *TypeIndexcInputSetDeviceType)
 					{ // type or mode has changed
 
 						if ((GH.InputInstance.DeviceData[Device].Connection != CONN_NONE) && (GH.InputInstance.DeviceData[Device].Connection != CONN_ERROR) && (GH.InputInstance.DeviceType[Device] != TYPE_UNKNOWN))
@@ -1013,9 +1015,9 @@ namespace Ev3CoreUnsafe.Cinput
 							if (GH.Daisy.cDaisyReady() != RESULT.BUSY)
 							{
 
-								cInputResetDevice(Device, TypeIndex);
+								cInputResetDevice(Device, *TypeIndexcInputSetDeviceType);
 								GH.InputInstance.DeviceData[Device].InvalidTime = DAISYCHAIN_MODE_TIME;
-								cInputComSetDeviceType(Layer, Port, GH.InputInstance.DeviceType[Device], GH.InputInstance.DeviceMode[Device]);
+								cInputComSetDeviceType(*LayercInputSetDeviceType, *PortcInputSetDeviceType, GH.InputInstance.DeviceType[Device], GH.InputInstance.DeviceMode[Device]);
 
 								GH.printf($"c_input   cInputSetDeviceType: D   D={Device} C={GH.InputInstance.DeviceData[Device].Connection} Ti={GH.InputInstance.DeviceData[Device].TypeIndex} N={CommonHelper.GetString((sbyte*)GH.InputInstance.TypeData[GH.InputInstance.DeviceData[Device].TypeIndex].Name)}\r\n");
 
@@ -1035,7 +1037,7 @@ namespace Ev3CoreUnsafe.Cinput
 						}
 						else
 						{
-							cInputResetDevice(Device, TypeIndex);
+							cInputResetDevice(Device, *TypeIndexcInputSetDeviceType);
 						}
 
 					}
@@ -1425,21 +1427,22 @@ namespace Ev3CoreUnsafe.Cinput
 			return (Result);
 		}
 
+		private DATA8* DevicecInputSetChainedDeviceType = (DATA8*)CommonHelper.AllocateByteArray(1);
 		public RESULT cInputSetChainedDeviceType(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode)
 		{
 			RESULT Result = RESULT.FAIL;
-			DATA8 Device;
+			
 
-			Result = cInputCompressDevice(&Device, (byte)Layer, (byte)Port);
+			Result = cInputCompressDevice(DevicecInputSetChainedDeviceType, (byte)Layer, (byte)Port);
 			if (Result == OK)
 			{ // Device valid
 
-				if ((GH.InputInstance.DeviceType[Device] > 0) && (GH.InputInstance.DeviceType[Device] <= MAX_VALID_TYPE))
+				if ((GH.InputInstance.DeviceType[*DevicecInputSetChainedDeviceType] > 0) && (GH.InputInstance.DeviceType[*DevicecInputSetChainedDeviceType] <= MAX_VALID_TYPE))
 				{ // Device type valid
 
 					if (Type != TYPE_UNKNOWN)
 					{
-						cInputSetDeviceType(Device, Type, Mode, 1385); // 1385 was a current line
+						cInputSetDeviceType(*DevicecInputSetChainedDeviceType, Type, Mode, 1385); // 1385 was a current line
 					}
 					GH.printf($"c_input   cInputSetDeviceType:     L={Layer} P={Port} T={Type} M={Mode}\r\n");
 				}
@@ -1601,25 +1604,26 @@ namespace Ev3CoreUnsafe.Cinput
 
 		UWORD Cnt_cInputGetData;
 		UWORD Old_cInputGetData;
+		private DATA8* DevicecInputGetData = (DATA8*)CommonHelper.AllocateByteArray(1);
 		public RESULT cInputGetData(DATA8 Layer, DATA8 Port, DATA16 Time, DATA16* pInit, DATA8 Length, DATA8* pType, DATA8* pMode, DATA8* pData)
 		{
 			RESULT Result = RESULT.FAIL;
-			DATA8 Device;
+			
 
-			if (cInputCompressDevice(&Device, (byte)Layer, (byte)Port) == OK)
+			if (cInputCompressDevice(DevicecInputGetData, (byte)Layer, (byte)Port) == OK)
 			{ // Device valid
 
-				GH.printf($"c_input   cInputGetDeviceData      D={Device} L={Layer} P={Port} l={Length}\r\n");
+				GH.printf($"c_input   cInputGetDeviceData      D={*DevicecInputGetData} L={Layer} P={Port} l={Length}\r\n");
 
 				if (Length >= MAX_DEVICE_DATALENGTH)
 				{ // Length OK
 
 					CommonHelper.memset((byte*)pData, 0, Length);
 
-					*pType = GH.InputInstance.DeviceType[Device];
-					*pMode = GH.InputInstance.DeviceMode[Device];
+					*pType = GH.InputInstance.DeviceType[*DevicecInputGetData];
+					*pMode = GH.InputInstance.DeviceMode[*DevicecInputGetData];
 
-					if ((GH.InputInstance.DeviceData[Device].Connection != CONN_NONE) && (GH.InputInstance.DeviceData[Device].Connection != CONN_ERROR))
+					if ((GH.InputInstance.DeviceData[*DevicecInputGetData].Connection != CONN_NONE) && (GH.InputInstance.DeviceData[*DevicecInputGetData].Connection != CONN_ERROR))
 					{ // Device connected
 
 						if (Layer == 0)
@@ -1633,53 +1637,53 @@ namespace Ev3CoreUnsafe.Cinput
 									Time = 0;
 								}
 
-								if (GH.InputInstance.DeviceData[Device].Connection == CONN_INPUT_UART)
+								if (GH.InputInstance.DeviceData[*DevicecInputGetData].Connection == CONN_INPUT_UART)
 								{ // Device is an UART device
 
-									Memcpy((byte*)pData, (byte*)(*GH.InputInstance.pUart).GetRaw(Device),UART_DATA_LENGTH);
+									Memcpy((byte*)pData, (byte*)(*GH.InputInstance.pUart).GetRaw(*DevicecInputGetData),UART_DATA_LENGTH);
 									Result = OK;
 								}
 								else
 								{ // Device is not an UART device
 
-									if (GH.InputInstance.DeviceData[Device].Connection == CONN_NXT_IIC)
+									if (GH.InputInstance.DeviceData[*DevicecInputGetData].Connection == CONN_NXT_IIC)
 									{ // Device is an IIC device
-										Memcpy((byte*)pData, (byte*)(*GH.InputInstance.pIic).GetRaw(Device),IIC_DATA_LENGTH);										
+										Memcpy((byte*)pData, (byte*)(*GH.InputInstance.pIic).GetRaw(*DevicecInputGetData),IIC_DATA_LENGTH);										
 										Result = OK;
 									}
 									else
 									{ // Device is not an IIC device
 
-										if (GH.InputInstance.DeviceData[Device].Connection == CONN_INPUT_DUMB)
+										if (GH.InputInstance.DeviceData[*DevicecInputGetData].Connection == CONN_INPUT_DUMB)
 										{ // Device is a new dumb input device
 
-											if ((GH.InputInstance.DeviceType[Device] == 16) && (GH.InputInstance.DeviceMode[Device] == 1))
+											if ((GH.InputInstance.DeviceType[*DevicecInputGetData] == 16) && (GH.InputInstance.DeviceMode[*DevicecInputGetData] == 1))
 											{
-												Memcpy((byte*)pData, (byte*)&GH.InputInstance.DeviceData[Device].Changes, 4);
+												Memcpy((byte*)pData, (byte*)&GH.InputInstance.DeviceData[*DevicecInputGetData].Changes, 4);
 											}
 											else
 											{
-												Memcpy((byte*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin6[Device], 2);
+												Memcpy((byte*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin6[*DevicecInputGetData], 2);
 											}
 											Result = OK;
 										}
 										else
 										{
-											if (GH.InputInstance.DeviceData[Device].Connection == CONN_NXT_COLOR)
+											if (GH.InputInstance.DeviceData[*DevicecInputGetData].Connection == CONN_NXT_COLOR)
 											{ // Device is a nxt color sensor
 
-												Result = cInputGetColor(Device, pData);
+												Result = cInputGetColor(*DevicecInputGetData, pData);
 											}
 											else
 											{ // Device is an old dumb input device
 
-												if ((GH.InputInstance.DeviceType[Device] == 1) && (GH.InputInstance.DeviceMode[Device] == 1))
+												if ((GH.InputInstance.DeviceType[*DevicecInputGetData] == 1) && (GH.InputInstance.DeviceMode[*DevicecInputGetData] == 1))
 												{
-													Memcpy((byte*)pData, (byte*)&GH.InputInstance.DeviceData[Device].Bumps, 4);
+													Memcpy((byte*)pData, (byte*)&GH.InputInstance.DeviceData[*DevicecInputGetData].Bumps, 4);
 												}
 												else
 												{
-													Memcpy((byte*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin1[Device], 2);
+													Memcpy((byte*)pData, (byte*)&(*GH.InputInstance.pAnalog).InPin1[*DevicecInputGetData], 2);
 												}
 												Result = OK;
 											}
@@ -1690,22 +1694,22 @@ namespace Ev3CoreUnsafe.Cinput
 							else
 							{ // Device is output device
 
-								if (GH.InputInstance.DeviceMode[Device] == 2)
+								if (GH.InputInstance.DeviceMode[*DevicecInputGetData] == 2)
 								{
-									Memcpy((byte*)pData, (byte*)&GH.OutputInstance.pMotor[Device - INPUT_DEVICES].Speed, 1);
+									Memcpy((byte*)pData, (byte*)&GH.OutputInstance.pMotor[*DevicecInputGetData - INPUT_DEVICES].Speed, 1);
 									Result = OK;
 								}
 								else
 								{
-									Memcpy((byte*)pData, (byte*)&GH.OutputInstance.pMotor[Device - INPUT_DEVICES].TachoSensor, 4);
+									Memcpy((byte*)pData, (byte*)&GH.OutputInstance.pMotor[*DevicecInputGetData - INPUT_DEVICES].TachoSensor, 4);
 									Result = OK;
 								}
 
-								GH.InputInstance.DeviceData[Device].DevStatus = OK;
+								GH.InputInstance.DeviceData[*DevicecInputGetData].DevStatus = OK;
 							}
 							if (Result == OK)
 							{
-								Result = GH.InputInstance.DeviceData[Device].DevStatus;
+								Result = GH.InputInstance.DeviceData[*DevicecInputGetData].DevStatus;
 							}
 
 						}
@@ -2185,18 +2189,20 @@ namespace Ev3CoreUnsafe.Cinput
 		 *            Called when the VM read the device list
 		 *
 		 */
+		private DATA8* PortcInputDcmUpdate = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* LayercInputDcmUpdate = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* OutputcInputDcmUpdate = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* TypecInputDcmUpdate = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* ModecInputDcmUpdate = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private TYPES* pTmpcInputDcmUpdate;
 		public void cInputDcmUpdate(UWORD Time)
 		{
 			RESULT Result = RESULT.BUSY;
 			DATA8 Device;
-			DATA8 Port;
 			TYPES* Tmp = CommonHelper.PointerStruct<TYPES>();
-			TYPES* pTmp;
+			
 			DATA16 Index;
-			DATA8 Layer;
-			DATA8 Output;
-			DATA8 Type;
-			DATA8 Mode;
+			
 
 			if (GH.InputInstance.DCMUpdate != 0)
 			{
@@ -2206,13 +2212,13 @@ namespace Ev3CoreUnsafe.Cinput
 					if ((Device >= 0) && (Device < INPUTS))
 					{ // Device is local input port
 
-						Port = Device;
+						*PortcInputDcmUpdate = Device;
 
-						if (GH.InputInstance.DeviceData[Device].Connection != (*GH.InputInstance.pAnalog).InConn[Port])
+						if (GH.InputInstance.DeviceData[Device].Connection != (*GH.InputInstance.pAnalog).InConn[*PortcInputDcmUpdate])
 						{ // Connection type has changed
 
-							GH.InputInstance.DeviceData[Device].Connection = (*GH.InputInstance.pAnalog).InConn[Port];
-							cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).InDcm[Port], 0, 2156); // 2156 was a current line
+							GH.InputInstance.DeviceData[Device].Connection = (*GH.InputInstance.pAnalog).InConn[*PortcInputDcmUpdate];
+							cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).InDcm[*PortcInputDcmUpdate], 0, 2156); // 2156 was a current line
 							GH.InputInstance.DeviceMode[Device] = 0;
 							GH.InputInstance.TmpMode[Device] = MAX_DEVICE_MODES;
 							GH.InputInstance.DeviceData[Device].DevStatus = RESULT.BUSY;
@@ -2221,7 +2227,7 @@ namespace Ev3CoreUnsafe.Cinput
 						if (GH.InputInstance.DeviceData[Device].Connection == CONN_INPUT_UART)
 						{ // UART device
 
-							Result = cInputCheckUartInfo((byte)Port);
+							Result = cInputCheckUartInfo((byte)*PortcInputDcmUpdate);
 
 						}
 						else
@@ -2229,7 +2235,7 @@ namespace Ev3CoreUnsafe.Cinput
 							if (GH.InputInstance.DeviceData[Device].Connection == CONN_NXT_IIC)
 							{ // IIC device
 
-								Result = cInputCheckIicInfo((byte)Port);
+								Result = cInputCheckIicInfo((byte)*PortcInputDcmUpdate);
 							}
 							else
 							{ // Analogue device
@@ -2246,13 +2252,13 @@ namespace Ev3CoreUnsafe.Cinput
 						if ((Device >= INPUT_DEVICES) && (Device < (INPUT_DEVICES + OUTPUTS)))
 						{ // Device is local output port
 
-							Port = (sbyte)(Device - INPUT_DEVICES);
+							*PortcInputDcmUpdate = (sbyte)(Device - INPUT_DEVICES);
 
-							if (GH.InputInstance.DeviceData[Device].Connection != (*GH.InputInstance.pAnalog).OutConn[Port])
+							if (GH.InputInstance.DeviceData[Device].Connection != (*GH.InputInstance.pAnalog).OutConn[*PortcInputDcmUpdate])
 							{ // Connection type has changed
 
-								GH.InputInstance.DeviceData[Device].Connection = (*GH.InputInstance.pAnalog).OutConn[Port];
-								cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).OutDcm[Port], 0, 2196); // 2196 was a current line
+								GH.InputInstance.DeviceData[Device].Connection = (*GH.InputInstance.pAnalog).OutConn[*PortcInputDcmUpdate];
+								cInputSetDeviceType(Device, (*GH.InputInstance.pAnalog).OutDcm[*PortcInputDcmUpdate], 0, 2196); // 2196 was a current line
 							}
 
 							Result = OK;
@@ -2261,23 +2267,23 @@ namespace Ev3CoreUnsafe.Cinput
 						else
 						{ // Device is from daisy chain
 
-							cInputExpandDevice(Device, &Layer, &Port, &Output);
+							cInputExpandDevice(Device, LayercInputDcmUpdate, PortcInputDcmUpdate, OutputcInputDcmUpdate);
 
-							Result = cInputComGetDeviceType(Layer, Port, MAX_DEVICE_DATALENGTH, &Type, &Mode, (DATA8*)Tmp);
+							Result = cInputComGetDeviceType(*LayercInputDcmUpdate, *PortcInputDcmUpdate, MAX_DEVICE_DATALENGTH, TypecInputDcmUpdate, ModecInputDcmUpdate, (DATA8*)Tmp);
 
-							if ((Type > 0) && (Type <= MAX_VALID_TYPE) && (Result != RESULT.FAIL))
+							if ((*TypecInputDcmUpdate > 0) && (*TypecInputDcmUpdate <= MAX_VALID_TYPE) && (Result != RESULT.FAIL))
 							{
 								GH.InputInstance.DeviceData[Device].Connection = CONN_DAISYCHAIN;
 							}
 							else
 							{
-								Type = TYPE_NONE;
+								*TypecInputDcmUpdate = TYPE_NONE;
 								GH.InputInstance.DeviceData[Device].Connection = CONN_NONE;
 							}
 
-							if (GH.InputInstance.DeviceType[Device] != Type)
+							if (GH.InputInstance.DeviceType[Device] != *TypecInputDcmUpdate)
 							{
-								cInputSetDeviceType(Device, Type, 0, 2221); // 2221 was a current line
+								cInputSetDeviceType(Device, *TypecInputDcmUpdate, 0, 2221); // 2221 was a current line
 							}
 						}
 					}
@@ -2324,12 +2330,13 @@ namespace Ev3CoreUnsafe.Cinput
 			GH.Ev3System.Logger.LogInfo("Calling cInputComGetDeviceInfo in cInputDcmUpdate");
 			if (cInputComGetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)Tmp) == OK)
 			{
-				Result = cInputGetNewTypeDataPointer((sbyte*)(*Tmp).Name, (*Tmp).Type, (*Tmp).Mode, (*Tmp).Connection, &pTmp);
-				if (pTmp != null)
+				fixed (TYPES** pp = &pTmpcInputDcmUpdate)
+				Result = cInputGetNewTypeDataPointer((sbyte*)(*Tmp).Name, (*Tmp).Type, (*Tmp).Mode, (*Tmp).Connection, pp);
+				if (pTmpcInputDcmUpdate != null)
 				{
 					if (Result == OK)
 					{
-						(*pTmp) = *Tmp;
+						(*pTmpcInputDcmUpdate) = *Tmp;
 						GH.printf($"c_input   cInputDcmUpdate: NEW     T={(*Tmp).Type} M={(*Tmp).Mode} C={(*Tmp).Connection} N={CommonHelper.GetString((sbyte*)(*Tmp).Name)}\r\n");
 					}
 					else
@@ -2926,6 +2933,7 @@ namespace Ev3CoreUnsafe.Cinput
 		/*! \brief  opINPUT_DEVICE byte code
 		 *
 		 */
+		private UWORD* TypeIndexcInputDevice = (UWORD*)CommonHelper.AllocateByteArray(2);
 		public void cInputDevice()
 		{
 			IP TmpIp;
@@ -2958,7 +2966,7 @@ namespace Ev3CoreUnsafe.Cinput
 			DATA8 RdLng;
 			DATA8* pWrData;
 			DATA8* pRdData;
-			UWORD TypeIndex;
+			
 			RESULT Result;
 
 
@@ -2995,16 +3003,16 @@ namespace Ev3CoreUnsafe.Cinput
 
 						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 						{
-							if (cInputFindDevice(Type, Mode, &TypeIndex) == OK)
+							if (cInputFindDevice(Type, Mode, TypeIndexcInputDevice) == OK)
 							{
 								if (GH.InputInstance.Calib[Type][Mode].InUse == 0)
 								{
 									GH.InputInstance.Calib[Type][Mode].InUse = 1;
-									GH.InputInstance.Calib[Type][Mode].Max = GH.InputInstance.TypeData[TypeIndex].RawMax;
+									GH.InputInstance.Calib[Type][Mode].Max = GH.InputInstance.TypeData[*TypeIndexcInputDevice].RawMax;
 								}
 								else
 								{
-									Min = GH.InputInstance.Calib[Type][Mode].Min + (((Min - GH.InputInstance.TypeData[TypeIndex].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[TypeIndex].SiMax - GH.InputInstance.TypeData[TypeIndex].SiMin));
+									Min = GH.InputInstance.Calib[Type][Mode].Min + (((Min - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMax - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin));
 								}
 								GH.InputInstance.Calib[Type][Mode].Min = Min;
 							}
@@ -3020,16 +3028,16 @@ namespace Ev3CoreUnsafe.Cinput
 
 						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 						{
-							if (cInputFindDevice(Type, Mode, &TypeIndex) == OK)
+							if (cInputFindDevice(Type, Mode, TypeIndexcInputDevice) == OK)
 							{
 								if (GH.InputInstance.Calib[Type][Mode].InUse == 0)
 								{
 									GH.InputInstance.Calib[Type][Mode].InUse = 1;
-									GH.InputInstance.Calib[Type][Mode].Min = GH.InputInstance.TypeData[TypeIndex].RawMin;
+									GH.InputInstance.Calib[Type][Mode].Min = GH.InputInstance.TypeData[*TypeIndexcInputDevice].RawMin;
 								}
 								else
 								{
-									Max = GH.InputInstance.Calib[Type][Mode].Min + (((Max - GH.InputInstance.TypeData[TypeIndex].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[TypeIndex].SiMax - GH.InputInstance.TypeData[TypeIndex].SiMin));
+									Max = GH.InputInstance.Calib[Type][Mode].Min + (((Max - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMax - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin));
 								}
 								GH.InputInstance.Calib[Type][Mode].Max = Max;
 							}

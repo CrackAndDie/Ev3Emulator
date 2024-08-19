@@ -793,13 +793,12 @@ namespace Ev3CoreUnsafe.Ccom
             }
         }
 
-
-        public UBYTE cComCheckForSpace(DATA8* pFullName, ULONG Size)
+		private DATA8* ChangedcComCheckForSpace = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA32* TotalSizecComCheckForSpace = (DATA32*)CommonHelper.AllocateByteArray(4);
+		private DATA32* FreeSizecComCheckForSpace = (DATA32*)CommonHelper.AllocateByteArray(4);
+		public UBYTE cComCheckForSpace(DATA8* pFullName, ULONG Size)
         {
             UBYTE RtnVal;
-            DATA32 TotalSize;
-            DATA32 FreeSize;
-            DATA8 Changed;
 
             RtnVal = (byte)RESULT.FAIL;
 
@@ -816,9 +815,9 @@ namespace Ev3CoreUnsafe.Ccom
 
             if (CommonHelper.strstr(pFullName, SDCARD_FOLDER.AsSbytePointer()) != null)
             {
-                if (GH.Lms.CheckSdcard(&Changed, &TotalSize, &FreeSize, 1) != 0)
+                if (GH.Lms.CheckSdcard(ChangedcComCheckForSpace, TotalSizecComCheckForSpace, FreeSizecComCheckForSpace, 1) != 0)
                 {
-                    if (FreeSize >= Size)
+                    if (*FreeSizecComCheckForSpace >= Size)
                     {
                         RtnVal = OK;
                     }
@@ -828,9 +827,9 @@ namespace Ev3CoreUnsafe.Ccom
             {
                 if (CommonHelper.strstr(pFullName, USBSTICK_FOLDER.AsSbytePointer()) != null)
                 {
-                    if (GH.Lms.CheckUsbstick(&Changed, &TotalSize, &FreeSize, 1) != 0)
+                    if (GH.Lms.CheckUsbstick(ChangedcComCheckForSpace, TotalSizecComCheckForSpace, FreeSizecComCheckForSpace, 1) != 0)
                     {
-                        if (FreeSize >= Size)
+                        if (*FreeSizecComCheckForSpace >= Size)
                         {
                             RtnVal = OK;
                         }
@@ -838,8 +837,8 @@ namespace Ev3CoreUnsafe.Ccom
                 }
                 else
                 {
-                    GH.Memory.cMemoryGetUsage(&TotalSize, &FreeSize, 1);
-                    if (FreeSize >= Size + 300)
+                    GH.Memory.cMemoryGetUsage(TotalSizecComCheckForSpace, FreeSizecComCheckForSpace, 1);
+                    if (*FreeSizecComCheckForSpace >= Size + 300)
                     {
                         RtnVal = OK;
                     }
@@ -915,6 +914,7 @@ namespace Ev3CoreUnsafe.Ccom
          *
          */
         private DATA8* FileHandlecComSystemCommand = (DATA8*)CommonHelper.AllocateByteArray(1);
+        private UBYTE* NocComSystemCommandWRITEMAILBOX = CommonHelper.AllocateByteArray(1);
 		public void cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
         {
             COMCMD* pComCmd;
@@ -2146,21 +2146,20 @@ namespace Ev3CoreUnsafe.Ccom
 
                 case WRITEMAILBOX:
                     {
-                        UBYTE No;
                         UWORD PayloadSize;
                         WRITE_MAILBOX* pWriteMailbox;
                         WRITE_MAILBOX_PAYLOAD* pWriteMailboxPayload;
 
                         pWriteMailbox = (WRITE_MAILBOX*)pRxBuf->Buf;
 
-                        if (1 == cComFindMailbox(&(pWriteMailbox->Name[0]), &No))
+                        if (1 == cComFindMailbox(&(pWriteMailbox->Name[0]), NocComSystemCommandWRITEMAILBOX))
                         {
                             pWriteMailboxPayload = (WRITE_MAILBOX_PAYLOAD*)&(pWriteMailbox->Name[(pWriteMailbox->NameSize)]);
                             PayloadSize = (UWORD)(pWriteMailboxPayload->SizeLsb);
                             PayloadSize += (UWORD)(((UWORD)(pWriteMailboxPayload->SizeMsb)) << 8);
-                            CommonHelper.memcpy((byte*)GH.ComInstance.MailBox[No].Content, pWriteMailboxPayload->Payload, PayloadSize);
-                            GH.ComInstance.MailBox[No].DataSize = PayloadSize;
-                            GH.ComInstance.MailBox[No].WriteCnt++;
+                            CommonHelper.memcpy((byte*)GH.ComInstance.MailBox[*NocComSystemCommandWRITEMAILBOX].Content, pWriteMailboxPayload->Payload, PayloadSize);
+                            GH.ComInstance.MailBox[*NocComSystemCommandWRITEMAILBOX].DataSize = PayloadSize;
+                            GH.ComInstance.MailBox[*NocComSystemCommandWRITEMAILBOX].WriteCnt++;
                         }
                     }
                     break;
@@ -2638,6 +2637,7 @@ namespace Ev3CoreUnsafe.Ccom
         }
 
 		private ULONG* ReadBytescComTxUpdate = (ULONG*)CommonHelper.AllocateByteArray(4);
+        private UBYTE* pDatacComTxUpdate = (UBYTE*)CommonHelper.AllocateByteArray(1);     // Pointer to dedicated Daisy Upstream Buffer (INFO or Data)
 		public void cComTxUpdate(UBYTE ChNo)
         {
             TXBUF* pTxBuf;
@@ -2719,17 +2719,17 @@ namespace Ev3CoreUnsafe.Ccom
 
                         if (null != GH.ComInstance.WriteChannel[USBDEV])
                         {
-                            UBYTE* pData;     // Pointer to dedicated Daisy Upstream Buffer (INFO or Data)
                             UWORD Len = 0;
 
-                            Len = GH.Daisy.cDaisyData(&pData);
+                            fixed (byte** pp = &pDatacComTxUpdate)
+                                Len = GH.Daisy.cDaisyData(pp);
 
                             GH.printf($"Daisy Len = {Len}, Counter = {GH.Daisy.GetDaisyPushCounter()}\n\r");
 
                             if (Len > 0)
                             {
 
-                                if ((GH.ComInstance.WriteChannel[USBDEV](pData, Len)) != 0)
+                                if ((GH.ComInstance.WriteChannel[USBDEV](pDatacComTxUpdate, Len)) != 0)
                                 {
                                     GH.printf($"Daisy OK tx{GH.Daisy.GetDaisyPushCounter()}\n\r");
 
@@ -3378,6 +3378,7 @@ namespace Ev3CoreUnsafe.Ccom
          *
          */
         
+        private void* pTmpcComWriteMailBox;
 		public void cComWriteMailBox()
         {
             DSPSTAT DspStat = DSPSTAT.FAILBREAK;
@@ -3447,21 +3448,21 @@ namespace Ev3CoreUnsafe.Ccom
                             DESCR* pDescr = null;
                             PRGID TmpPrgId;
                             DATA32 Size;
-                            void* pTmp;
                             HANDLER TmpHandle;
 
                             TmpPrgId = GH.Lms.CurrentProgramId();
                             TmpHandle = *(HANDLER*)GH.Lms.PrimParPointer();
 
-                            if (OK == GH.Memory.cMemoryGetPointer(TmpPrgId, TmpHandle, &pTmp))
-                            {
-                                pDescr = (DESCR*)pTmp;
-                                Size = (pDescr->Elements);
-                            }
-                            else
-                            {
-                                Size = 0;
-                            }
+                            fixed (void** pp = &pTmpcComWriteMailBox)
+                                if (OK == GH.Memory.cMemoryGetPointer(TmpPrgId, TmpHandle, pp))
+                                {
+                                    pDescr = (DESCR*)pTmpcComWriteMailBox;
+                                    Size = (pDescr->Elements);
+                                }
+                                else
+                                {
+                                    Size = 0;
+                                }
 
                             if (MAILBOX_CONTENT_SIZE < Size)
                             {
@@ -3959,13 +3960,14 @@ namespace Ev3CoreUnsafe.Ccom
 		private DATA8* ConnectedcComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
 		private DATA8* VisiblecComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
 		private DATA8* TypecComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* Mode2cComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
+		private DATA8* OnOffcComGet = (DATA8*)CommonHelper.AllocateByteArray(1);
 		public void cComGet()
         {
             DSPSTAT DspStat = DSPSTAT.FAILBREAK;
             DATA8 Cmd;
             DATA8 Hardware;
-            DATA8 OnOff;
-            DATA8 Mode2;
+            
             DATA8 Item;
             DATA8 Status;
             DATA8* pName;
@@ -3984,14 +3986,14 @@ namespace Ev3CoreUnsafe.Ccom
                 case GET_MODE2:
                     {
                         Hardware = *(DATA8*)GH.Lms.PrimParPointer();
-                        Mode2 = 0;
+                        *Mode2cComGet = 0;
 
                         switch (Hardware)
                         {
                             case HW_BT:
                                 {
 
-                                    if (RESULT.FAIL != (RESULT)GH.Bt.BtGetMode2((UBYTE*)&Mode2))
+                                    if (RESULT.FAIL != (RESULT)GH.Bt.BtGetMode2((UBYTE*)Mode2cComGet))
                                     {
                                         DspStat = DSPSTAT.NOBREAK;
                                     }
@@ -4002,14 +4004,14 @@ namespace Ev3CoreUnsafe.Ccom
                                 }
                                 break;
                         }
-                        *(DATA8*)GH.Lms.PrimParPointer() = Mode2;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *Mode2cComGet;
                     }
                     break;
 
                 case GET_ON_OFF:
                     {
                         Hardware = *(DATA8*)GH.Lms.PrimParPointer();
-                        OnOff = 0;
+                        *OnOffcComGet = 0;
 
                         switch (Hardware)
                         {
@@ -4019,7 +4021,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                             case HW_BT:
                                 {
-                                    if (RESULT.FAIL != (RESULT)GH.Bt.BtGetOnOff((UBYTE*)&OnOff))
+                                    if (RESULT.FAIL != (RESULT)GH.Bt.BtGetOnOff((UBYTE*)OnOffcComGet))
                                     {
                                         DspStat = DSPSTAT.NOBREAK;
                                     }
@@ -4029,7 +4031,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 {
                                     if (OK == GH.Wifi.cWiFiGetOnStatus())
                                     {
-                                        OnOff = 1;
+                                        *OnOffcComGet = 1;
                                     }
                                     DspStat = DSPSTAT.NOBREAK;
                                 }
@@ -4040,7 +4042,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                         }
 
-                        *(DATA8*)GH.Lms.PrimParPointer() = OnOff;
+                        *(DATA8*)GH.Lms.PrimParPointer() = *OnOffcComGet;
                     }
                     break;
 
@@ -4793,7 +4795,9 @@ namespace Ev3CoreUnsafe.Ccom
         /*! \brief  opCOM_SET byte code
          *
          */
-        public void cComSet()
+        private DATA8* ItemcComSet = (DATA8*)CommonHelper.AllocateByteArray(1);
+        private uint* LocalIndexcComSet = (ULONG*)CommonHelper.AllocateByteArray(4);
+		public void cComSet()
         {
             DSPSTAT DspStat = DSPSTAT.FAILBREAK;
             DATA8 Cmd;
@@ -4805,7 +4809,7 @@ namespace Ev3CoreUnsafe.Ccom
             DATA8* pName;
             DATA8* pPin;
             DATA8 Connection;
-            DATA8 Item;
+            
             DATA8 Type;
 
             Cmd = *(DATA8*)GH.Lms.PrimParPointer();
@@ -4989,11 +4993,11 @@ namespace Ev3CoreUnsafe.Ccom
                             case HW_WIFI:
                                 {
                                     GH.printf($"\n\rSSID = {CommonHelper.GetString(pName)}\r\n");
-                                    if (OK == GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)&Item))
+                                    if (OK == GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)ItemcComSet))
                                     {
-                                        GH.printf($"\r\nGot Index = {Item}\r\n");
+                                        GH.printf($"\r\nGot Index = {*ItemcComSet}\r\n");
                                         GH.printf($"\r\nGot Index from name = {CommonHelper.GetString(pName)}\r\n");
-										GH.Wifi.cWiFiMakePsk((DATA8*)pName, (DATA8*)pPin, (int)Item);
+										GH.Wifi.cWiFiMakePsk((DATA8*)pName, (DATA8*)pPin, (int)*ItemcComSet);
                                         GH.printf("\r\nPSK made\r\n");
                                         DspStat = DSPSTAT.NOBREAK;
                                     }
@@ -5064,11 +5068,11 @@ namespace Ev3CoreUnsafe.Ccom
                                 {
                                     if (Connection != 0)
                                     {
-                                        if (OK == GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)&Item))
+                                        if (OK == GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)ItemcComSet))
                                         {
-                                            GH.printf($"cWiFiConnect => index: {Item}, Name: {CommonHelper.GetString(pName)}\n\r");
+                                            GH.printf($"cWiFiConnect => index: {*ItemcComSet}, Name: {CommonHelper.GetString(pName)}\n\r");
 
-											GH.Wifi.cWiFiConnectToAp((int)Item);
+											GH.Wifi.cWiFiConnectToAp((int)*ItemcComSet);
 
                                             GH.printf("We have tried to connect....\n\r");
 
@@ -5123,7 +5127,7 @@ namespace Ev3CoreUnsafe.Ccom
                 case SET_MOVEUP:
                     {
                         Hardware = *(DATA8*)GH.Lms.PrimParPointer();
-                        Item = *(DATA8*)GH.Lms.PrimParPointer();
+                        *ItemcComSet = *(DATA8*)GH.Lms.PrimParPointer();
 
                         switch (Hardware)
                         {
@@ -5137,7 +5141,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                             case HW_WIFI:
                                 {
-                                    GH.Wifi.cWiFiMoveUpInList((int)Item);
+                                    GH.Wifi.cWiFiMoveUpInList((int)*ItemcComSet);
                                     DspStat = DSPSTAT.NOBREAK;
                                 }
                                 break;
@@ -5148,7 +5152,7 @@ namespace Ev3CoreUnsafe.Ccom
                 case SET_MOVEDOWN:
                     {
                         Hardware = *(DATA8*)GH.Lms.PrimParPointer();
-                        Item = *(DATA8*)GH.Lms.PrimParPointer();
+                        *ItemcComSet = *(DATA8*)GH.Lms.PrimParPointer();
 
                         switch (Hardware)
                         {
@@ -5162,7 +5166,7 @@ namespace Ev3CoreUnsafe.Ccom
                                 break;
                             case HW_WIFI:
                                 {
-									GH.Wifi.cWiFiMoveDownInList((int)Item);
+									GH.Wifi.cWiFiMoveDownInList((int)*ItemcComSet);
                                     DspStat = DSPSTAT.NOBREAK;
                                 }
                                 break;
@@ -5192,9 +5196,8 @@ namespace Ev3CoreUnsafe.Ccom
                                     {
                                         GH.printf("\r\nWPA encrypt called\r\n");
 
-                                        uint LocalIndex = 0;
-										GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)&LocalIndex);
-										GH.Wifi.cWiFiSetEncryptToWpa2((int)LocalIndex);
+										GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)LocalIndexcComSet);
+										GH.Wifi.cWiFiSetEncryptToWpa2((int)*LocalIndexcComSet);
                                     }
                                     else
                                     {
@@ -5243,12 +5246,13 @@ namespace Ev3CoreUnsafe.Ccom
         }
 
 
-        public void cComRemove()
+        private UBYTE* LocalIndexcComRemove = CommonHelper.AllocateByteArray(1);
+		public void cComRemove()
         {
             DSPSTAT DspStat = DSPSTAT.FAILBREAK;
             DATA8 Hardware;
             DATA8* pName;
-            UBYTE LocalIndex;
+            
 
             Hardware = *(DATA8*)GH.Lms.PrimParPointer();
             pName = (DATA8*)GH.Lms.PrimParPointer();
@@ -5269,11 +5273,11 @@ namespace Ev3CoreUnsafe.Ccom
                     break;
                 case HW_WIFI:
                     {
-						GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)&LocalIndex);
+						GH.Wifi.cWiFiGetIndexFromName((DATA8*)pName, (UBYTE*)LocalIndexcComRemove);
 
-                        GH.printf($"Removing Index: {LocalIndex}\n\r");
+                        GH.printf($"Removing Index: {*LocalIndexcComRemove}\n\r");
 
-						GH.Wifi.cWiFiDeleteAsKnown(LocalIndex);       // We removes the (favorit) "*"
+						GH.Wifi.cWiFiDeleteAsKnown(*LocalIndexcComRemove);       // We removes the (favorit) "*"
                         DspStat = DSPSTAT.NOBREAK;
                     }
                     break;

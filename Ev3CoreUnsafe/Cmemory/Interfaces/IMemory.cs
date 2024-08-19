@@ -35,7 +35,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 
 		void cMemoryGetResourcePath(PRGID PrgId, DATA8* pString, DATA8 MaxLength);
 
-		RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, long* pImagePointer);
+		RESULT cMemoryGetIcon(DATA8* pFolderName, DATA8 Item, DATA32* pImagePointer);
 
 		RESULT cMemoryGetImage(DATA8* pText, DATA16 Size, UBYTE* pBmp);
 
