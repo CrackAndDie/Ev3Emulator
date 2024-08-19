@@ -67,16 +67,16 @@ namespace Ev3CoreUnsafe.Coutput
             return (Result);
         }
 
-
-        public RESULT cOutputOpen()
+        private UBYTE* PrgStartcOutputOpen = CommonHelper.AllocateByteArray(1);
+		public RESULT cOutputOpen()
         {
             RESULT Result = RESULT.FAIL;
 
-            UBYTE PrgStart = opPROGRAM_START;
+			*PrgStartcOutputOpen = opPROGRAM_START;
 
             OutputReset();
 
-            GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)&PrgStart, 1));
+            GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)PrgStartcOutputOpen, 1));
 
             Result = OK;
 
@@ -262,13 +262,14 @@ namespace Ev3CoreUnsafe.Coutput
         /*! \brief  opOUTPUT_PRG_STOP byte code
          *
          */
-        public void cOutputPrgStop()
+        private DATA8* PrgStopcOutputPrgStop = (DATA8*)CommonHelper.AllocateByteArray(1);
+		public void cOutputPrgStop()
         {
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
-            DATA8 PrgStop;
 
-            PrgStop = (DATA8)opPROGRAM_STOP;
-            GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)&PrgStop, 1));
+
+			*PrgStopcOutputPrgStop = (DATA8)opPROGRAM_STOP;
+            GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)PrgStopcOutputPrgStop, 1));
             GH.Lms.SetDispatchStatus(DspStat);
         }
 
@@ -820,11 +821,12 @@ namespace Ev3CoreUnsafe.Coutput
         /*! \brief  opOUTPUT_STEP_POWER byte code
          *
          */
-        public void cOutputStepPower()
+        private STEPPOWER* StepPowercOutputStepPower = CommonHelper.PointerStruct<STEPPOWER>();
+		public void cOutputStepPower()
         {
             DATA8 Layer;
             DATA8 Tmp;
-            STEPPOWER StepPower;
+            
             UBYTE Len;
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
             IP TmpIp;
@@ -834,23 +836,23 @@ namespace Ev3CoreUnsafe.Coutput
             Layer = *(DATA8*)GH.Lms.PrimParPointer();
             unchecked
             {
-                StepPower.Cmd = (sbyte)opOUTPUT_STEP_POWER;
+                (*StepPowercOutputStepPower).Cmd = (sbyte)opOUTPUT_STEP_POWER;
             }
-            StepPower.Nos = *(DATA8*)GH.Lms.PrimParPointer();
-            StepPower.Power = *(DATA8*)GH.Lms.PrimParPointer();
-            StepPower.Step1 = *(DATA32*)GH.Lms.PrimParPointer();
-            StepPower.Step2 = *(DATA32*)GH.Lms.PrimParPointer();
-            StepPower.Step3 = *(DATA32*)GH.Lms.PrimParPointer();
-            StepPower.Brake = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepPowercOutputStepPower).Nos = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepPowercOutputStepPower).Power = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepPowercOutputStepPower).Step1 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepPowercOutputStepPower).Step2 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepPowercOutputStepPower).Step3 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepPowercOutputStepPower).Brake = *(DATA8*)GH.Lms.PrimParPointer();
 
             if (0 == Layer)
             {
-                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&(StepPower.Cmd), sizeof(STEPPOWER)));
+                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&((*StepPowercOutputStepPower).Cmd), sizeof(STEPPOWER)));
 
                 for (Tmp = 0; Tmp < OUTPUTS; Tmp++)
                 {
                     // Set calling id for all involved inputs
-                    if ((StepPower.Nos & (0x01 << Tmp)) != 0)
+                    if (((*StepPowercOutputStepPower).Nos & (0x01 << Tmp)) != 0)
                     {
                         GH.OutputInstance.Owner[Tmp] = GH.Lms.CallingObjectId();
                     }
@@ -867,15 +869,15 @@ namespace Ev3CoreUnsafe.Coutput
                         DaisyBuf[Len++] = (sbyte)opOUTPUT_STEP_POWER;
                     }
                     Len += cOutputPackParam((DATA32)0, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepPower.Nos, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepPower.Power, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepPower.Step1, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepPower.Step2, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepPower.Step3, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepPower.Brake, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepPowercOutputStepPower).Nos, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepPowercOutputStepPower).Power, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepPowercOutputStepPower).Step1, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepPowercOutputStepPower).Step2, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepPowercOutputStepPower).Step3, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepPowercOutputStepPower).Brake, &(DaisyBuf[Len]));
 
                     //if(OK != GH.Daisy.cDaisyDownStreamCmd(DaisyBuf, Len, Layer))
-                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, StepPower.Nos))
+                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, (*StepPowercOutputStepPower).Nos))
                     {
                         GH.Lms.SetObjectIp(TmpIp - 1);
                         DspStat = DSPSTAT.BUSYBREAK;
@@ -894,7 +896,7 @@ namespace Ev3CoreUnsafe.Coutput
         }
 
 
-        /*! \page cOutput Output
+		/*! \page cOutput Output
          *  <hr size="1"/>
          *  <b>     opOUTPUT_TIME_POWER (LAYER, NOS, POWER, TIME1, TIME2, TIME3, BRAKE)  </b>
          *
@@ -909,14 +911,15 @@ namespace Ev3CoreUnsafe.Coutput
          *  \param  (DATA32)  TIME3   - Time in Ms [0..MAX]
          *  \param  (DATA8)   BRAKE   - 0 = Coast, 1 = BRAKE
          */
-        /*! \brief  opOUTPUT_TIME_POWER byte code
+		/*! \brief  opOUTPUT_TIME_POWER byte code
          *
          */
-        public void cOutputTimePower()
+		private TIMEPOWER* TimePowercOutputTimePower = CommonHelper.PointerStruct<TIMEPOWER>();
+		public void cOutputTimePower()
         {
             DATA8 Layer;
             DATA8 Tmp;
-            TIMEPOWER TimePower;
+            
             UBYTE Len;
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
             IP TmpIp;
@@ -926,23 +929,23 @@ namespace Ev3CoreUnsafe.Coutput
             Layer = *(DATA8*)GH.Lms.PrimParPointer();
             unchecked
             {
-                TimePower.Cmd = (sbyte)opOUTPUT_TIME_POWER;
+                (*TimePowercOutputTimePower).Cmd = (sbyte)opOUTPUT_TIME_POWER;
             }
-            TimePower.Nos = *(DATA8*)GH.Lms.PrimParPointer();
-            TimePower.Power = *(DATA8*)GH.Lms.PrimParPointer();
-            TimePower.Time1 = *(DATA32*)GH.Lms.PrimParPointer();
-            TimePower.Time2 = *(DATA32*)GH.Lms.PrimParPointer();
-            TimePower.Time3 = *(DATA32*)GH.Lms.PrimParPointer();
-            TimePower.Brake = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimePowercOutputTimePower).Nos = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimePowercOutputTimePower).Power = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimePowercOutputTimePower).Time1 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimePowercOutputTimePower).Time2 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimePowercOutputTimePower).Time3 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimePowercOutputTimePower).Brake = *(DATA8*)GH.Lms.PrimParPointer();
 
             if (0 == Layer)
             {
-                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&(TimePower.Cmd), sizeof(TIMEPOWER)));
+                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&((*TimePowercOutputTimePower).Cmd), sizeof(TIMEPOWER)));
 
                 for (Tmp = 0; Tmp < OUTPUTS; Tmp++)
                 {
                     // Set calling id for all involved inputs
-                    if ((TimePower.Nos & (0x01 << Tmp)) != 0)
+                    if (((*TimePowercOutputTimePower).Nos & (0x01 << Tmp)) != 0)
                     {
                         GH.OutputInstance.Owner[Tmp] = GH.Lms.CallingObjectId();
                     }
@@ -959,13 +962,13 @@ namespace Ev3CoreUnsafe.Coutput
                         DaisyBuf[Len++] = (sbyte)opOUTPUT_TIME_POWER;
                     }
                     Len += cOutputPackParam((DATA32)0, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimePower.Nos, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimePower.Power, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimePower.Time1, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimePower.Time2, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimePower.Time3, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimePower.Brake, &(DaisyBuf[Len]));
-                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, TimePower.Nos))
+                    Len += cOutputPackParam((DATA32)(*TimePowercOutputTimePower).Nos, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimePowercOutputTimePower).Power, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimePowercOutputTimePower).Time1, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimePowercOutputTimePower).Time2, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimePowercOutputTimePower).Time3, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimePowercOutputTimePower).Brake, &(DaisyBuf[Len]));
+                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, (*TimePowercOutputTimePower).Nos))
                     {
                         GH.Lms.SetObjectIp(TmpIp - 1);
                         DspStat = DSPSTAT.BUSYBREAK;
@@ -999,11 +1002,12 @@ namespace Ev3CoreUnsafe.Coutput
         /*! \brief  opOUTPUT_STEP_SPEED byte code
          *
          */
-        public void cOutputStepSpeed()
+        private STEPSPEED* StepSpeedcOutputStepSpeed = CommonHelper.PointerStruct<STEPSPEED>();
+		public void cOutputStepSpeed()
         {
             DATA8 Layer;
             DATA8 Tmp;
-            STEPSPEED StepSpeed;
+            
             UBYTE Len;
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
             IP TmpIp;
@@ -1016,14 +1020,14 @@ namespace Ev3CoreUnsafe.Coutput
             Layer = *(DATA8*)GH.Lms.PrimParPointer();
             unchecked
             {
-                StepSpeed.Cmd = (sbyte)opOUTPUT_STEP_SPEED;
+                (*StepSpeedcOutputStepSpeed).Cmd = (sbyte)opOUTPUT_STEP_SPEED;
             }
-            StepSpeed.Nos = *(DATA8*)GH.Lms.PrimParPointer();
-            StepSpeed.Speed = *(DATA8*)GH.Lms.PrimParPointer();
-            StepSpeed.Step1 = *(DATA32*)GH.Lms.PrimParPointer();
-            StepSpeed.Step2 = *(DATA32*)GH.Lms.PrimParPointer();
-            StepSpeed.Step3 = *(DATA32*)GH.Lms.PrimParPointer();
-            StepSpeed.Brake = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepSpeedcOutputStepSpeed).Nos = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepSpeedcOutputStepSpeed).Speed = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepSpeedcOutputStepSpeed).Step1 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepSpeedcOutputStepSpeed).Step2 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepSpeedcOutputStepSpeed).Step3 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepSpeedcOutputStepSpeed).Brake = *(DATA8*)GH.Lms.PrimParPointer();
             /*
               printf("StepSpeed.Cmd = %d\n\r", StepSpeed.Cmd);
               printf("StepSpeed.Nos = %d\n\r", StepSpeed.Nos);
@@ -1036,12 +1040,12 @@ namespace Ev3CoreUnsafe.Coutput
             */
             if (0 == Layer)
             {
-                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&(StepSpeed.Cmd), sizeof(STEPSPEED)));
+                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&((*StepSpeedcOutputStepSpeed).Cmd), sizeof(STEPSPEED)));
 
                 for (Tmp = 0; Tmp < OUTPUTS; Tmp++)
                 {// Set calling id for all involved inputs
 
-                    if ((StepSpeed.Nos & (0x01 << Tmp)) != 0)
+                    if (((*StepSpeedcOutputStepSpeed).Nos & (0x01 << Tmp)) != 0)
                     {
                         GH.OutputInstance.Owner[Tmp] = GH.Lms.CallingObjectId();
                     }
@@ -1058,12 +1062,12 @@ namespace Ev3CoreUnsafe.Coutput
                         DaisyBuf[Len++] = (sbyte)opOUTPUT_STEP_SPEED;
                     }
                     Len += cOutputPackParam((DATA32)0, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSpeed.Nos, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSpeed.Speed, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSpeed.Step1, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSpeed.Step2, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSpeed.Step3, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSpeed.Brake, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSpeedcOutputStepSpeed).Nos, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSpeedcOutputStepSpeed).Speed, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSpeedcOutputStepSpeed).Step1, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSpeedcOutputStepSpeed).Step2, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSpeedcOutputStepSpeed).Step3, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSpeedcOutputStepSpeed).Brake, &(DaisyBuf[Len]));
 
                     /* printf("Len = %d\n\r", Len);
                      for(i = 0; i < Len; i++)
@@ -1071,7 +1075,7 @@ namespace Ev3CoreUnsafe.Coutput
                                        printf("\n\r");
              */
 
-                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, StepSpeed.Nos))
+                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, (*StepSpeedcOutputStepSpeed).Nos))
                     {
                         GH.printf("NOT ok txed cOutputStepSpeed\n\r");
                         GH.Lms.SetObjectIp(TmpIp - 1);
@@ -1114,11 +1118,12 @@ namespace Ev3CoreUnsafe.Coutput
         /*! \brief  opOUTPUT_TIME_SPEED byte code
          *
          */
-        public void cOutputTimeSpeed()
+        private TIMESPEED* TimeSpeedcOutputTimeSpeed = CommonHelper.PointerStruct<TIMESPEED>();
+		public void cOutputTimeSpeed()
         {
             DATA8 Layer;
             DATA8 Tmp;
-            TIMESPEED TimeSpeed;
+            
             UBYTE Len;
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
             IP TmpIp;
@@ -1128,23 +1133,23 @@ namespace Ev3CoreUnsafe.Coutput
             Layer = *(DATA8*)GH.Lms.PrimParPointer();
             unchecked
             {
-                TimeSpeed.Cmd = (DATA8)opOUTPUT_TIME_SPEED;
+                (*TimeSpeedcOutputTimeSpeed).Cmd = (DATA8)opOUTPUT_TIME_SPEED;
             }
-            TimeSpeed.Nos = *(DATA8*)GH.Lms.PrimParPointer();
-            TimeSpeed.Speed = *(DATA8*)GH.Lms.PrimParPointer();
-            TimeSpeed.Time1 = *(DATA32*)GH.Lms.PrimParPointer();
-            TimeSpeed.Time2 = *(DATA32*)GH.Lms.PrimParPointer();
-            TimeSpeed.Time3 = *(DATA32*)GH.Lms.PrimParPointer();
-            TimeSpeed.Brake = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimeSpeedcOutputTimeSpeed).Nos = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimeSpeedcOutputTimeSpeed).Speed = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimeSpeedcOutputTimeSpeed).Time1 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimeSpeedcOutputTimeSpeed).Time2 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimeSpeedcOutputTimeSpeed).Time3 = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimeSpeedcOutputTimeSpeed).Brake = *(DATA8*)GH.Lms.PrimParPointer();
 
             if (0 == Layer)
             {
-                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&(TimeSpeed.Cmd), sizeof(TIMESPEED)));
+                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&((*TimeSpeedcOutputTimeSpeed).Cmd), sizeof(TIMESPEED)));
 
                 for (Tmp = 0; Tmp < OUTPUTS; Tmp++)
                 {
                     // Set calling id for all involved inputs
-                    if ((TimeSpeed.Nos & (0x01 << Tmp)) != 0)
+                    if (((*TimeSpeedcOutputTimeSpeed).Nos & (0x01 << Tmp)) != 0)
                     {
                         GH.OutputInstance.Owner[Tmp] = GH.Lms.CallingObjectId();
                     }
@@ -1161,13 +1166,13 @@ namespace Ev3CoreUnsafe.Coutput
                         DaisyBuf[Len++] = (sbyte)opOUTPUT_TIME_SPEED;
                     }
                     Len += cOutputPackParam((DATA32)0, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSpeed.Nos, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSpeed.Speed, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSpeed.Time1, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSpeed.Time2, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSpeed.Time3, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSpeed.Brake, &(DaisyBuf[Len]));
-                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, TimeSpeed.Nos))
+                    Len += cOutputPackParam((DATA32)(*TimeSpeedcOutputTimeSpeed).Nos, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSpeedcOutputTimeSpeed).Speed, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSpeedcOutputTimeSpeed).Time1, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSpeedcOutputTimeSpeed).Time2, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSpeedcOutputTimeSpeed).Time3, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSpeedcOutputTimeSpeed).Brake, &(DaisyBuf[Len]));
+                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, (*TimeSpeedcOutputTimeSpeed).Nos))
                     {
                         GH.Lms.SetObjectIp(TmpIp - 1);
                         DspStat = DSPSTAT.BUSYBREAK;
@@ -1184,7 +1189,7 @@ namespace Ev3CoreUnsafe.Coutput
         }
 
 
-        /*! \page cOutput Output
+		/*! \page cOutput Output
          *  <hr size="1"/>
          *  <b>     opOUTPUT_STEP_SYNC (LAYER, NOS, SPEED, TURN, STEP, BRAKE)  </b>
          *
@@ -1198,14 +1203,15 @@ namespace Ev3CoreUnsafe.Coutput
          *  \param  (DATA32)  STEP    - Tacho Pulses       [0..MAX]
          *  \param  (DATA8)   BRAKE   - 0 = Coast, 1 = BRAKE
          */
-        /*! \brief  opOUTPUT_STEP_SYNC byte code
+		/*! \brief  opOUTPUT_STEP_SYNC byte code
          *
          */
-        public void cOutputStepSync()
+		private STEPSYNC* StepSynccOutputStepSync;
+		public void cOutputStepSync()
         {
             DATA8 Layer;
             DATA8 Tmp;
-            STEPSYNC StepSync;
+           
             UBYTE Len;
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
             IP TmpIp;
@@ -1215,22 +1221,22 @@ namespace Ev3CoreUnsafe.Coutput
             Layer = *(DATA8*)GH.Lms.PrimParPointer();
             unchecked
             {
-                StepSync.Cmd = (sbyte)opOUTPUT_STEP_SYNC;
+                (*StepSynccOutputStepSync).Cmd = (sbyte)opOUTPUT_STEP_SYNC;
             }
-            StepSync.Nos = *(DATA8*)GH.Lms.PrimParPointer();
-            StepSync.Speed = *(DATA8*)GH.Lms.PrimParPointer();
-            StepSync.Turn = *(DATA16*)GH.Lms.PrimParPointer();
-            StepSync.Step = *(DATA32*)GH.Lms.PrimParPointer();
-            StepSync.Brake = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepSynccOutputStepSync).Nos = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepSynccOutputStepSync).Speed = *(DATA8*)GH.Lms.PrimParPointer();
+			(*StepSynccOutputStepSync).Turn = *(DATA16*)GH.Lms.PrimParPointer();
+			(*StepSynccOutputStepSync).Step = *(DATA32*)GH.Lms.PrimParPointer();
+			(*StepSynccOutputStepSync).Brake = *(DATA8*)GH.Lms.PrimParPointer();
 
             if (0 == Layer)
             {
-                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&(StepSync.Cmd), sizeof(STEPSYNC)));
+                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&((*StepSynccOutputStepSync).Cmd), sizeof(STEPSYNC)));
 
                 for (Tmp = 0; Tmp < OUTPUTS; Tmp++)
                 {
                     // Set calling id for all involved outputs
-                    if ((StepSync.Nos & (0x01 << Tmp)) != 0)
+                    if (((*StepSynccOutputStepSync).Nos & (0x01 << Tmp)) != 0)
                     {
                         GH.OutputInstance.Owner[Tmp] = GH.Lms.CallingObjectId();
                     }
@@ -1247,12 +1253,12 @@ namespace Ev3CoreUnsafe.Coutput
                         DaisyBuf[Len++] = (sbyte)opOUTPUT_STEP_SYNC;
                     }
                     Len += cOutputPackParam((DATA32)0, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSync.Nos, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSync.Speed, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSync.Turn, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSync.Step, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)StepSync.Brake, &(DaisyBuf[Len]));
-                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, StepSync.Nos))
+                    Len += cOutputPackParam((DATA32)(*StepSynccOutputStepSync).Nos, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSynccOutputStepSync).Speed, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSynccOutputStepSync).Turn, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSynccOutputStepSync).Step, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*StepSynccOutputStepSync).Brake, &(DaisyBuf[Len]));
+                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, (*StepSynccOutputStepSync).Nos))
                     {
                         GH.Lms.SetObjectIp(TmpIp - 1);
                         DspStat = DSPSTAT.BUSYBREAK;
@@ -1287,11 +1293,12 @@ namespace Ev3CoreUnsafe.Coutput
         /*! \brief  opOUTPUT_STEP_SYNC byte code
          *
          */
-        public void cOutputTimeSync()
+        private TIMESYNC* TimeSynccOutputTimeSync = CommonHelper.PointerStruct<TIMESYNC>();
+		public void cOutputTimeSync()
         {
             DATA8 Layer;
             DATA8 Tmp;
-            TIMESYNC TimeSync;
+            
             UBYTE Len;
             DSPSTAT DspStat = DSPSTAT.NOBREAK;
             IP TmpIp;
@@ -1301,22 +1308,22 @@ namespace Ev3CoreUnsafe.Coutput
             Layer = *(DATA8*)GH.Lms.PrimParPointer();
             unchecked
             {
-                TimeSync.Cmd = (sbyte)opOUTPUT_TIME_SYNC;
+                (*TimeSynccOutputTimeSync).Cmd = (sbyte)opOUTPUT_TIME_SYNC;
             }
-            TimeSync.Nos = *(DATA8*)GH.Lms.PrimParPointer();
-            TimeSync.Speed = *(DATA8*)GH.Lms.PrimParPointer();
-            TimeSync.Turn = *(DATA16*)GH.Lms.PrimParPointer();
-            TimeSync.Time = *(DATA32*)GH.Lms.PrimParPointer();
-            TimeSync.Brake = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimeSynccOutputTimeSync).Nos = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimeSynccOutputTimeSync).Speed = *(DATA8*)GH.Lms.PrimParPointer();
+			(*TimeSynccOutputTimeSync).Turn = *(DATA16*)GH.Lms.PrimParPointer();
+			(*TimeSynccOutputTimeSync).Time = *(DATA32*)GH.Lms.PrimParPointer();
+			(*TimeSynccOutputTimeSync).Brake = *(DATA8*)GH.Lms.PrimParPointer();
 
             if (0 == Layer)
             {
-                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&(TimeSync.Cmd), sizeof(TIMESYNC)));
+                GH.Ev3System.OutputHandler.WritePwmData(CommonHelper.GetArray((byte*)(DATA8*)&((*TimeSynccOutputTimeSync).Cmd), sizeof(TIMESYNC)));
 
                 for (Tmp = 0; Tmp < OUTPUTS; Tmp++)
                 {
                     // Set calling id for all involved outputs
-                    if ((TimeSync.Nos & (0x01 << Tmp)) != 0)
+                    if (((*TimeSynccOutputTimeSync).Nos & (0x01 << Tmp)) != 0)
                     {
                         GH.OutputInstance.Owner[Tmp] = GH.Lms.CallingObjectId();
                     }
@@ -1333,12 +1340,12 @@ namespace Ev3CoreUnsafe.Coutput
                         DaisyBuf[Len++] = (sbyte)opOUTPUT_TIME_SYNC;
                     }
                     Len += cOutputPackParam((DATA32)0, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSync.Nos, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSync.Speed, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSync.Turn, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSync.Time, &(DaisyBuf[Len]));
-                    Len += cOutputPackParam((DATA32)TimeSync.Brake, &(DaisyBuf[Len]));
-                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, TimeSync.Nos))
+                    Len += cOutputPackParam((DATA32)(*TimeSynccOutputTimeSync).Nos, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSynccOutputTimeSync).Speed, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSynccOutputTimeSync).Turn, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSynccOutputTimeSync).Time, &(DaisyBuf[Len]));
+                    Len += cOutputPackParam((DATA32)(*TimeSynccOutputTimeSync).Brake, &(DaisyBuf[Len]));
+                    if (OK != GH.Daisy.cDaisyMotorDownStream(DaisyBuf, (sbyte)Len, Layer, (*TimeSynccOutputTimeSync).Nos))
                     {
                         GH.Lms.SetObjectIp(TmpIp - 1);
                         DspStat = DSPSTAT.BUSYBREAK;
