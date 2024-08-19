@@ -2061,7 +2061,11 @@ namespace Ev3CoreUnsafe.Lms2012
 					}
 
 					GH.Ev3System.Logger.LogError($"CURRENT OBJECTIP: {*GH.VMInstance.ObjectIp}");
-					PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)]();
+					var mtd = PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)];
+					GH.Ev3System.Logger.LogInfo($"CALLING METHOD NAME: {mtd.Method.Name}");
+					mtd();
+					Thread.Sleep(1000);
+					GH.Ev3System.Logger.LogError($"new CURRENT OBJECTIP: {*GH.VMInstance.ObjectIp}");
 
 					GH.VMInstance.InstrCnt++;
 					if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)

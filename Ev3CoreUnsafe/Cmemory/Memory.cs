@@ -2653,6 +2653,8 @@ namespace Ev3CoreUnsafe.Cmemory
 
 								hFile.Close();
 
+								GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE done reading file [{CommonHelper.GetString(FilenameBuf)}]\r\n");
+
 								*(DATA32*)GH.Lms.PrimParPointer() = *ISizecMemoryFile;
 								*(DATA32*)GH.Lms.PrimParPointer() = (int)ImagePointer;
 							}
@@ -2668,6 +2670,8 @@ namespace Ev3CoreUnsafe.Cmemory
 							GH.Lms.PrimParPointer();
 						}
 						DspStat = DSPSTAT.NOBREAK;
+
+						GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE done [{CommonHelper.GetString(FilenameBuf)}]\r\n");
 					}
 					break;
 

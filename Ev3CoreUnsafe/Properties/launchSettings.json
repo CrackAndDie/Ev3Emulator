@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Ev3CoreUnsafe": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "nativeDebugging": true
     },
     "Профиль 1": {
       "commandName": "Executable",

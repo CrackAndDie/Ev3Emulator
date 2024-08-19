@@ -22,33 +22,14 @@ namespace Ev3ConsoleTest
 			//         th.Start();
 			// th.Join();
 
-
-
 			Console.ReadKey();
 		}
 
 		#region common test
         private unsafe static void CommonTest()
         {
-			byte* notAllocated = CommonHelper.AllocateByteArray(1001);
-
-            for (int i = 0; i < 20; ++i)
-            {
-				notAllocated[1000 + i] = 3;
-			}
-            
-
-            // CommonHelper.memset(notAllocated, 0, 1000);
-
-            // var a = *(&notAllocated[1000]);
-
-			// CommonHelper.DeleteByteArray(&notAllocated[3]);
-
-			System.Console.WriteLine("asdasd");
-   //         System.Console.WriteLine("asdasd");
-   //         System.Console.WriteLine("asdasd");
-   //         System.Console.WriteLine("asdasd");
-   //         System.Console.WriteLine("asdasd");
+            var tmp = new ExceptionTests();
+            tmp.Call();
 		}
 		#endregion
 
