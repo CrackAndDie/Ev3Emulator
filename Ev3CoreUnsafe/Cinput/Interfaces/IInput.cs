@@ -147,9 +147,9 @@ namespace Ev3CoreUnsafe.Cinput.Interfaces
 			ConfigurationChanged = CommonHelper.Pointer1d<DATA8>(MAX_PROGRAMS);
 			DeviceType = CommonHelper.Pointer1d<DATA8>(DEVICES);
 			DeviceMode = CommonHelper.Pointer1d<DATA8>(DEVICES);
-			DeviceData = CommonHelper.Pointer1d<DEVICE>(DEVICES, true);
+			DeviceData = CommonHelper.Pointer1d<DEVICE>(DEVICES);
 			TypeModes = CommonHelper.Pointer1d<DATA8>(MAX_DEVICE_TYPE + 1);
-			Calib = CommonHelper.Pointer2d<CALIB>(MAX_DEVICE_TYPE, MAX_DEVICE_MODES, true);
+			Calib = CommonHelper.Pointer2d<CALIB>(MAX_DEVICE_TYPE, MAX_DEVICE_MODES);
 		}
 	}
 }

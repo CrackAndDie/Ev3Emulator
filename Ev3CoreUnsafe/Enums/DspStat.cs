@@ -4,7 +4,7 @@
      *
      *        Dispatch status values
      */
-    public enum DSPSTAT : int
+    public enum DSPSTAT 
     {
         NOBREAK = 0x0100,               //!< Dispatcher running (looping)
         STOPBREAK = 0x0200,               //!< Break because of program stop

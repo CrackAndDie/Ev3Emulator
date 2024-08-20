@@ -157,11 +157,6 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public BTSOCKET* BtSocket;
 		public UBYTE* Status;
 
-		public BTCH()
-		{
-			Init();
-		}
-
 		public void Init()
 		{
 			// structs 
@@ -259,8 +254,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 			TrustedDev = CommonHelper.PointerStruct<TRUSTED_DEV>();
 			NonVol = CommonHelper.PointerStruct<NONVOLBT>();
 
-			BtCh = CommonHelper.Pointer1d<BTCH>(NO_OF_BT_CHS, true);
-			SearchList = CommonHelper.Pointer1d<SEARCHLIST>(MAX_DEV_TABLE_ENTRIES, true);
+			BtCh = CommonHelper.Pointer1d<BTCH>(NO_OF_BT_CHS);
+			SearchList = CommonHelper.Pointer1d<SEARCHLIST>(MAX_DEV_TABLE_ENTRIES);
 			Adr = CommonHelper.Pointer1d<DATA8>(13);
 			BtName = CommonHelper.Pointer1d<DATA8>(vmBRICKNAMESIZE);
 		}

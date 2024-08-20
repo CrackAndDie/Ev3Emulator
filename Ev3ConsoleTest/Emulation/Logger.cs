@@ -1,4 +1,5 @@
-﻿using Ev3CoreUnsafe.Interfaces;
+﻿using Ev3CoreUnsafe;
+using Ev3CoreUnsafe.Interfaces;
 
 namespace Ev3ConsoleTest.Emulation
 {
@@ -20,6 +21,9 @@ namespace Ev3ConsoleTest.Emulation
 			File.AppendAllText("anime.txt", message + '\n');
 			if (exception != null)
 				File.AppendAllText("anime.txt", exception.ToString() + '\n');
+
+			if (GH.ENABLE_THREAD_SLEEP)
+				Thread.Sleep(35);
 		}
 
 		public void Log(string message)

@@ -1,6 +1,6 @@
 ﻿namespace Ev3CoreUnsafe.Enums
 {
-    public enum RESULT : UBYTE
+    public enum RESULT
     {
         OK = 0,                    //!< No errors to report
         BUSY = 1,                    //!< Busy - try again

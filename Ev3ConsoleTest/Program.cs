@@ -8,6 +8,9 @@ using EV3DecompilerLib.Decompile;
 using EV3DecompilerLib.Recognize;
 using EV3ModelLib;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Ev3ConsoleTest
 {
@@ -15,7 +18,11 @@ namespace Ev3ConsoleTest
     {
         static unsafe void Main(string[] args)
         {
-            EnumlatorTest();
+            checked
+            {
+                EnumlatorTest();
+            }
+            
             // CommonTest();
 			// var th = new Thread(EnumlatorTest);
 			//var th = new Thread(CommonTest);

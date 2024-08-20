@@ -414,7 +414,7 @@ namespace Ev3CoreUnsafe.Cui.Interfaces
 
 			// LCD* a = (LCD*)Unsafe.AsPointer<LCD>(ref LcdBuffer);
 
-			LcdPool = CommonHelper.Pointer1d<LCD>(LCD_STORE_LEVELS, true);
+			LcdPool = CommonHelper.Pointer1d<LCD>(LCD_STORE_LEVELS);
 			ButtonState = CommonHelper.Pointer1d<DATA8>(BUTTONS);
 			ButtonTimer = CommonHelper.Pointer1d<DATA16>(BUTTONS);
 			ButtonDebounceTimer = CommonHelper.Pointer1d<DATA16>(BUTTONS);

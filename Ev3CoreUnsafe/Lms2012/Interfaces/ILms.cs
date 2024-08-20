@@ -607,7 +607,7 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 			FirstProgram = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
 			PrintBuffer = CommonHelper.Pointer1d<DATA8>(PRINTBUFFERSIZE + 1);
-			Program = CommonHelper.Pointer1d<PRG>(MAX_PROGRAMS, true);
+			Program = CommonHelper.Pointer1d<PRG>(MAX_PROGRAMS);
 			Errors = CommonHelper.Pointer1d<ERR>(ERROR_BUFFER_SIZE);
 		}
 	}

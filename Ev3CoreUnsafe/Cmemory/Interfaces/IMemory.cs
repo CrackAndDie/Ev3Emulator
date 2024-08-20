@@ -140,7 +140,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 		public void Init()
 		{
 			PathList = CommonHelper.Pointer2d<DATA8>(MAX_PROGRAMS, vmPATHSIZE);
-			pPoolList = CommonHelper.Pointer2d<POOL>(MAX_PROGRAMS, MAX_HANDLES, true);
+			pPoolList = CommonHelper.Pointer2d<POOL>(MAX_PROGRAMS, MAX_HANDLES);
 			Cache = CommonHelper.Pointer2d<DATA8>(CACHE_DEEPT + 1, vmFILENAMESIZE);
 		}
 	}

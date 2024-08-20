@@ -1,6 +1,6 @@
 ﻿namespace Ev3CoreUnsafe.Enums
 {
-	public enum OBJSTAT : uint
+	public enum OBJSTAT
 	{
 		RUNNING = 0x0010,                     //!< Object code is running
 		WAITING = 0x0020,                     //!< Object is waiting for final trigger

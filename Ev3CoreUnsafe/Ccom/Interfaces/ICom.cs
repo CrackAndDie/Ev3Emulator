@@ -603,10 +603,10 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		{
 			Image = CommonHelper.Pointer1d<IMGDATA>(SizeofImage);
 			Globals = CommonHelper.Pointer1d<UBYTE>(MAX_COMMAND_GLOBALS);
-			Files = CommonHelper.Pointer1d<FIL>(MAX_FILE_HANDLES, true);
-			TxBuf = CommonHelper.Pointer1d<TXBUF>(NO_OF_CHS, true);
-			RxBuf = CommonHelper.Pointer1d<RXBUF>(NO_OF_CHS, true);
-			MailBox = CommonHelper.Pointer1d<MAILBOX>(NO_OF_MAILBOXES, true);
+			Files = CommonHelper.Pointer1d<FIL>(MAX_FILE_HANDLES);
+			TxBuf = CommonHelper.Pointer1d<TXBUF>(NO_OF_CHS);
+			RxBuf = CommonHelper.Pointer1d<RXBUF>(NO_OF_CHS);
+			MailBox = CommonHelper.Pointer1d<MAILBOX>(NO_OF_MAILBOXES);
 			BrickName = CommonHelper.Pointer1d<UBYTE>(vmBRICKNAMESIZE);
 		}
 	}

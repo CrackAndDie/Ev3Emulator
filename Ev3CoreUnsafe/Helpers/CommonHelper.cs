@@ -114,35 +114,21 @@ namespace Ev3CoreUnsafe.Helpers
         }
 
 #pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
-        public unsafe static T* Pointer1d<T>(int a, bool inst = false) where T : new()
+        public unsafe static T* Pointer1d<T>(int a) where T : new()
         {
 			T* arr = (T*)AllocateByteArray(sizeof(T) * a);
 #pragma warning restore CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
-            if (!inst)
-				return arr;
-
-			for (int j = 0; j < a; ++j)
-			{
-				arr[j] = new T();
-			}
 			return arr;
 		}
 
 #pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
-        public unsafe static T** Pointer2d<T>(int a, int b, bool inst = false) where T : new()
+        public unsafe static T** Pointer2d<T>(int a, int b) where T : new()
 		{
 			int* arr = (int*)AllocateByteArray(sizeof(int) * a); // warning: int here is a size of ptr
 
 			for (int i = 0; i < a; i++)
 			{
 				arr[i] = (int)(T*)AllocateByteArray(sizeof(T) * b);
-
-                if (!inst)
-					continue;
-				for (int j = 0; j < b; ++j)
-				{
-					((T*)arr[i])[j] = new T();
-				}
 			}
 			return (T**)arr;
 		}

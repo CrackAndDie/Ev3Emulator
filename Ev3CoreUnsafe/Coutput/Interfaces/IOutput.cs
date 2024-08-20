@@ -66,7 +66,7 @@ namespace Ev3CoreUnsafe.Coutput.Interfaces
 		{
 			OutputType = CommonHelper.Pointer1d<DATA8>(OUTPUTS);
 			Owner = CommonHelper.Pointer1d<OBJID>(OUTPUTS);
-			MotorData = CommonHelper.Pointer1d<MOTORDATA>(OUTPUTS, true);
+			MotorData = CommonHelper.Pointer1d<MOTORDATA>(OUTPUTS);
 		}
 	}
 }

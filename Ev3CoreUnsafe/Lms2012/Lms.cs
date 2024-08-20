@@ -2051,7 +2051,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			}
 
 			if (GH.ENABLE_THREAD_SLEEP)
-				Thread.Sleep(1000);
+				Thread.Sleep(200);
 
 			Time = GH.Timer.cTimerGetuS();
 			Time -= GH.VMInstance.PerformTimer;
@@ -2086,22 +2086,25 @@ namespace Ev3CoreUnsafe.Lms2012
 					mtd();
 					GH.Ev3System.Logger.LogInfo("Before thread sleep in mSchedCtrl");
 					if (GH.ENABLE_THREAD_SLEEP)
-						Thread.Sleep(1000);
+						Thread.Sleep(200);
 					GH.Ev3System.Logger.LogError($"new CURRENT OBJECTIP: {*GH.VMInstance.ObjectIp}");
 
 					GH.VMInstance.InstrCnt++;
-					if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)
+					var tmpDelete = GH.VMInstance.Program[USER_SLOT];
+                    GH.Ev3System.Logger.LogInfo($"prog ptr in mSchedCtrl is {GH.VMInstance.Program[USER_SLOT].Status}");
+
+                    if (GH.VMInstance.Program[USER_SLOT].Status != OBJSTAT.STOPPED)
 					{
 						GH.printf(".");
 					}
 				}
 				if (GH.ENABLE_THREAD_SLEEP)
-					Thread.Sleep(1000);
+					Thread.Sleep(200);
 			}
+            GH.Ev3System.Logger.LogInfo($"before time shite in mSchedCtrl");
+            /*****************************************************************************/
 
-			/*****************************************************************************/
-
-			GH.VMInstance.PerformTimer = GH.Timer.cTimerGetuS();
+            GH.VMInstance.PerformTimer = GH.Timer.cTimerGetuS();
 
 			GH.VMInstance.NewTime = GetTimeMS();
 
@@ -2451,6 +2454,8 @@ namespace Ev3CoreUnsafe.Lms2012
 			pI = *(IP*)PrimParPointer();
 			DB = *(UBYTE*)PrimParPointer();
 
+			if (GH.ENABLE_THREAD_SLEEP)
+				Thread.Sleep(200);
 
 			if (GH.VMInstance.Program[PrgId].Status == OBJSTAT.STOPPED)
 			{
@@ -2467,7 +2472,9 @@ namespace Ev3CoreUnsafe.Lms2012
 							Flag = 1;
 						}
 					}
-				}
+                    if (GH.ENABLE_THREAD_SLEEP)
+                        Thread.Sleep(200);
+                }
 				else
 				{ // Gui, user or debug starting a program
 
@@ -2475,9 +2482,13 @@ namespace Ev3CoreUnsafe.Lms2012
 					{
 						Flag = 1;
 					}
-				}
+                    if (GH.ENABLE_THREAD_SLEEP)
+                        Thread.Sleep(200);
+                }
 			}
-			if (Flag == 0)
+            if (GH.ENABLE_THREAD_SLEEP)
+                Thread.Sleep(200);
+            if (Flag == 0)
 			{
 				LogErrorNumber(ERR.VM_PROGRAM_NOT_STARTED);
 			}

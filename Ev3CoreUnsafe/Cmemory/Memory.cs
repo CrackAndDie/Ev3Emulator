@@ -2668,8 +2668,8 @@ namespace Ev3CoreUnsafe.Cmemory
 								GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE  [{CommonHelper.GetString(FilenameBuf)}]\r\n");
 								using var hFile = File.OpenRead(CommonHelper.GetString(FilenameBuf));
 
-								if (GH.ENABLE_THREAD_SLEEP)
-									Thread.Sleep(200);
+								//if (GH.ENABLE_THREAD_SLEEP)
+								//	Thread.Sleep(200);
 
 								*ISizecMemoryFile = (int)hFile.Length;
 
@@ -2686,8 +2686,8 @@ namespace Ev3CoreUnsafe.Cmemory
 										ImagePointer = (DATA32)pImagecMemoryFile;
 										DspStat = DSPSTAT.NOBREAK;
 									}
-									if (GH.ENABLE_THREAD_SLEEP)
-										Thread.Sleep(200);
+									//if (GH.ENABLE_THREAD_SLEEP)
+									//	Thread.Sleep(200);
 								}
 
 								hFile.Close();
@@ -2696,8 +2696,8 @@ namespace Ev3CoreUnsafe.Cmemory
 
 								*(DATA32*)GH.Lms.PrimParPointer() = *ISizecMemoryFile;
 								*(DATA32*)GH.Lms.PrimParPointer() = (int)ImagePointer;
-								if (GH.ENABLE_THREAD_SLEEP)
-									Thread.Sleep(200);
+								//if (GH.ENABLE_THREAD_SLEEP)
+								//	Thread.Sleep(200);
 							}
 							else
 							{
