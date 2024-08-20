@@ -270,60 +270,63 @@ namespace Ev3CoreUnsafe.Cinput
 			RESULT Result = RESULT.FAIL;  // RESULT.FAIL=full, OK=new, RESULT.BUSY=found
 			UWORD Index = 0;
 
-			if ((Type >= 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
-			{ // Type and mode valid
+			unchecked
+			{
+				if ((Type >= 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+				{ // Type and mode valid
 
 
-				while ((Index < GH.InputInstance.IicDeviceTypes) && (Result != RESULT.BUSY))
-				{ // trying to find device type
+					while ((Index < GH.InputInstance.IicDeviceTypes) && (Result != RESULT.BUSY))
+					{ // trying to find device type
 
-					if ((GH.InputInstance.IicString[Index].Type == Type) && (GH.InputInstance.IicString[Index].Mode == Mode))
-					{ // match on type and mode
+						if ((GH.InputInstance.IicString[Index].Type == Type) && (GH.InputInstance.IicString[Index].Mode == Mode))
+						{ // match on type and mode
 
-						Result = RESULT.BUSY;
+							Result = RESULT.BUSY;
+						}
+						Index++;
 					}
-					Index++;
-				}
-				if (Result != RESULT.BUSY)
-				{ // device type not found
+					if (Result != RESULT.BUSY)
+					{ // device type not found
 
-					if (GH.InputInstance.IicDeviceTypes < MAX_DEVICE_TYPES)
-					{ // Allocate room for a new type/mode
+						if (GH.InputInstance.IicDeviceTypes < MAX_DEVICE_TYPES)
+						{ // Allocate room for a new type/mode
 
-						fixed (IICSTR** pp = &pTmpcInputInsertNewIicString)
-							if (GH.Memory.cMemoryRealloc((void*)GH.InputInstance.IicString, (void**)pp, (DATA32)(sizeof(IICSTR) * (GH.InputInstance.IicDeviceTypes + 1))) == OK)
-							{ // Success
+							fixed (IICSTR** pp = &pTmpcInputInsertNewIicString)
+								if (GH.Memory.cMemoryRealloc((void*)GH.InputInstance.IicString, (void**)pp, (DATA32)(sizeof(IICSTR) * (GH.InputInstance.IicDeviceTypes + 1))) == OK)
+								{ // Success
 
-								GH.InputInstance.IicString = pTmpcInputInsertNewIicString;
+									GH.InputInstance.IicString = pTmpcInputInsertNewIicString;
 
-								GH.InputInstance.IicString[Index].Type = Type;
-								GH.InputInstance.IicString[Index].Mode = Mode;
-								CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].Manufacturer, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pManufacturer));
-								CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].SensorType, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pSensorType));
-								GH.InputInstance.IicString[Index].SetupLng = SetupLng;
-								GH.InputInstance.IicString[Index].SetupString = SetupString;
-								GH.InputInstance.IicString[Index].PollLng = PollLng;
-								GH.InputInstance.IicString[Index].PollString = PollString;
-								GH.InputInstance.IicString[Index].ReadLng = ReadLng;
-								//          GH.printf("cInputInsertNewIicString  %-3u %01u IIC %u 0x%08X %u 0x%08X %s %s\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,pManufacturer,pSensorType);
+									GH.InputInstance.IicString[Index].Type = Type;
+									GH.InputInstance.IicString[Index].Mode = Mode;
+									CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].Manufacturer, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pManufacturer));
+									CommonHelper.snprintf((DATA8*)GH.InputInstance.IicString[Index].SensorType, IIC_NAME_LENGTH + 1, CommonHelper.GetString((DATA8*)pSensorType));
+									GH.InputInstance.IicString[Index].SetupLng = SetupLng;
+									GH.InputInstance.IicString[Index].SetupString = SetupString;
+									GH.InputInstance.IicString[Index].PollLng = PollLng;
+									GH.InputInstance.IicString[Index].PollString = PollString;
+									GH.InputInstance.IicString[Index].ReadLng = ReadLng;
+									//          GH.printf("cInputInsertNewIicString  %-3u %01u IIC %u 0x%08X %u 0x%08X %s %s\r\n",Type,Mode,SetupLng,SetupString,PollLng,PollString,pManufacturer,pSensorType);
 
-								GH.InputInstance.IicDeviceTypes++;
-								Result = OK;
-							}
+									GH.InputInstance.IicDeviceTypes++;
+									Result = OK;
+								}
+						}
+					}
+					if (Result == RESULT.FAIL)
+					{ // No room for type/mode
+
+						GH.Ev3System.Logger.LogError($"Error {nameof(TYPEDATA_TABEL_FULL)} occured in {Environment.StackTrace}");
 					}
 				}
-				if (Result == RESULT.FAIL)
-				{ // No room for type/mode
+				else
+				{ // Type or mode invalid
 
-					GH.Ev3System.Logger.LogError($"Error {nameof(TYPEDATA_TABEL_FULL)} occured in {Environment.StackTrace}");
+					GH.printf($"Iic  error {Type}: m={Mode} IIC\r\n");
 				}
 			}
-			else
-			{ // Type or mode invalid
-
-				GH.printf($"Iic  error {Type}: m={Mode} IIC\r\n");
-			}
-
+			
 			return (Result);
 		}
 
@@ -380,48 +383,51 @@ namespace Ev3CoreUnsafe.Cinput
 
 			*ppPlace = null;
 
-			if ((Type >= 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
-			{ // Type and mode valid
+			unchecked
+			{
+				if ((Type >= 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+				{ // Type and mode valid
 
-				while ((Index < GH.InputInstance.MaxDeviceTypes) && (Result != RESULT.BUSY))
-				{ // trying to find device type
+					while ((Index < GH.InputInstance.MaxDeviceTypes) && (Result != RESULT.BUSY))
+					{ // trying to find device type
 
-					if ((GH.InputInstance.TypeData[Index].Type == Type) && (GH.InputInstance.TypeData[Index].Mode == Mode) && (GH.InputInstance.TypeData[Index].Connection == Connection))
-					{ // match on type, mode and connection
+						if ((GH.InputInstance.TypeData[Index].Type == Type) && (GH.InputInstance.TypeData[Index].Mode == Mode) && (GH.InputInstance.TypeData[Index].Connection == Connection))
+						{ // match on type, mode and connection
 
-						*ppPlace = &GH.InputInstance.TypeData[Index];
-						Result = RESULT.BUSY;
+							*ppPlace = &GH.InputInstance.TypeData[Index];
+							Result = RESULT.BUSY;
+						}
+						Index++;
 					}
-					Index++;
-				}
-				if (Result != RESULT.BUSY)
-				{ // device type not found
+					if (Result != RESULT.BUSY)
+					{ // device type not found
 
-					if (GH.InputInstance.MaxDeviceTypes < MAX_DEVICE_TYPES)
-					{ // Allocate room for a new type/mode
+						if (GH.InputInstance.MaxDeviceTypes < MAX_DEVICE_TYPES)
+						{ // Allocate room for a new type/mode
 
-						if (GH.Memory.cMemoryRealloc((void*)GH.InputInstance.TypeData, (void**)ppPlace, (DATA32)(sizeof(TYPES) * (GH.InputInstance.MaxDeviceTypes + 1))) == OK)
-						{ // Success
+							if (GH.Memory.cMemoryRealloc((void*)GH.InputInstance.TypeData, (void**)ppPlace, (DATA32)(sizeof(TYPES) * (GH.InputInstance.MaxDeviceTypes + 1))) == OK)
+							{ // Success
 
-							GH.InputInstance.TypeData = *ppPlace;
+								GH.InputInstance.TypeData = *ppPlace;
 
-							*ppPlace = &GH.InputInstance.TypeData[GH.InputInstance.MaxDeviceTypes];
-							GH.InputInstance.TypeModes[Type]++;
-							GH.InputInstance.MaxDeviceTypes++;
-							Result = OK;
+								*ppPlace = &GH.InputInstance.TypeData[GH.InputInstance.MaxDeviceTypes];
+								GH.InputInstance.TypeModes[Type]++;
+								GH.InputInstance.MaxDeviceTypes++;
+								Result = OK;
+							}
 						}
 					}
-				}
-				if (Result == RESULT.FAIL)
-				{ // No room for type/mode
+					if (Result == RESULT.FAIL)
+					{ // No room for type/mode
 
-					GH.Ev3System.Logger.LogError($"Error {nameof(TYPEDATA_TABEL_FULL)} occured in {Environment.StackTrace}");
+						GH.Ev3System.Logger.LogError($"Error {nameof(TYPEDATA_TABEL_FULL)} occured in {Environment.StackTrace}");
+					}
 				}
-			}
-			else
-			{ // Type or mode invalid
+				else
+				{ // Type or mode invalid
 
-				GH.printf($"Type error {Type}: m={Mode} c={Connection} n={CommonHelper.GetString(pName)}\r\n");
+					GH.printf($"Type error {Type}: m={Mode} c={Connection} n={CommonHelper.GetString(pName)}\r\n");
+				}
 			}
 
 			return (Result);
@@ -1049,9 +1055,9 @@ namespace Ev3CoreUnsafe.Cinput
 
 		public void cInputCalDataInit()
 		{
-			DATA8 Type;
-			DATA8 Mode;
-			int File;
+			//DATA8 Type;
+			//DATA8 Mode;
+			//int File;
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 			// TODO: calib shite
 			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmCALDATA_FILE_NAME}{vmEXT_CONFIG}");
@@ -1083,7 +1089,7 @@ namespace Ev3CoreUnsafe.Cinput
 
 		public void cInputCalDataExit()
 		{
-			int File;
+			//int File;
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
             // TODO: calib shite
             CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmCALDATA_FILE_NAME}{vmEXT_CONFIG}");
@@ -1957,12 +1963,15 @@ namespace Ev3CoreUnsafe.Cinput
 				Min = GH.InputInstance.TypeData[TypeIndex].RawMin;
 				Max = GH.InputInstance.TypeData[TypeIndex].RawMax;
 
-				if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+				unchecked
 				{
-					if (GH.InputInstance.Calib[Type][Mode].InUse != 0)
+					if ((Type > 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 					{
-						Min = GH.InputInstance.Calib[Type][Mode].Min;
-						Max = GH.InputInstance.Calib[Type][Mode].Max;
+						if (GH.InputInstance.Calib[Type][Mode].InUse != 0)
+						{
+							Min = GH.InputInstance.Calib[Type][Mode].Min;
+							Max = GH.InputInstance.Calib[Type][Mode].Max;
+						}
 					}
 				}
 
@@ -2004,12 +2013,15 @@ namespace Ev3CoreUnsafe.Cinput
 				Min = GH.InputInstance.TypeData[TypeIndex].RawMin;
 				Max = GH.InputInstance.TypeData[TypeIndex].RawMax;
 
-				if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+				unchecked
 				{
-					if (GH.InputInstance.Calib[Type][Mode].InUse != 0)
+					if ((Type > 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 					{
-						Min = GH.InputInstance.Calib[Type][Mode].Min;
-						Max = GH.InputInstance.Calib[Type][Mode].Max;
+						if (GH.InputInstance.Calib[Type][Mode].InUse != 0)
+						{
+							Min = GH.InputInstance.Calib[Type][Mode].Min;
+							Max = GH.InputInstance.Calib[Type][Mode].Max;
+						}
 					}
 				}
 
@@ -2473,9 +2485,9 @@ namespace Ev3CoreUnsafe.Cinput
 		public RESULT cInputInit()
 		{
 			RESULT Result = OK;
-			ANALOG* pAdcTmp;
-			UART* pUartTmp;
-			IIC* pIicTmp;
+			//ANALOG* pAdcTmp;
+			//UART* pUartTmp;
+			//IIC* pIicTmp;
 			PRGID TmpPrgId;
 			UWORD Tmp;
 			UWORD Set;
@@ -2634,41 +2646,40 @@ namespace Ev3CoreUnsafe.Cinput
 
 			cInputCalDataExit();
 
-            // TODO: mapping shite (probably no need)
-            //if (GH.InputInstance.AdcFile >= MIN_HANDLE)
-            //{
-            //	munmap(GH.InputInstance.pAnalog, sizeof(ANALOG));
-            //	close(GH.InputInstance.AdcFile);
-            //}
+			// TODO: mapping shite (probably no need)
+			//if (GH.InputInstance.AdcFile >= MIN_HANDLE)
+			//{
+			//	munmap(GH.InputInstance.pAnalog, sizeof(ANALOG));
+			//	close(GH.InputInstance.AdcFile);
+			//}
 
-            //if (GH.InputInstance.UartFile >= MIN_HANDLE)
-            //{
-            //	munmap(GH.InputInstance.pUart, sizeof(UART));
-            //	close(GH.InputInstance.UartFile);
-            //}
+			//if (GH.InputInstance.UartFile >= MIN_HANDLE)
+			//{
+			//	munmap(GH.InputInstance.pUart, sizeof(UART));
+			//	close(GH.InputInstance.UartFile);
+			//}
 
-            //if (GH.InputInstance.IicFile >= MIN_HANDLE)
-            //{
-            //	munmap(GH.InputInstance.pIic, sizeof(IIC));
-            //	close(GH.InputInstance.IicFile);
-            //}
+			//if (GH.InputInstance.IicFile >= MIN_HANDLE)
+			//{
+			//	munmap(GH.InputInstance.pIic, sizeof(IIC));
+			//	close(GH.InputInstance.IicFile);
+			//}
 
-            //if (GH.InputInstance.DcmFile >= MIN_HANDLE)
-            //{
-            //	close(GH.InputInstance.DcmFile);
-            //}
+			//if (GH.InputInstance.DcmFile >= MIN_HANDLE)
+			//{
+			//	close(GH.InputInstance.DcmFile);
+			//}
 
-            // TODO: memory free
-            //if (GH.InputInstance.IicString != null)
-            //{
-            //	free((void*)GH.InputInstance.IicString);
-            //}
-            //if (GH.InputInstance.TypeData != null)
-            //{
-            //	free((void*)GH.InputInstance.TypeData);
-            //}
+			if (GH.InputInstance.IicString != null)
+			{
+				CommonHelper.DeleteByteArray((byte*)GH.InputInstance.IicString);
+			}
+			if (GH.InputInstance.TypeData != null)
+			{
+				CommonHelper.DeleteByteArray((byte*)GH.InputInstance.TypeData);
+			}
 
-            Result = OK;
+			Result = OK;
 
 			return (Result);
 		}
@@ -2987,10 +2998,13 @@ namespace Ev3CoreUnsafe.Cinput
 						Min = (DATAF) (* (DATA32*)GH.Lms.PrimParPointer());
 						Max = (DATAF)( * (DATA32*)GH.Lms.PrimParPointer());
 
-						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+						unchecked
 						{
-							GH.InputInstance.Calib[Type][Mode].Min = Min;
-							GH.InputInstance.Calib[Type][Mode].Max = Max;
+							if ((Type > 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+							{
+								GH.InputInstance.Calib[Type][Mode].Min = Min;
+								GH.InputInstance.Calib[Type][Mode].Max = Max;
+							}
 						}
 					}
 					break;
@@ -3001,20 +3015,23 @@ namespace Ev3CoreUnsafe.Cinput
 						Mode = *(DATA8*)GH.Lms.PrimParPointer();
 						Min = (DATAF) (* (DATA32*)GH.Lms.PrimParPointer());
 
-						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+						unchecked
 						{
-							if (cInputFindDevice(Type, Mode, TypeIndexcInputDevice) == OK)
+							if ((Type > 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 							{
-								if (GH.InputInstance.Calib[Type][Mode].InUse == 0)
+								if (cInputFindDevice(Type, Mode, TypeIndexcInputDevice) == OK)
 								{
-									GH.InputInstance.Calib[Type][Mode].InUse = 1;
-									GH.InputInstance.Calib[Type][Mode].Max = GH.InputInstance.TypeData[*TypeIndexcInputDevice].RawMax;
+									if (GH.InputInstance.Calib[Type][Mode].InUse == 0)
+									{
+										GH.InputInstance.Calib[Type][Mode].InUse = 1;
+										GH.InputInstance.Calib[Type][Mode].Max = GH.InputInstance.TypeData[*TypeIndexcInputDevice].RawMax;
+									}
+									else
+									{
+										Min = GH.InputInstance.Calib[Type][Mode].Min + (((Min - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMax - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin));
+									}
+									GH.InputInstance.Calib[Type][Mode].Min = Min;
 								}
-								else
-								{
-									Min = GH.InputInstance.Calib[Type][Mode].Min + (((Min - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMax - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin));
-								}
-								GH.InputInstance.Calib[Type][Mode].Min = Min;
 							}
 						}
 					}
@@ -3026,20 +3043,23 @@ namespace Ev3CoreUnsafe.Cinput
 						Mode = *(DATA8*)GH.Lms.PrimParPointer();
 						Max = (DATAF)(*(DATA32*)GH.Lms.PrimParPointer());
 
-						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+						unchecked
 						{
-							if (cInputFindDevice(Type, Mode, TypeIndexcInputDevice) == OK)
+							if ((Type > 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
 							{
-								if (GH.InputInstance.Calib[Type][Mode].InUse == 0)
+								if (cInputFindDevice(Type, Mode, TypeIndexcInputDevice) == OK)
 								{
-									GH.InputInstance.Calib[Type][Mode].InUse = 1;
-									GH.InputInstance.Calib[Type][Mode].Min = GH.InputInstance.TypeData[*TypeIndexcInputDevice].RawMin;
+									if (GH.InputInstance.Calib[Type][Mode].InUse == 0)
+									{
+										GH.InputInstance.Calib[Type][Mode].InUse = 1;
+										GH.InputInstance.Calib[Type][Mode].Min = GH.InputInstance.TypeData[*TypeIndexcInputDevice].RawMin;
+									}
+									else
+									{
+										Max = GH.InputInstance.Calib[Type][Mode].Min + (((Max - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMax - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin));
+									}
+									GH.InputInstance.Calib[Type][Mode].Max = Max;
 								}
-								else
-								{
-									Max = GH.InputInstance.Calib[Type][Mode].Min + (((Max - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin) * (GH.InputInstance.Calib[Type][Mode].Max - GH.InputInstance.Calib[Type][Mode].Min)) / (GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMax - GH.InputInstance.TypeData[*TypeIndexcInputDevice].SiMin));
-								}
-								GH.InputInstance.Calib[Type][Mode].Max = Max;
 							}
 						}
 					}
@@ -3050,9 +3070,12 @@ namespace Ev3CoreUnsafe.Cinput
 						Type = *(DATA8*)GH.Lms.PrimParPointer();
 						Mode = *(DATA8*)GH.Lms.PrimParPointer();
 
-						if ((Type > 0) && (Type < (MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+						unchecked
 						{
-							GH.InputInstance.Calib[Type][Mode].InUse = 0;
+							if ((Type > 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)) && (Mode >= 0) && (Mode < MAX_DEVICE_MODES))
+							{
+								GH.InputInstance.Calib[Type][Mode].InUse = 0;
+							}
 						}
 					}
 					break;
@@ -3237,49 +3260,52 @@ namespace Ev3CoreUnsafe.Cinput
 						if (Device < DEVICES)
 						{
 							Type = GH.InputInstance.DeviceType[Device];
-							if ((Type >= 0) && (Type < (MAX_DEVICE_TYPE + 1)))
+							unchecked
 							{
-								// try to find device type
-								Index = 0;
-								while (Index < GH.InputInstance.MaxDeviceTypes)
+								if ((Type >= 0) && (Type < (sbyte)(MAX_DEVICE_TYPE + 1)))
 								{
-									if (GH.InputInstance.TypeData[Index].Type == Type)
-									{ // match on type
+									// try to find device type
+									Index = 0;
+									while (Index < GH.InputInstance.MaxDeviceTypes)
+									{
+										if (GH.InputInstance.TypeData[Index].Type == Type)
+										{ // match on type
 
-										if (GH.InputInstance.TypeData[Index].Mode == Mode)
-										{ // match on mode
+											if (GH.InputInstance.TypeData[Index].Mode == Mode)
+											{ // match on mode
 
-											TmpName = (sbyte*)GH.InputInstance.TypeData[Index].Name;
+												TmpName = (sbyte*)GH.InputInstance.TypeData[Index].Name;
 
-											if (GH.VMInstance.Handle >= 0)
-											{
-												Tmp = (sbyte)((DATA8)CommonHelper.strlen((DATA8*)TmpName) + 1);
-
-												if (Length == -1)
+												if (GH.VMInstance.Handle >= 0)
 												{
-													Length = Tmp;
+													Tmp = (sbyte)((DATA8)CommonHelper.strlen((DATA8*)TmpName) + 1);
+
+													if (Length == -1)
+													{
+														Length = Tmp;
+													}
+													pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
 												}
-												pDestination = (DATA8*)GH.Lms.VmMemoryResize(GH.VMInstance.Handle, (DATA32)Length);
+												if (pDestination != null)
+												{
+													while ((Count < (Length - 1)) && (TmpName[Count] != 0))
+													{
+														pDestination[Count] = TmpName[Count];
+
+														Count++;
+													}
+													while (Count < (Length - 1))
+													{
+														pDestination[Count] = (sbyte)' ';
+
+														Count++;
+													}
+												}
+												Index = GH.InputInstance.MaxDeviceTypes;
 											}
-											if (pDestination != null)
-											{
-												while ((Count < (Length - 1)) && (TmpName[Count] != 0))
-												{
-													pDestination[Count] = TmpName[Count];
-
-													Count++;
-												}
-												while (Count < (Length - 1))
-												{
-													pDestination[Count] = (sbyte)' ';
-
-													Count++;
-												}
-											}
-											Index = GH.InputInstance.MaxDeviceTypes;
 										}
+										Index++;
 									}
-									Index++;
 								}
 							}
 						}

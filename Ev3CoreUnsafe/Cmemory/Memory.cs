@@ -263,7 +263,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			DATA8 Tmp;
 			PRGID TmpPrgId;
 			HANDLER TmpHandle;
-			int File;
+			//int File;
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 
 			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
@@ -288,6 +288,12 @@ namespace Ev3CoreUnsafe.Cmemory
 			//		GH.MemoryInstance.Cache[Tmp][0] = 0;
 			//	}
 			//}
+
+			// TODO: haha fuck the cache file
+			for (Tmp = 0; Tmp < CACHE_DEEPT; Tmp++)
+			{
+				GH.MemoryInstance.Cache[Tmp][0] = 0;
+			}
 
 			for (TmpPrgId = 0; TmpPrgId < MAX_PROGRAMS; TmpPrgId++)
 			{
@@ -333,7 +339,7 @@ namespace Ev3CoreUnsafe.Cmemory
 		public RESULT cMemoryExit()
 		{
 			RESULT Result = RESULT.FAIL;
-			int File;
+			//int File;
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 
 			CommonHelper.snprintf(PrgNameBuf, vmFILENAMESIZE, $"{vmSETTINGS_DIR}/{vmLASTRUN_FILE_NAME}{vmEXT_CONFIG}");
@@ -513,6 +519,16 @@ namespace Ev3CoreUnsafe.Cmemory
 			return (Result);
 		}
 
+		public RESULT ConstructFilename(PRGID PrgId, DATA8* pFilename, DATA8* pName, string pDefaultExt)
+		{
+#pragma warning disable CS0618 // Тип или член устарел
+			sbyte* tmpExt = pDefaultExt.AsSbytePointer();
+#pragma warning restore CS0618 // Тип или член устарел
+			var res = ConstructFilename(PrgId, pFilename, pName, tmpExt);
+			CommonHelper.DeleteByteArray((byte*)tmpExt);
+			return res;
+		}
+
 
 		public int FindDot(DATA8* pString)
 		{
@@ -644,37 +660,37 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			if (pExt[0] != 0)
 			{
-				if (CommonHelper.strcmp(pExt, EXT_SOUND.AsSbytePointer()) == 0)
+				if (CommonHelper.strcmp(pExt, EXT_SOUND) == 0)
 				{
 					Result = TYPE_SOUND;
 				}
 				else
 				{
-					if (CommonHelper.strcmp(pExt, EXT_GRAPHICS.AsSbytePointer()) == 0)
+					if (CommonHelper.strcmp(pExt, EXT_GRAPHICS) == 0)
 					{
 						Result = TYPE_GRAPHICS;
 					}
 					else
 					{
-						if (CommonHelper.strcmp(pExt, EXT_BYTECODE.AsSbytePointer()) == 0)
+						if (CommonHelper.strcmp(pExt, EXT_BYTECODE) == 0)
 						{
 							Result = TYPE_BYTECODE;
 						}
 						else
 						{
-							if (CommonHelper.strcmp(pExt, EXT_DATALOG.AsSbytePointer()) == 0)
+							if (CommonHelper.strcmp(pExt, EXT_DATALOG) == 0)
 							{
 								Result = TYPE_DATALOG;
 							}
 							else
 							{
-								if (CommonHelper.strcmp(pExt, EXT_PROGRAM.AsSbytePointer()) == 0)
+								if (CommonHelper.strcmp(pExt, EXT_PROGRAM) == 0)
 								{
 									Result = TYPE_PROGRAM;
 								}
 								else
 								{
-									if (CommonHelper.strcmp(pExt, EXT_TEXT.AsSbytePointer()) == 0)
+									if (CommonHelper.strcmp(pExt, EXT_TEXT) == 0)
 									{
 										Result = TYPE_TEXT;
 									}
@@ -725,17 +741,20 @@ namespace Ev3CoreUnsafe.Cmemory
 							Folders++;
 							if (Item == Folders)
 							{
+#pragma warning disable CS0618 // Тип или член устарел
+								sbyte* dirNameTmp = directories[Tmp].Name.AsSbytePointer();
+#pragma warning restore CS0618 // Тип или член устарел
 								Char = 0;
-								while (((directories[Tmp]).Name.AsSbytePointer()[Char] != 0) && ((directories[Tmp]).Name.AsSbytePointer()[Char] != '.'))
+								while ((dirNameTmp[Char] != 0) && (dirNameTmp[Char] != '.'))
 								{
 									Char++;
 								}
 								if ((directories[Tmp]).Name[Char] == '.')
 								{
-									Filetype = cMemoryFindType(&(directories[Tmp]).Name.AsSbytePointer()[Char]);
+									Filetype = cMemoryFindType(&dirNameTmp[Char]);
 
 									// delete extension
-									var tmpAnime = (directories[Tmp]).Name.AsSbytePointer();
+									var tmpAnime = dirNameTmp;
                                     tmpAnime[Char] = 0;
 									CommonHelper.snprintf(pSubFolderName, (int)MaxLength, CommonHelper.GetString(tmpAnime));
 								}
@@ -744,6 +763,7 @@ namespace Ev3CoreUnsafe.Cmemory
 									CommonHelper.snprintf(pSubFolderName, (int)MaxLength, (directories[Tmp]).Name);
 									Filetype = TYPE_FOLDER;
 								}
+								CommonHelper.DeleteByteArray((byte*)dirNameTmp);
 							}
 						}
 					}
@@ -762,7 +782,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			DATA8* buf = CommonHelper.Pointer1d<DATA8>(256);
 			DATA8 DeleteOk = 1;
 
-			if (CommonHelper.strcmp(pFolderName, DEMO_FILE_NAME.AsSbytePointer()) == 0)
+			if (CommonHelper.strcmp(pFolderName, DEMO_FILE_NAME) == 0)
 			{
 				DeleteOk = 0;
 			}
@@ -778,7 +798,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			// uncomment anime
 			// struct dirent **NameList;
 			// struct stat Status;
-			int Items;
+			//int Items;
 			DATA32 Size = 0;
 
             DirectoryInfo directory = new DirectoryInfo(CommonHelper.GetString(pFolderName));
@@ -982,7 +1002,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			
 			DATA8* FilenameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 
-			if (ConstructFilename(USER_SLOT, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
+			if (ConstructFilename(USER_SLOT, pFileName, FilenameBuf, "") == OK)
 			{
 				cMemoryGetFileHandle(USER_SLOT, FilenameBuf, HandlecMemoryCheckOpenWrite, OpenForWritecMemoryCheckOpenWrite);
 				if (*OpenForWritecMemoryCheckOpenWrite != 0)
@@ -1034,11 +1054,9 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			}
 
-#warning is the pFDescrcMemoryOpenFile allocated to place there something
 			fixed (FDESCR** pp = &pFDescrcMemoryOpenFile)
 			if (cMemoryAlloc(PrgId, POOL_TYPE_FILE, (GBINDEX)sizeof(FDESCR), (void**)pp, pHandle) == OK) 
 			{
-				(*pFDescrcMemoryOpenFile).hFile = 0;
 				(*pFDescrcMemoryOpenFile).Access = Access;
 				CommonHelper.strcpy((*pFDescrcMemoryOpenFile).Filename, pFileName);
 
@@ -1241,7 +1259,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 			TmpPrgId = GH.Lms.CurrentProgramId();
 
-			if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, EXT_GRAPHICS.AsSbytePointer()) == OK)
+			if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, EXT_GRAPHICS) == OK)
 			{
 				using var file = File.OpenRead(CommonHelper.GetString(FilenameBuf));
 				file.ReadUnsafe(pBmp, 0, (int)Size);
@@ -1292,6 +1310,16 @@ namespace Ev3CoreUnsafe.Cmemory
 			return (Result);
 		}
 
+		public RESULT cMemoryGetMediaName(string pChar, DATA8* pName)
+		{
+#pragma warning disable CS0618 // Тип или член устарел
+			sbyte* tmpChar = pChar.AsSbytePointer();
+#pragma warning restore CS0618 // Тип или член устарел
+			var res = cMemoryGetMediaName(tmpChar, pName);
+			CommonHelper.DeleteByteArray((byte*)tmpChar);
+			return res;
+		}
+
 		public void cMemorySortEntry(FOLDER* pMemory, UBYTE Type, DATA8* pName)
 		{
 			DATA8 Sort;
@@ -1334,7 +1362,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 					for (Pointer = 1; Pointer < NoOfFavourites[Sort]; Pointer++)
 					{
-						if (CommonHelper.strcmp(pName, pFavourites[Sort, Pointer].AsSbytePointer()) == 0)
+						if (CommonHelper.strcmp(pName, pFavourites[Sort, Pointer]) == 0)
 						{
 							Priority = Pointer;
 						}
@@ -1344,7 +1372,7 @@ namespace Ev3CoreUnsafe.Cmemory
 				{
 					for (Pointer = 0; Pointer < NoOfFavourites[Sort]; Pointer++)
 					{
-						if (CommonHelper.strcmp(pName, pFavourites[Sort, Pointer].AsSbytePointer()) == 0)
+						if (CommonHelper.strcmp(pName, pFavourites[Sort, Pointer]) == 0)
 						{
 							Priority = Pointer;
 						}
@@ -1411,19 +1439,19 @@ namespace Ev3CoreUnsafe.Cmemory
 				}
 				else
 				{
-					if (CommonHelper.strcmp(pFolderName, vmPRJS_DIR.AsSbytePointer()) == 0)
+					if (CommonHelper.strcmp(pFolderName, vmPRJS_DIR) == 0)
 					{
 						(*pMemorycMemoryOpenFolder).Sort = SORT_PRJS;
 					}
 					else
 					{
-						if (CommonHelper.strcmp(pFolderName, vmAPPS_DIR.AsSbytePointer()) == 0)
+						if (CommonHelper.strcmp(pFolderName, vmAPPS_DIR) == 0)
 						{
 							(*pMemorycMemoryOpenFolder).Sort = SORT_APPS;
 						}
 						else
 						{
-							if (CommonHelper.strcmp(pFolderName, vmTOOLS_DIR.AsSbytePointer()) == 0)
+							if (CommonHelper.strcmp(pFolderName, vmTOOLS_DIR) == 0)
 							{
 								(*pMemorycMemoryOpenFolder).Sort = SORT_TOOLS;
 							}
@@ -1623,7 +1651,7 @@ namespace Ev3CoreUnsafe.Cmemory
 			
 			DATA8* Filename = CommonHelper.Pointer1d<DATA8>(MAX_FILENAME_SIZE);
 			
-			DATA8* Termination = "\t".AsSbytePointer();
+			DATA8 Termination = (sbyte)'\t';
 			int No;
 
 			for (*TmpcMemoryGetItemText = 0; *TmpcMemoryGetItemText < Length; (*TmpcMemoryGetItemText)++)
@@ -1647,7 +1675,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					while ((No == 1) && (Length > 1))
 					{
 						No = hFile.ReadUnsafe((byte*)TmpcMemoryGetItemText, 0, 1);
-						if ((*TmpcMemoryGetItemText == Termination[0]) || (*TmpcMemoryGetItemText == '\r') || (*TmpcMemoryGetItemText == '\n'))
+						if ((*TmpcMemoryGetItemText == Termination) || (*TmpcMemoryGetItemText == '\r') || (*TmpcMemoryGetItemText == '\n'))
 						{
 							No = 0;
 						}
@@ -2081,7 +2109,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "") == OK)
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_APPEND [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2096,7 +2124,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "") == OK)
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_READ   [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2112,7 +2140,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "") == OK)
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_WRITE  [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2216,7 +2244,7 @@ namespace Ev3CoreUnsafe.Cmemory
 
 						*TmpHandlecMemoryFile = 0;
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, vmEXT_DATALOG.AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, vmEXT_DATALOG) == OK)
 						{
 
 							GH.printf($"c_memory  cMemoryFile: OPEN_LOG    [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2389,7 +2417,7 @@ namespace Ev3CoreUnsafe.Cmemory
 						*TmpHandlecMemoryFile = *(DATA16*)GH.Lms.PrimParPointer();
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, vmEXT_DATALOG.AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, vmEXT_DATALOG) == OK)
 						{
 							DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, TmpHandle2cMemoryFile, TmpcMemoryFile);
 							GH.printf($"c_memory  cMemoryFile: CLOSE_LOG   [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2508,7 +2536,7 @@ namespace Ev3CoreUnsafe.Cmemory
 						*TmpHandlecMemoryFile = 0;
 						*TmpcMemoryFile = 0;
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "") == OK)
 						{
 							DspStat = cMemoryGetFileHandle(TmpPrgId, FilenameBuf, TmpHandlecMemoryFile, TmpcMemoryFile);
 							GH.printf($"c_memory  cMemoryFile: GET_HANDLE  [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2523,7 +2551,7 @@ namespace Ev3CoreUnsafe.Cmemory
 					{
 						pFileName = (DATA8*)GH.Lms.PrimParPointer();
 
-						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "".AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pFileName, FilenameBuf, "") == OK)
 						{
 							cMemoryDeleteSubFolders(FilenameBuf);
 							GH.printf($"c_memory  cMemoryFile: REMOVE      [{CommonHelper.GetString(FilenameBuf)}]\r\n");
@@ -2576,9 +2604,9 @@ namespace Ev3CoreUnsafe.Cmemory
 						pSource = (DATA8*)GH.Lms.PrimParPointer();
 						pDestination = (DATA8*)GH.Lms.PrimParPointer();
 
-						if (ConstructFilename(TmpPrgId, pSource, SourceBuf, "".AsSbytePointer()) == OK)
+						if (ConstructFilename(TmpPrgId, pSource, SourceBuf, "") == OK)
 						{
-							if (ConstructFilename(TmpPrgId, pDestination, DestinationBuf, "".AsSbytePointer()) == OK)
+							if (ConstructFilename(TmpPrgId, pDestination, DestinationBuf, "") == OK)
 							{
 
 								CommonHelper.snprintf(Buffer, LOGBUFFER_SIZE, $"cp -r \"{CommonHelper.GetString(SourceBuf)}\" \"{CommonHelper.GetString(DestinationBuf)}\"");
@@ -3989,7 +4017,11 @@ namespace Ev3CoreUnsafe.Cmemory
 				case EXIST:
 					{
 						pFilename = (DATA8*)GH.Lms.PrimParPointer();
-						cMemoryFilename(TmpPrgId, pFilename, "".AsSbytePointer(), MAX_FILENAME_SIZE, Filename);
+#pragma warning disable CS0618 // Тип или член устарел
+						sbyte* tmpExt = "".AsSbytePointer();
+#pragma warning restore CS0618 // Тип или член устарел
+						cMemoryFilename(TmpPrgId, pFilename, tmpExt, MAX_FILENAME_SIZE, Filename);
+						CommonHelper.DeleteByteArray((byte*)tmpExt);
 
 						Tmp = 0;
 						if (File.Exists(CommonHelper.GetString(Filename)))
@@ -4004,7 +4036,12 @@ namespace Ev3CoreUnsafe.Cmemory
 				case TOTALSIZE:
 					{
 						pFilename = (DATA8*)GH.Lms.PrimParPointer();
-						cMemoryFilename(TmpPrgId, pFilename, "".AsSbytePointer(), MAX_FILENAME_SIZE, Filename);
+#pragma warning disable CS0618 // Тип или член устарел
+						sbyte* tmpExt = "".AsSbytePointer();
+#pragma warning restore CS0618 // Тип или член устарел
+						cMemoryFilename(TmpPrgId, pFilename, tmpExt, MAX_FILENAME_SIZE, Filename);
+						CommonHelper.DeleteByteArray((byte*)tmpExt);
+
 						Size = cMemoryFindSize(Filename, FilescMemoryFileName);
 
 						*(DATA32*)GH.Lms.PrimParPointer() = *FilescMemoryFileName;

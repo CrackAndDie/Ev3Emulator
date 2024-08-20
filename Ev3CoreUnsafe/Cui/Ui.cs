@@ -299,15 +299,15 @@ namespace Ev3CoreUnsafe.Cui
 		public unsafe RESULT cUiInit()
         {
             RESULT Result = OK;
-            UI* pUiTmp;
-            ANALOG* pAdcTmp;
-            UBYTE Tmp;
+            //UI* pUiTmp;
+            //ANALOG* pAdcTmp;
+            //UBYTE Tmp;
             
             DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(32);
             DATA8* OsBuf = CommonHelper.Pointer1d<DATA8>(2000);
-            int Lng;
-            int Start;
-            int Sid;
+            //int Lng;
+            //int Start;
+            //int Sid;
 
 			cUiAlive();
 
@@ -373,7 +373,7 @@ namespace Ev3CoreUnsafe.Cui
 
             if (SPECIALVERS < '0')
             {
-				CommonHelper.snprintf(GH.UiInstance.FwVers, FWVERS_SIZE, $"V{VERS.ToString("F2", CultureInfo.InvariantCulture)}");
+				// CommonHelper.snprintf(GH.UiInstance.FwVers, FWVERS_SIZE, $"V{VERS.ToString("F2", CultureInfo.InvariantCulture)}");
             }
             else
             {
@@ -714,7 +714,19 @@ namespace Ev3CoreUnsafe.Cui
             }
         }
 
-        public DATA8 cUiButtonRemap(DATA8 Mapped)
+		public void cUiWriteString(string pString)
+		{
+			foreach (char c in pString)
+			{
+				GH.UiInstance.UiWrBuffer[GH.UiInstance.UiWrBufferSize] = (sbyte)c;
+				if (++GH.UiInstance.UiWrBufferSize >= UI_WR_BUFFER_SIZE)
+				{
+					cUiFlushBuffer();
+				}
+			}
+		}
+
+		public DATA8 cUiButtonRemap(DATA8 Mapped)
         {
             DATA8 Real;
 
@@ -1171,8 +1183,8 @@ namespace Ev3CoreUnsafe.Cui
             DATA8* Name = CommonHelper.Pointer1d<DATA8>(NAME_LENGTH + 1);
 
 			DATA8* TempBuf = CommonHelper.Pointer1d<DATA8>(10);
-            DATA32 Total;
-            DATA32 Free;
+            //DATA32 Total;
+            //DATA32 Free;
 
             if (GH.UiInstance.TopLineEnabled != 0)
             {
@@ -1352,7 +1364,7 @@ namespace Ev3CoreUnsafe.Cui
 
 							// Draw fixed image
 							var mind = BmpHelper.Get(BmpType.Mindstorms);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 39, mind.Width, mind.Height, (UBYTE*)mind.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 39, mind.Width, mind.Height, (UBYTE*)mind.Data);
                             cUiUpdateLcd();
 
                             // Draw user program name
@@ -1369,7 +1381,7 @@ namespace Ev3CoreUnsafe.Cui
                                 cUiSetLed(LED_GREEN_PULSE);
                             }
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani1.Width, ani1.Height, (UBYTE*)ani1.Data.AsPointer());
+                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani1.Width, ani1.Height, (UBYTE*)ani1.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenTimer = GH.UiInstance.MilliSeconds;
@@ -1387,7 +1399,7 @@ namespace Ev3CoreUnsafe.Cui
                                 cUiSetLed(LED_GREEN_PULSE);
                             }
 
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani1.Width, ani1.Height, (UBYTE*)ani1.Data.AsPointer());
+                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani1.Width, ani1.Height, (UBYTE*)ani1.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenTimer = GH.UiInstance.MilliSeconds;
@@ -1427,7 +1439,7 @@ namespace Ev3CoreUnsafe.Cui
                         { // 500mS -> Ani2
 
 							var ani2 = BmpHelper.Get(BmpType.Ani2x);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani2.Width, ani2.Height, (UBYTE*)ani2.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani2.Width, ani2.Height, (UBYTE*)ani2.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1438,7 +1450,7 @@ namespace Ev3CoreUnsafe.Cui
                         { // 600mS -> Ani3
 
 							var ani3 = BmpHelper.Get(BmpType.Ani3x);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani3.Width, ani3.Height, (UBYTE*)ani3.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani3.Width, ani3.Height, (UBYTE*)ani3.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1449,7 +1461,7 @@ namespace Ev3CoreUnsafe.Cui
                         { // 700ms -> Ani4
 
 							var ani4 = BmpHelper.Get(BmpType.Ani4x);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani4.Width, ani4.Height, (UBYTE*)ani4.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani4.Width, ani4.Height, (UBYTE*)ani4.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1460,7 +1472,7 @@ namespace Ev3CoreUnsafe.Cui
                         { // 800ms -> Ani5
 
 							var ani5 = BmpHelper.Get(BmpType.Ani5x);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani5.Width, ani5.Height, (UBYTE*)ani5.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani5.Width, ani5.Height, (UBYTE*)ani5.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled++;
@@ -1471,7 +1483,7 @@ namespace Ev3CoreUnsafe.Cui
                         { // 900ms -> Ani6
 
 							var ani6 = BmpHelper.Get(BmpType.Ani6x);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani6.Width, ani6.Height, (UBYTE*)ani6.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, 8, 67, ani6.Width, ani6.Height, (UBYTE*)ani6.Data);
                             cUiUpdateLcd();
 
                             GH.UiInstance.RunScreenEnabled = 4;
@@ -1612,7 +1624,7 @@ namespace Ev3CoreUnsafe.Cui
                         X = 16;
                         Y = 52;
 
-                        GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X, Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
+                        GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, X, Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data);
 
                         GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X + 48), (short)(Y + 10), LARGE_ICON, WARNSIGN);
                         GH.Lcd.dLcdDrawIcon((*GH.UiInstance.pLcd).Lcd, FG_COLOR, (short)(X + 72), (short)(Y + 10), LARGE_ICON, WARN_POWER);
@@ -1662,7 +1674,7 @@ namespace Ev3CoreUnsafe.Cui
                 GH.UiInstance.TempTimer += CALL_INTERVAL;
                 GH.UiInstance.Tbatt = new_bat_temp(GH.UiInstance.Vbatt, (GH.UiInstance.Ibatt * (DATAF)1.1));
                 sbyte* Buffer = CommonHelper.Pointer1d<sbyte>(250);
-                int BufferSize;
+                // int BufferSize;
 
 				// TODO: wtf
 				//if (TempFile >= MIN_HANDLE)
@@ -1877,7 +1889,7 @@ namespace Ev3CoreUnsafe.Cui
                         if (GH.UiInstance.ScreenBlocked == 0)
                         {
                             LCDCopy((byte*)GH.UiInstance.LcdSafe, (byte*)GH.UiInstance.LcdSave, sizeof(LCD));
-                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
+                            GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, FG_COLOR, vmPOP3_ABS_X, vmPOP3_ABS_Y, pop3.Width, pop3.Height, (UBYTE*)pop3.Data);
 
                             if ((Tmp & WARNING_TEMP) != 0)
                             {
@@ -2169,7 +2181,7 @@ namespace Ev3CoreUnsafe.Cui
                 //* UPDATE ***************************************************************************************************
                 (*pQ).NeedUpdate = 0;
 
-                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
+                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop3.Width, pop3.Height, (UBYTE*)pop3.Data);
 
                 X2 = (*pQ).IconStartX;
 
@@ -2273,7 +2285,7 @@ namespace Ev3CoreUnsafe.Cui
                 //* UPDATE ***************************************************************************************************
                 (*pQ).NeedUpdate = 0;
 
-                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop3.Width, pop3.Height, (UBYTE*)pop3.Data.AsPointer());
+                GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop3.Width, pop3.Height, (UBYTE*)pop3.Data);
                 (*pQ).ScreenWidth = pop3.Width;
                 (*pQ).ScreenHeight = pop3.Height;
 
@@ -2441,7 +2453,7 @@ namespace Ev3CoreUnsafe.Cui
                 //* UPDATE ***************************************************************************************************
                 (*pQ).NeedUpdate = 0;
 
-				GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop2.Width, pop2.Height, (UBYTE*)pop2.Data.AsPointer());
+				GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pQ).ScreenStartX, (*pQ).ScreenStartY, pop2.Width, pop2.Height, (UBYTE*)pop2.Data);
                 (*pQ).ScreenWidth = pop2.Width;
                 (*pQ).ScreenHeight = pop2.Height;
 
@@ -2594,7 +2606,7 @@ namespace Ev3CoreUnsafe.Cui
                 (*pK).NeedUpdate = 1;
             }
 
-            Width = (short)(CommonHelper.strlen(KeyboardLayout[(*pK).Layout][(*pK).PointerY].AsPointer()) - 1);
+            Width = (short)KeyboardLayout[(*pK).Layout][(*pK).PointerY].Length;
             Height = MAX_KEYB_HEIGHT - 1;
 
             Inc = cUiGetHorz();
@@ -2712,21 +2724,21 @@ namespace Ev3CoreUnsafe.Cui
                     case 0:
                         {
 							var keyc = BmpHelper.Get(BmpType.KeyboardCap);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyc.Width, keyc.Height, (UBYTE*)keyc.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyc.Width, keyc.Height, (UBYTE*)keyc.Data);
                         }
                         break;
 
                     case 1:
                         {
 							var keys = BmpHelper.Get(BmpType.KeyboardSmp);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keys.Width, keys.Height, (UBYTE*)keys.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keys.Width, keys.Height, (UBYTE*)keys.Data);
                         }
                         break;
 
                     case 2:
                         {
 							var keyn = BmpHelper.Get(BmpType.KeyboardNum);
-							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyn.Width, keyn.Height, (UBYTE*)keyn.Data.AsPointer());
+							GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pK).ScreenStartX, (*pK).ScreenStartY, keyn.Width, keyn.Height, (UBYTE*)keyn.Data);
                         }
                         break;
 
@@ -3116,7 +3128,7 @@ namespace Ev3CoreUnsafe.Cui
                                     {
                                         GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, (*pB).OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).SubFolder, TmpTypecUiBrowser);
                                         GH.printf($"Open  folder {(*pB).OpenFolder} ({CommonHelper.GetString((*pB).SubFolder)})\r\n");
-                                        if (CommonHelper.strcmp((*pB).SubFolder, SDCARD_FOLDER.AsSbytePointer()) == 0)
+                                        if (CommonHelper.strcmp((*pB).SubFolder, SDCARD_FOLDER) == 0)
                                         {
                                             Item = (*pB).ItemPointer;
                                             GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, PrioritycUiBrowser);
@@ -3127,7 +3139,7 @@ namespace Ev3CoreUnsafe.Cui
                                         }
                                         else
                                         {
-                                            if (CommonHelper.strcmp((*pB).SubFolder, USBSTICK_FOLDER.AsSbytePointer()) == 0)
+                                            if (CommonHelper.strcmp((*pB).SubFolder, USBSTICK_FOLDER) == 0)
                                             {
                                                 Item = (*pB).ItemPointer;
                                                 GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, PrioritycUiBrowser);
@@ -3178,7 +3190,7 @@ namespace Ev3CoreUnsafe.Cui
                     }
                 }
 
-                if (CommonHelper.strstr((*pB).SubFolder, SDCARD_FOLDER.AsSbytePointer()) != null)
+                if (CommonHelper.strstr((*pB).SubFolder, SDCARD_FOLDER) != null)
                 {
                     (*pB).Sdcard = 1;
                 }
@@ -3187,7 +3199,7 @@ namespace Ev3CoreUnsafe.Cui
                     (*pB).Sdcard = 0;
                 }
 
-                if (CommonHelper.strstr((*pB).SubFolder, USBSTICK_FOLDER.AsSbytePointer()) != null)
+                if (CommonHelper.strstr((*pB).SubFolder, USBSTICK_FOLDER) != null)
                 {
                     (*pB).Usbstick = 1;
                 }
@@ -3262,7 +3274,7 @@ namespace Ev3CoreUnsafe.Cui
                             }
                             (*pB).PrgId = 0;
                             (*pB).ObjId = 0;
-                            CommonHelper.strcpy(pAnswer, vmPRJS_DIR.AsSbytePointer());
+                            CommonHelper.strcpy(pAnswer, vmPRJS_DIR);
                             *pType = 0;
                             (*pB).SubFolder[0] = 0;
                         }
@@ -3286,7 +3298,7 @@ namespace Ev3CoreUnsafe.Cui
                             }
                             (*pB).PrgId = 0;
                             (*pB).ObjId = 0;
-                            CommonHelper.strcpy(pAnswer, vmPRJS_DIR.AsSbytePointer());
+                            CommonHelper.strcpy(pAnswer, vmPRJS_DIR);
                             *pType = 0;
                             (*pB).SubFolder[0] = 0;
                         }
@@ -3363,7 +3375,7 @@ namespace Ev3CoreUnsafe.Cui
                                     (*pB).OpenFolder = (*pB).ItemPointer;
                                     GH.Memory.cMemoryGetItem((*pB).PrgId, (*pB).hFolders, (*pB).OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, (*pB).SubFolder, TmpTypecUiBrowser);
                                     GH.printf($"Open  folder {(*pB).OpenFolder} ({CommonHelper.GetString((*pB).SubFolder)})\r\n");
-                                    if (CommonHelper.strcmp((*pB).SubFolder, SDCARD_FOLDER.AsSbytePointer()) == 0)
+                                    if (CommonHelper.strcmp((*pB).SubFolder, SDCARD_FOLDER) == 0)
                                     {
                                         Item = (*pB).ItemPointer;
                                         GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, PrioritycUiBrowser);
@@ -3374,7 +3386,7 @@ namespace Ev3CoreUnsafe.Cui
                                     }
                                     else
                                     {
-                                        if (CommonHelper.strcmp((*pB).SubFolder, USBSTICK_FOLDER.AsSbytePointer()) == 0)
+                                        if (CommonHelper.strcmp((*pB).SubFolder, USBSTICK_FOLDER) == 0)
                                         {
                                             Item = (*pB).ItemPointer;
                                             GH.Memory.cMemoryGetItemName((*pB).PrgId, (*pB).hFolders, Item, MAX_FILENAME_SIZE, (*pB).Filename, pType, PrioritycUiBrowser);
@@ -3537,11 +3549,11 @@ namespace Ev3CoreUnsafe.Cui
                                             else
                                             {
 												var app = BmpHelper.Get(BmpType.App);
-												GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), app.Width, app.Height, (UBYTE*)app.Data.AsPointer());
+												GH.Lcd.dLcdDrawPicture((*GH.UiInstance.pLcd).Lcd, Color, (*pB).IconStartX, (short)((*pB).IconStartY + (Tmp * (*pB).LineHeight)), app.Width, app.Height, (UBYTE*)app.Data);
                                             }
 
                                             (*pB).Text[0] = 0;
-                                            if (CommonHelper.strcmp((*pB).Filename, "Bluetooth".AsSbytePointer()) == 0)
+                                            if (CommonHelper.strcmp((*pB).Filename, "Bluetooth") == 0)
                                             {
                                                 if (GH.UiInstance.BtOn != 0)
                                                 {
@@ -3554,7 +3566,7 @@ namespace Ev3CoreUnsafe.Cui
                                             }
                                             else
                                             {
-                                                if (CommonHelper.strcmp((*pB).Filename, "WiFi".AsSbytePointer()) == 0)
+                                                if (CommonHelper.strcmp((*pB).Filename, "WiFi") == 0)
                                                 {
                                                     if (GH.UiInstance.WiFiOn != 0)
                                                     {
@@ -5544,8 +5556,7 @@ namespace Ev3CoreUnsafe.Cui
                                 (*SizecUiRead)++;
                                 (*pImgHead).ImageSize = (uint)(*SizecUiRead);
 
-								// TODO: idk what is it 
-								// CommonHelper.memset(GH.UiInstance.Globals, 0, sizeof(GH.UiInstance.Globals));
+								CommonHelper.memset(GH.UiInstance.Globals, 0, MAX_COMMAND_GLOBALS);
 								GH.Ev3System.Logger.LogWarning($"Unimplemented shite called in: {Environment.StackTrace}");
 
 								*(DATA32*)GH.Lms.PrimParPointer() = (DATA32)GH.UiInstance.Globals;
@@ -5861,21 +5872,21 @@ namespace Ev3CoreUnsafe.Cui
 
                         pSource = (DATA8*)pGlobal;
 
-                        cUiWriteString("\r\n    ".AsSbytePointer());
+                        cUiWriteString("\r\n    ");
                         for (Tmp = 0; Tmp < Data32; Tmp++)
                         {
                             CommonHelper.snprintf(Buffer, 7, $"{pSource[Tmp] & 0xFF} ");
                             cUiWriteString(Buffer);
                             if (((Tmp & 0x3) == 0x3) && ((Tmp & 0xF) != 0xF))
                             {
-                                cUiWriteString(" ".AsSbytePointer());
+                                cUiWriteString(" ");
                             }
                             if (((Tmp & 0xF) == 0xF) && (Tmp < (Data32 - 1)))
                             {
-                                cUiWriteString("\r\n    ".AsSbytePointer());
+                                cUiWriteString("\r\n    ");
                             }
                         }
-                        cUiWriteString("\r\n".AsSbytePointer());
+                        cUiWriteString("\r\n");
                         DspStat = DSPSTAT.NOBREAK;
                     }
                     break;

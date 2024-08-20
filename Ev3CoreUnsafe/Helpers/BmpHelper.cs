@@ -1,4 +1,5 @@
 ﻿using Ev3CoreUnsafe.Enums;
+using Ev3CoreUnsafe.Extensions;
 
 namespace Ev3CoreUnsafe.Helpers
 {
@@ -44,20 +45,20 @@ namespace Ev3CoreUnsafe.Helpers
 			return _images.FirstOrDefault(x => x.Name == name);
 		}
 
-		public static byte[] GetBytesOf(BmpType name)
+		public unsafe static byte* GetBytesOf(BmpType name)
 		{
 			return _images.FirstOrDefault(x => x.Name == name).Data;
 		}
 	}
 
-	public class BmpImage
+	public unsafe class BmpImage
 	{
 		public BmpType Name { get; set; }
 		public string RealName { get; set; }
 
 		public short Width { get; set; }
 		public short Height { get; set; }
-		public byte[] Data { get; private set; }
+		public byte* Data { get; private set; }
 
 		public BmpImage(string real, BmpType name)
 		{
@@ -74,7 +75,9 @@ namespace Ev3CoreUnsafe.Helpers
 
 			Width = (short)outputImage.Width;
 			Height = (short)outputImage.Height;
-			Data = GetBinaryBytes(bmp.PixelData, outputImage.BytesPerPixel);
+#pragma warning disable CS0618 // Тип или член устарел
+			Data = GetBinaryBytes(bmp.PixelData, outputImage.BytesPerPixel).AsPointer();
+#pragma warning restore CS0618 // Тип или член устарел
 		}
 
 		private byte[] GetBinaryBytes(byte[] bmp, int perPixel)

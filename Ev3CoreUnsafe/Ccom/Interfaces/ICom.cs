@@ -72,8 +72,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCnt;
 		public UBYTE Cmd;
-		[Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;                    //!< Pay load is DIRCMD or SYSCMD
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len       //!< Pay load is DIRCMD or SYSCMD
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -82,8 +81,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public CMDSIZE CmdSize;
 		public MSGCNT MsgCnt;
 		public UBYTE Cmd;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE Path[256]; // WARNING: 256 is max path len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -91,8 +89,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 	{
 		public UBYTE Globals;
 		public UBYTE Locals;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Code;
+		public fixed UBYTE Code[256]; // WARNING: 256 is max path len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -103,8 +100,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE LengthNsb1;
 		public UBYTE LengthNsb2;
 		public UBYTE LengthMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Name;
+        public fixed UBYTE Name[256]; // WARNING: 256 is max name len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -113,8 +109,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Sys;
 		public UBYTE LengthLsb;
 		public UBYTE LengthMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Name;
+		public fixed UBYTE Name[256]; // WARNING: 256 is max name len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -131,8 +126,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 	{
 		public UBYTE Sys;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE Path[256]; // WARNING: 256 is max path len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -144,8 +138,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE BytesToReadLsb;
 		public UBYTE BytesToReadMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Path;
+        public fixed UBYTE Path[256]; // WARNING: 256 is max path len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -161,8 +154,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE ListSizeNsb2;
 		public UBYTE ListSizeMsb;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max payload len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -186,8 +178,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE Status;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE Path[256]; // WARNING: 256 is max payload len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -199,8 +190,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE BytesToReadLsb;
 		public UBYTE BytesToReadMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Path;
+        public fixed UBYTE Path[256]; // WARNING: 256 is max file len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -216,8 +206,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -245,8 +234,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -258,8 +246,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE BytesToReadLsb;
 		public UBYTE BytesToReadMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Path;
+        public fixed UBYTE Path[256]; // WARNING: 256 is max Path len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -275,8 +262,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -300,8 +286,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE Cmd;
 		public UBYTE Status;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -321,8 +306,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE Status;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -332,8 +316,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Name;
+        public fixed UBYTE Name[256]; // WARNING: 256 is max Name len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -353,8 +336,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Dir;
+        public fixed UBYTE Dir[256]; // WARNING: 256 is max Dir len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -399,9 +381,8 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE FileSizeNsb1;
 		public UBYTE FileSizeNsb2;
 		public UBYTE FileSizeMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Path;
-		//  UBYTE   PayLoad[];
+        public fixed UBYTE Path[256]; // WARNING: 256 is max Path len
+									  //  UBYTE   PayLoad[];
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -423,8 +404,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE Handle;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* PayLoad;
+        public fixed UBYTE PayLoad[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -446,8 +426,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public UBYTE CmdType;
 		public UBYTE Cmd;
 		public UBYTE NameSize;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Name;
+        public fixed UBYTE Name[256]; // WARNING: 256 is max Name len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -455,8 +434,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 	{
 		public UBYTE SizeLsb;
 		public UBYTE SizeMsb;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* Payload;
+        public fixed UBYTE Payload[256]; // WARNING: 256 is max PayLoad len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -513,8 +491,7 @@ namespace Ev3CoreUnsafe.Ccom.Interfaces
 		public MSGCNT MsgCount;
 		public UBYTE CmdType;
 		public UBYTE Cmd;
-        [Obsolete("alloc memory before usage")]
-        public UBYTE* BundleSeedId;
+        public fixed UBYTE BundleSeedId[256]; // WARNING: 256 is max BundleSeedId len
 	}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

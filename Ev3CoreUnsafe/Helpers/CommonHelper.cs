@@ -313,6 +313,31 @@ namespace Ev3CoreUnsafe.Helpers
 			return 0;
 		}
 
+		public unsafe static int strcmp(DATA8* str1, string str2)
+		{
+			int curr = 0;
+			while (true)
+			{
+				bool done1 = str1[curr] == 0;
+				bool done2 = str1[curr] == 0;
+
+				if (done1 && done2)
+					break;
+
+				if (done1)
+					return -1;
+				if (done2)
+					return 1;
+
+				if (str1[curr] != str2[curr])
+				{
+					return str1[curr] > str2[curr] ? 1 : -1;
+				}
+				curr++;
+			}
+			return 0;
+		}
+
 		public unsafe static DATA8* strncpy(DATA8* dst, DATA8* src, int num)
 		{
 			for (int i = 0; i < num; ++i)
@@ -344,7 +369,56 @@ namespace Ev3CoreUnsafe.Helpers
 			}
 		}
 
+		public unsafe static DATA8* strcpy(DATA8* dst, string src)
+		{
+			int i = 0;
+			while (true)
+			{
+				if (src[i] == 0)
+				{
+					dst[i] = (sbyte)src[i];
+					return dst;
+				}
+
+				dst[i] = (sbyte)src[i];
+				i++;
+			}
+		}
+
 		public unsafe static DATA8* strstr(DATA8* str1, DATA8* str2)
+		{
+			int localPointer = 0;
+			int i = 0;
+			while (true)
+			{
+				localPointer = 0;
+
+				if (str1[i] == 0)
+					break;
+
+				if (str1[i] == str1[localPointer])
+				{
+					while (true)
+					{
+						if (str2[localPointer] == 0)
+							return &str1[i];
+
+						if (str1[i + localPointer] == 0)
+							break;
+
+						if (str1[i + localPointer] != str2[localPointer])
+							break;
+
+						localPointer++;
+					}
+				}
+
+				i++;
+			}
+			return null;
+		}
+
+		public unsafe static DATA8* strstr(DATA8* str1, string str2)
 		{
 			int localPointer = 0;
 			int i = 0;
@@ -390,6 +464,25 @@ namespace Ev3CoreUnsafe.Helpers
 			while (src[srcPointer] != 0)
 			{
 				dst[localPointer + srcPointer] = src[srcPointer];
+				srcPointer++;
+			}
+			dst[localPointer + srcPointer] = 0;
+			return dst;
+		}
+
+		public unsafe static DATA8* strcat(DATA8* dst, string src)
+		{
+			int localPointer = 0;
+			// find the '\0'
+			while (dst[localPointer] != 0)
+			{
+				localPointer++;
+			}
+			// copy
+			int srcPointer = 0;
+			while (src[srcPointer] != 0)
+			{
+				dst[localPointer + srcPointer] = (sbyte)src[srcPointer];
 				srcPointer++;
 			}
 			dst[localPointer + srcPointer] = 0;

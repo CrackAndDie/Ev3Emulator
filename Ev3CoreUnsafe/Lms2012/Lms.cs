@@ -163,6 +163,11 @@ namespace Ev3CoreUnsafe.Lms2012
 			GH.printf(CommonHelper.GetString(pString));
 		}
 
+		public void VmPrint(string pString)
+		{
+			GH.printf(pString);
+		}
+
 
 		public void SetTerminalEnable(DATA8 Value)
 		{
@@ -1230,6 +1235,8 @@ namespace Ev3CoreUnsafe.Lms2012
 								// Save object pointer in Object list
 
 								OBJ* dataTmp = (OBJ*)pDataProgramReset;
+								dataTmp->Local = pDataProgramReset + OBJ.Sizeof;
+
 								GH.VMInstance.Program[PrgId].pObjList[ObjIndex] = dataTmp;
 
 								// Initialise instruction pointer, trigger counts and status
@@ -1612,7 +1619,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		public DATA8 CheckSdcard(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Force)
 		{
 			DATA8 Result = 0;
-			DATAF Tmp;
+			//DATAF Tmp;
 			DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmNAMESIZE);
 			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(250);
 
@@ -1630,7 +1637,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 				GH.VMInstance.SdcardTimer += Time;
 
-				if (GH.Memory.cMemoryGetMediaName("m".AsSbytePointer(), Name) == OK)
+				if (GH.Memory.cMemoryGetMediaName("m", Name) == OK)
 				{
 					// TODO: probably no need
 					//if (GH.VMInstance.SdcardOk == 0)
@@ -1716,7 +1723,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 			ULONG Time;
 			// struct statvfs Status;
-			DATAF Tmp;
+			//DATAF Tmp;
 			DATA8* Name = CommonHelper.Pointer1d<DATA8>(vmNAMESIZE);
 			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(250);
 
@@ -1727,7 +1734,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 				GH.VMInstance.UsbstickTimer += Time;
 
-				if (GH.Memory.cMemoryGetMediaName("s".AsSbytePointer(), Name) == OK)
+				if (GH.Memory.cMemoryGetMediaName("s", Name) == OK)
 				{
 					//					if (GH.VMInstance.UsbstickOk == 0)
 					//					{
@@ -1815,13 +1822,13 @@ namespace Ev3CoreUnsafe.Lms2012
 			IMGHEAD* pImgHead;
 			DATA16 Loop;
 			
-			float Tmp;
+			//float Tmp;
 			DATA8* PrgNameBuf = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
 			DATA8* ParBuf = CommonHelper.Pointer1d<DATA8>(255);
 
 			GH.VMInstance.Status = 0x00;
 
-			ANALOG* pAdcTmp;
+			//ANALOG* pAdcTmp;
 
 			GH.VMInstance.pAnalog = (ANALOG*)GH.VMInstance.Analog;
 			// TODO: analog shite
@@ -1990,7 +1997,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 			GH.VMInstance.Test = 0;
 
-			VmPrint("\r\n\n\n\n\n\nLMS2012 VM STARTED\r\n{\r\n".AsSbytePointer());
+			VmPrint("\r\n\n\n\n\n\nLMS2012 VM STARTED\r\n{\r\n");
 			GH.VMInstance.ProgramId = DEBUG_SLOT;
 			pImgHead = (IMGHEAD*)UiImage;
 			(*pImgHead).ImageSize = 40; // sizeof(UiImage); 
@@ -2202,7 +2209,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		{
 			DATA32 Result = OK;
 
-			VmPrint("}\r\nVM OBJSTAT.STOPPED\r\n\n".AsSbytePointer());
+			VmPrint("}\r\nVM OBJSTAT.STOPPED\r\n\n");
 
 			// TODO: usb and sd card shite
 			//# ifndef DISABLE_SDCARD_SUPPORT
@@ -2312,10 +2319,10 @@ namespace Ev3CoreUnsafe.Lms2012
 		public void Error()
 		{
 			// TODO: probably uncomment
-			// ProgramEnd(GH.VMInstance.ProgramId);
-			// GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
-			// SetDispatchStatus((DSPSTAT)INSTRBREAK);
-			GH.Ev3System.Logger.LogError($"An error occured in prgId: {GH.VMInstance.ProgramId}");
+			ProgramEnd(GH.VMInstance.ProgramId);
+			GH.VMInstance.Program[GH.VMInstance.ProgramId].Result = RESULT.FAIL;
+			SetDispatchStatus((DSPSTAT)INSTRBREAK);
+			// GH.Ev3System.Logger.LogError($"An error occured in prgId: {GH.VMInstance.ProgramId}");
 		}
 
 
@@ -2935,12 +2942,12 @@ namespace Ev3CoreUnsafe.Lms2012
 						VmPrint(GH.VMInstance.PrintBuffer);
 						if (((Tmp & 0x0F) == 0xF) && (Tmp < (Size - 1)))
 						{
-							VmPrint("\r\n    ".AsSbytePointer());
+							VmPrint("\r\n    ");
 						}
 						Ram++;
 					}
 
-					VmPrint("\r\n    }\r\n".AsSbytePointer());
+					VmPrint("\r\n    }\r\n");
 				}
 			}
 		}
@@ -3996,14 +4003,14 @@ namespace Ev3CoreUnsafe.Lms2012
 					VmPrint(GH.VMInstance.PrintBuffer);
 					if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
 					{
-						VmPrint(" ".AsSbytePointer());
+						VmPrint(" ");
 					}
 					if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
 					{
-						VmPrint("\r\n".AsSbytePointer());
+						VmPrint("\r\n");
 					}
 				}
-				VmPrint("\r\n".AsSbytePointer());
+				VmPrint("\r\n");
 
 				CommonHelper.snprintf(GH.VMInstance.PrintBuffer, PRINTBUFFERSIZE, $"              GV={(ulong)GH.VMInstance.pGlobal:B} -> ");
 				VmPrint(GH.VMInstance.PrintBuffer);
@@ -4016,14 +4023,14 @@ namespace Ev3CoreUnsafe.Lms2012
 					VmPrint(GH.VMInstance.PrintBuffer);
 					if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
 					{
-						VmPrint(" ".AsSbytePointer());
+						VmPrint(" ");
 					}
 					if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
 					{
-						VmPrint("\r\n                             ".AsSbytePointer());
+						VmPrint("\r\n                             ");
 					}
 				}
-				VmPrint("\r\n".AsSbytePointer());
+				VmPrint("\r\n");
 
 				for (ObjId = 1; ObjId <= GH.VMInstance.Objects; ObjId++)
 				{
@@ -4091,18 +4098,18 @@ namespace Ev3CoreUnsafe.Lms2012
 						VmPrint(GH.VMInstance.PrintBuffer);
 						if (((Lv & 0x3) == 0x3) && ((Lv & 0xF) != 0xF))
 						{
-							VmPrint(" ".AsSbytePointer());
+							VmPrint(" ");
 						}
 						if (((Lv & 0xF) == 0xF) && (Lv < (Ln - 1)))
 						{
-							VmPrint("\r\n                             ".AsSbytePointer());
+							VmPrint("\r\n                             ");
 						}
 					}
-					VmPrint("\r\n".AsSbytePointer());
+					VmPrint("\r\n");
 
 				}
 
-				VmPrint("\r\n".AsSbytePointer());
+				VmPrint("\r\n");
 
 				Index = (IMINDEX)GH.VMInstance.ObjectIp - (IMINDEX)GH.VMInstance.pImage;
 				GH.Validate.cValidateDisassemble(GH.VMInstance.pImage, &Index, (LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label);
@@ -4146,7 +4153,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		public RESULT TstOpen(UWORD Time)
 		{
 			RESULT Result = RESULT.FAIL;
-			int File;
+			//int File;
 
 			if ((Time > 0) && (Time <= 30000))
 			{
@@ -4183,7 +4190,7 @@ namespace Ev3CoreUnsafe.Lms2012
 
 		public void TstClose()
 		{
-			int File;
+			//int File;
 
 			if (GH.VMInstance.Test != 0)
 			{
@@ -4575,7 +4582,7 @@ namespace Ev3CoreUnsafe.Lms2012
 			DATA8* Buffer = CommonHelper.Pointer1d<DATA8>(2);
 			TSTPIN Tstpin;
 			TSTUART Tstuart;
-			int File;
+			//int File;
 
 			Cmd = *(DATA8*)PrimParPointer();
 
@@ -4794,12 +4801,12 @@ namespace Ev3CoreUnsafe.Lms2012
 
 						case TST_RAM_CHECK:
 							{
-								ULONG RamCheckFile;
+								//ULONG RamCheckFile;
 								// TODO: ram check
 								//UBYTE RamStatus[2];
 
 								//RamCheckFile = open(UPDATE_DEVICE_NAME, O_RDWR);
-								Data8 = FAIL;
+								Data8 = OK;
 								//if (RamCheckFile >= 0)
 								//{
 								//	read(RamCheckFile, RamStatus, 2);

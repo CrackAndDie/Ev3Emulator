@@ -47,10 +47,10 @@ namespace Ev3CoreUnsafe.Cui
         public void dLcdExec(LCD* pDisp)
 		{
 			UBYTE* pSrc;
-			UBYTE* pDst;
-			ULONG Pixels;
-			UWORD X;
-			UWORD Y;
+			//UBYTE* pDst;
+			//ULONG Pixels;
+			//UWORD X;
+			//UWORD Y;
 
 			LCD* bufPtr = (LCD*)GH.VMInstance.LcdBuffer;
 			LCD* uiBufPtr = (LCD*)GH.UiInstance.LcdBuffer;
@@ -367,9 +367,10 @@ namespace Ev3CoreUnsafe.Cui
 			DATA16 CharWidth;
 			DATA16 CharHeight;
 			DATA16 CharByteIndex;
-			DATA16 LcdByteIndex;
+			//DATA16 LcdByteIndex;
 			UBYTE CharByte;
-			DATA16 Tmp, X, Y, TmpX, MaxX;
+			//DATA16 Tmp, MaxX;
+			DATA16 X, Y, TmpX;
 
 
 			CharWidth = FontInfo[Font].FontWidth;
@@ -537,7 +538,7 @@ namespace Ev3CoreUnsafe.Cui
 			UBYTE BitmapByte;
 			DATA16 Tmp, X, Y, TmpX, MaxX;
 
-			DATA16 LcdByteIndex;
+			//DATA16 LcdByteIndex;
 
 			if ((UIntPtr)pBitmap != 0)
 			{

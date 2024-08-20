@@ -12,8 +12,8 @@ namespace Ev3CoreUnsafe.Csound
 		public RESULT cSoundInit()
 		{
 			RESULT Result = RESULT.FAIL;
-			SOUND* pSoundTmp;
-			int SndFile;
+			//SOUND* pSoundTmp;
+			//int SndFile;
 
 			GH.SoundInstance.SoundDriverDescriptor = -1;
 			GH.SoundInstance.hSoundFile = null;

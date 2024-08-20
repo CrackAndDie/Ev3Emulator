@@ -390,12 +390,12 @@ namespace Ev3CoreUnsafe.Ccom
             return (Result);
         }
 
-        [Obsolete("Suck some dick")]
+        // [Obsolete("Suck some dick")]
         public void cComCloseFileHandle(SLONG* pHandle)
         {
             if (*pHandle >= MIN_HANDLE)
             {
-                // TODO: anime
+                // TODO: no need to close probably
                 // close(*pHandle);
                 *pHandle = -1;
             }
@@ -473,8 +473,8 @@ namespace Ev3CoreUnsafe.Ccom
 
         public void cComCreateBeginDl(TXBUF* pTxBuf, UBYTE* pName)
         {
-            UWORD Index;
-            UWORD ReadBytes;
+            //UWORD Index;
+            //UWORD ReadBytes;
             BEGIN_DL* pDlMsg;
             SBYTE FileHandle;
             DATA8* TmpFileName = CommonHelper.Pointer1d<DATA8>(vmFILENAMESIZE);
@@ -758,10 +758,10 @@ namespace Ev3CoreUnsafe.Ccom
                 CommonHelper.strncpy(pBuffer, NameList, FILENAMESIZE);   // Need to copy to tmp var to be able to add "/" for folders
                 *pNameLen = (uint)CommonHelper.strlen(NameList);               // + 1 is the new line character
 
-                CommonHelper.strcat(pBuffer, "/".AsSbytePointer());
+                CommonHelper.strcat(pBuffer, "/");
                 (*pNameLen)++;
 
-                CommonHelper.strcat(pBuffer, "\n".AsSbytePointer());
+                CommonHelper.strcat(pBuffer, "\n");
                 (*pNameLen)++;
 
             }
@@ -772,7 +772,7 @@ namespace Ev3CoreUnsafe.Ccom
                 {
 					/* If it is a file then add 16 bytes MD5SUM + space */
 					CommonHelper.strcpy(FileName, (DATA8*)pFolder);
-                    CommonHelper.strcat(FileName, "/".AsSbytePointer());
+                    CommonHelper.strcat(FileName, "/");
                     CommonHelper.strcat(FileName, NameList);
 
                     /* Get the MD5sum and put in the buffer */
@@ -787,7 +787,7 @@ namespace Ev3CoreUnsafe.Ccom
                     CommonHelper.strcat(pBuffer, NameList);
                     *pNameLen += (uint)CommonHelper.strlen(NameList);
 
-                    CommonHelper.strcat(pBuffer, "\n".AsSbytePointer());
+                    CommonHelper.strcat(pBuffer, "\n");
                     (*pNameLen)++;
                 }
             }
@@ -813,7 +813,7 @@ namespace Ev3CoreUnsafe.Ccom
                 Size /= KB;
             }
 
-            if (CommonHelper.strstr(pFullName, SDCARD_FOLDER.AsSbytePointer()) != null)
+            if (CommonHelper.strstr(pFullName, SDCARD_FOLDER) != null)
             {
                 if (GH.Lms.CheckSdcard(ChangedcComCheckForSpace, TotalSizecComCheckForSpace, FreeSizecComCheckForSpace, 1) != 0)
                 {
@@ -825,7 +825,7 @@ namespace Ev3CoreUnsafe.Ccom
             }
             else
             {
-                if (CommonHelper.strstr(pFullName, USBSTICK_FOLDER.AsSbytePointer()) != null)
+                if (CommonHelper.strstr(pFullName, USBSTICK_FOLDER) != null)
                 {
                     if (GH.Lms.CheckUsbstick(ChangedcComCheckForSpace, TotalSizecComCheckForSpace, FreeSizecComCheckForSpace, 1) != 0)
                     {
@@ -973,7 +973,7 @@ namespace Ev3CoreUnsafe.Ccom
                                     if (Folder[Tmp] == '/')
                                     {
                                         Folder[Tmp + 1] = 0;
-                                        if (CommonHelper.strcmp("~/".AsSbytePointer(), Folder) != 0)
+                                        if (CommonHelper.strcmp(Folder, "~/") != 0)
                                         {
                                             if (Directory.CreateDirectory(CommonHelper.GetString(Folder)) != null)
                                             {
@@ -1167,7 +1167,7 @@ namespace Ev3CoreUnsafe.Ccom
                 case BEGIN_UPLOAD:
                     {
                         ULONG BytesToRead;
-                        ULONG ReadBytes;
+                        //ULONG ReadBytes;
 
                         BEGIN_READ* pBeginRead; ;
                         RPLY_BEGIN_READ* pReplyBeginRead;
@@ -1373,7 +1373,7 @@ namespace Ev3CoreUnsafe.Ccom
                     {
 
                         ULONG BytesToRead;
-                        ULONG ReadBytes;
+                        //ULONG ReadBytes;
                         BEGIN_GET_FILE* pBeginGetFile; ;
                         RPLY_BEGIN_GET_FILE* pReplyBeginGetFile;
 
@@ -1609,7 +1609,12 @@ namespace Ev3CoreUnsafe.Ccom
                         pBeginList = (BEGIN_LIST*)pRxBuf->Buf;
                         pReplyBeginList = (RPLY_BEGIN_LIST*)pTxBuf->Buf;
 
-                        *FileHandlecComSystemCommand = cComGetHandle("ListFileHandle".AsSbytePointer());
+#pragma warning disable CS0618 // Тип или член устарел
+						sbyte* strTmp = "ListFileHandle".AsSbytePointer();
+#pragma warning restore CS0618 // Тип или член устарел
+						*FileHandlecComSystemCommand = cComGetHandle(strTmp);
+                        CommonHelper.DeleteByteArray((byte*)strTmp);
+
                         pTxBuf->pFile = &GH.ComInstance.Files[*FileHandlecComSystemCommand];   // Insert the file pointer into the ch struct
                         pTxBuf->FileHandle = (byte)*FileHandlecComSystemCommand;                       // Also save the File handle number
 
@@ -1664,11 +1669,11 @@ namespace Ev3CoreUnsafe.Ccom
                             else
                             {
                                 SLONG TmpN;
-                                ULONG NameLen;
+                                //ULONG NameLen;
                                 ULONG BytesToSend;
                                 UBYTE Repeat;
                                 UBYTE* pDstAdr;
-                                UBYTE* pSrcAdr;
+                                //UBYTE* pSrcAdr;
 
                                 TmpN = pTxBuf->pFile->File;     // Make a copy of number of entries
                                 Len = 0;
@@ -1816,8 +1821,8 @@ namespace Ev3CoreUnsafe.Ccom
                         ULONG BytesToRead;
                         ULONG Len = 0;
                         ULONG BytesToSend;
-                        ULONG NameLen;
-                        ULONG RemCharCnt;
+                        //ULONG NameLen;
+                        //ULONG RemCharCnt;
                         UBYTE Repeat;
                         DATA8* TmpFileName = CommonHelper.Pointer1d<DATA8>(FILENAMESIZE);
 
@@ -2080,10 +2085,10 @@ namespace Ev3CoreUnsafe.Ccom
 							}
 							else
 							{
-								pReplyRemove->CmdType = SYSTEM_REPLY_ERROR;
-								pReplyRemove->Status = NO_PERMISSION;
+								//pReplyRemove->CmdType = SYSTEM_REPLY_ERROR;
+								//pReplyRemove->Status = NO_PERMISSION;
 
-								GH.printf($"File {CommonHelper.GetString(Folder)} not deleted (%s)\r\n");
+								//GH.printf($"File {CommonHelper.GetString(Folder)} not deleted (%s)\r\n");
 							}
 						}
                         else
@@ -2096,10 +2101,10 @@ namespace Ev3CoreUnsafe.Ccom
 							}
 							else
 							{
-								pReplyRemove->CmdType = SYSTEM_REPLY_ERROR;
-								pReplyRemove->Status = NO_PERMISSION;
+								//pReplyRemove->CmdType = SYSTEM_REPLY_ERROR;
+								//pReplyRemove->Status = NO_PERMISSION;
 
-								GH.printf($"Folder {CommonHelper.GetString(Folder)} not deleted (%s)\r\n");
+								//GH.printf($"Folder {CommonHelper.GetString(Folder)} not deleted (%s)\r\n");
 							}
 						}
                         
@@ -2208,8 +2213,8 @@ namespace Ev3CoreUnsafe.Ccom
 
                 case ENTERFWUPDATE:
                     {
-                        ULONG UpdateFile;
-                        UBYTE Dummy;
+                        //ULONG UpdateFile;
+                        //UBYTE Dummy;
 
                         if (USBDEV == GH.ComInstance.ActiveComCh)
                         {
@@ -2860,8 +2865,8 @@ namespace Ev3CoreUnsafe.Ccom
                         {
                             ULONG TmpN;
                             ULONG Len;
-                            ULONG NameLen;
-                            ULONG RemCharCnt;
+                            //ULONG NameLen;
+                            //ULONG RemCharCnt;
                             ULONG BytesToSend;
                             UBYTE Repeat;
                             DATA8* TmpFileName = CommonHelper.Pointer1d<DATA8>(FILENAMESIZE);
@@ -3764,7 +3769,7 @@ namespace Ev3CoreUnsafe.Ccom
 
                             // Make copy of Foldername including a "/" at the end
                             CommonHelper.snprintf((DATA8*)pTxBuf->Folder, MAX_FILENAME_SIZE, CommonHelper.GetString(pFileName));
-                            CommonHelper.strcat((DATA8*)pTxBuf->Folder, "/".AsSbytePointer());
+                            CommonHelper.strcat((DATA8*)pTxBuf->Folder, "/");
 
                             pTxBuf->pDir = (DATA8*)pFileName;
 
@@ -4487,14 +4492,14 @@ namespace Ev3CoreUnsafe.Ccom
                         }
                         else
                         {
-                            if (vmMACSIZE >= vmIPSIZE)
-                            {
-                                MaxStrLen = vmMACSIZE;
-                            }
-                            else
-                            {
-                                MaxStrLen = vmIPSIZE;
-                            }
+                            //if (vmMACSIZE >= vmIPSIZE)
+                            //{
+                            //    MaxStrLen = vmMACSIZE;
+                            //}
+                            //else
+                            //{
+                            //    MaxStrLen = vmIPSIZE;
+                            //}
                         }
 
                         pName = (DATA8*)GH.Lms.PrimParPointer();

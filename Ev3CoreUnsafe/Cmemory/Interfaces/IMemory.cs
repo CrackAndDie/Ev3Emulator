@@ -46,6 +46,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 		RESULT cMemoryCheckFilename(DATA8* pFilename, DATA8* pPath, DATA8* pName, DATA8* pExt);
 
 		RESULT cMemoryGetMediaName(DATA8* pChar, DATA8* pName);
+        RESULT cMemoryGetMediaName(string pChar, DATA8* pName);
 
 
 
@@ -128,7 +129,7 @@ namespace Ev3CoreUnsafe.Cmemory.Interfaces
 		public DATA8** PathList;
 		public POOL** pPoolList;
 
-		[Obsolete("Programs are not cached here")]
+		// [Obsolete("Programs are not cached here")]
 		public DATA8** Cache;
 
 		public MEMORY_GLOBALS()

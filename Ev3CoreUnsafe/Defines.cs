@@ -458,7 +458,9 @@ namespace Ev3CoreUnsafe
 				tmp.Add(opFILE); tmp.Add(LC0(LOAD_IMAGE)); tmp.Add(LC0(GUI_SLOT)); tmp.Add(GV0(0)); tmp.Add(LV0(4)); tmp.Add(LV0(0));
 				tmp.Add(opPROGRAM_START); tmp.Add(LC0(GUI_SLOT)); tmp.Add(LC0(0)); tmp.Add(LV0(0)); tmp.Add(LC0(0));
 				tmp.Add(opOBJECT_END);
+#pragma warning disable CS0618 // Тип или член устарел
 				_uiImage = tmp.ToArray().AsPointer();
+#pragma warning restore CS0618 // Тип или член устарел
 				return _uiImage;
 			}
 		}
@@ -1217,22 +1219,26 @@ namespace Ev3CoreUnsafe
 
 		public unsafe static KeyValuePair<OP, OPCODE> OC(OP opCode, byte par1, byte par2, byte par3, byte par4, byte par5, byte par6, byte par7, byte par8)
 		{
+#pragma warning disable CS0618 // Тип или член устарел
 			return new KeyValuePair<OP, OPCODE>(opCode, new OPCODE()
 			{
 				Name = (byte*)Enum.GetName(opCode.GetType(), opCode).AsSbytePointer(),
 				Pars = ((ULONG)par1) + ((ULONG)par2 << 4) + ((ULONG)par3 << 8) + ((ULONG)par4 << 12) +
 						((ULONG)par5 << 16) + ((ULONG)par6 << 20) + ((ULONG)par7 << 24) + ((ULONG)par8 << 28),
 			});
+#pragma warning restore CS0618 // Тип или член устарел
 		}
 
 		public unsafe static KeyValuePair<byte, SUBCODE> SC(string subCodeName, byte subcode, byte par1, byte par2, byte par3, byte par4, byte par5, byte par6, byte par7, byte par8)
 		{
+#pragma warning disable CS0618 // Тип или член устарел
 			return new KeyValuePair<byte, SUBCODE>(subcode, new SUBCODE()
 			{
 				Name = (byte*)subCodeName.AsSbytePointer(),
 				Pars = ((ULONG)par1) + ((ULONG)par2 << 4) + ((ULONG)par3 << 8) + ((ULONG)par4 << 12) +
 						((ULONG)par5 << 16) + ((ULONG)par6 << 20) + ((ULONG)par7 << 24) + ((ULONG)par8 << 28),
 			});
+#pragma warning restore CS0618 // Тип или член устарел
 		}
 
 		public static Dictionary<OP, OPCODE> OpCodes = new Dictionary<OP, OPCODE>(new[]
@@ -2397,6 +2403,7 @@ namespace Ev3CoreUnsafe
 		#region c_input.c
 		public const int LINESIZE = 255;
 
+#pragma warning disable CS0618 // Тип или член устарел
 		public unsafe static IMGDATA* CLR_LAYER_CLR_CHANGES = (new byte[] { opINPUT_DEVICE, CLR_CHANGES, 0, 0, opINPUT_DEVICE, CLR_CHANGES, 0, 1, opINPUT_DEVICE, CLR_CHANGES, 0, 2, opINPUT_DEVICE, CLR_CHANGES, 0, 3, opOBJECT_END }).AsPointer();
 		public unsafe static IMGDATA* CLR_LAYER_CLR_BUMBED = (new byte[] { opUI_BUTTON, FLUSH, opOBJECT_END }).AsPointer();
 		public unsafe static IMGDATA* CLR_LAYER_OUTPUT_RESET = (new byte[] { opOUTPUT_RESET, 0, 15, opOBJECT_END }).AsPointer();
@@ -2413,6 +2420,7 @@ namespace Ev3CoreUnsafe
 			new TYPES("UNKNOWN".AsSbytePointer())    {      Type = TYPE_UNKNOWN, Connection = CONN_UNKNOWN, Mode = 0, DataSets = 1, Format = 1, Figures = 4, Decimals = 0, Views = 1, RawMin = 0.0f, RawMax = 1023.0f, PctMin = 0.0f, PctMax = 100.0f, SiMin = 0.0f, SiMax = 1023.0f, InvalidTime = 0, IdValue = 0, Pins = (sbyte)'f', },
 			new TYPES("".AsSbytePointer())           { }
 		};
+#pragma warning restore CS0618 // Тип или член устарел
 
 		public const int SENSOR_RESOLUTION = 1023;
 
@@ -2468,7 +2476,9 @@ namespace Ev3CoreUnsafe
 		#region c_ui.c
 		public const int CALL_INTERVAL = 400;  // [mS]
 
+#pragma warning disable CS0618 // Тип или член устарел
 		public unsafe static IMGDATA* DownloadSuccesSound = (new byte[] { opINFO, LC0(GET_VOLUME), LV0(0), opSOUND, LC0(PLAY), LV0(0), LCS, (byte)'u', (byte)'i', (byte)'/', (byte)'D', (byte)'o', (byte)'w', (byte)'n', (byte)'l', (byte)'o', (byte)'a', (byte)'d', (byte)'S', (byte)'u', (byte)'c', (byte)'c', (byte)'e', (byte)'s', 0, opSOUND_READY, opOBJECT_END }).AsPointer();
+#pragma warning restore CS0618 // Тип или член устарел
 
 		public const int REAL_ANY_BUTTON = 6;
 		public const int REAL_NO_BUTTON = 7;
@@ -2612,7 +2622,7 @@ namespace Ev3CoreUnsafe
 		{
 			{ NORMAL_FONT, new FONTINFO()
 							{
-								pFontBits    = BmpHelper.GetBytesOf(BmpType.NormalFont).AsPointer(),
+								pFontBits    = BmpHelper.GetBytesOf(BmpType.NormalFont),
 								FontHeight   = 9,
 								FontWidth    = 8,
 								FontHorz     = 16,
@@ -2621,7 +2631,7 @@ namespace Ev3CoreUnsafe
 							}},
 			{ SMALL_FONT, new FONTINFO()
 							{
-								pFontBits    = BmpHelper.GetBytesOf(BmpType.SmallFont).AsPointer(),
+								pFontBits    = BmpHelper.GetBytesOf(BmpType.SmallFont),
 								FontHeight   = 8,
 								FontWidth    = 8,
 								FontHorz     = 16,
@@ -2630,7 +2640,7 @@ namespace Ev3CoreUnsafe
 							}},
 			{ LARGE_FONT, new FONTINFO()
 							{
-								pFontBits = BmpHelper.GetBytesOf(BmpType.LargeFont).AsPointer(),
+								pFontBits = BmpHelper.GetBytesOf(BmpType.LargeFont),
 								FontHeight = 16,
 								FontWidth = 16,
 								FontHorz = 16,
@@ -2639,7 +2649,7 @@ namespace Ev3CoreUnsafe
 							}},
 			{ TINY_FONT, new FONTINFO()
 							{
-								pFontBits = BmpHelper.GetBytesOf(BmpType.TinyFont).AsPointer(),
+								pFontBits = BmpHelper.GetBytesOf(BmpType.TinyFont),
 								FontHeight = 7,
 								FontWidth = 5,
 								FontHorz = 16,
@@ -2653,35 +2663,35 @@ namespace Ev3CoreUnsafe
 		{
 			{ NORMAL_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.NormalIcons).AsPointer(),
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.NormalIcons),
 								IconSize     = 420,
 								IconHeight   = 12,
 								IconWidth    = 24,
 							}},
 			{ SMALL_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.SmallIcons).AsPointer(),
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.SmallIcons),
 								IconSize     = 176,
 								IconHeight   = 8,
 								IconWidth    = 16,
 							}},
 			{ LARGE_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.LargeIcons).AsPointer(),
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.LargeIcons),
 								IconSize     = 616,
 								IconHeight   = 22,
 								IconWidth    = 24,
 							}},
 			{ MENU_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.MenuIcons).AsPointer(),
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.MenuIcons),
 								IconSize     = 132,
 								IconHeight   = 12,
 								IconWidth    = 16,
 							}},
 			{ ARROW_ICON, new ICONINFO()
 							{
-								pIconBits    = BmpHelper.GetBytesOf(BmpType.ArrowIcons).AsPointer(),
+								pIconBits    = BmpHelper.GetBytesOf(BmpType.ArrowIcons),
 								IconSize     = 36,
 								IconHeight   = 12,
 								IconWidth    = 8,
