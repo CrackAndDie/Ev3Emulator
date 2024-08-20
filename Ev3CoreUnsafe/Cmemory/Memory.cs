@@ -2668,15 +2668,26 @@ namespace Ev3CoreUnsafe.Cmemory
 								GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE  [{CommonHelper.GetString(FilenameBuf)}]\r\n");
 								using var hFile = File.OpenRead(CommonHelper.GetString(FilenameBuf));
 
+								if (GH.ENABLE_THREAD_SLEEP)
+									Thread.Sleep(200);
+
 								*ISizecMemoryFile = (int)hFile.Length;
 
 								// allocate memory to contain the whole file:
 								fixed (byte** pp = &pImagecMemoryFile)
-								if (cMemoryAlloc((ushort)PrgNo, POOL_TYPE_MEMORY, (GBINDEX)(* ISizecMemoryFile), (void**)pp, TmpHandlecMemoryFile) == OK)
 								{
-									hFile.ReadUnsafe(pImagecMemoryFile, 0, *ISizecMemoryFile);
-									ImagePointer = (DATA32)pImagecMemoryFile;
-									DspStat = DSPSTAT.NOBREAK;
+									GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE pp [{(int)pp}]\r\n");
+									GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE pp2 [{(int)pImagecMemoryFile}]\r\n");
+									GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE size [{(GBINDEX)(*ISizecMemoryFile)}]\r\n");
+									if (cMemoryAlloc((ushort)PrgNo, POOL_TYPE_MEMORY, (GBINDEX)(*ISizecMemoryFile), (void**)pp, TmpHandlecMemoryFile) == OK)
+									{
+										GH.printf($"c_memory  cMemoryFile: LOAD_IMAGE pp2 after [{(int)pImagecMemoryFile}]\r\n");
+										hFile.ReadUnsafe(pImagecMemoryFile, 0, *ISizecMemoryFile);
+										ImagePointer = (DATA32)pImagecMemoryFile;
+										DspStat = DSPSTAT.NOBREAK;
+									}
+									if (GH.ENABLE_THREAD_SLEEP)
+										Thread.Sleep(200);
 								}
 
 								hFile.Close();
@@ -2685,6 +2696,8 @@ namespace Ev3CoreUnsafe.Cmemory
 
 								*(DATA32*)GH.Lms.PrimParPointer() = *ISizecMemoryFile;
 								*(DATA32*)GH.Lms.PrimParPointer() = (int)ImagePointer;
+								if (GH.ENABLE_THREAD_SLEEP)
+									Thread.Sleep(200);
 							}
 							else
 							{
@@ -2904,6 +2917,8 @@ namespace Ev3CoreUnsafe.Cmemory
 				GH.Lms.SetObjectIp(TmpIp - 1);
 			}
 			GH.Lms.SetDispatchStatus(DspStat);
+
+			GH.Ev3System.Logger.LogInfo("exit in cMemoryFile");
 		}
 
 

@@ -14,7 +14,7 @@ namespace Ev3CoreUnsafe.Helpers
 			tmp->GlobalBytes = 0;
 			tmp2.GlobalBytes = 0;
 
-			CommonHelper.DeleteByteArray((byte*)&tmp[4]);
+			CommonHelper.DeleteByteArray((byte*)&tmp[6]);
 
 			//for (int i = 0; i < 20; ++i)
 			//{
@@ -36,7 +36,15 @@ namespace Ev3CoreUnsafe.Helpers
 
 			// CommonHelper.DeleteByteArray((byte*)100000);
 
-			Thread.Sleep(1000);
+			//IntPtr handler = Marshal.AllocHGlobal(3);
+			//var ptr = (byte*)handler.ToPointer();
+
+			//CommonHelper.memset(ptr, 0, 3);
+
+			//var handler2 = new IntPtr(&ptr[6]);
+			//Marshal.FreeHGlobal(handler2);
+
+			Thread.Sleep(2000);
 
 			System.Console.WriteLine("asdasd");
 		}

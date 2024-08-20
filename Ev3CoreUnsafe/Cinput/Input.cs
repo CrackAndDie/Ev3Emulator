@@ -2072,34 +2072,34 @@ namespace Ev3CoreUnsafe.Cinput
 						(*GH.InputInstance.UartCtl).Mode = GH.InputInstance.TmpMode[Port];
 						GH.Ev3System.InputHandler.IoctlUart(UART_READ_MODE_INFO, (*GH.InputInstance.UartCtl));
 
-						if ((*GH.InputInstance.UartCtl).TypeData.Name[0] != 0)
+						if ((*(*GH.InputInstance.UartCtl).TypeData).Name[0] != 0)
 						{ // Info available
 
-							Result = cInputGetNewTypeDataPointer((sbyte*)(*GH.InputInstance.UartCtl).TypeData.Name, (*GH.InputInstance.UartCtl).TypeData.Type, (*GH.InputInstance.UartCtl).TypeData.Mode, CONN_INPUT_UART, &pTmp);
+							Result = cInputGetNewTypeDataPointer((sbyte*)(*(*GH.InputInstance.UartCtl).TypeData).Name, (*(*GH.InputInstance.UartCtl).TypeData).Type, (*(*GH.InputInstance.UartCtl).TypeData).Mode, CONN_INPUT_UART, &pTmp);
 							if (pTmp != null)
 							{ // Tabel index found
 
 								if (GH.InputInstance.DeviceType[Port] == TYPE_UNKNOWN)
 								{ // Use first mode info to set type
 
-									GH.InputInstance.DeviceType[Port] = (*GH.InputInstance.UartCtl).TypeData.Type;
+									GH.InputInstance.DeviceType[Port] = (*(*GH.InputInstance.UartCtl).TypeData).Type;
 								}
 
 								if (Result == OK)
 								{ // New mode
 
 									// Insert in tabel
-									Memcpy((byte*)pTmp, (byte*)Unsafe.AsPointer(ref (*GH.InputInstance.UartCtl).TypeData), sizeof(TYPES));
+									Memcpy((byte*)pTmp, (byte*)(*GH.InputInstance.UartCtl).TypeData, sizeof(TYPES));
 
 								}
-								if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)(byte*)Unsafe.AsPointer(ref (*GH.InputInstance.UartCtl).TypeData)) == RESULT.BUSY)
+								if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)(*GH.InputInstance.UartCtl).TypeData) == RESULT.BUSY)
 								{ // Chain not ready - roll back
 
                                     GH.Ev3System.InputHandler.IoctlUart(UART_NACK_MODE_INFO, (*GH.InputInstance.UartCtl));
 									GH.InputInstance.TmpMode[Port]++;
 								}
 
-								GH.printf($"P={Port} T={(*GH.InputInstance.UartCtl).TypeData.Type} M={(*GH.InputInstance.UartCtl).TypeData.Mode} N={CommonHelper.GetString((sbyte*)(*GH.InputInstance.UartCtl).TypeData.Name)}\r\n");
+								GH.printf($"P={Port} T={(*(*GH.InputInstance.UartCtl).TypeData).Type} M={(*(*GH.InputInstance.UartCtl).TypeData).Mode} N={CommonHelper.GetString((sbyte*)(*(*GH.InputInstance.UartCtl).TypeData).Name)}\r\n");
 							}
 						}
 					}

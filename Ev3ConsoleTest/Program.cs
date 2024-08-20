@@ -15,14 +15,14 @@ namespace Ev3ConsoleTest
     {
         static unsafe void Main(string[] args)
         {
-            // EnumlatorTest();
-            CommonTest();
+            EnumlatorTest();
+            // CommonTest();
 			// var th = new Thread(EnumlatorTest);
 			//var th = new Thread(CommonTest);
 			//         th.Start();
 			// th.Join();
 
-			Console.ReadKey();
+			// Console.ReadKey();
 		}
 
 		#region common test

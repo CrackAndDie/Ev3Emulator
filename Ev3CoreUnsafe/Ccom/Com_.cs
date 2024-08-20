@@ -2316,7 +2316,7 @@ namespace Ev3CoreUnsafe.Ccom
                 pRxBuf = &(GH.ComInstance.RxBuf[ChNo]);
                 BytesRead = 0;
 
-				GH.Ev3System.Logger.LogInfo($"In loop cComUpdate ch {ChNo}");
+				// GH.Ev3System.Logger.LogInfo($"In loop cComUpdate ch {ChNo}");
 
 				if (pTxBuf->Writing == 0)
                 {
@@ -2776,7 +2776,7 @@ namespace Ev3CoreUnsafe.Ccom
             if (0 == pTxBuf->Writing)
             {
                 // Tx buffer needs to be empty to fill new data into it....
-                GH.Ev3System.Logger.LogInfo($"Current com tx state: {pTxBuf->State}");
+                // GH.Ev3System.Logger.LogInfo($"Current com tx state: {pTxBuf->State}");
                 switch (pTxBuf->State)
                 {
                     case TXFILEUPLOAD:
@@ -2993,7 +2993,7 @@ namespace Ev3CoreUnsafe.Ccom
                 }
             }
 
-			GH.Ev3System.Logger.LogInfo($"exit of cComTxUpdate");
+			// GH.Ev3System.Logger.LogInfo($"exit of cComTxUpdate");
 		}
 
 

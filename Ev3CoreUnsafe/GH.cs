@@ -17,6 +17,8 @@ namespace Ev3CoreUnsafe
 {
     public static class GH
     {
+        public static bool ENABLE_THREAD_SLEEP = true;
+
         public static IEv3System Ev3System { get; set; }
 
         // lms2012
@@ -69,7 +71,7 @@ namespace Ev3CoreUnsafe
         // other shite
         public static int printf(string ln)
         {
-            Ev3System.Logger.LogInfo(ln);
+            Ev3System?.Logger?.LogInfo(ln);
             return ln.Length;
         }
     }

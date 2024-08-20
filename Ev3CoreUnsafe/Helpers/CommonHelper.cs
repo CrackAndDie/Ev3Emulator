@@ -81,8 +81,12 @@ namespace Ev3CoreUnsafe.Helpers
 
 		public unsafe static byte* AllocateByteArray(int amount, bool fillZeros = true)
 		{
+			// GH.printf($"Before allocating {amount} bytes");
+
 			IntPtr handler = Marshal.AllocHGlobal(amount);
 			var ptr = (byte*)handler.ToPointer();
+
+			// GH.printf($"Allocated {amount} bytes by {(int)ptr}");
 
 			// if should be zeroed
 			if (fillZeros)
@@ -93,10 +97,11 @@ namespace Ev3CoreUnsafe.Helpers
 		}
 
 		public unsafe static void DeleteByteArray(byte* ptr)
-		{ 
-			// GH.Ev3System.Logger.LogWarning($"before deleting ptr: {Environment.StackTrace}"); 
+		{
+			GH.printf($"Before deleting {(int)ptr}");
 			var handler = new IntPtr(ptr);
 			Marshal.FreeHGlobal(handler);
+			GH.printf($"Deleted {(int)ptr}");
 		}
 
 #pragma warning disable CS8500 // Это принимает адрес, получает размер или объявляет указатель на управляемый тип
@@ -294,7 +299,7 @@ namespace Ev3CoreUnsafe.Helpers
 			while (true)
 			{
 				bool done1 = str1[curr] == 0;
-				bool done2 = str1[curr] == 0;
+				bool done2 = str2[curr] == 0;
 
 				if (done1 && done2)
 					break;
@@ -319,7 +324,7 @@ namespace Ev3CoreUnsafe.Helpers
 			while (true)
 			{
 				bool done1 = str1[curr] == 0;
-				bool done2 = str1[curr] == 0;
+				bool done2 = str2.Length == curr;
 
 				if (done1 && done2)
 					break;
@@ -374,9 +379,9 @@ namespace Ev3CoreUnsafe.Helpers
 			int i = 0;
 			while (true)
 			{
-				if (src[i] == 0)
+				if (src.Length == i)
 				{
-					dst[i] = (sbyte)src[i];
+					dst[i] = (sbyte)'\0';
 					return dst;
 				}
 
@@ -396,7 +401,7 @@ namespace Ev3CoreUnsafe.Helpers
 				if (str1[i] == 0)
 					break;
 
-				if (str1[i] == str1[localPointer])
+				if (str1[i] == str2[localPointer])
 				{
 					while (true)
 					{
@@ -429,11 +434,11 @@ namespace Ev3CoreUnsafe.Helpers
 				if (str1[i] == 0)
 					break;
 
-				if (str1[i] == str1[localPointer])
+				if (str1[i] == str2[localPointer])
 				{
 					while (true)
 					{
-						if (str2[localPointer] == 0)
+						if (str2.Length == localPointer)
 							return &str1[i];
 
 						if (str1[i + localPointer] == 0)
@@ -480,7 +485,7 @@ namespace Ev3CoreUnsafe.Helpers
 			}
 			// copy
 			int srcPointer = 0;
-			while (src[srcPointer] != 0)
+			while (src.Length > srcPointer)
 			{
 				dst[localPointer + srcPointer] = (sbyte)src[srcPointer];
 				srcPointer++;

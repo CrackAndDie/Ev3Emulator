@@ -4,6 +4,7 @@ using Ev3CoreUnsafe.Helpers;
 using Ev3CoreUnsafe.Lms2012.Interfaces;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
+using System.Text;
 using static Ev3CoreUnsafe.Defines;
 
 namespace Ev3CoreUnsafe.Lms2012
@@ -361,7 +362,8 @@ namespace Ev3CoreUnsafe.Lms2012
 				{
 					GH.VMInstance.OldTime2 += Time;
 
-					Thread.Sleep(1); // TODO: do i need the sleep?
+					if (GH.ENABLE_THREAD_SLEEP)
+						Thread.Sleep(1); // TODO: do i need the sleep?
 					GH.Input.cInputUpdate((UWORD)Time);
 					GH.Ui.cUiUpdate((UWORD)Time);
 				}
@@ -479,7 +481,7 @@ namespace Ev3CoreUnsafe.Lms2012
 		{
 			IMGDATA Data;
 
-			ResultPrimParPointer = (void*)Unsafe.AsPointer(ref GH.VMInstance.Value);
+			ResultPrimParPointer = (void*)GH.VMInstance.Value;
 			Data = *((IMGDATA*)GH.VMInstance.ObjectIp++);
 			GH.VMInstance.Handle = -1;
 
@@ -495,25 +497,25 @@ namespace Ev3CoreUnsafe.Lms2012
 						case PRIMPAR_1_BYTE:
 							{ // One byte to follow
 
-								GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+								*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
 							}
 							break;
 
 						case PRIMPAR_2_BYTES:
 							{ // Two bytes to follow
 
-								GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+								*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+								*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
 							}
 							break;
 
 						case PRIMPAR_4_BYTES:
 							{ // Four bytes to follow
 
-								GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
-								GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
+								*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+								*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+								*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
+								*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
 							}
 							break;
 
@@ -521,12 +523,12 @@ namespace Ev3CoreUnsafe.Lms2012
 					if ((Data & PRIMPAR_GLOBAL) != 0)
 					{ // global
 
-						ResultPrimParPointer = (void*)(&GH.VMInstance.pGlobal[GH.VMInstance.Value]);
+						ResultPrimParPointer = (void*)(&GH.VMInstance.pGlobal[*GH.VMInstance.Value]);
 					}
 					else
 					{ // local
 
-						ResultPrimParPointer = (void*)(&GH.VMInstance.ObjectLocal[GH.VMInstance.Value]);
+						ResultPrimParPointer = (void*)(&GH.VMInstance.ObjectLocal[*GH.VMInstance.Value]);
 					}
 				}
 				else
@@ -535,13 +537,13 @@ namespace Ev3CoreUnsafe.Lms2012
 					if ((Data & PRIMPAR_LABEL) != 0)
 					{ // label
 
-						GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+						*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
 
-						if ((GH.VMInstance.Value > 0) && (GH.VMInstance.Value < MAX_LABELS))
+						if ((*GH.VMInstance.Value > 0) && (*GH.VMInstance.Value < MAX_LABELS))
 						{
-							GH.VMInstance.Value = (ULONG)((LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label)[GH.VMInstance.Value].Addr;
-							GH.VMInstance.Value -= ((ULONG)GH.VMInstance.ObjectIp - (ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage);
-							ResultPrimParPointer = (void*)Unsafe.AsPointer(ref GH.VMInstance.Value);
+							*GH.VMInstance.Value = (ULONG)((LABEL*)GH.VMInstance.Program[GH.VMInstance.ProgramId].Label)[*GH.VMInstance.Value].Addr;
+							*GH.VMInstance.Value -= ((ULONG)GH.VMInstance.ObjectIp - (ULONG)GH.VMInstance.Program[GH.VMInstance.ProgramId].pImage);
+							ResultPrimParPointer = (void*)GH.VMInstance.Value;
 						}
 					}
 					else
@@ -563,11 +565,11 @@ namespace Ev3CoreUnsafe.Lms2012
 							case PRIMPAR_1_BYTE:
 								{ // One byte to follow
 
-									GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-									if ((GH.VMInstance.Value & 0x00000080) != 0)
+									*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+									if ((*GH.VMInstance.Value & 0x00000080) != 0)
 									{ // Adjust if negative
 
-										GH.VMInstance.Value |= 0xFFFFFF00;
+										*GH.VMInstance.Value |= 0xFFFFFF00;
 									}
 								}
 								break;
@@ -575,12 +577,12 @@ namespace Ev3CoreUnsafe.Lms2012
 							case PRIMPAR_2_BYTES:
 								{ // Two bytes to follow
 
-									GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-									if ((GH.VMInstance.Value & 0x00008000) != 0)
+									*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+									*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+									if ((*GH.VMInstance.Value & 0x00008000) != 0)
 									{ // Adjust if negative
 
-										GH.VMInstance.Value |= 0xFFFF0000;
+										*GH.VMInstance.Value |= 0xFFFF0000;
 									}
 								}
 								break;
@@ -588,10 +590,10 @@ namespace Ev3CoreUnsafe.Lms2012
 							case PRIMPAR_4_BYTES:
 								{ // Four bytes to follow
 
-									GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
-									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
-									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
-									GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
+									*GH.VMInstance.Value = (ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++));
+									*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 8));
+									*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 16));
+									*GH.VMInstance.Value |= ((ULONG)(*((IMGDATA*)GH.VMInstance.ObjectIp++) << 24));
 								}
 								break;
 						}
@@ -608,7 +610,7 @@ namespace Ev3CoreUnsafe.Lms2012
 					if ((Data & PRIMPAR_ADDR) != 0)
 					{
 						ResultPrimParPointer = (void*)*(DATA32*)ResultPrimParPointer;
-						GH.VMInstance.Value = (uint)(DATA32)ResultPrimParPointer;
+						*GH.VMInstance.Value = (uint)(DATA32)ResultPrimParPointer;
 					}
 				}
 			}
@@ -618,28 +620,28 @@ namespace Ev3CoreUnsafe.Lms2012
 				if ((Data & PRIMPAR_VARIABEL) != 0)
 				{ // variabel
 
-					GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_INDEX);
+					*GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_INDEX);
 
 					if ((Data & PRIMPAR_GLOBAL) != 0)
 					{ // global
 
-						ResultPrimParPointer = (void*)(&GH.VMInstance.pGlobal[GH.VMInstance.Value]);
+						ResultPrimParPointer = (void*)(&GH.VMInstance.pGlobal[*GH.VMInstance.Value]);
 					}
 					else
 					{ // local
 
-						ResultPrimParPointer = (void*)(&GH.VMInstance.ObjectLocal[GH.VMInstance.Value]);
+						ResultPrimParPointer = (void*)(&GH.VMInstance.ObjectLocal[*GH.VMInstance.Value]);
 					}
 				}
 				else
 				{ // constant
 
-					GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_VALUE);
+					*GH.VMInstance.Value = (ULONG)(Data & PRIMPAR_VALUE);
 
 					if ((Data & PRIMPAR_CONST_SIGN) != 0)
 					{ // Adjust if negative
 
-						GH.VMInstance.Value |= ~(ULONG)(PRIMPAR_VALUE);
+						*GH.VMInstance.Value |= ~(ULONG)(PRIMPAR_VALUE);
 					}
 				}
 			}
@@ -1226,6 +1228,8 @@ namespace Ev3CoreUnsafe.Lms2012
 
 							GH.VMInstance.Program[PrgId].pObjHead = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
 
+							GH.printf($"ProgramReset: object amount: {GH.VMInstance.Program[PrgId].Objects}");
+
 							for (ObjIndex = 1; ObjIndex <= GH.VMInstance.Program[PrgId].Objects; ObjIndex++)
 							{
 								// Align
@@ -1235,13 +1239,19 @@ namespace Ev3CoreUnsafe.Lms2012
 								// Save object pointer in Object list
 
 								OBJ* dataTmp = (OBJ*)pDataProgramReset;
-								dataTmp->Local = pDataProgramReset + OBJ.Sizeof;
+								// dataTmp->Local = pDataProgramReset + OBJ.Sizeof;
 
 								GH.VMInstance.Program[PrgId].pObjList[ObjIndex] = dataTmp;
 
 								// Initialise instruction pointer, trigger counts and status
 
 								(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &pI[(ULONG)GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
+								GH.printf($"		ProgramReset: object {ObjIndex}: {(int)(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip}");
+
+								//for (int i = 0; i < GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes; ++i)
+								//{
+								//	GH.printf($"			   ProgramReset: object ip {i}: {(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip[i]}");
+								//}
 
 								(*GH.VMInstance.Program[PrgId].pObjList[ObjIndex]).TriggerCount = GH.VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
 
@@ -2040,6 +2050,9 @@ namespace Ev3CoreUnsafe.Lms2012
 				GH.printf($"\r\n  {GH.VMInstance.ProgramId}  {GH.VMInstance.ObjectId}");
 			}
 
+			if (GH.ENABLE_THREAD_SLEEP)
+				Thread.Sleep(1000);
+
 			Time = GH.Timer.cTimerGetuS();
 			Time -= GH.VMInstance.PerformTimer;
 			GH.VMInstance.PerformTime *= (DATAF)199;
@@ -2071,7 +2084,9 @@ namespace Ev3CoreUnsafe.Lms2012
 					var mtd = PrimDispatchTabel[*(GH.VMInstance.ObjectIp++)];
 					GH.Ev3System.Logger.LogInfo($"CALLING METHOD NAME: {mtd.Method.Name}");
 					mtd();
-					Thread.Sleep(1000);
+					GH.Ev3System.Logger.LogInfo("Before thread sleep in mSchedCtrl");
+					if (GH.ENABLE_THREAD_SLEEP)
+						Thread.Sleep(1000);
 					GH.Ev3System.Logger.LogError($"new CURRENT OBJECTIP: {*GH.VMInstance.ObjectIp}");
 
 					GH.VMInstance.InstrCnt++;
@@ -2080,6 +2095,8 @@ namespace Ev3CoreUnsafe.Lms2012
 						GH.printf(".");
 					}
 				}
+				if (GH.ENABLE_THREAD_SLEEP)
+					Thread.Sleep(1000);
 			}
 
 			/*****************************************************************************/
@@ -2110,7 +2127,8 @@ namespace Ev3CoreUnsafe.Lms2012
 			{
 				GH.VMInstance.OldTime2 += Time;
 
-				Thread.Sleep(1); // TODO: do i really need it?
+				if (GH.ENABLE_THREAD_SLEEP)
+					Thread.Sleep(1); // TODO: do i really need it?
 				GH.Input.cInputUpdate((UWORD)Time);
 				GH.Ui.cUiUpdate((UWORD)Time);
 
@@ -2127,6 +2145,9 @@ namespace Ev3CoreUnsafe.Lms2012
 				}
 			}
 			GH.Ev3System.Logger.LogInfo($"After if stmt with ui update in mSchedCtrl");
+
+			if (GH.ENABLE_THREAD_SLEEP)
+				Thread.Sleep(1000);
 
 			if (GH.VMInstance.DispatchStatus == DSPSTAT.FAILBREAK)
 			{
@@ -2170,6 +2191,9 @@ namespace Ev3CoreUnsafe.Lms2012
 
 				Result = ObjectExec();
 
+				if (GH.ENABLE_THREAD_SLEEP)
+					Thread.Sleep(1000);
+
 				if (Result == RESULT.STOP)
 				{
 					ProgramExit();
@@ -2197,7 +2221,8 @@ namespace Ev3CoreUnsafe.Lms2012
 				Result = RESULT.FAIL;
 			}
 
-			Thread.Sleep(1); // TODO: do i really need it?
+			if (GH.ENABLE_THREAD_SLEEP)
+				Thread.Sleep(1); // TODO: do i really need it?
 
 			GH.Ev3System.Logger.LogInfo($"exit in mSchedCtrl");
 
@@ -2281,15 +2306,16 @@ namespace Ev3CoreUnsafe.Lms2012
 
 						// TODO: comment
 						// DEBUG SLOWER
-						Thread.Sleep(400);
-						GC.Collect();
+						if (GH.ENABLE_THREAD_SLEEP)
+							Thread.Sleep(400);
+						// GC.Collect();
 
 					}
 					while (Result == OK);
 
 
 
-					GH.Ev3System.Logger.LogInfo($"normal exit in main");
+					GH.Ev3System.Logger.LogError($"normal exit in main");
 
 					Result = mSchedExit();
 				}

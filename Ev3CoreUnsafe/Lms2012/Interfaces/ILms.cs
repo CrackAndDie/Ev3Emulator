@@ -145,11 +145,11 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
         [FieldOffset(10)]
         public TRIGGER TriggerCount;               //!< Trigger count used by BLOCK's trigger logic
 
-        //[FieldOffset(12)]
-        //public fixed VARDATA Local[100];                      //!< Poll of bytes used for local variables
-
 		[FieldOffset(12)]
-		public VARDATA* Local;
+		public fixed VARDATA Local[1024];                      //!< Poll of bytes used for local variables
+
+		//[FieldOffset(12)]
+		//public VARDATA* Local;
 
 		public const int Sizeof = 12; // the truth sizeof of orig
 	}
@@ -326,7 +326,7 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct UARTCTL
 	{
-		public TYPES TypeData;
+		public TYPES* TypeData;
 		public DATA8 Port;
 		public DATA8 Mode;
 	}
@@ -567,7 +567,7 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 		public DSPSTAT DispatchStatus;               //!< Dispatch status
 		public ULONG Priority;                     //!< Object priority
 
-		public ULONG Value;
+		public ULONG* Value;
 		public HANDLER Handle;
 
 		public ERR* Errors;
@@ -599,6 +599,8 @@ namespace Ev3CoreUnsafe.Lms2012.Interfaces
 
 		public GLOBALS()
 		{
+			Value = (uint*)CommonHelper.AllocateByteArray(4);
+
 			NonVol = CommonHelper.PointerStruct<NONVOL>();
 			LcdBuffer = CommonHelper.PointerStruct<LCD>();
 			Analog = CommonHelper.PointerStruct<ANALOG>();

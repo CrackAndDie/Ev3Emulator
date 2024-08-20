@@ -7,7 +7,7 @@ namespace Ev3CoreUnsafe.Ccom
     {
         public RESULT cDaisyChained()
         {
-            GH.Ev3System.Logger.LogInfo("cDaisyChained called");
+            // GH.Ev3System.Logger.LogInfo("cDaisyChained called");
             return RESULT.FAIL;
         }
 
