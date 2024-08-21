@@ -7,6 +7,7 @@ set (SOURCE_FILES
     w_time.c
     w_lcd.c
     w_buttons.c
+    w_motors.c
 )
 
 add_library (low_level OBJECT ${SOURCE_FILES})

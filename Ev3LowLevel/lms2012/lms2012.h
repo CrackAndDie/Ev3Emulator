@@ -894,10 +894,10 @@ typedef   struct
 }
 UARTCTL;
 
-#define   UART_SET_CONN           _IOWR('u',0,DEVCON)
-#define   UART_READ_MODE_INFO     _IOWR('u',1,UARTCTL)
-#define   UART_NACK_MODE_INFO     _IOWR('u',2,UARTCTL)
-#define   UART_CLEAR_CHANGED      _IOWR('u',3,UARTCTL)
+#define   UART_SET_CONN           0
+#define   UART_READ_MODE_INFO     1
+#define   UART_NACK_MODE_INFO     2
+#define   UART_CLEAR_CHANGED      3
 
 
 /*! \page IicModuleMemory
@@ -985,13 +985,13 @@ typedef   struct
 IICSTR;
 
 
-#define   IIC_SET_CONN            _IOWR('i',2,DEVCON)
-#define   IIC_READ_TYPE_INFO      _IOWR('i',3,IICCTL)
-#define   IIC_SETUP               _IOWR('i',5,IICDAT)
-#define   IIC_SET                 _IOWR('i',6,IICSTR)
-#define   IIC_READ_STATUS					_IOWR('i',7,IICDAT)
-#define   IIC_READ_DATA						_IOWR('i',8,IICDAT)
-#define   IIC_WRITE_DATA					_IOWR('i',9,IICDAT)
+#define   IIC_SET_CONN            2
+#define   IIC_READ_TYPE_INFO      3
+#define   IIC_SETUP               5
+#define   IIC_SET                 6
+#define   IIC_READ_STATUS					7
+#define   IIC_READ_DATA						8
+#define   IIC_WRITE_DATA					9
 
 
 
@@ -1006,10 +1006,10 @@ typedef   struct
 }
 TSTPIN;
 
-#define   TST_PIN_ON              _IOWR('t',1,TSTPIN)
-#define   TST_PIN_OFF             _IOWR('t',2,TSTPIN)
-#define   TST_PIN_READ            _IOWR('t',3,TSTPIN)
-#define   TST_PIN_WRITE           _IOWR('t',4,TSTPIN)
+#define   TST_PIN_ON              1
+#define   TST_PIN_OFF             2
+#define   TST_PIN_READ            3
+#define   TST_PIN_WRITE           4
 
 
 
@@ -1025,12 +1025,12 @@ typedef   struct
 }
 TSTUART;
 
-#define   TST_UART_ON             _IOWR('t',5,TSTUART)
-#define   TST_UART_OFF            _IOWR('t',6,TSTUART)
-#define   TST_UART_EN             _IOWR('t',7,TSTUART)
-#define   TST_UART_DIS            _IOWR('t',8,TSTUART)
-#define   TST_UART_READ           _IOWR('t',9,TSTUART)
-#define   TST_UART_WRITE          _IOWR('t',10,TSTUART)
+#define   TST_UART_ON             5
+#define   TST_UART_OFF            6
+#define   TST_UART_EN             7
+#define   TST_UART_DIS            8
+#define   TST_UART_READ           9
+#define   TST_UART_WRITE          10
 
 #define   LCD_BUFFER_SIZE (((LCD_WIDTH + 7) / 8) * LCD_HEIGHT)
 #define   LCD_TOPLINE_SIZE (((LCD_WIDTH + 7) / 8) * (TOPLINE_HEIGHT + 1))
