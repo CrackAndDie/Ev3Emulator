@@ -22,8 +22,8 @@
 
 #include <stdio.h>
 
-static struct termios TerminalAttr;
-static struct termios TerminalSavedAttr;
+//static struct termios TerminalAttr;
+//static struct termios TerminalSavedAttr;
 static RESULT TerminalResult = FAIL;
 
 

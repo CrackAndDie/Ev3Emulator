@@ -112,6 +112,9 @@ add_definitions("-DPROJECT=\"${PROJECT_NAME}\"" "-DVERS=${PROJECT_VERSION}")
 add_compile_options (-Wall)
 
 # Include sub-projects.
-add_subdirectory ("low_level")
-add_subdirectory ("lms2012")
-add_subdirectory ("c_ui")
+add_subdirectory (low_level)
+add_subdirectory (win)
+add_subdirectory (c_ui)
+add_subdirectory (c_memory)
+add_subdirectory (lms2012)
+add_subdirectory (lmssrc)
