@@ -120,7 +120,7 @@ void dynloadVMExit()
   */
 void dynloadVMLoad()
 {
-	// TODO: wtf is dynload do i need it
+	// TODO: COMMENTED wtf is dynload do i need it
 #ifdef aenrviuernvpwrtbiwrutwtuuit 
 	RESULT res = FAIL;
 
