@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #define CALL_INTERVAL   400   // [mS]
 
@@ -77,60 +76,63 @@ void cUiPowerOpenBatteryFiles(void)
 
     UiInstance.BatteryVoltageNowFile = -1;
     UiInstance.BatteryCurrentNowFile = -1;
-    enumerate = udev_enumerate_new(VMInstance.udev);
-    udev_enumerate_add_match_subsystem(enumerate, "power_supply");
-    udev_enumerate_add_match_property(enumerate, "POWER_SUPPLY_SCOPE", "System");
-    udev_enumerate_add_match_property(enumerate, "POWER_SUPPLY_TYPE", "Battery");
-    udev_enumerate_scan_devices(enumerate);
-    list = udev_enumerate_get_list_entry(enumerate);
-    if (!list) {
-        fprintf(stderr, "Failed to find system power supply\n");
-    } else {
-        // just taking the first match in the list
-        const char *path = udev_list_entry_get_name(list);
-        char attr_path[255 + 1] = { 0 };
-        int fd;
+    // TODO: battery shite
+    //enumerate = udev_enumerate_new(VMInstance.udev);
+    //udev_enumerate_add_match_subsystem(enumerate, "power_supply");
+    //udev_enumerate_add_match_property(enumerate, "POWER_SUPPLY_SCOPE", "System");
+    //udev_enumerate_add_match_property(enumerate, "POWER_SUPPLY_TYPE", "Battery");
+    //udev_enumerate_scan_devices(enumerate);
+    //list = udev_enumerate_get_list_entry(enumerate);
+    //if (!list) {
+    //    fprintf(stderr, "Failed to find system power supply\n");
+    //} else {
+    //    // just taking the first match in the list
+    //    const char *path = udev_list_entry_get_name(list);
+    //    char attr_path[255 + 1] = { 0 };
+    //    int fd;
 
-        snprintf(attr_path, 255, "%s/voltage_now", path);
-        fd = open(attr_path, O_RDONLY);
-        if (fd == -1) {
-            fprintf(stderr, "Could not open '%s': %s\n", attr_path,
-                    strerror(errno));
-            UiInstance.VinCnt = DEFAULT_BATTERY_VOLTAGE;
-        } else {
-            UiInstance.BatteryVoltageNowFile = fd;
-            UiInstance.VinCnt = cUiPowerReadAttr(fd);
-        }
+    //    snprintf(attr_path, 255, "%s/voltage_now", path);
+    //    fd = open(attr_path, O_RDONLY);
+    //    if (fd == -1) {
+    //        fprintf(stderr, "Could not open '%s': %s\n", attr_path,
+    //                strerror(errno));
+    //        UiInstance.VinCnt = DEFAULT_BATTERY_VOLTAGE;
+    //    } else {
+    //        UiInstance.BatteryVoltageNowFile = fd;
+    //        UiInstance.VinCnt = cUiPowerReadAttr(fd);
+    //    }
 
-        snprintf(attr_path, 255, "%s/current_now", path);
-        fd = open(attr_path, O_RDONLY);
-        if (fd == -1) {
-            fprintf(stderr, "Could not open '%s': %s\n", attr_path,
-                    strerror(errno));
-        } else {
-            UiInstance.BatteryCurrentNowFile = fd;
-            UiInstance.CinCnt = cUiPowerReadAttr(fd);
-        }
+    //    snprintf(attr_path, 255, "%s/current_now", path);
+    //    fd = open(attr_path, O_RDONLY);
+    //    if (fd == -1) {
+    //        fprintf(stderr, "Could not open '%s': %s\n", attr_path,
+    //                strerror(errno));
+    //    } else {
+    //        UiInstance.BatteryCurrentNowFile = fd;
+    //        UiInstance.CinCnt = cUiPowerReadAttr(fd);
+    //    }
 
-        // Check to see if this is a rechargeable battery
-        snprintf(attr_path, 255, "%s/technology", path);
-        fd = open(attr_path, O_RDONLY);
-        if (fd == -1) {
-            UiInstance.Accu = 0;
-        } else {
-            char technology[20 + 1] = { 0 };
+    //    // Check to see if this is a rechargeable battery
+    //    snprintf(attr_path, 255, "%s/technology", path);
+    //    fd = open(attr_path, O_RDONLY);
+    //    if (fd == -1) {
+    //        UiInstance.Accu = 0;
+    //    } else {
+    //        char technology[20 + 1] = { 0 };
 
-            read(fd, technology, 20);
-            close(fd);
+    //        read(fd, technology, 20);
+    //        close(fd);
 
-            if (strstr(technology, "LION")) {
-                UiInstance.Accu = 1;
-            } else {
-                UiInstance.Accu = 0;
-            }
-        }
-    }
-    udev_enumerate_unref(enumerate);
+    //        if (strstr(technology, "LION")) {
+    //            UiInstance.Accu = 1;
+    //        } else {
+    //            UiInstance.Accu = 0;
+    //        }
+    //    }
+    //}
+    //udev_enumerate_unref(enumerate);
+
+    UiInstance.Accu = 1;
 }
 
 void cUiPowerUpdateCnt(void)
