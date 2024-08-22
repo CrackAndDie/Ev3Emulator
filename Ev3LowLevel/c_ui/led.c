@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "w_lcd.h"
+
 #include "lms2012.h"
 #include "c_ui.h"
 #include "led.h"
@@ -228,8 +230,10 @@ void cUiLedSetState(LEDPATTERN State)
         return;
     }
 
-    // TODO: handle led change
-    if (UiInstance.LedRightRedTriggerFile >= MIN_HANDLE) {
+    w_lcd_updateLed(State);
+
+    // TODO: commented led cringe
+    /*if (UiInstance.LedRightRedTriggerFile >= MIN_HANDLE) {
         lseek(UiInstance.LedRightRedTriggerFile, 0, SEEK_SET);
         write(UiInstance.LedRightRedTriggerFile, red_trigger, strlen(red_trigger));
     }
@@ -244,5 +248,5 @@ void cUiLedSetState(LEDPATTERN State)
     if (UiInstance.LedLeftGreenTriggerFile >= MIN_HANDLE) {
         lseek(UiInstance.LedLeftGreenTriggerFile, 0, SEEK_SET);
         write(UiInstance.LedLeftGreenTriggerFile, green_trigger, strlen(green_trigger));
-    }
+    }*/
 }
