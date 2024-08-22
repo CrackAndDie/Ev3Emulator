@@ -120,8 +120,8 @@ static    int       BtFile;
 static    int       ThreadRunState;
 static    MODE2BUF  Mode2InBuf;
 char* RtnMsg = "I2c Func thread end";
-static    struct    i2c_rdwr_ioctl_data    msg_rdwr;
-static    struct    i2c_msg                i2cmsg;
+//static    struct    i2c_rdwr_ioctl_data    msg_rdwr;
+//static    struct    i2c_msg                i2cmsg;
 
 static    UBYTE     Status;
 

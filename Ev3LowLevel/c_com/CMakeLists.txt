@@ -9,6 +9,7 @@ set (SOURCE_FILES
 
 add_library (c_com OBJECT ${SOURCE_FILES})
 target_include_directories (c_com PUBLIC
+    ${CMAKE_SOURCE_DIR}/win
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/low_level
     ${CMAKE_SOURCE_DIR}/lms2012

@@ -23,7 +23,11 @@
 #define C_COM_H_
 
 #include  <sys/types.h>
-#include  <dirent.h>
+#ifdef _WIN32
+#include "dirent_win.h"
+#else
+#include <dirent.h>
+#endif
 
 
 #include  "lms2012.h"
