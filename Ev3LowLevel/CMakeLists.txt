@@ -113,7 +113,7 @@ add_compile_options (-Wall)
 
 # Include sub-projects.
 add_subdirectory (low_level)
-add_subdirectory (win)
+# add_subdirectory (a_win)
 add_subdirectory (c_com)
 add_subdirectory (c_dynload)
 add_subdirectory (c_input)

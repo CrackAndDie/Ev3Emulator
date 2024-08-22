@@ -12,13 +12,14 @@ set (SOURCE_FILES
 
 set (LMS2012_MODULES
     low_level
-    # c_com
-    # c_dynload
-    # c_input
-    # c_memory
-    # c_output
-    # c_robotcvm
-    # c_sound
+    # a_win
+    c_com
+    c_dynload
+    c_input
+    c_memory
+    c_output
+    c_robotcvm
+    c_sound
     c_ui
 )
 
@@ -35,7 +36,6 @@ target_include_directories (lms2012 PUBLIC
     ${LMS2012_INCLUDE_DIRS}
     ${LMS2012_DEPS_INCLUDE_DIRS}
 )
-target_link_libraries (lms2012 ${LMS2012_DEPS_LIBRARIES} -pthread dl m)
 if (CMAKE_CROSSCOMPILING)
     # These are not picked up automatically when cross compiling for some reason
     target_link_libraries (lms2012 "-lresolv")

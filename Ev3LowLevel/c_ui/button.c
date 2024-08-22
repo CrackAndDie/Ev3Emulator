@@ -70,59 +70,59 @@ static const DATA8 MappedToReal[BUTTONTYPES] = {
  *
  * @return The file descriptor or -1 on error.
  */
-int cUiButtonOpenFile(void)
-{
-	struct udev_enumerate* enumerate;
-	struct udev_list_entry* list;
-	int file = -1;
-
-	enumerate = udev_enumerate_new(VMInstance.udev);
-	udev_enumerate_add_match_subsystem(enumerate, "input");
-	udev_enumerate_add_match_sysname(enumerate, "input*");
-	// We are looking for a device that has only UP, DOWN, LEFT, RIGHT, ENTER,
-	// and BACKSPACE
-	udev_enumerate_add_match_property(enumerate, "KEY", "1680 0 0 10004000");
-	udev_enumerate_scan_devices(enumerate);
-	list = udev_enumerate_get_list_entry(enumerate);
-	if (list == NULL) {
-		fprintf(stderr, "Failed to get button input device\n");
-	}
-	else {
-		// just taking the first match in the list
-		const char* path = udev_list_entry_get_name(list);
-		struct udev_device* input_device;
-
-		input_device = udev_device_new_from_syspath(VMInstance.udev, path);
-		udev_enumerate_unref(enumerate);
-		enumerate = udev_enumerate_new(VMInstance.udev);
-		udev_enumerate_add_match_subsystem(enumerate, "input");
-		udev_enumerate_add_match_sysname(enumerate, "event*");
-		udev_enumerate_add_match_parent(enumerate, input_device);
-		udev_enumerate_scan_devices(enumerate);
-		list = udev_enumerate_get_list_entry(enumerate);
-		if (list == NULL) {
-			fprintf(stderr, "Failed to get button event device\n");
-		}
-		else {
-			// again, there should only be one match
-			struct udev_device* event_device;
-
-			path = udev_list_entry_get_name(list);
-			event_device = udev_device_new_from_syspath(VMInstance.udev, path);
-
-			path = udev_device_get_devnode(event_device);
-			file = open(path, O_RDONLY);
-			if (file == -1) {
-				fprintf(stderr, "Could not open %s: %s\n", path, strerror(errno));
-			}
-			udev_device_unref(event_device);
-		}
-		udev_device_unref(input_device);
-	}
-	udev_enumerate_unref(enumerate);
-
-	return file;
-}
+//int cUiButtonOpenFile(void)
+//{
+//	struct udev_enumerate* enumerate;
+//	struct udev_list_entry* list;
+//	int file = -1;
+//
+//	enumerate = udev_enumerate_new(VMInstance.udev);
+//	udev_enumerate_add_match_subsystem(enumerate, "input");
+//	udev_enumerate_add_match_sysname(enumerate, "input*");
+//	// We are looking for a device that has only UP, DOWN, LEFT, RIGHT, ENTER,
+//	// and BACKSPACE
+//	udev_enumerate_add_match_property(enumerate, "KEY", "1680 0 0 10004000");
+//	udev_enumerate_scan_devices(enumerate);
+//	list = udev_enumerate_get_list_entry(enumerate);
+//	if (list == NULL) {
+//		fprintf(stderr, "Failed to get button input device\n");
+//	}
+//	else {
+//		// just taking the first match in the list
+//		const char* path = udev_list_entry_get_name(list);
+//		struct udev_device* input_device;
+//
+//		input_device = udev_device_new_from_syspath(VMInstance.udev, path);
+//		udev_enumerate_unref(enumerate);
+//		enumerate = udev_enumerate_new(VMInstance.udev);
+//		udev_enumerate_add_match_subsystem(enumerate, "input");
+//		udev_enumerate_add_match_sysname(enumerate, "event*");
+//		udev_enumerate_add_match_parent(enumerate, input_device);
+//		udev_enumerate_scan_devices(enumerate);
+//		list = udev_enumerate_get_list_entry(enumerate);
+//		if (list == NULL) {
+//			fprintf(stderr, "Failed to get button event device\n");
+//		}
+//		else {
+//			// again, there should only be one match
+//			struct udev_device* event_device;
+//
+//			path = udev_list_entry_get_name(list);
+//			event_device = udev_device_new_from_syspath(VMInstance.udev, path);
+//
+//			path = udev_device_get_devnode(event_device);
+//			file = open(path, O_RDONLY);
+//			if (file == -1) {
+//				fprintf(stderr, "Could not open %s: %s\n", path, strerror(errno));
+//			}
+//			udev_device_unref(event_device);
+//		}
+//		udev_device_unref(input_device);
+//	}
+//	udev_enumerate_unref(enumerate);
+//
+//	return file;
+//}
 
 /**
  * @brief Clear the state of all buttons.

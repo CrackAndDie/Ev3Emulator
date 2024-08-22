@@ -1154,7 +1154,7 @@ static void cInputCalDataInit(void)
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
-	File = fopen(PrgNameBuf, O_RDONLY);
+	File = fopen(PrgNameBuf, "r");
 	if (File >= MIN_HANDLE)
 	{
 		if (fread((UBYTE*)&InputInstance.Calib, sizeof(CALIB), sizeof(InputInstance.Calib), File) != sizeof(InputInstance.Calib))
@@ -1185,7 +1185,7 @@ static void cInputCalDataExit(void)
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
-	File = fopen(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC);
+	File = fopen(PrgNameBuf, "w");
 	if (File >= MIN_HANDLE)
 	{
 		fwrite((UBYTE*)&InputInstance.Calib, sizeof(CALIB), sizeof(InputInstance.Calib), File);
@@ -2381,7 +2381,7 @@ RESULT cInputSetChainedDeviceType(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mod
 	return FAIL;
 }
 
-static RESULT cInputGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, DATA8* pType,
+RESULT cInputGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, DATA8* pType,
 	DATA8* pMode, DATA8* pData)
 {
 	return FAIL;
@@ -3367,25 +3367,25 @@ RESULT cInputExit(void)
 
 	if (InputInstance.AdcFile >= MIN_HANDLE)
 	{
-		munmap(InputInstance.pAnalog, sizeof(ANALOG));
-		close(InputInstance.AdcFile);
+		// munmap(InputInstance.pAnalog, sizeof(ANALOG));
+		fclose(InputInstance.AdcFile);
 	}
 
 	if (InputInstance.UartFile >= MIN_HANDLE)
 	{
-		munmap(InputInstance.pUart, sizeof(UART));
-		close(InputInstance.UartFile);
+		// munmap(InputInstance.pUart, sizeof(UART));
+		fclose(InputInstance.UartFile);
 	}
 
 	if (InputInstance.IicFile >= MIN_HANDLE)
 	{
-		munmap(InputInstance.pIic, sizeof(IIC));
-		close(InputInstance.IicFile);
+		// munmap(InputInstance.pIic, sizeof(IIC));
+		fclose(InputInstance.IicFile);
 	}
 
 	if (InputInstance.DcmFile >= MIN_HANDLE)
 	{
-		close(InputInstance.DcmFile);
+		fclose(InputInstance.DcmFile);
 	}
 
 	if (InputInstance.IicString != NULL)

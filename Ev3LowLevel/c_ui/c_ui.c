@@ -265,14 +265,15 @@ RESULT    cUiInit(void)
 	//g_unix_signal_add(SIGTERM, cUiHandleUnixSignal, NULL);
 	//g_unix_signal_add(SIGHUP, cUiHandleUnixSignal, NULL);
 
-	UiInstance.ButtonFile = cUiButtonOpenFile();
+	// UiInstance.ButtonFile = cUiButtonOpenFile();
+
 	UiInstance.LedLeftRedTriggerFile = cUiLedOpenTriggerFile(LED_NAME_LEFT_RED);
 	if (UiInstance.LedLeftRedTriggerFile == -1) {
 		UiInstance.ULedLeftRedSourceId = cUiLedCreateUserLed(LED_NAME_LEFT_RED, USER_LED_LEFT | USER_LED_RED);
 		UiInstance.LedLeftRedTriggerFile = cUiLedOpenTriggerFile(LED_NAME_LEFT_RED);
 	}
 	if (UiInstance.LedLeftRedTriggerFile == -1) {
-		g_warning("Failed to get left red LED");
+		// g_warning("Failed to get left red LED");
 	}
 	UiInstance.LedRightRedTriggerFile = cUiLedOpenTriggerFile(LED_NAME_RIGHT_RED);
 	if (UiInstance.LedRightRedTriggerFile == -1) {
@@ -280,7 +281,7 @@ RESULT    cUiInit(void)
 		UiInstance.LedRightRedTriggerFile = cUiLedOpenTriggerFile(LED_NAME_RIGHT_RED);
 	}
 	if (UiInstance.LedRightRedTriggerFile == -1) {
-		g_warning("Failed to get right red LED");
+		// g_warning("Failed to get right red LED");
 	}
 	UiInstance.LedLeftGreenTriggerFile = cUiLedOpenTriggerFile(LED_NAME_LEFT_GREEN);
 	if (UiInstance.LedLeftGreenTriggerFile == -1) {
@@ -288,7 +289,7 @@ RESULT    cUiInit(void)
 		UiInstance.LedLeftGreenTriggerFile = cUiLedOpenTriggerFile(LED_NAME_LEFT_GREEN);
 	}
 	if (UiInstance.LedLeftGreenTriggerFile == -1) {
-		g_warning("Failed to get left green LED");
+		// g_warning("Failed to get left green LED");
 	}
 	UiInstance.LedRightGreenTriggerFile = cUiLedOpenTriggerFile(LED_NAME_RIGHT_GREEN);
 	if (UiInstance.LedRightGreenTriggerFile == -1) {
@@ -296,7 +297,7 @@ RESULT    cUiInit(void)
 		UiInstance.LedRightGreenTriggerFile = cUiLedOpenTriggerFile(LED_NAME_RIGHT_GREEN);
 	}
 	if (UiInstance.LedRightGreenTriggerFile == -1) {
-		g_warning("Failed to get right green LED");
+		// g_warning("Failed to get right green LED");
 	}
 	cUiPowerOpenBatteryFiles();
 
@@ -450,37 +451,37 @@ RESULT    cUiExit(void)
 	Result = dTerminalExit();
 
 	if (UiInstance.ButtonFile >= MIN_HANDLE) {
-		close(UiInstance.ButtonFile);
+		fclose(UiInstance.ButtonFile);
 	}
 	if (UiInstance.LedRightRedTriggerFile >= MIN_HANDLE) {
-		close(UiInstance.LedRightRedTriggerFile);
+		fclose(UiInstance.LedRightRedTriggerFile);
 	}
 	if (UiInstance.LedLeftRedTriggerFile >= MIN_HANDLE) {
-		close(UiInstance.LedLeftRedTriggerFile);
+		fclose(UiInstance.LedLeftRedTriggerFile);
 	}
 	if (UiInstance.LedRightGreenTriggerFile >= MIN_HANDLE) {
-		close(UiInstance.LedRightGreenTriggerFile);
+		fclose(UiInstance.LedRightGreenTriggerFile);
 	}
 	if (UiInstance.LedLeftGreenTriggerFile >= MIN_HANDLE) {
-		close(UiInstance.LedLeftGreenTriggerFile);
+		fclose(UiInstance.LedLeftGreenTriggerFile);
 	}
 	if (UiInstance.ULedRightRedSourceId > 0) {
-		g_source_remove(UiInstance.ULedRightRedSourceId);
+		// g_source_remove(UiInstance.ULedRightRedSourceId);
 	}
 	if (UiInstance.ULedLeftRedSourceId > 0) {
-		g_source_remove(UiInstance.ULedLeftRedSourceId);
+		// g_source_remove(UiInstance.ULedLeftRedSourceId);
 	}
 	if (UiInstance.ULedRightGreenSourceId > 0) {
-		g_source_remove(UiInstance.ULedRightGreenSourceId);
+		// g_source_remove(UiInstance.ULedRightGreenSourceId);
 	}
 	if (UiInstance.ULedLeftGreenSourceId > 0) {
-		g_source_remove(UiInstance.ULedLeftGreenSourceId);
+		// g_source_remove(UiInstance.ULedLeftGreenSourceId);
 	}
 	if (UiInstance.BatteryVoltageNowFile >= MIN_HANDLE) {
-		close(UiInstance.BatteryVoltageNowFile);
+		fclose(UiInstance.BatteryVoltageNowFile);
 	}
 	if (UiInstance.BatteryCurrentNowFile >= MIN_HANDLE) {
-		close(UiInstance.BatteryCurrentNowFile);
+		fclose(UiInstance.BatteryCurrentNowFile);
 	}
 
 	Result = OK;

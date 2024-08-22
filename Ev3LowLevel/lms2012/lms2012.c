@@ -125,38 +125,7 @@ GLOBALS VMInstance;
 
 extern PRIM      PrimDispatchTable[PRIMDISPATHTABLE_SIZE];          //!< Dispatch table
 
-void      Error(void);
-void      Nop(void);
-void      ObjectStop(void);
-void      ObjectStart(void);
-void      ObjectTrig(void);
-void      ObjectWait(void);
-void      ObjectCall(void);
-void      ObjectReturn(void);
-void      ObjectEnd(void);
-void      ProgramStart(void);
-void      ProgramStop(void);
-void      Sleep(void);
-void      ProgramInfo(void);
-void      DefLabel(void);
-void      Do(void);
-void      Probe(void);
-void      BreakPoint(void);
-void      BreakSet(void);
-void      Random(void);
-void      Info(void);
-void      Strings(void);
-void      MemoryWrite(void);
-void      MemoryRead(void);
-void      cBranchJr(void);
-void      PortCnvOutput(void);
-void      PortCnvInput(void);
-void      NoteToFreq(void);
-void      System(void);
-void      Monitor(void);
 
-void      TstClose(void);
-void      Tst(void);
 
 
 //*****************************************************************************
@@ -552,7 +521,8 @@ DSPSTAT   ExecuteByteCode(IP pByteCode, GP pGlobals, LP pLocals)
 		{
 			VMInstance.OldTime2 += Time;
 
-			usleep(10);
+			// TODO: sleep
+			// usleep(10);
 			cInputUpdate((UWORD)Time);
 			cUiUpdate((UWORD)Time);
 		}
@@ -2102,7 +2072,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 	struct  timeval tv;
 #endif
 
-	VMInstance.udev = udev_new();
+	// VMInstance.udev = udev_new();
 
 #ifdef ENABLE_STATUS_TEST
 	VMInstance.Status = 0x00;
@@ -2141,7 +2111,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 	// Be sure necessary files exist
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmWIFI_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC);
+	File = fopen(PrgNameBuf, "w");
 	if (File >= MIN_HANDLE)
 	{
 		sprintf(ParBuf, "-\t");
@@ -2151,14 +2121,14 @@ RESULT    mSchedInit(int argc, char* argv[])
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmBLUETOOTH_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, O_RDONLY);
+	File = fopen(PrgNameBuf, "r");
 	if (File >= MIN_HANDLE)
 	{
 		fclose(File);
 	}
 	else
 	{
-		File = fopen(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC);
+		File = fopen(PrgNameBuf, "w");
 		if (File >= MIN_HANDLE)
 		{
 			sprintf(ParBuf, "-\t");
@@ -2169,7 +2139,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmSLEEP_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, O_RDONLY);
+	File = fopen(PrgNameBuf, "r");
 	if (File >= MIN_HANDLE)
 	{
 		ParBuf[0] = 0;
@@ -2195,7 +2165,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 	}
 	if (!Ok)
 	{
-		File = fopen(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC);
+		File = fopen(PrgNameBuf, "w");
 		if (File >= MIN_HANDLE)
 		{
 			SetSleepMinutes((DATA8)0);
@@ -2207,7 +2177,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmVOLUME_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, O_RDONLY);
+	File = fopen(PrgNameBuf, "r");
 	if (File >= MIN_HANDLE)
 	{
 		ParBuf[0] = 0;
@@ -2224,7 +2194,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 	}
 #ifdef DISABLE_SOUND
 	SetVolumePercent((DATA8)0);
-	File = fopen(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC);
+	File = fopen(PrgNameBuf, "w");
 	if (File >= MIN_HANDLE)
 	{
 		sprintf(ParBuf, "%d%%\t", 0);
@@ -2235,7 +2205,7 @@ RESULT    mSchedInit(int argc, char* argv[])
 	if (!Ok)
 	{
 		SetVolumePercent((DATA8)DEFAULT_VOLUME);
-		File = fopen(PrgNameBuf, O_CREAT | O_WRONLY | O_TRUNC);
+		File = fopen(PrgNameBuf, "w");
 		if (File >= MIN_HANDLE)
 		{
 			sprintf(ParBuf, "%d%%\t", DEFAULT_VOLUME);
@@ -2406,7 +2376,8 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 
 		}
 #endif
-		usleep(10);
+		// TODO: sleep
+		// usleep(10);
 		cInputUpdate((UWORD)Time);
 		cUiUpdate((UWORD)Time);
 
@@ -2491,7 +2462,8 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 	}
 
 #ifdef Linux_X86
-	usleep(1);
+	// TODO: sleep
+	// usleep(1);
 #endif
 
 	return (Result);
@@ -2537,7 +2509,7 @@ RESULT    mSchedExit(void)
 	Result |= cInputExit();
 	Result |= cOutputExit();
 
-	udev_unref(VMInstance.udev);
+	// udev_unref(VMInstance.udev);
 
 	return (RESULT)(Result);
 }
@@ -2550,10 +2522,10 @@ int       main(int argc, char* argv[])
 
 	// TODO: make the working directory configurable via environment variable so
 	// that we can run debug instances without messing up the system install
-	if (chdir("/var/lib/lms2012/sys") == -1) {
+	/*if (chdir("/var/lib/lms2012/sys") == -1) {
 		perror("Failed to change directory");
 		return (int)Result;
-	}
+	}*/
 
 	do
 	{
@@ -2564,7 +2536,7 @@ int       main(int argc, char* argv[])
 		{
 			do
 			{
-				g_main_context_iteration(NULL, FALSE);
+				// g_main_context_iteration(NULL, FALSE);
 				Result = mSchedCtrl(&Restart);
 			} while (Result == OK);
 
@@ -2595,7 +2567,7 @@ PRIM      PrimDispatchTable[PRIMDISPATHTABLE_SIZE] =
   [opRETURN] = &ObjectReturn,
   [opCALL] = &ObjectCall,
   [opOBJECT_END] = &ObjectEnd,
-  [opSLEEP] = &Sleep,
+  [opSLEEP] = &Sleep_,
   [opPROGRAM_INFO] = &ProgramInfo,
   [opLABEL] = &DefLabel,
   [opPROBE] = &Probe,
@@ -3275,7 +3247,7 @@ void      ObjectEnd(void)
   *
   *
   */
-void      Sleep(void)
+void      Sleep_(void)
 {
 	SetDispatchStatus(SLEEPBREAK);
 }
@@ -4581,7 +4553,7 @@ void  System(void)
 #ifndef DISABLE_SYSTEM_BYTECODE
 	Status = (DATA32)system((char*)pCmd);
 #endif
-	sync();
+	w_filesystem_sync();
 
 	*(DATA32*)PrimParPointer() = Status;
 }

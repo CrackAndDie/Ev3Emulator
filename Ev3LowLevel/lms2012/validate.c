@@ -839,7 +839,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 	UBYTE   Tab;            // Sub code table index
 	ULONG   Value;
 	UBYTE   ParCode = 0;
-	void* pParValue;
+	static void* pParValue;
 	DATA8   Parameters;
 	DATA32  Bytes;
 	int     Indent;
@@ -1740,7 +1740,7 @@ static RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 	ULONG   Value;
 	UBYTE   ParType = PAR;
 	UBYTE   ParCode;
-	void* pParValue;
+	static void* pParValue;
 	DATA8   Parameters;
 	DATA8   ParNo;
 	DATA32  Bytes;

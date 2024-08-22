@@ -730,10 +730,10 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 
 		SetUnlocked(TRUE);
 		cInputStartTypeDataUpload();                  // Force type table from SLAVE devices
-		usleep(1500);
+		// usleep(1500);
 		cDaisyPushUpStream();                         // Flood upward
 		cDaisyPrepareNext();                          // Ready for the next sensor in the array
-		usleep(1500);
+		// usleep(1500);
 		break;
 
 	case DAISY_SET_TYPE:		  // Set type exception

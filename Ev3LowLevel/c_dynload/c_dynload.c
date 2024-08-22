@@ -97,7 +97,7 @@ void dynloadVMExit()
 			SetDispatchStatus(FAILBREAK);
 
 		// Close the .so
-		dlclose(virtualMachineInfo.soHandle);
+		// dlclose(virtualMachineInfo.soHandle);
 
 		// Reinitialise everything to 0
 		dynloadInit();

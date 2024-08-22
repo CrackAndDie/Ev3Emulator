@@ -58,11 +58,11 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#ifdef _WIN32
-#include "dirent_win.h"
-#else
-#include <dirent.h>
-#endif
+//#ifdef _WIN32
+//#include "dirent_win.h"
+//#else
+//#include <dirent.h>
+//#endif
 
 #ifdef    DEBUG_C_COM
 #define   DEBUG
@@ -600,7 +600,7 @@ void      cComCloseFileHandle(SLONG* pHandle)
 {
 	if (*pHandle >= MIN_HANDLE)
 	{
-		close(*pHandle);
+		fclose(*pHandle);
 		*pHandle = -1;
 	}
 }
@@ -650,25 +650,25 @@ DATA8     cComGetHandle(char* pName)
 }
 
 
-UBYTE     cComGetNxtFile(DIR* pDir, UBYTE* pName)
+UBYTE     cComGetNxtFile(FILESYSTEM_ENTITY* pDir, UBYTE* pName)
 {
 	UBYTE     RtnVal = 0;
-	struct    dirent* pDirPtr;
+	FILESYSTEM_ENTITY* pDirPtr;
 
-	pDirPtr = readdir(pDir);
-	while ((NULL != pDirPtr) && (DT_REG != pDirPtr->d_type))
+	*pDirPtr = w_filesystem_readDir(*pDir);
+	while ((NULL != pDirPtr) && (pDirPtr->isDir) && (pDirPtr->result == OK))
 	{
-		pDirPtr = readdir(pDir);
+		*pDirPtr = w_filesystem_readDir(*pDir);
 	}
 
-	if (NULL != pDirPtr)
+	if (NULL != pDirPtr && (pDirPtr->result == OK))
 	{
-		snprintf((char*)pName, FILENAME_SIZE, "%s", pDirPtr->d_name);
+		snprintf((char*)pName, FILENAME_SIZE, "%s", pDirPtr->name);
 		RtnVal = 1;
 	}
 	else
 	{
-		closedir(pDir);
+		w_filesystem_closeDir(pDir);
 	}
 
 	return(RtnVal);
@@ -970,7 +970,7 @@ void      cComSystemReplyError(RXBUF* pRxBuf, TXBUF* pTxBuf)
 }
 
 
-void      cComGetNameFromScandirList(struct  dirent* NameList, char* pBuffer, ULONG* pNameLen, UBYTE* pFolder)
+void      cComGetNameFromScandirList(FILESYSTEM_ENTITY* NameList, char* pBuffer, ULONG* pNameLen, UBYTE* pFolder)
 {
 	char    FileName[MD5LEN + 1 + FILENAMESIZE];
 	struct  stat FileInfo;
@@ -979,10 +979,10 @@ void      cComGetNameFromScandirList(struct  dirent* NameList, char* pBuffer, UL
 	*pNameLen = 0;
 
 	//If type is a directory the add "/" at the end
-	if ((DT_LNK == NameList->d_type) || (DT_DIR == NameList->d_type))
+	if (NameList->isDir)
 	{
-		strncpy(pBuffer, NameList->d_name, FILENAMESIZE);   // Need to copy to tmp var to be able to add "/" for folders
-		*pNameLen = strlen(NameList->d_name);               // + 1 is the new line character
+		strncpy(pBuffer, NameList->name, FILENAMESIZE);   // Need to copy to tmp var to be able to add "/" for folders
+		*pNameLen = strlen(NameList->name);               // + 1 is the new line character
 
 		strcat(pBuffer, "/");
 		(*pNameLen)++;
@@ -994,12 +994,12 @@ void      cComGetNameFromScandirList(struct  dirent* NameList, char* pBuffer, UL
 	else
 	{
 
-		if (DT_REG == NameList->d_type)
+		if (!NameList->isDir)
 		{
 			/* If it is a file then add 16 bytes MD5SUM + space */
 			strcpy(FileName, (char*)pFolder);
 			strcat(FileName, "/");
-			strcat(FileName, NameList->d_name);
+			strcat(FileName, NameList->name);
 
 			/* Get the MD5sum and put in the buffer */
 			// md5_file(FileName, 0, (unsigned char *)Md5Sum);
@@ -1014,8 +1014,8 @@ void      cComGetNameFromScandirList(struct  dirent* NameList, char* pBuffer, UL
 			*pNameLen += sprintf(&(pBuffer[MD5LEN + 1]), "%08X ", (ULONG)FileInfo.st_size);
 
 			/* Insert Filename */
-			strcat(pBuffer, NameList->d_name);
-			*pNameLen += strlen(NameList->d_name);
+			strcat(pBuffer, NameList->name);
+			*pNameLen += strlen(NameList->name);
 
 			strcat(pBuffer, "\n");
 			(*pNameLen)++;
@@ -1845,7 +1845,9 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			BytesToRead += (ULONG)pBeginList->BytesToReadMsb << 8;
 
 			snprintf((char*)pTxBuf->Folder, FILENAMESIZE, "%s", (char*)pBeginList->Path);
-			pTxBuf->pFile->File = scandir((char*)pTxBuf->Folder, &(pTxBuf->pFile->namelist), 0, NULL);
+			// pTxBuf->pFile->File = scandir((char*)pTxBuf->Folder, &(pTxBuf->pFile->namelist), 0, NULL);
+
+			pTxBuf->pFile->namelist = w_filesystem_scanDir((char*)pTxBuf->Folder, &pTxBuf->pFile->File, 1);
 
 			if (pTxBuf->pFile->File <= 0)
 			{
@@ -1892,10 +1894,10 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				// Start by calculating the length of the entire list
 				while (TmpN--)
 				{
-					if ((DT_REG == pTxBuf->pFile->namelist[TmpN]->d_type) || (DT_DIR == pTxBuf->pFile->namelist[TmpN]->d_type) || (DT_LNK == pTxBuf->pFile->namelist[TmpN]->d_type))
+					if (1)
 					{
-						Len += strlen(pTxBuf->pFile->namelist[TmpN]->d_name);
-						if (DT_REG != pTxBuf->pFile->namelist[TmpN]->d_type)
+						Len += strlen(pTxBuf->pFile->namelist[TmpN].name);
+						if (pTxBuf->pFile->namelist[TmpN].isDir)
 						{
 							// Make room room for ending "/"
 							Len++;
@@ -1954,7 +1956,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				{
 					TmpN--;
 
-					cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+					cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 
 					if (0 != NameLen)
 					{
@@ -1965,7 +1967,8 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 							while (*pSrcAdr) *pDstAdr++ = *pSrcAdr++;
 							Len += NameLen;
 
-							free(pTxBuf->pFile->namelist[TmpN]);
+							// TODO: WARNING memory free commented
+							// free((pTxBuf->pFile->namelist[TmpN]));
 
 							if (BytesToSend == Len)
 							{
@@ -2098,7 +2101,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			{
 
 				// Only here if filename has been divided in 2 pieces
-				cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+				cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 
 				if (0 != NameLen)
 				{
@@ -2111,7 +2114,8 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 						memcpy((char*)(&(pReplyContinueList->PayLoad[Len])), &(TmpFileName[pTxBuf->pFile->Length]), RemCharCnt);
 						Len += RemCharCnt;
 
-						free(pTxBuf->pFile->namelist[TmpN]);
+						// TODO: WARNING memory free commented
+						// free((pTxBuf->pFile->namelist[TmpN]));
 
 						if (RemCharCnt == BytesToSend)
 						{
@@ -2143,14 +2147,15 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				{
 					TmpN--;
 
-					cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+					cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 
 					if ((NameLen + Len) <= BytesToSend)                         // Does the next name fit into the buffer?
 					{
 						memcpy((char*)(&(pReplyContinueList->PayLoad[Len])), TmpFileName, NameLen);
 						Len += NameLen;
 
-						free(pTxBuf->pFile->namelist[TmpN]);
+						// TODO: WARNING memory free commented
+						// free(pTxBuf->pFile->namelist[TmpN]);
 
 						if (BytesToSend == Len)
 						{
@@ -3193,7 +3198,7 @@ void      cComTxUpdate(UBYTE ChNo)
 			{
 				// Only here if filename has been divided in 2 pieces
 				// First transfer the remaining part of the last filename
-				cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+				cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 				RemCharCnt = NameLen - pTxBuf->pFile->Length;
 
 				if (RemCharCnt <= BytesToSend)
@@ -3202,7 +3207,8 @@ void      cComTxUpdate(UBYTE ChNo)
 					memcpy((char*)(&(pTxBuf->Buf[Len])), &(TmpFileName[pTxBuf->pFile->Length]), RemCharCnt);
 					Len += RemCharCnt;
 
-					free(pTxBuf->pFile->namelist[TmpN]);
+					// TODO: WARNING memory free commented
+					// free(pTxBuf->pFile->namelist[TmpN]);
 
 					if (RemCharCnt == BytesToSend)
 					{
@@ -3231,7 +3237,7 @@ void      cComTxUpdate(UBYTE ChNo)
 
 				TmpN--;
 
-				cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+				cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 
 				if ((NameLen + Len) <= BytesToSend)                         // Does the next name fit into the buffer?
 				{
@@ -3242,7 +3248,8 @@ void      cComTxUpdate(UBYTE ChNo)
 					printf("List entry no = %d; File name = %s\n", TmpN, pTxBuf->pFile->namelist[TmpN]->d_name);
 #endif
 
-					free(pTxBuf->pFile->namelist[TmpN]);
+					// TODO: WARNING memory free commented
+					// free(pTxBuf->pFile->namelist[TmpN]);
 
 					if (BytesToSend == Len)
 					{ // buffer is filled up now exit
@@ -4076,7 +4083,12 @@ void      cComWriteFile(void)
 			snprintf((char*)pTxBuf->Folder, MAX_FILENAME_SIZE, "%s", pFileName);
 			strcat((char*)pTxBuf->Folder, "/");
 
-			pTxBuf->pDir = (DIR*)opendir((char*)pFileName);
+
+			/*pTxBuf->pDir = (struct FILESYSTEM_ENTITY*)malloc(sizeof(struct FILESYSTEM_ENTITY));
+			pTxBuf->pDir->isDir = 1;
+			pTxBuf->pDir->exists = 1;
+			pTxBuf->pDir->name = (char*)pFileName;*/
+			pTxBuf->pDir = w_filesystem_openDir((char*)pFileName);
 
 			if (cComGetNxtFile(pTxBuf->pDir, pName))
 			{
@@ -4279,7 +4291,7 @@ void      cComGet(void)
 	DATA8   Paired = 0;
 	DATA8   Connected = 0;
 	DATA8   Visible = 0;
-	DATA8   Type;
+	static DATA8   Type;
 	DATA8* pMac;
 	DATA8* pIp;
 
@@ -5433,7 +5445,8 @@ void      cComSet(void)
 					fclose(File);
 				}
 				snprintf(ComInstance.BrickName, vmBRICKNAMESIZE, "%s", (char*)pName);
-				sethostname((char*)pName, Len + 1);
+				// TODO: sethost name
+				// sethostname((char*)pName, Len + 1);
 				DspStat = NOBREAK;
 			}
 		}

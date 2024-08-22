@@ -28,6 +28,8 @@
 #ifndef   BYTECODES_H_
 #define   BYTECODES_H_
 
+#include <math.h>
+
 #define   BYTECODE_VERSION              1.09
 
 // TODO: this can be dropped after next lmsasm release (>> 1.2.0)
@@ -1043,7 +1045,7 @@ typedef enum {
 #define   DATA8_NAN     ((DATA8)(-128))
 #define   DATA16_NAN    ((DATA16)(-32768))
 #define   DATA32_NAN    ((DATA32)(0x80000000))
-#define   DATAF_NAN     ((float)0 / (float)0) //(0x7FC00000)
+#define   DATAF_NAN     NAN // ((float)0.0 / (float)0.0) //(0x7FC00000)
 
 #define   DATA8_MIN     vmDATA8_MIN
 #define   DATA8_MAX     vmDATA8_MAX

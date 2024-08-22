@@ -749,6 +749,40 @@ extern    void      LogErrorNumber(ERR Error);               // Log error number
 extern    DATA8     LogErrorNumberExists(ERR Error);
 
 
+void      Error(void);
+void      Nop(void);
+void      ObjectStop(void);
+void      ObjectStart(void);
+void      ObjectTrig(void);
+void      ObjectWait(void);
+void      ObjectCall(void);
+void      ObjectReturn(void);
+void      ObjectEnd(void);
+void      ProgramStart(void);
+void      ProgramStop(void);
+void      Sleep_(void);
+void      ProgramInfo(void);
+void      DefLabel(void);
+void      Do(void);
+void      Probe(void);
+void      BreakPoint(void);
+void      BreakSet(void);
+void      Random(void);
+void      Info(void);
+void      Strings(void);
+void      MemoryWrite(void);
+void      MemoryRead(void);
+void      cBranchJr(void);
+void      PortCnvOutput(void);
+void      PortCnvInput(void);
+void      NoteToFreq(void);
+void      System(void);
+void      Monitor(void);
+
+void      TstClose(void);
+void      Tst(void);
+
+
 #ifndef   DISABLE_OLD_COLOR
 
 #define   COLORS                        4

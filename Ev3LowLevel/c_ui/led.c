@@ -56,9 +56,9 @@ static cUiLedFlags led_state;
  */
 int cUiLedOpenTriggerFile(const char *name)
 {
-    struct udev_enumerate *enumerate;
+    /*struct udev_enumerate *enumerate;
     struct udev_list_entry *list;
-    int fd = -1;
+    int fd = -1;*/
 
     // TODO: leds file shite
     //enumerate = udev_enumerate_new(VMInstance.udev);
@@ -80,7 +80,7 @@ int cUiLedOpenTriggerFile(const char *name)
     //}
     //udev_enumerate_unref(enumerate);
 
-    return fd;
+    return -1;
 }
 
 typedef struct {
