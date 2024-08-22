@@ -518,109 +518,110 @@ RESULT  cDaisyReady(void)
 	return (Result);
 }
 
-void DaisyAsyncReadCallBack(struct libusb_transfer* ReadUsbTransfer)
-{
-	// Callback -> Asyncronous Read-job done
-
-#ifdef DEBUG
-	printf("Did we reach here??\n");
-#endif
-
-	switch (ReadUsbTransfer->status)
-	{
-	case LIBUSB_TRANSFER_COMPLETED:   // An normal completion
-		ReadLength = ReadUsbTransfer->actual_length;
-		ReadState = DAISY_RD_DONE;
-
-#ifdef DEBUG
-		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_COMPLETED\n");
-#endif
-
-		break;
-
-	case LIBUSB_TRANSFER_TIMED_OUT:   // The asynchronous transfer ended up in a timeout
-		ReadState = DAISY_RD_TIMEDOUT;
-
-#ifdef DEBUG
-		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_TIMED_OUT\n");
-#endif
-
-		break;
-
-	case LIBUSB_TRANSFER_NO_DEVICE:   // The device (slave) has gone...
-		ReadState = DAISY_RD_DISCONNECTED;
-		DownConnectionState = DAISY_DOWN_DISCONNECTED;
-
-#ifdef DEBUG
-		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_NO_DEVICE\n");
-#endif
-
-		break;
-
-	default:                          // Fall through
-	case LIBUSB_TRANSFER_CANCELLED:   // Fall through   Could be more detailed - but all are unhappy states ;-)
-	case LIBUSB_TRANSFER_STALL:       // Fall through
-	case LIBUSB_TRANSFER_OVERFLOW:    // Fall through
-
-	case LIBUSB_TRANSFER_ERROR:       ReadState = DAISY_RD_ERROR;
-
-		//#define DEBUG
-#ifdef DEBUG
-		printf("\ncDaisyAsyncReadCallBack - LIBUSB_ALL_ERROR\n");
-#endif
-
-		break;
-	}
-}
-
-void cDaisyStartReadUnlockAnswer(void)
-{
-	// Startup of a read from downstream - are we ready (UNLOCKED)?
-	int ReadResult = DAISY_RD_OK;
-
-	libusb_fill_interrupt_transfer(ReadTransfer,
-		DeviceHandle,
-		DAISY_INTERRUPT_EP_IN,
-		DataIn,
-		DAISY_MAX_EP_IN_SIZE,
-		&DaisyAsyncReadCallBack,
-		NO_USER_DATA, // No user data
-		TimeOutMs);
-
-	ReadResult = libusb_submit_transfer(ReadTransfer);
-
-	switch (ReadResult)
-	{
-	case LIBUSB_SUCCESS:          ReadResult = DAISY_RD_OK;             // Read initiated OK
-		ReadState = DAISY_RD_REQUESTED;       // Ready for the callback to be called
-		ReadLength = 0;                       // Nothing read yet
-
-#ifdef DEBUG
-		printf("\ncDaisyStartReadUnlockAnswer - LIBUSB_SUCCESS\n");
-#endif
-
-		break;
-
-	case LIBUSB_ERROR_NO_DEVICE:  ReadResult = DAISY_RD_DISCONNECTED;   // Device gone, but can be requested later
-		ReadState = DAISY_RD_IDLE;            // No active job - Device is disconnected
-		DownConnectionState = DAISY_DOWN_DISCONNECTED;
-
-#ifdef DEBUG
-		printf("\nDaisyStartReadUnlockAnswer - LIBUSB_ERROR_NO_DEVICE\n");
-#endif
-
-		break;                                // Try again later....
-
-	default:                      ReadResult = DAISY_RD_ERROR;          // Some ERROR should not happen at start
-		ReadState = DAISY_RD_IDLE;            // if device present - No active job
-
-#ifdef DEBUG
-		printf("\nDaisyStartReadUnlockAnswer - LIBUSB_DEFAULT\n");
-#endif
-
-		break;                                // Try again later....
-	}
-}
+// TODO: daisy usb shite commented
+//void DaisyAsyncReadCallBack(struct libusb_transfer* ReadUsbTransfer)
+//{
+//	// Callback -> Asyncronous Read-job done
+//
+//#ifdef DEBUG
+//	printf("Did we reach here??\n");
+//#endif
+//
+//	switch (ReadUsbTransfer->status)
+//	{
+//	case LIBUSB_TRANSFER_COMPLETED:   // An normal completion
+//		ReadLength = ReadUsbTransfer->actual_length;
+//		ReadState = DAISY_RD_DONE;
+//
+//#ifdef DEBUG
+//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_COMPLETED\n");
+//#endif
+//
+//		break;
+//
+//	case LIBUSB_TRANSFER_TIMED_OUT:   // The asynchronous transfer ended up in a timeout
+//		ReadState = DAISY_RD_TIMEDOUT;
+//
+//#ifdef DEBUG
+//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_TIMED_OUT\n");
+//#endif
+//
+//		break;
+//
+//	case LIBUSB_TRANSFER_NO_DEVICE:   // The device (slave) has gone...
+//		ReadState = DAISY_RD_DISCONNECTED;
+//		DownConnectionState = DAISY_DOWN_DISCONNECTED;
+//
+//#ifdef DEBUG
+//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_NO_DEVICE\n");
+//#endif
+//
+//		break;
+//
+//	default:                          // Fall through
+//	case LIBUSB_TRANSFER_CANCELLED:   // Fall through   Could be more detailed - but all are unhappy states ;-)
+//	case LIBUSB_TRANSFER_STALL:       // Fall through
+//	case LIBUSB_TRANSFER_OVERFLOW:    // Fall through
+//
+//	case LIBUSB_TRANSFER_ERROR:       ReadState = DAISY_RD_ERROR;
+//
+//		//#define DEBUG
+//#ifdef DEBUG
+//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_ALL_ERROR\n");
+//#endif
+//
+//		break;
+//	}
+//}
+//
+//void cDaisyStartReadUnlockAnswer(void)
+//{
+//	// Startup of a read from downstream - are we ready (UNLOCKED)?
+//	int ReadResult = DAISY_RD_OK;
+//
+//	libusb_fill_interrupt_transfer(ReadTransfer,
+//		DeviceHandle,
+//		DAISY_INTERRUPT_EP_IN,
+//		DataIn,
+//		DAISY_MAX_EP_IN_SIZE,
+//		&DaisyAsyncReadCallBack,
+//		NO_USER_DATA, // No user data
+//		TimeOutMs);
+//
+//	ReadResult = libusb_submit_transfer(ReadTransfer);
+//
+//	switch (ReadResult)
+//	{
+//	case LIBUSB_SUCCESS:          ReadResult = DAISY_RD_OK;             // Read initiated OK
+//		ReadState = DAISY_RD_REQUESTED;       // Ready for the callback to be called
+//		ReadLength = 0;                       // Nothing read yet
+//
+//#ifdef DEBUG
+//		printf("\ncDaisyStartReadUnlockAnswer - LIBUSB_SUCCESS\n");
+//#endif
+//
+//		break;
+//
+//	case LIBUSB_ERROR_NO_DEVICE:  ReadResult = DAISY_RD_DISCONNECTED;   // Device gone, but can be requested later
+//		ReadState = DAISY_RD_IDLE;            // No active job - Device is disconnected
+//		DownConnectionState = DAISY_DOWN_DISCONNECTED;
+//
+//#ifdef DEBUG
+//		printf("\nDaisyStartReadUnlockAnswer - LIBUSB_ERROR_NO_DEVICE\n");
+//#endif
+//
+//		break;                                // Try again later....
+//
+//	default:                      ReadResult = DAISY_RD_ERROR;          // Some ERROR should not happen at start
+//		ReadState = DAISY_RD_IDLE;            // if device present - No active job
+//
+//#ifdef DEBUG
+//		printf("\nDaisyStartReadUnlockAnswer - LIBUSB_DEFAULT\n");
+//#endif
+//
+//		break;                                // Try again later....
+//	}
+//}
 
 RESULT cDaisyDownStreamCmd(DATA8* pData, DATA8 Length, DATA8 Layer)
 {
@@ -685,7 +686,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 	DAISY_UNLOCK_REPLY* pDaisyUnlockReply;
 	DAISYCMD* pDaisyCmd;
 	DAISY_READ* pDaisyRead;
-	uint	PortIndex;
+	unsigned int	PortIndex;
 	int	CommandPointer;
 	UBYTE	ThisMagicCookie;
 
@@ -885,17 +886,17 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 	}
 }
 
-int cDaisyGetMaxPacketSize(libusb_device_handle* DeviceHandle)
-{
-	// What's the smallest packet size for the HOSTed daisychained slave?
-	int InSize = 0;
-	int OutSize = 0;
-
-	InSize = libusb_get_max_packet_size(libusb_get_device(DeviceHandle), DAISY_INTERRUPT_EP_IN);
-	OutSize = libusb_get_max_packet_size(libusb_get_device(DeviceHandle), DAISY_INTERRUPT_EP_OUT);
-
-	return (InSize <= OutSize) ? InSize : OutSize;  // Return the smallest size
-}
+//int cDaisyGetMaxPacketSize(libusb_device_handle* DeviceHandle)
+//{
+//	// What's the smallest packet size for the HOSTed daisychained slave?
+//	int InSize = 0;
+//	int OutSize = 0;
+//
+//	InSize = libusb_get_max_packet_size(libusb_get_device(DeviceHandle), DAISY_INTERRUPT_EP_IN);
+//	OutSize = libusb_get_max_packet_size(libusb_get_device(DeviceHandle), DAISY_INTERRUPT_EP_OUT);
+//
+//	return (InSize <= OutSize) ? InSize : OutSize;  // Return the smallest size
+//}
 
 DATA8 cDaisyGetUsbUpStreamSpeed(void)
 {
@@ -1112,56 +1113,57 @@ RESULT cDaisyInit(void)
 
 	DaisyZeroTheBuffers();      // Start @ a known stage of data
 
+	// TODO: daisy usb shite commented
 	// Start initializing the UsbLib stuff
-	Temp = libusb_init(NULL);
-
-	if (Temp < 0)
-	{
-		Result = FAIL;
-	}
-	else
-	{
-#ifdef DEBUG
-		printf("\nDaisy Temp >= 0 \n");
-#endif
-
-		DeviceHandle = libusb_open_device_with_vid_pid(NULL, DAISY_VENDOR_ID, DAISY_PRODUCT_ID);
-		if (DeviceHandle != NULL)
-		{
-			// We've found our HID and want to use it
-			// Detach the hidusb from our HID to let us
-			// and the libusb use it :-)
-
-			libusb_detach_kernel_driver(DeviceHandle, INTERFACE_NUMBER);      // No simple ERROR check
-			// an ERROR will be catched
-			if (libusb_claim_interface(DeviceHandle, INTERFACE_NUMBER) >= 0)   // from here.....
-			{
-				// We have an valid Interface
-
-#ifdef DEBUG
-				printf("\nDaisy valid InterFace??? We have if this is seen...;-)\n");
-#endif
-
-				Result = OK;
-				MaxInterruptPacketSize = cDaisyGetMaxPacketSize(DeviceHandle);  // Be sure we have the right size
-
-#ifdef DEBUG
-				printf("\nDaisy MaxInterruptPacketSize: %d\n", MaxInterruptPacketSize);
-#endif
-
-				cDaisySetTimeout(DAISY_DEFAULT_TIMEOUT);
-				DownConnectionState = DAISY_DOWN_CONNECTED;
-				WriteState = DAISY_WR_IDLE; // We have a connection, but no communication yet
-				ReadState = DAISY_RD_IDLE;
-				ReadTransfer = libusb_alloc_transfer(0);
-				WriteTransfer = libusb_alloc_transfer(0);
-				BytesWritten = 0;
-				ReadLength = 0;
-			}
-			else
-				Result = FAIL;              // Could not claim the interface to the HID device
-		}
-	}
+//	Temp = libusb_init(NULL);
+//
+//	if (Temp < 0)
+//	{
+//		Result = FAIL;
+//	}
+//	else
+//	{
+//#ifdef DEBUG
+//		printf("\nDaisy Temp >= 0 \n");
+//#endif
+//
+//		DeviceHandle = libusb_open_device_with_vid_pid(NULL, DAISY_VENDOR_ID, DAISY_PRODUCT_ID);
+//		if (DeviceHandle != NULL)
+//		{
+//			// We've found our HID and want to use it
+//			// Detach the hidusb from our HID to let us
+//			// and the libusb use it :-)
+//
+//			libusb_detach_kernel_driver(DeviceHandle, INTERFACE_NUMBER);      // No simple ERROR check
+//			// an ERROR will be catched
+//			if (libusb_claim_interface(DeviceHandle, INTERFACE_NUMBER) >= 0)   // from here.....
+//			{
+//				// We have an valid Interface
+//
+//#ifdef DEBUG
+//				printf("\nDaisy valid InterFace??? We have if this is seen...;-)\n");
+//#endif
+//
+//				Result = OK;
+//				MaxInterruptPacketSize = cDaisyGetMaxPacketSize(DeviceHandle);  // Be sure we have the right size
+//
+//#ifdef DEBUG
+//				printf("\nDaisy MaxInterruptPacketSize: %d\n", MaxInterruptPacketSize);
+//#endif
+//
+//				cDaisySetTimeout(DAISY_DEFAULT_TIMEOUT);
+//				DownConnectionState = DAISY_DOWN_CONNECTED;
+//				WriteState = DAISY_WR_IDLE; // We have a connection, but no communication yet
+//				ReadState = DAISY_RD_IDLE;
+//				ReadTransfer = libusb_alloc_transfer(0);
+//				WriteTransfer = libusb_alloc_transfer(0);
+//				BytesWritten = 0;
+//				ReadLength = 0;
+//			}
+//			else
+//				Result = FAIL;              // Could not claim the interface to the HID device
+//		}
+//	}
 #ifdef DEBUG
 	printf("\nDaisy Init ended (HOST)\n");
 #endif
@@ -1375,9 +1377,9 @@ void cDaisyPushUpStream(void)
 
 		// Pack (reset) the stuff
 
-		uint j;
+		unsigned int j;
 		UBYTE p = 0x01;
-		uint StartIndex;
+		unsigned int StartIndex;
 
 		StartIndex = 4 * cDaisyGetOwnLayer();
 
@@ -1530,74 +1532,74 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 
 }
 
-void DaisyAsyncWriteCallBack(struct libusb_transfer* WriteUsbTransfer)
-{
-	BytesWritten = 0;           // Reset - only set if data written
-
-	// Callback -> Asyncronous Write-job done
-
-	if (WriteUsbTransfer->status == LIBUSB_TRANSFER_COMPLETED)
-	{
-#ifdef DEBUG
-		printf("Did I reach callback?? 01\n");
-#endif
-
-		LastWriteResult = DAISY_WR_COMPLETED; // Done with Success
-		BytesWritten = WriteUsbTransfer->actual_length;
-		DaisyReadyState = OK;
-	}
-	else  // Some thing went wrong....
-	{
-		switch (WriteUsbTransfer->status)
-		{
-
-
-		case LIBUSB_TRANSFER_TIMED_OUT:
-#ifdef DEBUG
-			printf("Did I reach callback?? 02\n");
-#endif
-
-			LastWriteResult = DAISY_WR_TIMEDOUT;
-			DaisyReadyState = FAIL;
-
-			break;
-
-		case LIBUSB_TRANSFER_NO_DEVICE:
-#ifdef DEBUG
-			printf("Did I reach callback?? 03\n");
-#endif
-
-			DownConnectionState = DAISY_DOWN_DISCONNECTED;
-			LastWriteResult = DAISY_WR_DISCONNECTED;
-			DaisyReadyState = FAIL;
-
-			break;
-
-		default:                        // Fall through
-		case LIBUSB_TRANSFER_CANCELLED: // Fall through   Could be more detailed
-		case LIBUSB_TRANSFER_STALL:     // Fall through
-		case LIBUSB_TRANSFER_OVERFLOW:  // Fall through
-
-		case LIBUSB_TRANSFER_ERROR:     LastWriteResult = DAISY_WR_ERROR;
-			DaisyReadyState = FAIL;
-
-#ifdef DEBUG
-			printf("Did I reach callback?? 04\n");
-#endif
-
-			break;
-		}
-	}
-
-	WriteState = DAISY_WR_IDLE;
-
-}
+//void DaisyAsyncWriteCallBack(struct libusb_transfer* WriteUsbTransfer)
+//{
+//	BytesWritten = 0;           // Reset - only set if data written
+//
+//	// Callback -> Asyncronous Write-job done
+//
+//	if (WriteUsbTransfer->status == LIBUSB_TRANSFER_COMPLETED)
+//	{
+//#ifdef DEBUG
+//		printf("Did I reach callback?? 01\n");
+//#endif
+//
+//		LastWriteResult = DAISY_WR_COMPLETED; // Done with Success
+//		BytesWritten = WriteUsbTransfer->actual_length;
+//		DaisyReadyState = OK;
+//	}
+//	else  // Some thing went wrong....
+//	{
+//		switch (WriteUsbTransfer->status)
+//		{
+//
+//
+//		case LIBUSB_TRANSFER_TIMED_OUT:
+//#ifdef DEBUG
+//			printf("Did I reach callback?? 02\n");
+//#endif
+//
+//			LastWriteResult = DAISY_WR_TIMEDOUT;
+//			DaisyReadyState = FAIL;
+//
+//			break;
+//
+//		case LIBUSB_TRANSFER_NO_DEVICE:
+//#ifdef DEBUG
+//			printf("Did I reach callback?? 03\n");
+//#endif
+//
+//			DownConnectionState = DAISY_DOWN_DISCONNECTED;
+//			LastWriteResult = DAISY_WR_DISCONNECTED;
+//			DaisyReadyState = FAIL;
+//
+//			break;
+//
+//		default:                        // Fall through
+//		case LIBUSB_TRANSFER_CANCELLED: // Fall through   Could be more detailed
+//		case LIBUSB_TRANSFER_STALL:     // Fall through
+//		case LIBUSB_TRANSFER_OVERFLOW:  // Fall through
+//
+//		case LIBUSB_TRANSFER_ERROR:     LastWriteResult = DAISY_WR_ERROR;
+//			DaisyReadyState = FAIL;
+//
+//#ifdef DEBUG
+//			printf("Did I reach callback?? 04\n");
+//#endif
+//
+//			break;
+//		}
+//	}
+//
+//	WriteState = DAISY_WR_IDLE;
+//
+//}
 
 int cDaisyWriteDone(void)                               // Called for an asyncronous check on the actual write
 {
 	int ReturnValue = DAISY_WR_NOT_FINISHED;
 
-	libusb_handle_events_timeout(0, &TV);         // Let the CPU get some job done - but don't let it
+	// libusb_handle_events_timeout(0, &TV);         // Let the CPU get some job done - but don't let it
 	// use too much time.......
 	switch (LastWriteResult)
 	{
@@ -1645,7 +1647,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 	int TempStorePointer = 0;                             // Used for the offset of O/P sensors
 	// (i.e. 16 = 4, 17 = 5 index in array)
 
-	libusb_handle_events_timeout(0, &TV);   // Let the CPU get some job done - but don't let it
+	// libusb_handle_events_timeout(0, &TV);   // Let the CPU get some job done - but don't let it
 	// use too much time.......
 
 	if (ReadState != DAISY_RD_IDLE)
@@ -1849,68 +1851,68 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 	}
 	else
 	{
-		// We have to start the READ job
-		if (DeviceHandle == NULL)
-		{
-#ifdef DEBUG
-			printf("\ncDaisyPollFromDownstream - Device_handle = NULL\n");
-#endif
-		}
-		else
-		{
-			if (ReadTransfer == NULL)
-			{
-#ifdef DEBUG
-				printf("\ncDaisyPollFromDownstream - ReadTransfer = NULL\n");
-#endif
-			}
-			else
-			{
-				// Populate the transfer
-				libusb_fill_interrupt_transfer(ReadTransfer,
-					DeviceHandle,
-					DAISY_INTERRUPT_EP_IN,
-					DataIn,
-					DAISY_MAX_EP_IN_SIZE,
-					&DaisyAsyncReadCallBack,
-					NO_USER_DATA, // No user data
-					TimeOutMs);
-
-				ReadResult = libusb_submit_transfer(ReadTransfer);
-				switch (ReadResult)
-				{
-				case LIBUSB_SUCCESS:                                                  // Read initiated OK
-					ReadState = DAISY_RD_REQUESTED;         // Ready for the callback to be called
-					ReadLength = 0;                         // Nothing read yet
-
-#ifdef DEBUG
-					printf("\ncDaisyPollFromDownstream REQ - LIBUSB_SUCCESS\n");
-#endif
-
-					break;
-
-				case LIBUSB_ERROR_NO_DEVICE:                                          // Device gone, but can be requested later
-					ReadState = DAISY_RD_IDLE;              // No active job - Device is disconnected
-					DownConnectionState = DAISY_DOWN_DISCONNECTED;
-					DaisyZeroTheBuffers();
-
-#ifdef DEBUG
-					printf("\ncDaisyPollFromDownstream - LIBUSB_ERROR_NO_DEVICE\n");
-#endif
-
-					break;                                  // Try again later....
-
-				default:                                                              // Some ERROR should not happen at start
-					ReadState = DAISY_RD_IDLE;              // if device present - No active job
-
-#ifdef DEBUG
-					printf("\ncDaisyPollFromDownstream - LIBUSB_DEFAULT\n");
-#endif
-
-					break;                                // Try again later....
-				}
-			}
-		}
+//		// We have to start the READ job
+//		if (DeviceHandle == NULL)
+//		{
+//#ifdef DEBUG
+//			printf("\ncDaisyPollFromDownstream - Device_handle = NULL\n");
+//#endif
+//		}
+//		else
+//		{
+//			if (ReadTransfer == NULL)
+//			{
+//#ifdef DEBUG
+//				printf("\ncDaisyPollFromDownstream - ReadTransfer = NULL\n");
+//#endif
+//			}
+//			else
+//			{
+//				// Populate the transfer
+//				libusb_fill_interrupt_transfer(ReadTransfer,
+//					DeviceHandle,
+//					DAISY_INTERRUPT_EP_IN,
+//					DataIn,
+//					DAISY_MAX_EP_IN_SIZE,
+//					&DaisyAsyncReadCallBack,
+//					NO_USER_DATA, // No user data
+//					TimeOutMs);
+//
+//				ReadResult = libusb_submit_transfer(ReadTransfer);
+//				switch (ReadResult)
+//				{
+//				case LIBUSB_SUCCESS:                                                  // Read initiated OK
+//					ReadState = DAISY_RD_REQUESTED;         // Ready for the callback to be called
+//					ReadLength = 0;                         // Nothing read yet
+//
+//#ifdef DEBUG
+//					printf("\ncDaisyPollFromDownstream REQ - LIBUSB_SUCCESS\n");
+//#endif
+//
+//					break;
+//
+//				case LIBUSB_ERROR_NO_DEVICE:                                          // Device gone, but can be requested later
+//					ReadState = DAISY_RD_IDLE;              // No active job - Device is disconnected
+//					DownConnectionState = DAISY_DOWN_DISCONNECTED;
+//					DaisyZeroTheBuffers();
+//
+//#ifdef DEBUG
+//					printf("\ncDaisyPollFromDownstream - LIBUSB_ERROR_NO_DEVICE\n");
+//#endif
+//
+//					break;                                  // Try again later....
+//
+//				default:                                                              // Some ERROR should not happen at start
+//					ReadState = DAISY_RD_IDLE;              // if device present - No active job
+//
+//#ifdef DEBUG
+//					printf("\ncDaisyPollFromDownstream - LIBUSB_DEFAULT\n");
+//#endif
+//
+//					break;                                // Try again later....
+//				}
+//			}
+//		}
 	}
 }
 
@@ -1926,68 +1928,68 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 		printf("DAISY WriteState and IDLE\n");
 #endif
 
-		// Do a start write
-		libusb_fill_interrupt_transfer(WriteTransfer,
-			DeviceHandle,
-			DAISY_INTERRUPT_EP_OUT,
-			DataOut,
-			DAISY_DEFAULT_MAX_EP_SIZE,
-			&DaisyAsyncWriteCallBack,
-			NO_USER_DATA, // No user data
-			TimeOutMs);
-
-		ResValue = libusb_submit_transfer(WriteTransfer);
-
-#ifdef DEBUG
-		printf("ResValue from write submit = %d\n", ResValue);
-#endif
-
-		switch (ResValue)                  // Could be returned as is,
-		{                                 // but if some should be rearranged,
-										  // renamed or grouped in another way
-
-		case LIBUSB_SUCCESS:
-#ifdef DEBUG
-			printf("Write submit LIBUSB_SUCCESS\n");
-#endif
-
-			ReturnValue = DAISY_WR_NOT_FINISHED;                // Write started OK
-			LastWriteResult = DAISY_WR_NOT_FINISHED;            // and NOT finished
-			WriteState = DAISY_WR_REQUESTED;                    // Ready for for the callback to signal Write Done
-
-			break;
-
-		case LIBUSB_ERROR_NO_DEVICE:
-
-#ifdef DEBUG
-			printf("Write submit LIBUSB_ERROR_NO_DEVICE\n");
-#endif
-
-			ReturnValue = DAISY_WR_DISCONNECTED;                // Device gone, but can be requested later
-			LastWriteResult = DAISY_WR_DISCONNECTED;            // signal it
-			DownConnectionState = DAISY_DOWN_DISCONNECTED;
-			WriteState = DAISY_WR_IDLE;                         // We can be used if a device is connected
-
-			break;
-
-		case LIBUSB_ERROR_BUSY:
-#ifdef DEBUG
-			printf("Write submit LIBUSB_ERROR_BUSY\n");
-#endif
-
-			ReturnValue = DAISY_WR_NOT_FINISHED;                // Previous write NOT finished
-			LastWriteResult = DAISY_WR_NOT_FINISHED;            // -
-			WriteState = DAISY_WR_REQUESTED;                    // Still.... must be
-
-			break;
-
-		default:
-#ifdef DEBUG
-			printf("Write submit DEFAULT in switch\n");	    // ERROR
-#endif
-
-			break;
-		}
+//		// Do a start write
+//		libusb_fill_interrupt_transfer(WriteTransfer,
+//			DeviceHandle,
+//			DAISY_INTERRUPT_EP_OUT,
+//			DataOut,
+//			DAISY_DEFAULT_MAX_EP_SIZE,
+//			&DaisyAsyncWriteCallBack,
+//			NO_USER_DATA, // No user data
+//			TimeOutMs);
+//
+//		ResValue = libusb_submit_transfer(WriteTransfer);
+//
+//#ifdef DEBUG
+//		printf("ResValue from write submit = %d\n", ResValue);
+//#endif
+//
+//		switch (ResValue)                  // Could be returned as is,
+//		{                                 // but if some should be rearranged,
+//										  // renamed or grouped in another way
+//
+//		case LIBUSB_SUCCESS:
+//#ifdef DEBUG
+//			printf("Write submit LIBUSB_SUCCESS\n");
+//#endif
+//
+//			ReturnValue = DAISY_WR_NOT_FINISHED;                // Write started OK
+//			LastWriteResult = DAISY_WR_NOT_FINISHED;            // and NOT finished
+//			WriteState = DAISY_WR_REQUESTED;                    // Ready for for the callback to signal Write Done
+//
+//			break;
+//
+//		case LIBUSB_ERROR_NO_DEVICE:
+//
+//#ifdef DEBUG
+//			printf("Write submit LIBUSB_ERROR_NO_DEVICE\n");
+//#endif
+//
+//			ReturnValue = DAISY_WR_DISCONNECTED;                // Device gone, but can be requested later
+//			LastWriteResult = DAISY_WR_DISCONNECTED;            // signal it
+//			DownConnectionState = DAISY_DOWN_DISCONNECTED;
+//			WriteState = DAISY_WR_IDLE;                         // We can be used if a device is connected
+//
+//			break;
+//
+//		case LIBUSB_ERROR_BUSY:
+//#ifdef DEBUG
+//			printf("Write submit LIBUSB_ERROR_BUSY\n");
+//#endif
+//
+//			ReturnValue = DAISY_WR_NOT_FINISHED;                // Previous write NOT finished
+//			LastWriteResult = DAISY_WR_NOT_FINISHED;            // -
+//			WriteState = DAISY_WR_REQUESTED;                    // Still.... must be
+//
+//			break;
+//
+//		default:
+//#ifdef DEBUG
+//			printf("Write submit DEFAULT in switch\n");	    // ERROR
+//#endif
+//
+//			break;
+//		}
 	}
 	return ReturnValue;
 }
@@ -2106,7 +2108,7 @@ void cDaisyControl(void)
 
 	// Do we have an interface at all?
 
-	libusb_handle_events_timeout(0, &TV);   // Let the CPU get some job done - but don't let it
+	// libusb_handle_events_timeout(0, &TV);   // Let the CPU get some job done - but don't let it
 	// use too much time.......
 
 	switch (DownConnectionState)       // What is downstream and what should we do---
@@ -2165,7 +2167,7 @@ void cDaisyControl(void)
 			printf("Before cDaisyStartReadUnlockAnswer()\n");
 #endif
 
-			cDaisyStartReadUnlockAnswer();
+			// cDaisyStartReadUnlockAnswer();
 			DownConnectionState = DAISY_CHECK_UNLOCK;
 		}
 		break;
@@ -2287,11 +2289,11 @@ void cDaisyControl(void)
 
 RESULT cDaisyOpen(void)
 {
-	if (DeviceHandle != NULL)
-	{
-		libusb_close(DeviceHandle);   // Close for safe open (again)
-		DeviceHandle = NULL;          // NO false pointer
-	}
+	//if (DeviceHandle != NULL)
+	//{
+	//	libusb_close(DeviceHandle);   // Close for safe open (again)
+	//	DeviceHandle = NULL;          // NO false pointer
+	//}
 	return (cDaisyInit());
 }
 
@@ -2304,15 +2306,15 @@ RESULT cDaisyExit(void)
 {
 	RESULT  Result = OK;
 
-	if (ReadTransfer)
-		libusb_free_transfer(ReadTransfer);   // Cleanup
-	if (WriteTransfer)
-		libusb_free_transfer(WriteTransfer);  // Cleanup
+	//if (ReadTransfer)
+	//	libusb_free_transfer(ReadTransfer);   // Cleanup
+	//if (WriteTransfer)
+	//	libusb_free_transfer(WriteTransfer);  // Cleanup
 
-	libusb_release_interface(DeviceHandle, 0);
-	libusb_close(DeviceHandle);
-	libusb_exit(NULL);
+	//libusb_release_interface(DeviceHandle, 0);
+	//libusb_close(DeviceHandle);
+	//libusb_exit(NULL);
 
-	DeviceHandle = NULL;
+	//DeviceHandle = NULL;
 	return (Result);
 }

@@ -339,10 +339,10 @@ typedef enum
 {
 	DAISY_WR_OK = 1,							      // Write started OK - REMEMBER we try to be asyncronous :-)
 	DAISY_WR_DONE = DAISY_WR_OK,							      // Request fullfilled else DAISY_WR_NOT_FINISHED
-	DAISY_WR_NOT_FINISHED = 2,			// Previous write not finished yet :-(
+	DAISY_WR_NOT_FINISHED = 6,			// Previous write not finished yet :-(
 	DAISY_WR_ERROR = 3,					  // ERROR bucket - NOT specified
 	DAISY_WR_TIMEDOUT = 4,				// Too slow...
-	DAISY_WR_DISCONNECTED = 5	// No device - I must be disconnected
+	DAISY_WR_DISCONNECTED = 7	// No device - I must be disconnected
 }
 DAISY_WR_ERROR_CODES;
 
