@@ -3,6 +3,7 @@
 #
 
 set (SOURCE_FILES
+    w_system.c
     w_filesystem.c
     w_time.c
     w_lcd.c

@@ -2054,7 +2054,7 @@ DATA8     CheckUsbstick(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Fo
 }
 
 
-RESULT    mSchedInit(int argc, char* argv[])
+RESULT    mSchedInit(int argc)
 {
 	DATA32  Result = OK;
 	PRGID   PrgId;
@@ -2246,7 +2246,8 @@ RESULT    mSchedInit(int argc, char* argv[])
 
 	if (argc >= 2)
 	{
-		snprintf((char*)VMInstance.FirstProgram, MAX_FILENAME_SIZE, "%s", argv[1]);
+		// TODO: uncomment to use argv
+		// snprintf((char*)VMInstance.FirstProgram, MAX_FILENAME_SIZE, "%s", argv[1]);
 	}
 	else
 	{
@@ -2515,7 +2516,7 @@ RESULT    mSchedExit(void)
 }
 
 
-int       main(int argc, char* argv[])
+int       lmsMain(int argc)
 {
 	RESULT  Result = FAIL;
 	UBYTE   Restart;
@@ -2530,7 +2531,7 @@ int       main(int argc, char* argv[])
 	do
 	{
 		Restart = 0;
-		Result = mSchedInit(argc, argv);
+		Result = mSchedInit(argc);
 
 		if (Result == OK)
 		{

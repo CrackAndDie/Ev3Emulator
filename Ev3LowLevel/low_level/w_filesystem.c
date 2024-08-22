@@ -1,5 +1,4 @@
 #include "w_filesystem.h"
-
 #include <stdlib.h>
 
 void reg_w_filesystem_createDir(int (*f)(const char* name))
@@ -7,9 +6,24 @@ void reg_w_filesystem_createDir(int (*f)(const char* name))
     w_filesystem_createDir = f;
 }
 
+void reg_w_filesystem_readDir(FILESYSTEM_ENTITY(*f)(FILESYSTEM_ENTITY dir))
+{
+	w_filesystem_readDir = f;
+}
+
+void reg_w_filesystem_scanDir(FILESYSTEM_ENTITY* (*f)(const char* name, int* amount, unsigned char sort))
+{
+	w_filesystem_scanDir = f;
+}
+
 void reg_w_filesystem_getUsedMemory(int (*f)(void))
 {
     w_filesystem_getUsedMemory = f;
+}
+
+void reg_w_filesystem_sync(void (*f)(void))
+{
+	w_filesystem_sync = f;
 }
 
 // ----- helpers

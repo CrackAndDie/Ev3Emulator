@@ -749,6 +749,9 @@ extern    void      LogErrorNumber(ERR Error);               // Log error number
 extern    DATA8     LogErrorNumberExists(ERR Error);
 
 
+int      lmsMain(int argc);
+
+
 void      Error(void);
 void      Nop(void);
 void      ObjectStop(void);

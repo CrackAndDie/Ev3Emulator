@@ -26,6 +26,8 @@ void reg_w_input_ioctlUARTDEVCON(void (*f)(int par, DEVCON data))
     w_input_ioctlUARTDEVCON = f;
 }
 
+// ------- writes
+
 void reg_w_input_writeData(void (*f)(int par, char* data, int len))
 {
     w_input_writeData = f;
