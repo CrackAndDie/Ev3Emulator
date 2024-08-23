@@ -642,14 +642,14 @@ static const char* const ParTypeNames[] = {
 
 static void ShowOpcode(UBYTE OpCode, char* Buf, int Lng)
 {
-	ULONG   Pars;
-	DATA8   Sub;
-	UBYTE   Tab;
-	UBYTE   ParType;
-	UBYTE   Flag = 0;
-	char    TmpBuf[255];
-	int     Length;
-	int     Size;
+	static ULONG   Pars;
+	static DATA8   Sub;
+	static UBYTE   Tab;
+	static UBYTE   ParType;
+	static UBYTE   Flag = 0;
+	static char    TmpBuf[255];
+	static int     Length;
+	static int     Size;
 
 
 	Buf[0] = 0;
@@ -757,7 +757,9 @@ RESULT cValidateInit(void)
 	UWORD   OpCode;
 	char    Buffer[8000];
 
-	pFile = fopen("../../../bytecodeassembler/o.c", "w");
+	w_filesystem_createDir("./lms_os/bytecodeassembler");
+
+	pFile = fopen("./lms_os/bytecodeassembler/o.c", "w");
 	fprintf(pFile, "//******************************************************************************\n");
 	fprintf(pFile, "//Test Supported Opcodes in V%4.2f\n", VERS);
 	fprintf(pFile, "//******************************************************************************\n\n");
@@ -793,7 +795,9 @@ RESULT cValidateInit(void)
 	fprintf(pFile, "//******************************************************************************\n");
 	fclose(pFile);
 
-	if (system("~/projects/lms2012/bytecodeassembler/oasm") >= 0)
+	w_system_printf("Wrote test bytecode file in cValidateInit \n");
+
+	if (system("./lms_os/projects/lms2012/bytecodeassembler/oasm") >= 0)
 	{
 		w_system_printf("Compiling\n");
 		w_filesystem_sync();

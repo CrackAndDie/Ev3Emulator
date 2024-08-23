@@ -268,6 +268,8 @@ RESULT    cUiInit(void)
 
 	// UiInstance.ButtonFile = cUiButtonOpenFile();
 
+	w_system_printf("Before led inits in cUiInit \n");
+
 	UiInstance.LedLeftRedTriggerFile = cUiLedOpenTriggerFile(LED_NAME_LEFT_RED);
 	if (UiInstance.LedLeftRedTriggerFile == -1) {
 		UiInstance.ULedLeftRedSourceId = cUiLedCreateUserLed(LED_NAME_LEFT_RED, USER_LED_LEFT | USER_LED_RED);
@@ -304,8 +306,12 @@ RESULT    cUiInit(void)
 
 	dLcdInit();
 
+	w_system_printf("Lcd inited in cUiInit \n");
+
 	snprintf(UiInstance.HwVers, HWVERS_SIZE, "ev3dev");
 	UiInstance.Hw = 0;
+
+	w_system_printf("HVersion sett in cUiInit \n");
 
 	if (SPECIALVERS < '0')
 	{
@@ -315,6 +321,8 @@ RESULT    cUiInit(void)
 	{
 		snprintf(UiInstance.FwVers, FWVERS_SIZE, "V%4.2f%c", VERS, SPECIALVERS);
 	}
+
+	w_system_printf("FVersion sett in cUiInit \n");
 
 	// TODO: real time shite
 	/*snprintf(Buffer, 32, "%s %s", __DATE__, __TIME__);
@@ -329,7 +337,7 @@ RESULT    cUiInit(void)
 	// snprintf(UiInstance.OsVers, OSVERS_SIZE, "%s %s", (*pOs).sysname, (*pOs).release);
 	snprintf(UiInstance.OsVers, OSVERS_SIZE, "%s", "PIVO 322");
 
-	sprintf((char*)UiInstance.OsBuild, OSBUILD_SIZE, "%s", "1207272106"); // same as fwbuild
+	snprintf(UiInstance.OsBuild, OSBUILD_SIZE, "%s", "1207272106"); // same as fwbuild
 
 	// TODO: real build shite
 	/*Lng = strlen((*pOs).version) - 9;
@@ -358,6 +366,8 @@ RESULT    cUiInit(void)
 		}
 	}*/
 
+	w_system_printf("Brick data inited in cUiInit \n");
+
 	UiInstance.IpAddr[0] = 0;
 	// TODO: do i need it
 	/*Sid = socket(AF_INET, SOCK_DGRAM, 0);
@@ -370,6 +380,8 @@ RESULT    cUiInit(void)
 	close(Sid);*/
 
 	cUiButtonClearAll();
+
+	w_system_printf("Buttons cleared in cUiInit \n");
 
 	// TODO: Handle other types of batteries.
 	// For now, we are assuming we have 6 AA Alkaline batteries or the LEGO

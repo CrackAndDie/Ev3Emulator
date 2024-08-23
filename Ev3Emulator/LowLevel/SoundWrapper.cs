@@ -20,11 +20,28 @@ namespace Ev3Emulator.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_sound_playChunkAction(IntPtr data, int len);
 
-		public static void Init(reg_w_sound_playToneAction playTone, reg_w_sound_isTonePlayingAction isTonePlaying, reg_w_sound_playChunkAction playChunk)
+		// TODO: custom handler post processed
+		public static void Init()
 		{
-			reg_w_sound_playTone(playTone);
-			reg_w_sound_isTonePlaying(isTonePlaying);
-			reg_w_sound_playChunk(playChunk);
+			reg_w_sound_playTone(PlayTone);
+			reg_w_sound_isTonePlaying(IsTonePlaying);
+			reg_w_sound_playChunk(PlayChunk);
+		}
+
+		private static void PlayTone(short freq)
+		{
+			// TODO:
+		}
+
+		private static int IsTonePlaying()
+		{
+			// TODO:
+			return 0;
+		}
+
+		private static void PlayChunk(IntPtr data, int len)
+		{
+			// TODO:
 		}
 	}
 }

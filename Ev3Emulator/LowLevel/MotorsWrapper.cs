@@ -20,11 +20,27 @@ namespace Ev3Emulator.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_motors_setDataAction(IntPtr data, int len);
 
-		public static void Init(reg_w_motors_getBusyFlagsAction getBusyFlags, reg_w_motors_setBusyFlagsAction setBusyFlags, reg_w_motors_setDataAction setData)
+		// TODO: custom handler post processed
+		public static void Init()
 		{
-			reg_w_motors_getBusyFlags(getBusyFlags);
-			reg_w_motors_setBusyFlags(setBusyFlags);
-			reg_w_motors_setData(setData);
+			reg_w_motors_getBusyFlags(GetBusyFlags);
+			reg_w_motors_setBusyFlags(SetBusyFlags);
+			reg_w_motors_setData(SetData);
+		}
+
+		private static void GetBusyFlags(ref int f1, ref int f2)
+		{
+			// TODO: 
+		}
+
+		private static void SetBusyFlags(int f1)
+		{
+			// TODO: 
+		}
+
+		private static void SetData(IntPtr data, int len)
+		{
+			// TODO: 
 		}
 	}
 }

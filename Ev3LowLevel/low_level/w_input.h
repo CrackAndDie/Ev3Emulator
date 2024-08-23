@@ -26,7 +26,7 @@ __declspec(dllexport) void reg_w_input_ioctlUARTDEVCON(void (*f)(int par, DEVCON
 // ------- writes
 
 // write to uart/adc/dcm  -  0, 1, 2
-void (*w_input_writeData)(int par, char* data, int len);
-__declspec(dllexport) void reg_w_input_writeData(void (*f)(int par, char* data, int len));
+void (*w_input_writeData)(int par, unsigned char* data, int len);
+__declspec(dllexport) void reg_w_input_writeData(void (*f)(int par, unsigned char* data, int len));
 
 #endif // W_INPUT_H_

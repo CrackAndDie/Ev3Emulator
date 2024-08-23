@@ -38,7 +38,7 @@
 
 // Defines
 
-#define vmAPPS_DIR "../apps"  // Apps folder
+#define vmAPPS_DIR "./lms_os/apps"  // Apps folder
 #define vmBG_COLOR (0)  // Background color
 #define vmBLUETOOTH_FILE_NAME "Bluetooth"  // File used in "Bluetooth" app to save status
 #define vmBRICKNAMESIZE (120)  // Brick name maximal size (including zero termination)
@@ -64,7 +64,7 @@
 #define vmDATAF_MAX (2147483647)  // DATAF  positive limit
 #define vmDATAF_MIN (-2147483647)  // DATAF  negative limit
 #define vmDATAF_NAN (2143289344)
-#define vmDATALOG_FOLDER "../prjs/BrkDL_SAVE"  // Folder for On Brick Data log files
+#define vmDATALOG_FOLDER "./lms_os/prjs/BrkDL_SAVE"  // Folder for On Brick Data log files
 #define vmDEFAULT_SLEEPMINUTES (30)
 #define vmDEFAULT_VOLUME (100)
 #define vmDIR_DEEPT (127)  // Max directory items allocated including "." and ".."
@@ -112,18 +112,18 @@
 #define vmPOP3_ABS_WARN_YES_Y (90)
 #define vmPOP3_ABS_X (16)
 #define vmPOP3_ABS_Y (50)
-#define vmPRJS_DIR "../prjs"  // Project folder
-#define vmPROGRAM_FOLDER "../prjs/BrkProg_SAVE"  // Folder for On Brick Programming programs
+#define vmPRJS_DIR "./lms_os/prjs"  // Project folder
+#define vmPROGRAM_FOLDER "./lms_os/prjs/BrkProg_SAVE"  // Folder for On Brick Programming programs
 #define vmPULSE_BROWSER (2)
 #define vmPULSE_GUI_BACKGROUND (1)
 #define vmPULSE_KEY (4)
-#define vmSDCARD_FOLDER "../prjs/SD_Card"  // Folder for SD card mount
-#define vmSETTINGS_DIR "../sys/settings"  // Folder for non volatile settings
+#define vmSDCARD_FOLDER "./lms_os/prjs/SD_Card"  // Folder for SD card mount
+#define vmSETTINGS_DIR "./lms_os/sys/settings"  // Folder for non volatile settings
 #define vmSLEEP_FILE_NAME "Sleep"  // File used in "Sleep" app to save status
-#define vmTMP_DIR "../tmp"  // Temporary folder
-#define vmTOOLS_DIR "../tools"  // Tools folder
+#define vmTMP_DIR "./lms_os/tmp"  // Temporary folder
+#define vmTOOLS_DIR "./lms_os/tools"  // Tools folder
 #define vmTOPLINE_HEIGHT (10)  // Top line vertical pixels
-#define vmUSBSTICK_FOLDER "../prjs/USB_Stick"  // Folder for USB stick mount
+#define vmUSBSTICK_FOLDER "./lms_os/prjs/USB_Stick"  // Folder for USB stick mount
 #define vmVOLUME_FILE_NAME "Volume"  // File used in "Volume" app to save status
 #define vmWIFIPASSKEYSIZE (33)  // WiFi pass key size (including zero termination)
 #define vmWIFI_FILE_NAME "WiFi"  // File used in "WiFi" app to save status

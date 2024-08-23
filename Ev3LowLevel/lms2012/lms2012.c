@@ -2108,10 +2108,12 @@ RESULT    mSchedInit(int argc)
 		// chmod(vmSETTINGS_DIR, DIRPERMISSIONS); // TODO: chmod
 	}
 
-	w_system_printf("dir created in schedinit: %s \n", vmSETTINGS_DIR);
+	w_system_printf("Dir created in schedinit: %s \n", vmSETTINGS_DIR);
 
 	CheckUsbstick(&Ok, &Total, &Free, 0);
 	CheckSdcard(&Ok, &Total, &Free, 0);
+
+	w_system_printf("shite checked in schedinit \n");
 
 	// Be sure necessary files exist
 	Ok = 0;
@@ -2123,6 +2125,8 @@ RESULT    mSchedInit(int argc)
 		fwrite(ParBuf, sizeof(char), strlen(ParBuf), File);
 		fclose(File);
 	}
+
+	w_system_printf("WiFi file checked in schedinit \n");
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmBLUETOOTH_FILE_NAME, vmEXT_TEXT);
@@ -2141,6 +2145,8 @@ RESULT    mSchedInit(int argc)
 			fclose(File);
 		}
 	}
+
+	w_system_printf("Bt file checked in schedinit \n");
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmSLEEP_FILE_NAME, vmEXT_TEXT);
@@ -2168,6 +2174,9 @@ RESULT    mSchedInit(int argc)
 		}
 		fclose(File);
 	}
+
+	w_system_printf("Sleep file checked in schedinit \n");
+
 	if (!Ok)
 	{
 		File = fopen(PrgNameBuf, "w");
@@ -2197,6 +2206,9 @@ RESULT    mSchedInit(int argc)
 		}
 		fclose(File);
 	}
+
+	w_system_printf("Volume file checked in schedinit \n");
+
 #ifdef DISABLE_SOUND
 	SetVolumePercent((DATA8)0);
 	File = fopen(PrgNameBuf, "w");
@@ -2222,17 +2234,28 @@ RESULT    mSchedInit(int argc)
 
 	VMInstance.RefCount = 0;
 
+	w_system_printf("Before inits in schedinit \n");
+
 	cOutputInit();
+	w_system_printf("Output inited in schedinit \n");
 	cInputInit();
+	w_system_printf("Input inited in schedinit \n");
 	cUiInit();
+	w_system_printf("Ui inited in schedinit \n");
 	cMemoryInit();
+	w_system_printf("Memory inited in schedinit \n");
 	cComInit();
+	w_system_printf("Com inited in schedinit \n");
 	cSoundInit();
+	w_system_printf("Sound inited in schedinit \n");
 
 	// Initialise the dynamic loading, does not return anything
 	dynloadInit();
+	w_system_printf("Dynload inited in schedinit \n");
 
 	cValidateInit();
+
+	w_system_printf("All inited in schedinit \n");
 
 	for (PrgId = 0; PrgId < MAX_PROGRAMS; PrgId++)
 	{
@@ -2260,6 +2283,8 @@ RESULT    mSchedInit(int argc)
 	}
 
 	ProgramReset(VMInstance.ProgramId, UiImage, (GP)VMInstance.FirstProgram, 0);
+
+	w_system_printf("Program reseted in schedinit \n");
 
 	return (RESULT)(Result);
 }
