@@ -1,7 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using Ev3CoreUnsafe;
-using Ev3Emulator.CoreImpl;
 using System;
 
 namespace Ev3Emulator

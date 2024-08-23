@@ -2100,11 +2100,15 @@ RESULT    mSchedInit(int argc)
 		}
 	}
 
+	w_system_printf("PrimDispatchTable filled in schedinit \n");
+
 	// Be sure necessary folders exist
 	if (w_filesystem_createDir(vmSETTINGS_DIR) == 0)
 	{
 		// chmod(vmSETTINGS_DIR, DIRPERMISSIONS); // TODO: chmod
 	}
+
+	w_system_printf("dir created in schedinit: %s \n", vmSETTINGS_DIR);
 
 	CheckUsbstick(&Ok, &Total, &Free, 0);
 	CheckSdcard(&Ok, &Total, &Free, 0);
@@ -2533,6 +2537,8 @@ int       lmsMain(int argc)
 	{
 		Restart = 0;
 		Result = mSchedInit(argc);
+
+		w_system_printf("result from schedinit: %d \n", Result);
 
 		if (Result == OK)
 		{

@@ -902,7 +902,7 @@ DATA8     cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, char* pFolderName
 
 void      cMemoryDeleteSubFolders(char* pFolderName)
 {
-	struct  FILESYSTEM_ENTITY* d;
+	struct  FILESYSTEM_ENTITY* d = (FILESYSTEM_ENTITY*)malloc(sizeof(FILESYSTEM_ENTITY));
 	struct FILESYSTEM_ENTITY* dir;
 	char    buf[256];
 	DATA8   DeleteOk = 1;
@@ -918,7 +918,8 @@ void      cMemoryDeleteSubFolders(char* pFolderName)
 
 		if (dir != NULL)
 		{
-			*d = w_filesystem_readDir(*dir);
+			*d = w_filesystem_readDir(dir->name, dir->searchOffset);
+			dir->searchOffset++;
 			while ((d->result == OK) && d->exists)
 			{
 #ifdef DEBUG
@@ -929,7 +930,8 @@ void      cMemoryDeleteSubFolders(char* pFolderName)
 				remove(buf);
 				cMemoryDeleteCacheFile(buf);
 
-				*d = w_filesystem_readDir(*dir);
+				*d = w_filesystem_readDir(dir->name, dir->searchOffset);
+				dir->searchOffset++;
 			}
 			w_filesystem_closeDir(dir);
 			remove(pFolderName);
@@ -1741,7 +1743,7 @@ RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 	RESULT  Result;
 	FOLDER* pMemory;
 	char    Ext[vmEXTSIZE];
-	struct  FILESYSTEM_ENTITY* pEntry;
+	struct  FILESYSTEM_ENTITY* pEntry = (FILESYSTEM_ENTITY*)malloc(sizeof(FILESYSTEM_ENTITY));
 
 	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
 	*pItems = 0;
@@ -1751,7 +1753,8 @@ RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 
 		if ((*pMemory).pDir != NULL)
 		{
-			*pEntry = w_filesystem_readDir(*(*pMemory).pDir);
+			*pEntry = w_filesystem_readDir((*pMemory).pDir->name, (*pMemory).pDir->searchOffset);
+			(*pMemory).pDir->searchOffset++;
 			if (pEntry != NULL)
 			{ // More entries
 

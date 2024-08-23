@@ -1,4 +1,5 @@
-﻿using Ev3ConsoleCmakeTest.Tests;
+﻿using Ev3ConsoleCmakeTest.Lms;
+using Ev3ConsoleCmakeTest.Tests;
 
 namespace Ev3ConsoleCmakeTest
 {
@@ -7,6 +8,7 @@ namespace Ev3ConsoleCmakeTest
 		static void Main(string[] args)
 		{
 			TestWrapper.Test();
+			// LmsWrapper.Lms();
 			Console.WriteLine("Hello, World! ");
 		}
 	}

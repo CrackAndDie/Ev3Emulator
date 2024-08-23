@@ -23,9 +23,8 @@
 					   Height="128"/>
 			</Border>
 		</StackPanel>
-		
-		
-		<ListBox Grid.Column="1"
+
+		<!--<ListBox Grid.Column="1"
 				 Background="Black"
 				 ItemsSource="{Binding OutputData}"
 				 AutoScrollToSelectedItem="True"
@@ -39,6 +38,6 @@
 					</TextBox>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
-		</ListBox>
+		</ListBox>-->
 	</Grid>
 </UserControl>

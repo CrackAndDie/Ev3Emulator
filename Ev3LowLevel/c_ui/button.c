@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define REAL_UP_BUTTON      0
@@ -167,6 +168,7 @@ void cUiUpdateButtons(DATA16 Time)
 				}
 			}
 		}
+		free(states);
 	}
 
 	for (Button = 0; Button < BUTTONS; Button++) {

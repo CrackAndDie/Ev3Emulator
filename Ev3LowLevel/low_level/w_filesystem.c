@@ -6,7 +6,7 @@ void reg_w_filesystem_createDir(int (*f)(const char* name))
     w_filesystem_createDir = f;
 }
 
-void reg_w_filesystem_readDir(FILESYSTEM_ENTITY(*f)(FILESYSTEM_ENTITY dir))
+void reg_w_filesystem_readDir(FILESYSTEM_ENTITY(*f)(const char* name, int offset))
 {
 	w_filesystem_readDir = f;
 }

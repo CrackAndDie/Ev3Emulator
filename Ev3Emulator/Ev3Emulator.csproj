@@ -7,6 +7,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <PlatformTarget>x86</PlatformTarget>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,6 +31,10 @@
     </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Ev3CoreUnsafe\Ev3CoreUnsafe.csproj" />
+		<None Include="$(SolutionDir)externals\**" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
+
+	<!--<ItemGroup>
+		<ProjectReference Include="..\Ev3CoreUnsafe\Ev3CoreUnsafe.csproj" />
+	</ItemGroup>-->
 </Project>

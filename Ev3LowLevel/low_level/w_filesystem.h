@@ -22,8 +22,8 @@ int (*w_filesystem_createDir)(const char* name);
 __declspec(dllexport) void reg_w_filesystem_createDir(int (*f)(const char* name));
 
 // gets the next element in directory and returns it
-FILESYSTEM_ENTITY (*w_filesystem_readDir)(FILESYSTEM_ENTITY dir);
-__declspec(dllexport) void reg_w_filesystem_readDir(FILESYSTEM_ENTITY (*f)(FILESYSTEM_ENTITY dir));
+FILESYSTEM_ENTITY (*w_filesystem_readDir)(const char* name, int offset);
+__declspec(dllexport) void reg_w_filesystem_readDir(FILESYSTEM_ENTITY (*f)(const char* name, int offset));
 
 // returns all elements in dir, amount. sort 0 - no sort, sort 1 - sort, sort 2 - alphasort
 // return value should be allocated in c# and freed in c

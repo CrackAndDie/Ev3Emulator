@@ -654,12 +654,14 @@ DATA8     cComGetHandle(char* pName)
 UBYTE     cComGetNxtFile(FILESYSTEM_ENTITY* pDir, UBYTE* pName)
 {
 	UBYTE     RtnVal = 0;
-	FILESYSTEM_ENTITY* pDirPtr;
+	FILESYSTEM_ENTITY* pDirPtr = (FILESYSTEM_ENTITY*)malloc(sizeof(FILESYSTEM_ENTITY));
 
-	*pDirPtr = w_filesystem_readDir(*pDir);
+	*pDirPtr = w_filesystem_readDir(pDir->name, pDir->searchOffset);
+	pDir->searchOffset++;
 	while ((NULL != pDirPtr) && (pDirPtr->isDir) && (pDirPtr->result == OK))
 	{
-		*pDirPtr = w_filesystem_readDir(*pDir);
+		*pDirPtr = w_filesystem_readDir(pDir->name, pDir->searchOffset);
+		pDir->searchOffset++;
 	}
 
 	if (NULL != pDirPtr && (pDirPtr->result == OK))

@@ -13,6 +13,8 @@ void w_system_startMain(void) {
 	File = fopen(__LOG_FILENAME, "w");
 	fclose(File);
 
+	w_system_printf("starting main... \n");
+
 	lmsMain(0);
 }
 

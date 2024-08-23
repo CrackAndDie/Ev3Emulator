@@ -23,8 +23,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using Ev3Emulator.Modules;
-using Ev3CoreUnsafe;
-using Ev3Emulator.CoreImpl;
 
 namespace Ev3Emulator;
 
@@ -46,7 +44,7 @@ public partial class App : ApplicationBase
         viewModelService.RegisterViewModelAssembly(Assembly.GetExecutingAssembly());
 
 		// init ev3
-		GH.Ev3System = new Ev3System();
+		
 
 		return base.CreateShell();
     }
