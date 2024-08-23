@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "w_system.h"
 #include "lms2012.h"
 #include "c_ui.h"
 #include "d_lcd.h"
@@ -197,7 +198,7 @@ void cUiGraphDraw(DATA8 View, DATAF *pActual, DATAF *pLowest, DATAF *pHighest,
                             Value  =  0;
                         }
 /*
-                        printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,UiInstance.Graph.pMin[Item],UiInstance.Graph.pMax[Item],UiInstance.Graph.pOffset[Item],UiInstance.Graph.pSpan[Item],Value);
+                        w_system_printf("S=%-3d V=%3.0f L=%3.0f H=%3.0f A=%3.0f v=%3.0f ^=%3.0f O=%3d S=%3d Y=%d\n",Samples,*pActual,*pLowest,*pHighest,*pAverage,UiInstance.Graph.pMin[Item],UiInstance.Graph.pMax[Item],UiInstance.Graph.pOffset[Item],UiInstance.Graph.pSpan[Item],Value);
 */
                         Y2  =  (UiInstance.Graph.pOffset[Item] + UiInstance.Graph.pSpan[Item]) - Value;
                         if (Pointer > 1)

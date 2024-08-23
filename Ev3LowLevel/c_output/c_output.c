@@ -129,6 +129,7 @@
   */
 
 
+#include "w_system.h"
 #include "w_motors.h"
 
 #include "lms2012.h"
@@ -453,13 +454,13 @@ void      cOutputSetType(void)
 				if ((Type == TYPE_NONE) || (Type == TYPE_ERROR))
 				{
 #ifdef DEBUG
-					printf("                Output %c Disable\n", 'A' + No);
+					w_system_printf("                Output %c Disable\n", 'A' + No);
 #endif
 				}
 				else
 				{
 #ifdef DEBUG
-					printf("                Output %c Enable\n", 'A' + No);
+					w_system_printf("                Output %c Enable\n", 'A' + No);
 #endif
 				}
 			}

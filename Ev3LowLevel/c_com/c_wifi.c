@@ -37,10 +37,11 @@
  *
  */
 
+#include "w_system.h"
 #include "c_wifi.h"
 
 #ifdef DEBUG_WIFI
-#define pr_dbg(f, ...) printf(f, ##__VA_ARGS__)
+#define pr_dbg(f, ...) w_system_printf(f, ##__VA_ARGS__)
 #else
 #define pr_dbg(f, ...) while (0) { }
 #endif
@@ -674,15 +675,15 @@ UWORD cWiFiWriteTcp(UBYTE* Buffer, UWORD Length)
 
     if (Length > 0) {
 #if 0 // this makes lots of noise
-        printf("\ncWiFiWriteTcp Length: %d\n", Length);
+        w_system_printf("\ncWiFiWriteTcp Length: %d\n", Length);
         // Code below used for "hunting" packets of correct length
         // but with length bytes set to "0000" and payload all zeroed
 
         if ((Buffer[0] == 0) && (Buffer[1] == 0)) {
             int i;
-            printf("\ncERROR in first 2 entries - WiFiWriteTcp Length: %d\n", Length);
+            w_system_printf("\ncERROR in first 2 entries - WiFiWriteTcp Length: %d\n", Length);
             for (i = 0; i < Length; i++) {
-                printf("\nFAIL!!! Buffer[%d] = 0x%x\n", i, Buffer[i]);
+                w_system_printf("\nFAIL!!! Buffer[%d] = 0x%x\n", i, Buffer[i]);
             }
         }
 #endif
@@ -827,17 +828,17 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
 //            case TCP_WAIT_ON_START:
 //                pr_dbg("TCP_WAIT_ON_START:\n");
 //#ifdef DEBUG_WIFI
-//                printf("\nDataRead = %d, Buffer = \n", DataRead);
+//                w_system_printf("\nDataRead = %d, Buffer = \n", DataRead);
 //                if (DataRead > 0) {
 //                    int ii;
 //
 //                    for (ii = 0; ii < DataRead; ii++) {
-//                        printf("0x%x, ", Buffer[ii]);
+//                        w_system_printf("0x%x, ", Buffer[ii]);
 //                    }
 //                } else {
-//                    printf("DataRead shows FAIL: %d", DataRead);
+//                    w_system_printf("DataRead shows FAIL: %d", DataRead);
 //                }
-//                printf("\n");
+//                w_system_printf("\n");
 //#endif
 //
 //                if (DataRead == 0) {
@@ -910,7 +911,7 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
 //                int i;
 //
 //                for (i = 0; i < TcpTotalLength; i++) {
-//                    printf("ReadBuffer[%d] = 0x%x\n", i, Buffer[i]);
+//                    w_system_printf("ReadBuffer[%d] = 0x%x\n", i, Buffer[i]);
 //                }
 //#endif
 //                pr_dbg("TcpRestLen = %d, DataRead incl. 2 = %d, Length = %d\n",

@@ -22,6 +22,9 @@
 #include <stdlib.h>
  // #include <unistd.h>
 
+#include "w_filesystem.h"
+#include "w_system.h"
+
 #include "bytecodes.h"
 #include "lmstypes.h"
 #include "validate.h"
@@ -792,8 +795,8 @@ RESULT cValidateInit(void)
 
 	if (system("~/projects/lms2012/bytecodeassembler/oasm") >= 0)
 	{
-		printf("Compiling\n");
-		sync();
+		w_system_printf("Compiling\n");
+		w_filesystem_sync();
 	}
 
 
@@ -848,7 +851,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 	// Check for validation error
 	if ((*pIndex) == cValidateGetErrorIndex())
 	{
-		printf("ERROR ");
+		w_system_printf("ERROR ");
 	}
 
 	// Get opcode
@@ -861,7 +864,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 		Parameters = 0;
 
 		// Print opcode
-		LineLength = printf("  /* %4d */  %s,", *pIndex, OpCodes[OpCode].Name);
+		LineLength = w_system_printf("  /* %4d */  %s,", *pIndex, OpCodes[OpCode].Name);
 		Indent = LineLength;
 
 		(*pIndex)++;
@@ -907,20 +910,20 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 								if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_1_BYTE)
 								{
-									LineLength += printf("LC1(%s),", SubCodes[Tab][Sub].Name);
+									LineLength += w_system_printf("LC1(%s),", SubCodes[Tab][Sub].Name);
 								}
 								if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_2_BYTES)
 								{
-									LineLength += printf("LC2(%s),", SubCodes[Tab][Sub].Name);
+									LineLength += w_system_printf("LC2(%s),", SubCodes[Tab][Sub].Name);
 								}
 								if ((ParCode & PRIMPAR_BYTES) == PRIMPAR_4_BYTES)
 								{
-									LineLength += printf("LC4(%s),", SubCodes[Tab][Sub].Name);
+									LineLength += w_system_printf("LC4(%s),", SubCodes[Tab][Sub].Name);
 								}
 							}
 							else
 							{
-								LineLength += printf("LC0(%s),", SubCodes[Tab][Sub].Name);
+								LineLength += w_system_printf("LC0(%s),", SubCodes[Tab][Sub].Name);
 							}
 
 							// Get sub code parameter list
@@ -941,7 +944,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 						//***************************************************************************
 						if ((LineLength + 10) >= 80)
 						{
-							printf("\n%*.*s", Indent, Indent, "");
+							w_system_printf("\n%*.*s", Indent, Indent, "");
 							LineLength = Indent;
 						}
 						Value = (ULONG)0;
@@ -955,13 +958,13 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 							if (ParCode & PRIMPAR_HANDLE)
 							{
-								LineLength += printf("HND(");
+								LineLength += w_system_printf("HND(");
 							}
 							else
 							{
 								if (ParCode & PRIMPAR_ADDR)
 								{
-									LineLength += printf("ADR(");
+									LineLength += w_system_printf("ADR(");
 								}
 							}
 							if (ParCode & PRIMPAR_VARIABLE)
@@ -970,12 +973,12 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 								if (ParCode & PRIMPAR_GLOBAL)
 								{ // global
 
-									LineLength += printf("GV");
+									LineLength += w_system_printf("GV");
 								}
 								else
 								{ // local
 
-									LineLength += printf("LV");
+									LineLength += w_system_printf("LV");
 								}
 								switch (ParCode & PRIMPAR_BYTES)
 								{
@@ -983,7 +986,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 								{
 									Value = (ULONG)pI[(*pIndex)++];
 
-									LineLength += printf("1(%d)", (int)Value);
+									LineLength += w_system_printf("1(%d)", (int)Value);
 								}
 								break;
 
@@ -992,7 +995,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									Value = (ULONG)pI[(*pIndex)++];
 									Value |= ((ULONG)pI[(*pIndex)++] << 8);
 
-									LineLength += printf("2(%d)", (int)Value);
+									LineLength += w_system_printf("2(%d)", (int)Value);
 								}
 								break;
 
@@ -1003,7 +1006,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									Value |= ((ULONG)pI[(*pIndex)++] << 16);
 									Value |= ((ULONG)pI[(*pIndex)++] << 24);
 
-									LineLength += printf("4(%d)", (int)Value);
+									LineLength += w_system_printf("4(%d)", (int)Value);
 								}
 								break;
 
@@ -1014,13 +1017,13 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 								if (ParCode & PRIMPAR_HANDLE)
 								{
-									LineLength += printf("HND(");
+									LineLength += w_system_printf("HND(");
 								}
 								else
 								{
 									if (ParCode & PRIMPAR_ADDR)
 									{
-										LineLength += printf("ADR(");
+										LineLength += w_system_printf("ADR(");
 									}
 								}
 								if (ParCode & PRIMPAR_LABEL)
@@ -1033,7 +1036,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 										Value |= 0xFFFFFF00;
 									}
 
-									LineLength += printf("LAB1(%d)", (int)(Value & 0xFF));
+									LineLength += w_system_printf("LAB1(%d)", (int)(Value & 0xFF));
 								}
 								else
 								{ // value
@@ -1044,14 +1047,14 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									case PRIMPAR_STRING:
 									{
 
-										LineLength += printf("LCS,");
+										LineLength += w_system_printf("LCS,");
 
 										while (pI[(*pIndex)])
 										{ // Adjust Ip
 
 											if ((LineLength + 5) >= 80)
 											{
-												printf("\n%*.*s", Indent, Indent, "");
+												w_system_printf("\n%*.*s", Indent, Indent, "");
 												LineLength = Indent;
 											}
 
@@ -1059,19 +1062,19 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 											{
 											case '\r':
 											{
-												LineLength += printf("'\\r',");
+												LineLength += w_system_printf("'\\r',");
 											}
 											break;
 
 											case '\n':
 											{
-												LineLength += printf("'\\n',");
+												LineLength += w_system_printf("'\\n',");
 											}
 											break;
 
 											default:
 											{
-												LineLength += printf("'%c',", pI[(*pIndex)]);
+												LineLength += w_system_printf("'%c',", pI[(*pIndex)]);
 											}
 											break;
 
@@ -1083,10 +1086,10 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 										if ((LineLength + 2) >= 80)
 										{
-											printf("\n%*.*s", Indent, Indent, "");
+											w_system_printf("\n%*.*s", Indent, Indent, "");
 											LineLength = Indent;
 										}
-										LineLength += printf("0");
+										LineLength += w_system_printf("0");
 									}
 									break;
 
@@ -1100,7 +1103,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 										}
 										if ((Pars & 0x0f) != SUBP)
 										{
-											LineLength += printf("LC1(%d)", (int)Value);
+											LineLength += w_system_printf("LC1(%d)", (int)Value);
 										}
 									}
 									break;
@@ -1116,7 +1119,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 										}
 										if ((Pars & 0x0f) != SUBP)
 										{
-											LineLength += printf("LC2(%d)", (int)Value);
+											LineLength += w_system_printf("LC2(%d)", (int)Value);
 										}
 									}
 									break;
@@ -1129,7 +1132,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 										Value |= ((ULONG)pI[(*pIndex)++] << 24);
 										if ((Pars & 0x0f) != SUBP)
 										{
-											LineLength += printf("LC4(%ld)", (long)Value);
+											LineLength += w_system_printf("LC4(%ld)", (long)Value);
 										}
 									}
 									break;
@@ -1139,17 +1142,17 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 							}
 							if (ParCode & PRIMPAR_HANDLE)
 							{
-								LineLength += printf("),");
+								LineLength += w_system_printf("),");
 							}
 							else
 							{
 								if (ParCode & PRIMPAR_ADDR)
 								{
-									LineLength += printf("),");
+									LineLength += w_system_printf("),");
 								}
 								else
 								{
-									LineLength += printf(",");
+									LineLength += w_system_printf(",");
 								}
 							}
 						}
@@ -1162,12 +1165,12 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 								if (ParCode & PRIMPAR_GLOBAL)
 								{ // global
 
-									LineLength += printf("GV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
+									LineLength += w_system_printf("GV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
 								}
 								else
 								{ // local
 
-									LineLength += printf("LV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
+									LineLength += w_system_printf("LV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
 								}
 							}
 							else
@@ -1180,10 +1183,10 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 									Value |= ~(ULONG)(PRIMPAR_VALUE);
 								}
-								LineLength += printf("LC0(%d)", (int)Value);
+								LineLength += w_system_printf("LC0(%d)", (int)Value);
 
 							}
-							LineLength += printf(",");
+							LineLength += w_system_printf(",");
 						}
 						if (ParType == PARNO)
 						{
@@ -1209,7 +1212,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 					if ((LineLength + 10) >= 80)
 					{
-						printf("\n%*.*s", Indent, Indent, "");
+						w_system_printf("\n%*.*s", Indent, Indent, "");
 						LineLength = Indent;
 					}
 					Value = (ULONG)0;
@@ -1226,13 +1229,13 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 						if (ParCode & PRIMPAR_HANDLE)
 						{
-							LineLength += printf("HND(");
+							LineLength += w_system_printf("HND(");
 						}
 						else
 						{
 							if (ParCode & PRIMPAR_ADDR)
 							{
-								LineLength += printf("ADR(");
+								LineLength += w_system_printf("ADR(");
 							}
 						}
 						if (ParCode & PRIMPAR_VARIABLE)
@@ -1241,12 +1244,12 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 							if (ParCode & PRIMPAR_GLOBAL)
 							{ // global
 
-								LineLength += printf("GV");
+								LineLength += w_system_printf("GV");
 							}
 							else
 							{ // local
 
-								LineLength += printf("LV");
+								LineLength += w_system_printf("LV");
 							}
 							switch (ParCode & PRIMPAR_BYTES)
 							{
@@ -1254,7 +1257,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 							{
 								Value = (ULONG)pI[(*pIndex)++];
 
-								LineLength += printf("1(%d)", (int)Value);
+								LineLength += w_system_printf("1(%d)", (int)Value);
 							}
 							break;
 
@@ -1263,7 +1266,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 								Value = (ULONG)pI[(*pIndex)++];
 								Value |= ((ULONG)pI[(*pIndex)++] << 8);
 
-								LineLength += printf("2(%d)", (int)Value);
+								LineLength += w_system_printf("2(%d)", (int)Value);
 							}
 							break;
 
@@ -1274,7 +1277,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 								Value |= ((ULONG)pI[(*pIndex)++] << 16);
 								Value |= ((ULONG)pI[(*pIndex)++] << 24);
 
-								LineLength += printf("4(%d)", (int)Value);
+								LineLength += w_system_printf("4(%d)", (int)Value);
 							}
 							break;
 
@@ -1285,13 +1288,13 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 							if (ParCode & PRIMPAR_HANDLE)
 							{
-								LineLength += printf("HND(");
+								LineLength += w_system_printf("HND(");
 							}
 							else
 							{
 								if (ParCode & PRIMPAR_ADDR)
 								{
-									LineLength += printf("ADR(");
+									LineLength += w_system_printf("ADR(");
 								}
 							}
 							if (ParCode & PRIMPAR_LABEL)
@@ -1304,7 +1307,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									Value |= 0xFFFFFF00;
 								}
 
-								LineLength += printf("LAB1(%d)", (int)(Value & 0xFF));
+								LineLength += w_system_printf("LAB1(%d)", (int)(Value & 0xFF));
 							}
 							else
 							{ // value
@@ -1315,14 +1318,14 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 								case PRIMPAR_STRING:
 								{
 
-									LineLength += printf("LCS,");
+									LineLength += w_system_printf("LCS,");
 
 									while (pI[(*pIndex)])
 									{ // Adjust Ip
 
 										if ((LineLength + 5) >= 80)
 										{
-											printf("\n%*.*s", Indent, Indent, "");
+											w_system_printf("\n%*.*s", Indent, Indent, "");
 											LineLength = Indent;
 										}
 
@@ -1330,19 +1333,19 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 										{
 										case '\r':
 										{
-											LineLength += printf("'\\r',");
+											LineLength += w_system_printf("'\\r',");
 										}
 										break;
 
 										case '\n':
 										{
-											LineLength += printf("'\\n',");
+											LineLength += w_system_printf("'\\n',");
 										}
 										break;
 
 										default:
 										{
-											LineLength += printf("'%c',", pI[(*pIndex)]);
+											LineLength += w_system_printf("'%c',", pI[(*pIndex)]);
 										}
 										break;
 
@@ -1354,10 +1357,10 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 									if ((LineLength + 2) >= 80)
 									{
-										printf("\n%*.*s", Indent, Indent, "");
+										w_system_printf("\n%*.*s", Indent, Indent, "");
 										LineLength = Indent;
 									}
-									LineLength += printf("0");
+									LineLength += w_system_printf("0");
 								}
 								break;
 
@@ -1371,7 +1374,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									}
 									if ((Pars & 0x0f) != SUBP)
 									{
-										LineLength += printf("LC1(%d)", (int)Value);
+										LineLength += w_system_printf("LC1(%d)", (int)Value);
 									}
 								}
 								break;
@@ -1387,7 +1390,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									}
 									if ((Pars & 0x0f) != SUBP)
 									{
-										LineLength += printf("LC2(%d)", (int)Value);
+										LineLength += w_system_printf("LC2(%d)", (int)Value);
 									}
 								}
 								break;
@@ -1400,7 +1403,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 									Value |= ((ULONG)pI[(*pIndex)++] << 24);
 									if ((Pars & 0x0f) != SUBP)
 									{
-										LineLength += printf("LC4(%ld)", (long)Value);
+										LineLength += w_system_printf("LC4(%ld)", (long)Value);
 									}
 								}
 								break;
@@ -1410,17 +1413,17 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 						}
 						if (ParCode & PRIMPAR_HANDLE)
 						{
-							LineLength += printf("),");
+							LineLength += w_system_printf("),");
 						}
 						else
 						{
 							if (ParCode & PRIMPAR_ADDR)
 							{
-								LineLength += printf("),");
+								LineLength += w_system_printf("),");
 							}
 							else
 							{
-								LineLength += printf(",");
+								LineLength += w_system_printf(",");
 							}
 						}
 					}
@@ -1433,12 +1436,12 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 							if (ParCode & PRIMPAR_GLOBAL)
 							{ // global
 
-								LineLength += printf("GV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
+								LineLength += w_system_printf("GV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
 							}
 							else
 							{ // local
 
-								LineLength += printf("LV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
+								LineLength += w_system_printf("LV0(%u)", (unsigned int)(ParCode & PRIMPAR_INDEX));
 							}
 						}
 						else
@@ -1453,13 +1456,13 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 							}
 							if ((Pars & 0x0f) != SUBP)
 							{
-								LineLength += printf("LC0(%d)", (int)Value);
+								LineLength += w_system_printf("LC0(%d)", (int)Value);
 							}
 
 						}
 						if ((Pars & 0x0f) != SUBP)
 						{
-							LineLength += printf(",");
+							LineLength += w_system_printf(",");
 						}
 					}
 					if (ParType == PARNO)
@@ -1486,7 +1489,7 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 				}
 			} while (ParType || Parameters);
 		}
-		printf("\n");
+		w_system_printf("\n");
 	}
 
 	return (Result);
@@ -1517,10 +1520,10 @@ static RESULT cValidateDisassembleProgram(PRGID PrgId, IP pI, LABEL* pLabel)
 	Objects = (*(IMGHEAD*)pI).NumberOfObjects;
 	Size = (*(IMGHEAD*)pI).ImageSize;
 
-	printf("\n//****************************************************************************");
-	printf("\n// Disassembler Listing");
-	printf("\n//****************************************************************************");
-	printf("\n\nUBYTE     prg[] =\n{\n");
+	w_system_printf("\n//****************************************************************************");
+	w_system_printf("\n// Disassembler Listing");
+	w_system_printf("\n//****************************************************************************");
+	w_system_printf("\n\nUBYTE     prg[] =\n{\n");
 
 	Addr = 0;
 	LastOffset = 0;
@@ -1528,21 +1531,21 @@ static RESULT cValidateDisassembleProgram(PRGID PrgId, IP pI, LABEL* pLabel)
 	// Check for validation error
 	if ((cValidateGetErrorIndex()) && (cValidateGetErrorIndex() < sizeof(IMGHEAD)))
 	{
-		printf("ERROR ");
+		w_system_printf("ERROR ");
 	}
-	printf("  /* %4u */  PROGRAMHeader(%.2f,%d,%d),\n", Addr, (float)(*pIH).VersionInfo / (float)100, (*pIH).NumberOfObjects, (*pIH).GlobalBytes);
+	w_system_printf("  /* %4u */  PROGRAMHeader(%.2f,%d,%d),\n", Addr, (float)(*pIH).VersionInfo / (float)100, (*pIH).NumberOfObjects, (*pIH).GlobalBytes);
 	Addr += sizeof(IMGHEAD);
 
 	for (ObjIndex = 1; ObjIndex <= Objects; ObjIndex++)
 	{
 		if ((cValidateGetErrorIndex() >= Addr) && (cValidateGetErrorIndex() < (Addr + sizeof(OBJHEAD))))
 		{
-			printf("ERROR ");
+			w_system_printf("ERROR ");
 		}
 		if (pOH[ObjIndex].OwnerObjectId)
 		{ // BLOCK object
 
-			ValidateInstance.Row = printf("  /* %4u */  BLOCKHeader(%u,%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].OwnerObjectId, pOH[ObjIndex].TriggerCount);
+			ValidateInstance.Row = w_system_printf("  /* %4u */  BLOCKHeader(%u,%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].OwnerObjectId, pOH[ObjIndex].TriggerCount);
 		}
 		else
 		{
@@ -1552,27 +1555,27 @@ static RESULT cValidateDisassembleProgram(PRGID PrgId, IP pI, LABEL* pLabel)
 				if (LastOffset == (ULONG)pOH[ObjIndex].OffsetToInstructions)
 				{ // SUBCALL alias object
 
-					ValidateInstance.Row = printf("  /* %4u */  SUBCALLHeader(%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].LocalBytes);
+					ValidateInstance.Row = w_system_printf("  /* %4u */  SUBCALLHeader(%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].LocalBytes);
 				}
 				else
 				{
-					ValidateInstance.Row = printf("  /* %4u */  SUBCALLHeader(%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].LocalBytes);
+					ValidateInstance.Row = w_system_printf("  /* %4u */  SUBCALLHeader(%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].LocalBytes);
 				}
 			}
 			else
 			{ // VMTHREAD object
 
-				ValidateInstance.Row = printf("  /* %4u */  VMTHREADHeader(%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].LocalBytes);
+				ValidateInstance.Row = w_system_printf("  /* %4u */  VMTHREADHeader(%u,%u),", Addr, (ULONG)pOH[ObjIndex].OffsetToInstructions, pOH[ObjIndex].LocalBytes);
 			}
 		}
 		ValidateInstance.Row = 41 - ValidateInstance.Row;
 		if (LastOffset == (ULONG)pOH[ObjIndex].OffsetToInstructions)
 		{
-			printf("%*.*s// Object %-3u (Alias for object %u)\n", ValidateInstance.Row, ValidateInstance.Row, " ", ObjIndex, LastObject);
+			w_system_printf("%*.*s// Object %-3u (Alias for object %u)\n", ValidateInstance.Row, ValidateInstance.Row, " ", ObjIndex, LastObject);
 		}
 		else
 		{
-			printf("%*.*s// Object %-3u\n", ValidateInstance.Row, ValidateInstance.Row, " ", ObjIndex);
+			w_system_printf("%*.*s// Object %-3u\n", ValidateInstance.Row, ValidateInstance.Row, " ", ObjIndex);
 		}
 		ValidateInstance.Row = 0;
 		LastOffset = (ULONG)pOH[ObjIndex].OffsetToInstructions;
@@ -1597,72 +1600,72 @@ static RESULT cValidateDisassembleProgram(PRGID PrgId, IP pI, LABEL* pLabel)
 		if (pOH[ObjIndex].OwnerObjectId)
 		{ // BLOCK object
 
-			printf("\n  /* Object %2d (BLOCK) [%lu..%lu] */\n\n", ObjIndex, (long unsigned int)MinIndex, (long unsigned int)MaxIndex);
+			w_system_printf("\n  /* Object %2d (BLOCK) [%lu..%lu] */\n\n", ObjIndex, (long unsigned int)MinIndex, (long unsigned int)MaxIndex);
 		}
 		else
 		{
 			if (pOH[ObjIndex].TriggerCount == 1)
 			{ // SUBCALL object
 
-				printf("\n  /* Object %2d (SUBCALL) [%lu..%lu] */\n\n", ObjIndex, (long unsigned int)MinIndex, (long unsigned int)MaxIndex);
+				w_system_printf("\n  /* Object %2d (SUBCALL) [%lu..%lu] */\n\n", ObjIndex, (long unsigned int)MinIndex, (long unsigned int)MaxIndex);
 
-				ValidateInstance.Row += printf("  /* %4d */  ", MinIndex);
+				ValidateInstance.Row += w_system_printf("  /* %4d */  ", MinIndex);
 				TmpIndex = (IMINDEX)pI[MinIndex++];
-				printf("%u,", TmpIndex);
+				w_system_printf("%u,", TmpIndex);
 				while (TmpIndex)
 				{
 					Type = pI[MinIndex++];
 					if (Type & CALLPAR_IN)
 					{
-						printf("IN_");
+						w_system_printf("IN_");
 					}
 					if (Type & CALLPAR_OUT)
 					{
-						printf("OUT_");
+						w_system_printf("OUT_");
 					}
 					switch (Type & CALLPAR_TYPE)
 					{
 					case CALLPAR_DATA8:
 					{
-						printf("8,");
+						w_system_printf("8,");
 					}
 					break;
 
 					case CALLPAR_DATA16:
 					{
-						printf("16,");
+						w_system_printf("16,");
 					}
 					break;
 
 					case CALLPAR_DATA32:
 					{
-						printf("32,");
+						w_system_printf("32,");
 					}
 					break;
 
 					case CALLPAR_DATAF:
 					{
-						printf("F,");
+						w_system_printf("F,");
 					}
 					break;
 
 					case CALLPAR_STRING:
 					{
 						Lng = (DATA32)pI[MinIndex++];
-						printf("(%d),", Lng);
+						w_system_printf("(%d),", Lng);
 					}
 					break;
 
 					}
 					TmpIndex--;
 				}
-				printf("\n\n");
+				w_system_printf("\n\n");
 
 			}
 			else
 			{ // VMTHREAD object
 
-				printf("\n  /* Object %2d (VMTHREAD) [%lu..%lu] */\n\n", ObjIndex, (long unsigned int)MinIndex, (long unsigned int)MaxIndex);
+				w_system_printf("\n  /* Object %2d (VMTHREAD) [%lu..%lu] */\n\n", ObjIndex, (long unsigned int)MinIndex, (long unsigned int)MaxIndex);
 			}
 		}
 
@@ -1678,8 +1681,8 @@ static RESULT cValidateDisassembleProgram(PRGID PrgId, IP pI, LABEL* pLabel)
 		Addr = Index;
 
 	}
-	printf("};\n");
-	printf("\n//****************************************************************************\n\n");
+	w_system_printf("};\n");
+	w_system_printf("\n//****************************************************************************\n\n");
 
 
 	return (Result);
@@ -2237,7 +2240,7 @@ RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 
 
 #ifdef    DEBUG
-	printf("Validation started\n");
+	w_system_printf("Validation started\n");
 #endif
 	cValidateSetErrorIndex(0);
 	pIH = (IMGHEAD*)pI;
@@ -2315,7 +2318,7 @@ RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 		if (ImageIndex > TotalSize)
 		{
 #ifdef    DEBUG
-			printf("%d %d\n", ImageIndex, TotalSize);
+			w_system_printf("%d %d\n", ImageIndex, TotalSize);
 #endif
 			cValidateSetErrorIndex(TmpIndex);
 		}
@@ -2328,7 +2331,7 @@ RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 	}
 
 #ifdef    DEBUG
-	printf("Validation ended\n");
+	w_system_printf("Validation ended\n");
 #endif
 	if (Disassemble)
 	{

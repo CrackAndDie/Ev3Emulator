@@ -37,6 +37,7 @@
 	*/
 
 	/***** Daisy var_s *****/
+#include "w_system.h"
 #include "c_input.h"
 #include "c_daisy.h"
 #include "c_output.h"
@@ -198,7 +199,7 @@ void cDaisySetOwnLayer(UBYTE Layer)
 	cDaisyOwnLayer = Layer;
 
 #ifdef DEBUG
-	printf("SetOwnLayer = %d\n", cDaisyOwnLayer);
+	w_system_printf("SetOwnLayer = %d\n", cDaisyOwnLayer);
 #endif
 }
 
@@ -228,7 +229,7 @@ RESULT cDaisyTxDownStream(void)
 	case DAISY_WR_DISCONNECTED:
 
 #ifdef DEBUG
-		printf("cDaisyDownTxStreamCmd - DAISY_WR_DISCONNECTED\n");
+		w_system_printf("cDaisyDownTxStreamCmd - DAISY_WR_DISCONNECTED\n");
 #endif
 
 		DownConnectionState = DAISY_DOWN_DISCONNECTED;
@@ -240,7 +241,7 @@ RESULT cDaisyTxDownStream(void)
 	case DAISY_WR_NOT_FINISHED:	              // Started OK, but not finished. Set wait for
 		// write completion and flag busy
 #ifdef DEBUG
-		printf("cDaisyDownTxStreamCmd - DAISY_WR_NOT_FINISHED\n");
+		w_system_printf("cDaisyDownTxStreamCmd - DAISY_WR_NOT_FINISHED\n");
 #endif
 
 		DownConnectionState = DAISY_DOWNSTREAM_CHECK_WRITE_DONE;
@@ -251,7 +252,7 @@ RESULT cDaisyTxDownStream(void)
 	case  DAISY_WR_ERROR:
 
 #ifdef DEBUG
-		printf("cDaisyDownStreamCmd - DAISY_WR_ERROR\n");
+		w_system_printf("cDaisyDownStreamCmd - DAISY_WR_ERROR\n");
 #endif
 		// Fall through
 		// break;
@@ -264,7 +265,7 @@ RESULT cDaisyTxDownStream(void)
 					  // flag error
 
 #ifdef DEBUG
-		printf("cDaisyDownStreamCmd - DAISY_WR_ERROR\n");
+		w_system_printf("cDaisyDownStreamCmd - DAISY_WR_ERROR\n");
 #endif
 
 		DaisyReadyState = FAIL;
@@ -356,7 +357,7 @@ UBYTE cDaisyCheckBusyBit(UBYTE Layer, UBYTE PortBits)
 	}
 
 #ifdef DEBUG
-	printf("cDaisyCheckBusyBit = %X\n", RetVal);
+	w_system_printf("cDaisyCheckBusyBit = %X\n", RetVal);
 #endif
 
 	return RetVal;
@@ -384,7 +385,7 @@ RESULT cDaisyMotorDownStream(DATA8* pData, DATA8 Length, DATA8 Layer, DATA8 Port
 	DATA8 Msg2 = 0;	// -
 
 #ifdef DEBUG
-	printf("cDaisyMotorDownStream called\n");
+	w_system_printf("cDaisyMotorDownStream called\n");
 #endif
 
 	if (DownConnectionState == DAISY_DOWN_DISCONNECTED) return OK;
@@ -418,17 +419,17 @@ RESULT cDaisyMotorDownStream(DATA8* pData, DATA8 Length, DATA8 Layer, DATA8 Port
 		cDaisySetupMagicCookies(7 + Length, Layer, PortField);
 
 #ifdef DEBUG
-		printf("cDaisyMotorDownStream sent as DAISY_COMMAND_NO_REPLY +  DAISY_CHAIN_DOWNSTREAM_WITH_BUSY\n");
+		w_system_printf("cDaisyMotorDownStream sent as DAISY_COMMAND_NO_REPLY +  DAISY_CHAIN_DOWNSTREAM_WITH_BUSY\n");
 
 		int ii;
-		printf("DataOut =\n");
+		w_system_printf("DataOut =\n");
 		for (ii = 0; ii < (Len + 2); ii++)
-			printf("%X, ", DataOut[ii]);
+			w_system_printf("%X, ", DataOut[ii]);
 
-		printf("DaisyBusyFlags =\n");
+		w_system_printf("DaisyBusyFlags =\n");
 		for (ii = 0; ii < 16; ii++)
-			printf("%X, ", DaisyBusyFlags[ii]);
-		printf("\n");
+			w_system_printf("%X, ", DaisyBusyFlags[ii]);
+		w_system_printf("\n");
 #endif
 
 	}
@@ -450,14 +451,14 @@ RESULT cDaisyMotorDownStream(DATA8* pData, DATA8 Length, DATA8 Layer, DATA8 Port
 		cDaisySetupMagicCookies(5 + Length, Layer, PortField);
 
 #ifdef DEBUG
-		printf("cDaisyMotorDownStream sent as a normal DIR_CMD_NO_REPLY_WITH_BUSY\n");
-		printf("After cDaisySetupMagicCookies\n");
+		w_system_printf("cDaisyMotorDownStream sent as a normal DIR_CMD_NO_REPLY_WITH_BUSY\n");
+		w_system_printf("After cDaisySetupMagicCookies\n");
 		int help2;
 		for (help2 = 0; help2 < (Len + 2); help2++)
 		{
-			printf("%X, ", DataOut[help2]);
+			w_system_printf("%X, ", DataOut[help2]);
 		}
-		printf("\n");
+		w_system_printf("\n");
 #endif
 	}
 
@@ -524,7 +525,7 @@ RESULT  cDaisyReady(void)
 //	// Callback -> Asyncronous Read-job done
 //
 //#ifdef DEBUG
-//	printf("Did we reach here??\n");
+//	w_system_printf("Did we reach here??\n");
 //#endif
 //
 //	switch (ReadUsbTransfer->status)
@@ -534,7 +535,7 @@ RESULT  cDaisyReady(void)
 //		ReadState = DAISY_RD_DONE;
 //
 //#ifdef DEBUG
-//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_COMPLETED\n");
+//		w_system_printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_COMPLETED\n");
 //#endif
 //
 //		break;
@@ -543,7 +544,7 @@ RESULT  cDaisyReady(void)
 //		ReadState = DAISY_RD_TIMEDOUT;
 //
 //#ifdef DEBUG
-//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_TIMED_OUT\n");
+//		w_system_printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_TIMED_OUT\n");
 //#endif
 //
 //		break;
@@ -553,7 +554,7 @@ RESULT  cDaisyReady(void)
 //		DownConnectionState = DAISY_DOWN_DISCONNECTED;
 //
 //#ifdef DEBUG
-//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_NO_DEVICE\n");
+//		w_system_printf("\ncDaisyAsyncReadCallBack - LIBUSB_TRANSFER_NO_DEVICE\n");
 //#endif
 //
 //		break;
@@ -567,7 +568,7 @@ RESULT  cDaisyReady(void)
 //
 //		//#define DEBUG
 //#ifdef DEBUG
-//		printf("\ncDaisyAsyncReadCallBack - LIBUSB_ALL_ERROR\n");
+//		w_system_printf("\ncDaisyAsyncReadCallBack - LIBUSB_ALL_ERROR\n");
 //#endif
 //
 //		break;
@@ -597,7 +598,7 @@ RESULT  cDaisyReady(void)
 //		ReadLength = 0;                       // Nothing read yet
 //
 //#ifdef DEBUG
-//		printf("\ncDaisyStartReadUnlockAnswer - LIBUSB_SUCCESS\n");
+//		w_system_printf("\ncDaisyStartReadUnlockAnswer - LIBUSB_SUCCESS\n");
 //#endif
 //
 //		break;
@@ -607,7 +608,7 @@ RESULT  cDaisyReady(void)
 //		DownConnectionState = DAISY_DOWN_DISCONNECTED;
 //
 //#ifdef DEBUG
-//		printf("\nDaisyStartReadUnlockAnswer - LIBUSB_ERROR_NO_DEVICE\n");
+//		w_system_printf("\nDaisyStartReadUnlockAnswer - LIBUSB_ERROR_NO_DEVICE\n");
 //#endif
 //
 //		break;                                // Try again later....
@@ -616,7 +617,7 @@ RESULT  cDaisyReady(void)
 //		ReadState = DAISY_RD_IDLE;            // if device present - No active job
 //
 //#ifdef DEBUG
-//		printf("\nDaisyStartReadUnlockAnswer - LIBUSB_DEFAULT\n");
+//		w_system_printf("\nDaisyStartReadUnlockAnswer - LIBUSB_DEFAULT\n");
 //#endif
 //
 //		break;                                // Try again later....
@@ -693,7 +694,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 	// Here the commands come from an upstream friend or if Layer 1 from the HOSTing Brick
 
 #ifdef DEBUG
-	printf("Here is the call from the HOST to cDaisyCmd\n");
+	w_system_printf("Here is the call from the HOST to cDaisyCmd\n");
 #endif
 
 	pComCmd = (COMCMD*)(ComInstance.RxBuf[USBDEV].Buf);                         // Overall pointer to Rec. Command stuff
@@ -712,13 +713,13 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		pDaisyUnlockReply->Status = OK;
 
 #ifdef DEBUG
-		printf("CmdSize1 = %d\n", ComInstance.TxBuf[USBDEV].Buf[0]);
-		printf("CmdSize2 = %d\n", ComInstance.TxBuf[USBDEV].Buf[1]);
-		printf("MSG1 = %d\n", ComInstance.TxBuf[USBDEV].Buf[2]);
-		printf("MSG2 = %d\n", ComInstance.TxBuf[USBDEV].Buf[3]);
-		printf("CmdTyp = %x\n", ComInstance.TxBuf[USBDEV].Buf[4]);
-		printf("Cmd = %x\n", ComInstance.TxBuf[USBDEV].Buf[5]);
-		printf("Stat = %x\n", ComInstance.TxBuf[USBDEV].Buf[6]);
+		w_system_printf("CmdSize1 = %d\n", ComInstance.TxBuf[USBDEV].Buf[0]);
+		w_system_printf("CmdSize2 = %d\n", ComInstance.TxBuf[USBDEV].Buf[1]);
+		w_system_printf("MSG1 = %d\n", ComInstance.TxBuf[USBDEV].Buf[2]);
+		w_system_printf("MSG2 = %d\n", ComInstance.TxBuf[USBDEV].Buf[3]);
+		w_system_printf("CmdTyp = %x\n", ComInstance.TxBuf[USBDEV].Buf[4]);
+		w_system_printf("Cmd = %x\n", ComInstance.TxBuf[USBDEV].Buf[5]);
+		w_system_printf("Stat = %x\n", ComInstance.TxBuf[USBDEV].Buf[6]);
 #endif
 
 		// Fill the control stuff
@@ -739,7 +740,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 	case DAISY_SET_TYPE:		  // Set type exception
 
 #ifdef DEBUG
-		printf("DAISY_SET_TYPE\n");
+		w_system_printf("DAISY_SET_TYPE\n");
 #endif
 
 
@@ -749,7 +750,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 
 
 #ifdef DEBUG
-			printf("DAISY_SET_TYPE layer < 1 : ");
+			w_system_printf("DAISY_SET_TYPE layer < 1 : ");
 #endif
 
 			cInputSetChainedDeviceType(0, (*pDaisyCmd).SensorNo, (*pDaisyCmd).PayLoad[0], (*pDaisyCmd).PayLoad[1]);
@@ -757,7 +758,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		else	// Further down
 		{
 #ifdef DEBUG
-			printf("DAISY_SET_TYPE Further DOWN\n");
+			w_system_printf("DAISY_SET_TYPE Further DOWN\n");
 #endif
 
 			(*pDaisyCmd).Layer = ((*pDaisyCmd).Layer - 1);
@@ -774,7 +775,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		// a DaisyChain payload
 
 #ifdef DEBUG
-		printf("Here is the call from the HOST to cDaisyCmd DAISY_CHAIN_DOWNSTREAM - Daisy Layer set to %d\n", (*pDaisyCmd).Layer);
+		w_system_printf("Here is the call from the HOST to cDaisyCmd DAISY_CHAIN_DOWNSTREAM - Daisy Layer set to %d\n", (*pDaisyCmd).Layer);
 #endif
 
 		if ((*pDaisyCmd).Layer == 1)
@@ -792,7 +793,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			memcpy(&(DataOut[5]), &((*pComCmd).PayLoad[2]), ((*pComCmd).CmdSize - 3));
 
 #ifdef DEBUG
-			printf("DAISY_CHAIN_DOWNSTREAM sent as a DIRECT command\n");
+			w_system_printf("DAISY_CHAIN_DOWNSTREAM sent as a DIRECT command\n");
 #endif
 		}
 		else
@@ -802,7 +803,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			memcpy(&(DataOut[0]), pComCmd, ((*pComCmd).CmdSize + 2));
 
 #ifdef DEBUG
-			printf("DAISY_CHAIN_DOWNSTREAM sent as a further down command\n");
+			w_system_printf("DAISY_CHAIN_DOWNSTREAM sent as a further down command\n");
 #endif
 		}
 
@@ -813,7 +814,7 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 	case DAISY_CHAIN_DOWNSTREAM_WITH_BUSY:
 
 #ifdef DEBUG
-		printf(" case DAISY_CHAIN_DOWNSTREAM_WITH_BUSY - (*pDaisyCmd).Layer ==  %d\n", (*pDaisyCmd).Layer);
+		w_system_printf(" case DAISY_CHAIN_DOWNSTREAM_WITH_BUSY - (*pDaisyCmd).Layer ==  %d\n", (*pDaisyCmd).Layer);
 #endif
 
 		// If Layer == 1 we should tx downstream as a "normal" DIRECT CMD
@@ -844,13 +845,13 @@ void cDaisyCmd(RXBUF* pRxBuf, TXBUF* pTxBuf)
 
 		int DebugP;
 
-		printf("DaisyBusyFlags DOWN:\n");
+		w_system_printf("DaisyBusyFlags DOWN:\n");
 
 		for (DebugP = 0; DebugP < 16; DebugP++)
-			printf("%X, ", DaisyBusyFlags[DebugP]);
+			w_system_printf("%X, ", DaisyBusyFlags[DebugP]);
 
-		printf("\nCookie setting done..(*pDaisyCmd).Layer == %d OwnLayer == %d\n", (*pDaisyCmd).Layer, cDaisyOwnLayer);
-		printf("\n");
+		w_system_printf("\nCookie setting done..(*pDaisyCmd).Layer == %d OwnLayer == %d\n", (*pDaisyCmd).Layer, cDaisyOwnLayer);
+		w_system_printf("\n");
 #endif
 
 		if ((*pDaisyCmd).Layer == 1)
@@ -909,7 +910,7 @@ DATA8 cDaisyGetUsbUpStreamSpeed(void)
 	if (ComInstance.udc_speed == FULL_SPEED) {
 
 #ifdef DEBUG
-		printf("Connected to FULL_SPEED on Gadget side - DAISY chained\n");
+		w_system_printf("Connected to FULL_SPEED on Gadget side - DAISY chained\n");
 #endif
 
 		IsDaisyChained = OK;
@@ -921,7 +922,7 @@ DATA8 cDaisyGetUsbUpStreamSpeed(void)
 		IsDaisyChained = FAIL;
 
 #ifdef DEBUG
-		printf("Connected to HIGH_SPEED on Gadget side\n");
+		w_system_printf("Connected to HIGH_SPEED on Gadget side\n");
 #endif
 	}
 	return SpeedResult;
@@ -958,7 +959,7 @@ RESULT cDaisyWriteTypeDownstream(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode
 	int ReturnValue = DAISY_WR_ERROR;
 
 #ifdef DEBUG
-	printf("Writing TYPE/MODE to SLAVE - Layer = %d, Port = %d, Type = %d, Mode = %d\n", Layer, Port, Type, Mode);
+	w_system_printf("Writing TYPE/MODE to SLAVE - Layer = %d, Port = %d, Type = %d, Mode = %d\n", Layer, Port, Type, Mode);
 #endif
 
 	cDaisyResetBusyTiming();  // Make new prioritized access to channel
@@ -981,7 +982,7 @@ RESULT cDaisyWriteTypeDownstream(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode
 	case DAISY_WR_DISCONNECTED:
 
 #ifdef DEBUG
-		printf("cDaisyWriteTypeDownstream - DAISY_WR_DISCONNECTED\n");
+		w_system_printf("cDaisyWriteTypeDownstream - DAISY_WR_DISCONNECTED\n");
 #endif
 
 		DownConnectionState = DAISY_DOWN_DISCONNECTED;
@@ -995,7 +996,7 @@ RESULT cDaisyWriteTypeDownstream(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode
 		// write completion and flag busy
 
 #ifdef DEBUG
-		printf("cDaisyWriteTypeDownstream - DAISY_WR_NOT_FINISHED\n");
+		w_system_printf("cDaisyWriteTypeDownstream - DAISY_WR_NOT_FINISHED\n");
 #endif
 
 		DownConnectionState = DAISY_DOWN_SET_DEVICETYPE;
@@ -1008,7 +1009,7 @@ RESULT cDaisyWriteTypeDownstream(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode
 	case  DAISY_WR_ERROR:
 
 #ifdef DEBUG
-		printf("cDaisyWriteTypeDownstream - DAISY_WR_ERROR\n");
+		w_system_printf("cDaisyWriteTypeDownstream - DAISY_WR_ERROR\n");
 #endif
 
 		// Fall through
@@ -1038,7 +1039,7 @@ RESULT	cDaisySetDeviceType(DATA8 Layer, DATA8 Port, DATA8 Type, DATA8 Mode)
 
 	//#define DEBUG
 #ifdef DEBUG
-	printf("cDaisySetDeviceType in cDaisy\n");
+	w_system_printf("cDaisySetDeviceType in cDaisy\n");
 #endif
 
 	if (Layer >= 1)	                  // Layer > self
@@ -1092,7 +1093,7 @@ RESULT cDaisyInit(void)
 	int Temp;
 
 #ifdef DEBUG
-	printf("\nDaisy Init called\n");
+	w_system_printf("\nDaisy Init called\n");
 #endif
 
 	DownConnectionState = DAISY_DOWN_DISCONNECTED;
@@ -1124,7 +1125,7 @@ RESULT cDaisyInit(void)
 //	else
 //	{
 //#ifdef DEBUG
-//		printf("\nDaisy Temp >= 0 \n");
+//		w_system_printf("\nDaisy Temp >= 0 \n");
 //#endif
 //
 //		DeviceHandle = libusb_open_device_with_vid_pid(NULL, DAISY_VENDOR_ID, DAISY_PRODUCT_ID);
@@ -1141,14 +1142,14 @@ RESULT cDaisyInit(void)
 //				// We have an valid Interface
 //
 //#ifdef DEBUG
-//				printf("\nDaisy valid InterFace??? We have if this is seen...;-)\n");
+//				w_system_printf("\nDaisy valid InterFace??? We have if this is seen...;-)\n");
 //#endif
 //
 //				Result = OK;
 //				MaxInterruptPacketSize = cDaisyGetMaxPacketSize(DeviceHandle);  // Be sure we have the right size
 //
 //#ifdef DEBUG
-//				printf("\nDaisy MaxInterruptPacketSize: %d\n", MaxInterruptPacketSize);
+//				w_system_printf("\nDaisy MaxInterruptPacketSize: %d\n", MaxInterruptPacketSize);
 //#endif
 //
 //				cDaisySetTimeout(DAISY_DEFAULT_TIMEOUT);
@@ -1165,7 +1166,7 @@ RESULT cDaisyInit(void)
 //		}
 //	}
 #ifdef DEBUG
-	printf("\nDaisy Init ended (HOST)\n");
+	w_system_printf("\nDaisy Init ended (HOST)\n");
 #endif
 
 	return Result;
@@ -1174,7 +1175,7 @@ RESULT cDaisyInit(void)
 int cDaisyWriteUnlockToSlave()
 {
 #ifdef DEBUG
-	printf("Writing UNLOCK to SLAVE\n");
+	w_system_printf("Writing UNLOCK to SLAVE\n");
 #endif
 
 	DataOut[LEN1] = 4;
@@ -1219,7 +1220,7 @@ RESULT    cDaisyGetDeviceInfo(DATA8 Length, UBYTE* pInfo)
 		if (Length > MAX_DEVICE_INFOLENGTH) Length = MAX_DEVICE_INFOLENGTH;
 
 #ifdef DEBUG
-		printf("%s\n", &(DaisyInfoBuffer[0]));
+		w_system_printf("%s\n", &(DaisyInfoBuffer[0]));
 #endif
 
 		memcpy(pInfo, DaisyInfoBuffer, Length);
@@ -1238,13 +1239,13 @@ RESULT    cDaisySetDeviceInfo(DATA8 Length, UBYTE* pInfo)
 	if (PushState == DAISY_PUSH_CONNECTED)
 	{
 #ifdef DEBUG
-		printf("cDaisySetDeviceInfo, PushState == DAISY_PUSH_CONNECTED\n");
+		w_system_printf("cDaisySetDeviceInfo, PushState == DAISY_PUSH_CONNECTED\n");
 #endif
 
 		if (DaisyInfo == EMPTY)	// Ready for new info stuff
 		{
 #ifdef DEBUG
-			printf("cDaisySetDeviceInfo, DaisyInfo == EMPTY\n");
+			w_system_printf("cDaisySetDeviceInfo, DaisyInfo == EMPTY\n");
 #endif
 
 			if (Length > MAX_DEVICE_INFOLENGTH) Length = MAX_DEVICE_INFOLENGTH;
@@ -1254,7 +1255,7 @@ RESULT    cDaisySetDeviceInfo(DATA8 Length, UBYTE* pInfo)
 			int loop;
 			for (loop = 0; loop < Length; loop++)
 			{
-				printf("DaisyInfoBuffer[%d] = 0x%x\n", loop, DaisyInfoBuffer[loop]);
+				w_system_printf("DaisyInfoBuffer[%d] = 0x%x\n", loop, DaisyInfoBuffer[loop]);
 			}
 #endif
 
@@ -1285,7 +1286,7 @@ void cDaisyPushUpStream(void)
 	UBYTE MotorFlags;
 
 #ifdef DEBUG
-	printf("Her we call c_daisy cDaisyPushUpStream\n");
+	w_system_printf("Her we call c_daisy cDaisyPushUpStream\n");
 #endif
 
 	pDaisyReply = (DAISY_DEVICE_DATA*)(DaisyUpstreamDataBuffer);   // Overall pointer to Reply stuff
@@ -1313,7 +1314,7 @@ void cDaisyPushUpStream(void)
 		DaisyInfo = EMPTY;                              // We've used the stuff
 
 #ifdef DEBUG
-		printf("cDaisyPushUpStream INFO done!!!!\n");
+		w_system_printf("cDaisyPushUpStream INFO done!!!!\n");
 #endif
 	}
 	else	// NO info, so do the DATA job
@@ -1340,7 +1341,7 @@ void cDaisyPushUpStream(void)
 
 #ifdef DEBUG
 			if (DeviceNo == 1)
-				printf("Self DATA (PUSH) collected here: ReadLayerP: %d, ReadSensorP: %d, DeviceNo: %d, Status %d\n", ReadLayerPointer, ReadSensorPointer, DeviceNo, SensorResult);
+				w_system_printf("Self DATA (PUSH) collected here: ReadLayerP: %d, ReadSensorP: %d, DeviceNo: %d, Status %d\n", ReadLayerPointer, ReadSensorPointer, DeviceNo, SensorResult);
 #endif
 
 		}
@@ -1350,7 +1351,7 @@ void cDaisyPushUpStream(void)
 			// Remember layer is 1 offset (i.e. 0 == Layer 1, 1 == 2, so Read Array Layer 1 == read[1 - 1]
 
 #ifdef DEBUG
-			printf("Array Data (PUSH) are collected here: ReadLayerPointer > 0: %d, ReadSensorPointer: %d, DeviceNo: %d - STATUS = %d\n", ReadLayerPointer, ReadSensorPointer, DeviceNo, DaisyBuffers[ReadLayerPointer - 1][ReadSensorPointer][0]);
+			w_system_printf("Array Data (PUSH) are collected here: ReadLayerPointer > 0: %d, ReadSensorPointer: %d, DeviceNo: %d - STATUS = %d\n", ReadLayerPointer, ReadSensorPointer, DeviceNo, DaisyBuffers[ReadLayerPointer - 1][ReadSensorPointer][0]);
 #endif
 
 			memcpy(&(pDaisyReply->Status), (&(DaisyBuffers[ReadLayerPointer - 1][ReadSensorPointer])), DAISY_DEVICE_PAYLOAD_SIZE);
@@ -1360,19 +1361,19 @@ void cDaisyPushUpStream(void)
 
 		int w;
 
-		printf("Before own in PUSH:");
+		w_system_printf("Before own in PUSH:");
 
 		for (w = 0; w < 16; w++)
 			if (DaisyBusyFlags[w] != 0x00)
-				printf("[%d]=%X ", w, DaisyBusyFlags[w]);
-		printf("\n");
+				w_system_printf("[%d]=%X ", w, DaisyBusyFlags[w]);
+		w_system_printf("\n");
 #endif
 
 		// refresh the motor status
 		MotorFlags = cMotorGetBusyFlags();
 
 #ifdef DEBUG
-		printf("Push MotorFlags from cMotorGetBusyFlags() = %X\n", MotorFlags);
+		w_system_printf("Push MotorFlags from cMotorGetBusyFlags() = %X\n", MotorFlags);
 #endif
 
 		// Pack (reset) the stuff
@@ -1384,7 +1385,7 @@ void cDaisyPushUpStream(void)
 		StartIndex = 4 * cDaisyGetOwnLayer();
 
 #ifdef DEBUG
-		printf("StartIndex Getting cMotorGetBusyFlags() = %d\n", StartIndex);
+		w_system_printf("StartIndex Getting cMotorGetBusyFlags() = %d\n", StartIndex);
 #endif
 
 		for (j = StartIndex; j < (StartIndex + 4); j++)
@@ -1399,13 +1400,13 @@ void cDaisyPushUpStream(void)
 			p <<= 1;
 
 #ifdef DEBUG
-			printf("DaisyBusyFlags[%d] = %X, ", j, DaisyBusyFlags[j]);
+			w_system_printf("DaisyBusyFlags[%d] = %X, ", j, DaisyBusyFlags[j]);
 #endif
 
 		}
 
 #ifdef DEBUG
-		printf("\n");
+		w_system_printf("\n");
 #endif
 
 		//We add the Motor BUSY stuff
@@ -1415,12 +1416,12 @@ void cDaisyPushUpStream(void)
 
 		int z;
 
-		printf("PUSHed:");
+		w_system_printf("PUSHed:");
 
 		for (z = 0; z < 16; z++)
 			if (DaisyBusyFlags[z] != 0x00)
-				printf("[%d]=%X @ StartIndex:%d", z, DaisyBusyFlags[z], StartIndex);
-		printf("\n");
+				w_system_printf("[%d]=%X @ StartIndex:%d", z, DaisyBusyFlags[z], StartIndex);
+		w_system_printf("\n");
 #endif
 
 	}
@@ -1428,7 +1429,7 @@ void cDaisyPushUpStream(void)
 	// Common portion
 
 #ifdef DEBUG
-	printf("StreamDataReady set TRUE\n");
+	w_system_printf("StreamDataReady set TRUE\n");
 #endif
 
 	DaisyUpstreamDataReady = TRUE;
@@ -1439,10 +1440,10 @@ void cDaisyPushUpStream(void)
 
 	for (nn = 2; nn < 4; nn++)
 	{
-		printf("[%d]=%d, ", nn, DaisyUpstreamDataBuffer[nn]);
+		w_system_printf("[%d]=%d, ", nn, DaisyUpstreamDataBuffer[nn]);
 	}
 
-	printf("\n");
+	w_system_printf("\n");
 #endif
 
 }
@@ -1455,7 +1456,7 @@ void cDaisyPrepareNext(void)
 	{
 
 #ifdef DEBUG
-		printf("ReadSensorPointer %d at PrepareNext lige foer reset\n", ReadSensorPointer);
+		w_system_printf("ReadSensorPointer %d at PrepareNext lige foer reset\n", ReadSensorPointer);
 #endif
 
 		ReadSensorPointer = 0;    // Reset position
@@ -1465,7 +1466,7 @@ void cDaisyPrepareNext(void)
 	}
 
 #ifdef DEBUG
-	printf("ReadSensorPointer %d at PrepareNext\n", ReadSensorPointer);
+	w_system_printf("ReadSensorPointer %d at PrepareNext\n", ReadSensorPointer);
 #endif
 
 }
@@ -1478,7 +1479,7 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 	RESULT Result = FAIL;
 
 #ifdef DEBUG
-	printf("Layer (+1): %d, Port: %d", Layer, Sensor);
+	w_system_printf("Layer (+1): %d, Port: %d", Layer, Sensor);
 #endif
 
 	if (Layer > 0)	  // Self should not be called here, but directly from the I/P's
@@ -1498,19 +1499,19 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 		{
 			switch (Result)
 			{
-			case OK:		printf("Layer 0, Sensor 1, OK\n");
+			case OK:		w_system_printf("Layer 0, Sensor 1, OK\n");
 				break;
 
-			case BUSY:	printf("Layer 0, Sensor 1, BUSY\n");
+			case BUSY:	w_system_printf("Layer 0, Sensor 1, BUSY\n");
 				break;
 
-			case FAIL:	printf("Layer 0, Sensor 1, FAIL\n");
+			case FAIL:	w_system_printf("Layer 0, Sensor 1, FAIL\n");
 				break;
 
-			case START:	printf("Layer 0, Sensor 1, START\n");
+			case START:	w_system_printf("Layer 0, Sensor 1, START\n");
 				break;
 
-			case STOP:	printf("Layer 0, Sensor 1, STOP\n");
+			case STOP:	w_system_printf("Layer 0, Sensor 1, STOP\n");
 				break;
 			}
 		}
@@ -1525,7 +1526,7 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 		memcpy(pData, &(DaisyBuffers[Layer][NormSensor][DEVICE_DATA_POS]), Length);
 
 #ifdef DEBUG
-		printf("L=%d, S=%d, T=%d\n", Layer, NormSensor, DaisyBuffers[Layer][NormSensor][TYPE_POS]);
+		w_system_printf("L=%d, S=%d, T=%d\n", Layer, NormSensor, DaisyBuffers[Layer][NormSensor][TYPE_POS]);
 #endif
 	}
 	return Result;
@@ -1541,7 +1542,7 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 //	if (WriteUsbTransfer->status == LIBUSB_TRANSFER_COMPLETED)
 //	{
 //#ifdef DEBUG
-//		printf("Did I reach callback?? 01\n");
+//		w_system_printf("Did I reach callback?? 01\n");
 //#endif
 //
 //		LastWriteResult = DAISY_WR_COMPLETED; // Done with Success
@@ -1556,7 +1557,7 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 //
 //		case LIBUSB_TRANSFER_TIMED_OUT:
 //#ifdef DEBUG
-//			printf("Did I reach callback?? 02\n");
+//			w_system_printf("Did I reach callback?? 02\n");
 //#endif
 //
 //			LastWriteResult = DAISY_WR_TIMEDOUT;
@@ -1566,7 +1567,7 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 //
 //		case LIBUSB_TRANSFER_NO_DEVICE:
 //#ifdef DEBUG
-//			printf("Did I reach callback?? 03\n");
+//			w_system_printf("Did I reach callback?? 03\n");
 //#endif
 //
 //			DownConnectionState = DAISY_DOWN_DISCONNECTED;
@@ -1584,7 +1585,7 @@ RESULT cDaisyGetDownstreamData(DATA8 Layer, DATA8 Sensor, DATA8 Length, DATA8* p
 //			DaisyReadyState = FAIL;
 //
 //#ifdef DEBUG
-//			printf("Did I reach callback?? 04\n");
+//			w_system_printf("Did I reach callback?? 04\n");
 //#endif
 //
 //			break;
@@ -1659,22 +1660,22 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 		case DAISY_RD_DONE:       // We have a valid READ
 
 #ifdef DEBUG
-			printf("\ncDaisyPollFromDownstream - DAISY_RD_DONE - length = %d\n", ReadLength);
+			w_system_printf("\ncDaisyPollFromDownstream - DAISY_RD_DONE - length = %d\n", ReadLength);
 #endif
 
 #ifdef DEBUG
 
 			int x;
-			printf("--DATAIN---\n");
+			w_system_printf("--DATAIN---\n");
 			for (x = 0; x < 16; x++)
-				printf("%d, ", DataIn[x]);
+				w_system_printf("%d, ", DataIn[x]);
 
 			for (x = 16; x < 32; x++)
-				printf("%d, ", DataIn[x]);
-			printf("\n");
+				w_system_printf("%d, ", DataIn[x]);
+			w_system_printf("\n");
 
 			// Smaller print for verify :-)
-			//printf("Data rec\n");
+			//w_system_printf("Data rec\n");
 
 #endif
 
@@ -1692,7 +1693,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 			{
 			case DAISY_CHAIN_INFO:
 #ifdef DEBUG
-				printf("DaisyInfo from DownStream\n");
+				w_system_printf("DaisyInfo from DownStream\n");
 #endif
 
 				// Ready for update
@@ -1715,7 +1716,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 					PushPriorityCounter--;
 
 #ifdef DEBUG
-					printf("PushPriorityCounter, Time = %d , %d\n", PushPriorityCounter, BusyTimer);
+					w_system_printf("PushPriorityCounter, Time = %d , %d\n", PushPriorityCounter, BusyTimer);
 #endif
 				}
 
@@ -1724,7 +1725,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 			case DAISY_CHAIN_UPSTREAM:
 
 #ifdef DEBUG
-				printf("DaisyData polled from DownStream\n");
+				w_system_printf("DaisyData polled from DownStream\n");
 #endif
 
 				if (ReadLength < DAISY_MAX_EP_IN_SIZE) // Add trailing zeroes
@@ -1773,21 +1774,21 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 				int j;
 				int z;
 
-				printf("-----\n");
+				w_system_printf("-----\n");
 				for (j = 0; j < 4; j++)
 				{
 					for (i = 0; i < 8; i++)
 					{
 						for (z = 0; z < 32; z++)
 						{
-							printf("%d, ", (UBYTE)(DaisyBuffers[j][i][z]));
+							w_system_printf("%d, ", (UBYTE)(DaisyBuffers[j][i][z]));
 						}
-						printf("\n");
+						w_system_printf("\n");
 					}
 				}
 
 				// Smaller print for verify :-)
-				//printf("Data rec\n");
+				//w_system_printf("Data rec\n");
 #endif
 
 				if (PushPriorityCounter > 0)
@@ -1811,7 +1812,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 			// ReadState already set OK
 
 #ifdef DEBUG
-			printf("\ncDaisyPollFromDownstream - DAISY_RD_REQUESTED\n");
+			w_system_printf("\ncDaisyPollFromDownstream - DAISY_RD_REQUESTED\n");
 #endif
 
 			break;
@@ -1822,14 +1823,14 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 			DaisyZeroTheBuffers();
 
 #ifdef DEBUG
-			printf("\ncDaisyPollFromDownstream - DAISY_RD_DISCONNECTED\n");
+			w_system_printf("\ncDaisyPollFromDownstream - DAISY_RD_DISCONNECTED\n");
 #endif
 			// FALL THROUGH
 
 		case DAISY_RD_TIMEDOUT:     // Too lazy...
 
 #ifdef DEBUG
-			printf("\ncDaisyPollFromDownstream - DAISY_RD_TIMEDOUT\n");
+			w_system_printf("\ncDaisyPollFromDownstream - DAISY_RD_TIMEDOUT\n");
 #endif
 
 			ReadState = DAISY_RD_IDLE;  // Ready again if it becomes more "energy"...
@@ -1840,7 +1841,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 
 		case DAISY_RD_ERROR:
 #ifdef DEBUG
-			printf("\ncDaisyPollFromDownstream - DAISY_RD_ERROR\n");
+			w_system_printf("\ncDaisyPollFromDownstream - DAISY_RD_ERROR\n");
 #endif
 
 			ReadResult = DAISY_RD_ERROR;
@@ -1855,7 +1856,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 //		if (DeviceHandle == NULL)
 //		{
 //#ifdef DEBUG
-//			printf("\ncDaisyPollFromDownstream - Device_handle = NULL\n");
+//			w_system_printf("\ncDaisyPollFromDownstream - Device_handle = NULL\n");
 //#endif
 //		}
 //		else
@@ -1863,7 +1864,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 //			if (ReadTransfer == NULL)
 //			{
 //#ifdef DEBUG
-//				printf("\ncDaisyPollFromDownstream - ReadTransfer = NULL\n");
+//				w_system_printf("\ncDaisyPollFromDownstream - ReadTransfer = NULL\n");
 //#endif
 //			}
 //			else
@@ -1886,7 +1887,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 //					ReadLength = 0;                         // Nothing read yet
 //
 //#ifdef DEBUG
-//					printf("\ncDaisyPollFromDownstream REQ - LIBUSB_SUCCESS\n");
+//					w_system_printf("\ncDaisyPollFromDownstream REQ - LIBUSB_SUCCESS\n");
 //#endif
 //
 //					break;
@@ -1897,7 +1898,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 //					DaisyZeroTheBuffers();
 //
 //#ifdef DEBUG
-//					printf("\ncDaisyPollFromDownstream - LIBUSB_ERROR_NO_DEVICE\n");
+//					w_system_printf("\ncDaisyPollFromDownstream - LIBUSB_ERROR_NO_DEVICE\n");
 //#endif
 //
 //					break;                                  // Try again later....
@@ -1906,7 +1907,7 @@ void cDaisyPollFromDownStream(void)  // Autonomous put into array etc. :-)
 //					ReadState = DAISY_RD_IDLE;              // if device present - No active job
 //
 //#ifdef DEBUG
-//					printf("\ncDaisyPollFromDownstream - LIBUSB_DEFAULT\n");
+//					w_system_printf("\ncDaisyPollFromDownstream - LIBUSB_DEFAULT\n");
 //#endif
 //
 //					break;                                // Try again later....
@@ -1925,7 +1926,7 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 	{
 
 #ifdef DEBUG
-		printf("DAISY WriteState and IDLE\n");
+		w_system_printf("DAISY WriteState and IDLE\n");
 #endif
 
 //		// Do a start write
@@ -1941,7 +1942,7 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 //		ResValue = libusb_submit_transfer(WriteTransfer);
 //
 //#ifdef DEBUG
-//		printf("ResValue from write submit = %d\n", ResValue);
+//		w_system_printf("ResValue from write submit = %d\n", ResValue);
 //#endif
 //
 //		switch (ResValue)                  // Could be returned as is,
@@ -1950,7 +1951,7 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 //
 //		case LIBUSB_SUCCESS:
 //#ifdef DEBUG
-//			printf("Write submit LIBUSB_SUCCESS\n");
+//			w_system_printf("Write submit LIBUSB_SUCCESS\n");
 //#endif
 //
 //			ReturnValue = DAISY_WR_NOT_FINISHED;                // Write started OK
@@ -1962,7 +1963,7 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 //		case LIBUSB_ERROR_NO_DEVICE:
 //
 //#ifdef DEBUG
-//			printf("Write submit LIBUSB_ERROR_NO_DEVICE\n");
+//			w_system_printf("Write submit LIBUSB_ERROR_NO_DEVICE\n");
 //#endif
 //
 //			ReturnValue = DAISY_WR_DISCONNECTED;                // Device gone, but can be requested later
@@ -1974,7 +1975,7 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 //
 //		case LIBUSB_ERROR_BUSY:
 //#ifdef DEBUG
-//			printf("Write submit LIBUSB_ERROR_BUSY\n");
+//			w_system_printf("Write submit LIBUSB_ERROR_BUSY\n");
 //#endif
 //
 //			ReturnValue = DAISY_WR_NOT_FINISHED;                // Previous write NOT finished
@@ -1985,7 +1986,7 @@ int cDaisyWrite()                     // Write DOWNSTREAM
 //
 //		default:
 //#ifdef DEBUG
-//			printf("Write submit DEFAULT in switch\n");	    // ERROR
+//			w_system_printf("Write submit DEFAULT in switch\n");	    // ERROR
 //#endif
 //
 //			break;
@@ -1999,7 +2000,7 @@ RESULT cDaisyUnlockOk(void)
 	RESULT Result = FAIL;
 
 #ifdef DEBUG
-	printf("cDaisyUnlockOk\n");
+	w_system_printf("cDaisyUnlockOk\n");
 #endif
 
 	switch (ReadState)
@@ -2007,14 +2008,14 @@ RESULT cDaisyUnlockOk(void)
 	case  DAISY_RD_DONE:      // We have to check the answer
 
 #ifdef DEBUG
-		printf("Did we reach RD_DONE in UnLockOk?\n");
+		w_system_printf("Did we reach RD_DONE in UnLockOk?\n");
 #endif
 
 		if ((DataIn[SUBCMD] == DAISY_UNLOCK_SLAVE) && (DataIn[STAT] == OK))
 		{
 			Result = OK;
 #ifdef DEBUG
-			printf("cDaisyUnlockOk -> OK\n");
+			w_system_printf("cDaisyUnlockOk -> OK\n");
 #endif
 		}
 		else
@@ -2022,7 +2023,7 @@ RESULT cDaisyUnlockOk(void)
 			// else FAIL already set
 
 #ifdef DEBUG
-			printf("cDaisyUnlockOk -> FAIL\n");
+			w_system_printf("cDaisyUnlockOk -> FAIL\n");
 #endif
 		}
 
@@ -2116,7 +2117,7 @@ void cDaisyControl(void)
 	case  DAISY_DOWN_DISCONNECTED:  // The "try and connect" is simple timed
 
 #ifdef DEBUG
-		printf("DAISY_DOWN_DISCONNECTED\n");
+		w_system_printf("DAISY_DOWN_DISCONNECTED\n");
 #endif
 
 		PlugAndPlay--;  // one more "loop"
@@ -2132,7 +2133,7 @@ void cDaisyControl(void)
 				PlugAndPlay = TIME_TO_CHECK_FOR_DAISY_DOWNSTREAM;  // Another period
 				DaisyZeroTheBuffers();
 #ifdef DEBUG
-				printf("DAISY disconnected DOWNSTREAM - No slave bricks!! \n");
+				w_system_printf("DAISY disconnected DOWNSTREAM - No slave bricks!! \n");
 #endif
 			}
 		}
@@ -2141,7 +2142,7 @@ void cDaisyControl(void)
 	case  DAISY_DOWN_CONNECTED:     // Slave connected but still locked
 
 #ifdef DEBUG
-		printf("DAISY_DOWN_CONNECTED\n");
+		w_system_printf("DAISY_DOWN_CONNECTED\n");
 #endif
 
 		if (cDaisyWriteUnlockToSlave() == DAISY_WR_NOT_FINISHED)
@@ -2154,7 +2155,7 @@ void cDaisyControl(void)
 	case  DAISY_DOWN_UNLOCKING:     // Write Request in progress
 
 #ifdef DEBUG
-		printf("DAISY_DOWN_UNLOCKING\n");
+		w_system_printf("DAISY_DOWN_UNLOCKING\n");
 #endif
 
 		if (cDaisyWriteDone() == DAISY_WR_ERROR)
@@ -2164,7 +2165,7 @@ void cDaisyControl(void)
 		else
 		{
 #ifdef DEBUG
-			printf("Before cDaisyStartReadUnlockAnswer()\n");
+			w_system_printf("Before cDaisyStartReadUnlockAnswer()\n");
 #endif
 
 			// cDaisyStartReadUnlockAnswer();
@@ -2175,19 +2176,19 @@ void cDaisyControl(void)
 	case  DAISY_CHECK_UNLOCK:       // Check for a valid answer (DAISY_DOWN_UNLOCKED)
 
 #ifdef DEBUG
-		printf("DAISY_CHECK_UNLOCK ReadState = %d\n", ReadState);
+		w_system_printf("DAISY_CHECK_UNLOCK ReadState = %d\n", ReadState);
 #endif
 
 		if (ReadState == DAISY_RD_DONE)
 		{
 #ifdef DEBUG
-			printf("DAISY_RD_DONE\n");
+			w_system_printf("DAISY_RD_DONE\n");
 #endif
 
 			if (cDaisyUnlockOk() == OK)
 			{
 #ifdef DEBUG
-				printf("cDaisyUnlockOk() returned OK\n");
+				w_system_printf("cDaisyUnlockOk() returned OK\n");
 #endif
 
 				SetSlaveUnlocked(TRUE);
@@ -2196,7 +2197,7 @@ void cDaisyControl(void)
 			else
 			{
 #ifdef DEBUG
-				printf("cDaisyUnlockOk() failed :-( \n");
+				w_system_printf("cDaisyUnlockOk() failed :-( \n");
 #endif
 
 				DownConnectionState = DAISY_DOWN_CONNECTED;  // Try again
@@ -2214,7 +2215,7 @@ void cDaisyControl(void)
 	case  DAISY_DOWN_UNLOCKED:      // Initialized i.e. UNLOCKed and ready for Transfer of INFO & DATA
 
 #ifdef DEBUG
-		printf("DAISY_DOWN_UNLOCKED\n");
+		w_system_printf("DAISY_DOWN_UNLOCKED\n");
 #endif
 
 		// Poll as fast as possible and even faster.....

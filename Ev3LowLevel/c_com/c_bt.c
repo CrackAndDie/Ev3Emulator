@@ -154,6 +154,7 @@
 
 // #include "lms2012.h"
 
+#include "w_system.h"
 #include "lms2012.h"
 #include "c_com.h"
 #include "c_bt.h"
@@ -392,7 +393,7 @@ static UWORD cBtRead(DATA8 ch, UBYTE* pBuf, UWORD Length)
 
 	if (MSG_BUF_FULL == pMsgBuf->Status) {
 #ifdef DEBUG
-		printf("MSG_BUF_FULL on Bt Channel %d, number of bytes = %d\n",
+		w_system_printf("MSG_BUF_FULL on Bt Channel %d, number of bytes = %d\n",
 			ch, pMsgBuf->InPtr);
 #endif
 		memcpy(pBuf, pMsgBuf->Buf, (pMsgBuf->InPtr));
@@ -487,7 +488,7 @@ void      DecodeMode1(UBYTE BufNo)
 	AvailBytes = (pReadBuf->InPtr - pReadBuf->OutPtr);          /* How many bytes is ready to be read */
 
 #ifdef DEBUG
-	printf("\nDecode mode 1: Avail bytes = %d MsgBuf status = %d\n", AvailBytes, pMsgBuf->Status);
+	w_system_printf("\nDecode mode 1: Avail bytes = %d MsgBuf status = %d\n", AvailBytes, pMsgBuf->Status);
 #endif
 
 	switch (pMsgBuf->Status)
@@ -527,12 +528,12 @@ void      DecodeMode1(UBYTE BufNo)
 						pMsgBuf->Status = MSG_BUF_FULL;
 
 #ifdef DEBUG
-						printf(" Message is received from MSG_BUF_EMPTY: ");
+						w_system_printf(" Message is received from MSG_BUF_EMPTY: ");
 						for (Test = 0; Test < ((pMsgBuf->MsgLen) + 2); Test++)
 						{
-							printf("%02X ", pMsgBuf->Buf[Test]);
+							w_system_printf("%02X ", pMsgBuf->Buf[Test]);
 						}
-						printf("\n");
+						w_system_printf("\n");
 #endif
 
 						if (0 == AvailBytes)
@@ -612,12 +613,12 @@ void      DecodeMode1(UBYTE BufNo)
 				pMsgBuf->Status = MSG_BUF_FULL;
 
 #ifdef DEBUG
-				printf(" Message is received from MSG_BUF_EMPTY: ");
+				w_system_printf(" Message is received from MSG_BUF_EMPTY: ");
 				for (Test = 0; Test < ((pMsgBuf->MsgLen) + 2); Test++)
 				{
-					printf("%02X ", pMsgBuf->Buf[Test]);
+					w_system_printf("%02X ", pMsgBuf->Buf[Test]);
 				}
-				printf("\n");
+				w_system_printf("\n");
 #endif
 
 				if (0 == AvailBytes)
@@ -709,12 +710,12 @@ void      DecodeMode1(UBYTE BufNo)
 				pMsgBuf->Status = MSG_BUF_FULL;
 
 #ifdef DEBUG
-				printf(" Message is received from MSG_BUF_EMPTY: ");
+				w_system_printf(" Message is received from MSG_BUF_EMPTY: ");
 				for (Test = 0; Test < ((pMsgBuf->MsgLen) + 2); Test++)
 				{
-					printf("%02X ", pMsgBuf->Buf[Test]);
+					w_system_printf("%02X ", pMsgBuf->Buf[Test]);
 				}
-				printf("\n");
+				w_system_printf("\n");
 #endif
 
 				if (0 == AvailBytes)
@@ -804,9 +805,9 @@ static void BtClose(void)
 //		pWriteBuf->OutPtr += BytesWritten;
 //
 //#ifdef DEBUG
-//		printf("transmitted Bytes to send %d, Bytes written = %d\n",
+//		w_system_printf("transmitted Bytes to send %d, Bytes written = %d\n",
 //			ByteCnt, BytesWritten);
-//		printf(" errno = %d\n", errno);
+//		w_system_printf(" errno = %d\n", errno);
 //#endif
 //
 //		if (pWriteBuf->OutPtr == pWriteBuf->InPtr) {
@@ -2014,11 +2015,11 @@ int       cBtSetBundleSeedId(const char* pSeedId)
 //		if (BytesRead > 0) {
 //#ifdef DEBUG
 //			int Cnt;
-//			printf("\nData received on BT in Slave mode");
+//			w_system_printf("\nData received on BT in Slave mode");
 //			for (Cnt = 0; Cnt < BytesRead; Cnt++) {
-//				printf("\n Rx byte nr %02d = %02X", Cnt, pReadBuf->Buf[Cnt]);
+//				w_system_printf("\n Rx byte nr %02d = %02X", Cnt, pReadBuf->Buf[Cnt]);
 //			}
-//			printf("\n");
+//			w_system_printf("\n");
 //#endif
 //			pReadBuf->OutPtr = 0;
 //			pReadBuf->InPtr = BytesRead;

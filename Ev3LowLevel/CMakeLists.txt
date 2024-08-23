@@ -14,6 +14,8 @@ set (LMS2012_DEBUG_BUFPRINT 0)
 set (LMS2012_ENABLE_DEBUG_PULSE 0)
 
 add_definitions ("-DLinux_X86")
+add_definitions ("-DDEBUG")
+add_definitions ("-DDEBUG_TO_FILE")
 
 add_definitions("-D${LMS2012_SPECIALVERS}VERS")
 if (LMS2012_ENABLE_TERMINAL)

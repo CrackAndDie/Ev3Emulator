@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "w_system.h"
 #include "lms2012.h"
 #include "button.h"
 #include "c_ui.h"
@@ -436,7 +437,7 @@ RESULT cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 *pState,
             pQ->SelectSpaceX  =  pQ->IconSpaceX;
         }
 #ifdef DEBUG
-        printf("Shown icons %d -> 0x%08X\n",pQ->NoOfIcons,pQ->Icons);
+        w_system_printf("Shown icons %d -> 0x%08X\n",pQ->NoOfIcons,pQ->Icons);
 #endif
 
         pQ->NeedUpdate    =  1;
@@ -526,7 +527,7 @@ RESULT cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 *pState,
         Result  =  OK;
         *pState =  0;
 #ifdef DEBUG
-        printf("Selecting icon %d -> 0x%08X\n",pQ->PointerX,*pIcons);
+        w_system_printf("Selecting icon %d -> 0x%08X\n",pQ->PointerX,*pIcons);
 #endif
     }
     if (cUiButtonGetShortPress(BACK_BUTTON))

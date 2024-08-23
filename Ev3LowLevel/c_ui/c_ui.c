@@ -141,6 +141,7 @@
 	*
 	*/
 
+#include "w_system.h"
 #include "lms2012.h"
 #include "button.h"
 #include "graph.h"
@@ -1636,7 +1637,7 @@ void      cUiRead(void)
 				UiInstance.KeyBuffer[Lng] = UiInstance.KeyBuffer[Lng + 1];
 			}
 #ifdef  DEBUG_TRACE_KEY
-			printf("%s", (char*)UiInstance.KeyBuffer);
+			w_system_printf("%s", (char*)UiInstance.KeyBuffer);
 #endif
 		}
 		else

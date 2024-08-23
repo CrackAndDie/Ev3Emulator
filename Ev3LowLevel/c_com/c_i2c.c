@@ -51,6 +51,7 @@
 	*  Interfaces to Mode2
 	*/
 
+#include  "w_system.h"
 #include  "lms2012.h"
 #include  "c_com.h"
 #include  "c_bt.h"
@@ -240,7 +241,7 @@ void* I2cCtrl(void* ptr)
 //	if (I2cFile < 0)
 //	{
 //#ifdef DEBUG
-//		printf("Can't open device file /dev/i2c-1\n");
+//		w_system_printf("Can't open device file /dev/i2c-1\n");
 //#endif
 //	}
 //	else
@@ -305,7 +306,7 @@ void* I2cCtrl(void* ptr)
 //						// to mode2 decoding
 //						Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//						printf("\nERROR - OVERRUN\n");
+//						w_system_printf("\nERROR - OVERRUN\n");
 //#endif
 //					}
 //					break;
@@ -313,7 +314,7 @@ void* I2cCtrl(void* ptr)
 //					{
 //						Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//						printf("\nERROR - CRC\n");
+//						w_system_printf("\nERROR - CRC\n");
 //#endif
 //					}
 //					break;
@@ -321,7 +322,7 @@ void* I2cCtrl(void* ptr)
 //					{
 //						Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//						printf("\nERROR - INCORRECT_ACTION\n");
+//						w_system_printf("\nERROR - INCORRECT_ACTION\n");
 //#endif
 //					}
 //					break;
@@ -329,7 +330,7 @@ void* I2cCtrl(void* ptr)
 //					{
 //						Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//						printf("\nERROR - UNEXPECTED\n");
+//						w_system_printf("\nERROR - UNEXPECTED\n");
 //#endif
 //					}
 //					break;
@@ -337,7 +338,7 @@ void* I2cCtrl(void* ptr)
 //					{
 //						Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//						printf("\nERROR - RAW_OVERRUN\n");
+//						w_system_printf("\nERROR - RAW_OVERRUN\n");
 //#endif
 //					}
 //					break;
@@ -346,7 +347,7 @@ void* I2cCtrl(void* ptr)
 //						// Unknown Error
 //						Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//						printf("\nERROR - UNKNOWN\n");
+//						w_system_printf("\nERROR - UNKNOWN\n");
 //#endif
 //					}
 //					break;
@@ -373,15 +374,15 @@ void* I2cCtrl(void* ptr)
 //							{
 //								// Error
 //#ifdef DEBUG
-//								printf("\n'A' Read error \n");
+//								w_system_printf("\n'A' Read error \n");
 //#endif
 //							}
 //
 //#ifdef DEBUG
-//							printf("\nA - Reading mode2 data from decoding to Tx on Bluetooth\n");
+//							w_system_printf("\nA - Reading mode2 data from decoding to Tx on Bluetooth\n");
 //							for (Test = 0; Test < Size; Test++)
 //							{
-//								printf("Buf[%d] = %02X\n", Test, Buf[Test]);
+//								w_system_printf("Buf[%d] = %02X\n", Test, Buf[Test]);
 //							}
 //#endif
 //
@@ -399,7 +400,7 @@ void* I2cCtrl(void* ptr)
 //
 //					// More data for mode2 decoding is needed at address 0x54
 //#ifdef DEBUG
-//					printf("\nW - Waiting for more mode2 data\n");
+//					w_system_printf("\nW - Waiting for more mode2 data\n");
 //#endif
 //
 //					BytesToTx = BUFBytesAvail;
@@ -412,12 +413,12 @@ void* I2cCtrl(void* ptr)
 //						}
 //
 //#ifdef DEBUG
-//						printf("\n Remote data:");
+//						w_system_printf("\n Remote data:");
 //#endif
 //						for (TmpCnt = 0; TmpCnt < BytesToTx; TmpCnt++)
 //						{
 //#ifdef DEBUG
-//							printf("%02X, ", Mode2InBuf.Buf[Mode2InBuf.OutPtr]);
+//							w_system_printf("%02X, ", Mode2InBuf.Buf[Mode2InBuf.OutPtr]);
 //#endif
 //							TmpBuf[TmpCnt] = Mode2InBuf.Buf[Mode2InBuf.OutPtr];
 //							BUFAddOutPtr(1);
@@ -427,7 +428,7 @@ void* I2cCtrl(void* ptr)
 //						{
 //							// Error
 //#ifdef DEBUG
-//							printf("\n'W' write error \n");
+//							w_system_printf("\n'W' write error \n");
 //#endif
 //						}
 //					}
@@ -446,7 +447,7 @@ void* I2cCtrl(void* ptr)
 //					{
 //						// Minimum msg length coming from remote device has been received
 //#ifdef DEBUG
-//						printf("\nData to decoding from Bluetooth = %d, Inptr = %d, OutPtr = %d\n", BytesAvail, Mode2InBuf.InPtr, Mode2InBuf.OutPtr);
+//						w_system_printf("\nData to decoding from Bluetooth = %d, Inptr = %d, OutPtr = %d\n", BytesAvail, Mode2InBuf.InPtr, Mode2InBuf.OutPtr);
 //#endif
 //
 //						// Send minimum msg length + 0xFF header
@@ -465,7 +466,7 @@ void* I2cCtrl(void* ptr)
 //						else
 //						{
 //#ifdef DEBUG
-//							printf("\n.... Remote data to the Pic, Bytes transferred %d\n", ByteCnt);
+//							w_system_printf("\n.... Remote data to the Pic, Bytes transferred %d\n", ByteCnt);
 //#endif
 //						}
 //					}
@@ -502,14 +503,14 @@ void* I2cCtrl(void* ptr)
 //							else
 //							{
 //#ifdef DEBUG
-//								printf("\n.... Application data to the Pic, Bytes to send %d\n", ByteCnt);
+//								w_system_printf("\n.... Application data to the Pic, Bytes to send %d\n", ByteCnt);
 //#endif
 //							}
 //
 //						}
 //					}
 //#ifdef DEBUG
-//					printf("\nI - Idle state\n");
+//					w_system_printf("\nI - Idle state\n");
 //#endif
 //				}
 //				break;
@@ -532,10 +533,10 @@ void* I2cCtrl(void* ptr)
 //							pReadBuf->Status = READ_BUF_FULL;
 //
 //#ifdef DEBUG
-//							printf("\nR - %d bytes of App data read \n", Size);
+//							w_system_printf("\nR - %d bytes of App data read \n", Size);
 //							for (Test = 0; Test < Size; Test++)
 //							{
-//								printf("AppData[%d] = %02X\n", Test, pReadBuf->Buf[Test]);
+//								w_system_printf("AppData[%d] = %02X\n", Test, pReadBuf->Buf[Test]);
 //							}
 //#endif
 //
@@ -572,7 +573,7 @@ void* I2cCtrl(void* ptr)
 //				case 'S':
 //				{
 //#ifdef DEBUG
-//					printf("\nS - Reset source = %02X, Status = %02X\n", Buf[1], Buf[2]);
+//					w_system_printf("\nS - Reset source = %02X, Status = %02X\n", Buf[1], Buf[2]);
 //#endif
 //
 //					if (0 == Buf[2])
@@ -580,7 +581,7 @@ void* I2cCtrl(void* ptr)
 //						Status = MODE2_FALIURE;
 //						DISCONNDueToErr;
 //#ifdef DEBUG
-//						printf("\nERROR - failure on reset\n");
+//						w_system_printf("\nERROR - failure on reset\n");
 //#endif
 //					}
 //				}
@@ -590,7 +591,7 @@ void* I2cCtrl(void* ptr)
 //				{
 //					Status = MODE2_FALIURE;
 //#ifdef DEBUG
-//					printf("\nStatus return not recognized....\n");
+//					w_system_printf("\nStatus return not recognized....\n");
 //#endif
 //				}
 //				break;
@@ -732,7 +733,7 @@ int I2cRead(int fd, unsigned int addr, unsigned char* buf, unsigned char len)
 //	if ((i = ioctl(fd, I2C_RDWR, &msg_rdwr)) < 0)
 //	{
 //#ifdef DEBUG
-//		printf("\nIOCTL Read error, Len = %d, i2cmsg.len = %d \n", len, i2cmsg.len);
+//		w_system_printf("\nIOCTL Read error, Len = %d, i2cmsg.len = %d \n", len, i2cmsg.len);
 //#endif
 //
 //		Status = MODE2_FALIURE;
@@ -758,7 +759,7 @@ int I2cWrite(int fd, unsigned int addr, unsigned char* buf, unsigned char len)
 	if ((i = ioctl(fd, I2C_RDWR, &msg_rdwr)) < 0)
 	{
 #ifdef DEBUG
-		printf("\nIOCTL write error, Len = %d, i2cmsg.len = %d \n", len, i2cmsg.len);
+		w_system_printf("\nIOCTL write error, Len = %d, i2cmsg.len = %d \n", len, i2cmsg.len);
 #endif
 
 		Status = MODE2_FALIURE;

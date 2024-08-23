@@ -39,6 +39,7 @@
    *    - USB
    *
    */
+#include "w_system.h"
 #include "w_filesystem.h"
 
 #include "c_com.h"
@@ -419,17 +420,17 @@ void      cComShow(UBYTE* pB)
 	Lng = (UWORD)pB[0];
 	Lng += (UWORD)pB[1] << 8;
 
-	printf("[%02X%02X", pB[0], pB[1]);
+	w_system_printf("[%02X%02X", pB[0], pB[1]);
 	pB++;
 	pB++;
 
 	while (Lng)
 	{
-		printf("%02X", *pB);
+		w_system_printf("%02X", *pB);
 		pB++;
 		Lng--;
 	}
-	printf("]\n");
+	w_system_printf("]\n");
 }
 
 #endif
@@ -443,17 +444,17 @@ void      cComPrintTxMsg(TXBUF* pTxBuf)
 
 	pComRpl = (COMRPL*)pTxBuf->Buf;
 
-	printf("Tx Buf content:\n");
+	w_system_printf("Tx Buf content:\n");
 	for (Cnt = 0; ((Cnt < ((*pComRpl).CmdSize + 2)) && (Cnt < 1024)); Cnt++)
 	{
 		for (Cnt2 = Cnt; Cnt2 < (Cnt + 16); Cnt2++)
 		{
-			printf("0x%02X, ", ((UBYTE*)(&((*pComRpl).CmdSize)))[Cnt2]);
+			w_system_printf("0x%02X, ", ((UBYTE*)(&((*pComRpl).CmdSize)))[Cnt2]);
 		}
 		Cnt = (Cnt2 - 1);
-		printf("\n");
+		w_system_printf("\n");
 	}
-	printf("\n");
+	w_system_printf("\n");
 }
 #endif
 
@@ -500,7 +501,7 @@ UWORD cComWriteBuffer(UBYTE* pBuffer, UWORD Size)
 		Length = write(ComInstance.Cmdfd, pBuffer, 1024);
 	}*/
 #ifdef DEBUG
-	printf("cComWriteBuffer %d\n", Length);
+	w_system_printf("cComWriteBuffer %d\n", Length);
 #endif
 
 	return Length;
@@ -568,16 +569,16 @@ UBYTE     cComDirectCommand(UBYTE* pBuffer, UBYTE* pReply)
 			(*pImgHead).ImageSize = Length;
 
 #ifdef DEBUG
-			printf("\n");
+			w_system_printf("\n");
 			for (Tmp = 0; Tmp <= Length; Tmp++)
 			{
-				printf("%02X ", ComInstance.Image[Tmp]);
+				w_system_printf("%02X ", ComInstance.Image[Tmp]);
 				if ((Tmp & 0x0F) == 0x0F)
 				{
-					printf("\n");
+					w_system_printf("\n");
 				}
 			}
-			printf("\n");
+			w_system_printf("\n");
 #endif
 
 			Result = 1;
@@ -1142,13 +1143,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 							{
 								// chmod(Folder, DIRPERMISSIONS);
 #ifdef DEBUG
-								printf("Folder %s created\n", Folder);
+								w_system_printf("Folder %s created\n", Folder);
 #endif
 							}
 							else
 							{
 #ifdef DEBUG
-								printf("Folder %s not created (%s)\n", Folder, strerror(errno));
+								w_system_printf("Folder %s not created (%s)\n", Folder, strerror(errno));
 #endif
 							}
 						}
@@ -1203,7 +1204,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				{
 					// Error in opening file
 #ifdef DEBUG
-					printf("File %s not created\n", ComInstance.Files[FileHandle].Name);
+					w_system_printf("File %s not created\n", ComInstance.Files[FileHandle].Name);
 #endif
 					cComFreeHandle(FileHandle);
 					pReplyDl->CmdType = SYSTEM_REPLY_ERROR;
@@ -1217,7 +1218,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			{
 				//Not enough space for the file
 #ifdef DEBUG
-				printf("File %s is too big\n", ComInstance.Files[FileHandle].Name);
+				w_system_printf("File %s is too big\n", ComInstance.Files[FileHandle].Name);
 #endif
 
 				cComFreeHandle(FileHandle);
@@ -1236,7 +1237,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pTxBuf->BlockLen = SIZEOF_RPLYBEGINDL;
 
 #ifdef DEBUG
-			printf("No more handles\n");
+			w_system_printf("No more handles\n");
 #endif
 		}
 	}
@@ -1294,7 +1295,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 					BytesToWrite = pRxBuf->pFile->Size - pRxBuf->pFile->Pointer;
 
 #ifdef DEBUG
-					printf("File size limited\n");
+					w_system_printf("File size limited\n");
 #endif
 				}
 
@@ -1303,13 +1304,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				pRxBuf->RxBytes = BytesToWrite;
 
 #ifdef DEBUG
-				printf("Size %8lu - Loaded %8lu\n", (unsigned long)ComInstance.Files[FileHandle].Size, (unsigned long)ComInstance.Files[FileHandle].Length);
+				w_system_printf("Size %8lu - Loaded %8lu\n", (unsigned long)ComInstance.Files[FileHandle].Size, (unsigned long)ComInstance.Files[FileHandle].Length);
 #endif
 
 				if (pRxBuf->pFile->Pointer >= ComInstance.Files[FileHandle].Size)
 				{
 #ifdef DEBUG
-					printf("%s %lu bytes downloaded\n", ComInstance.Files[FileHandle].Name, (unsigned long)ComInstance.Files[FileHandle].Length);
+					w_system_printf("%s %lu bytes downloaded\n", ComInstance.Files[FileHandle].Name, (unsigned long)ComInstance.Files[FileHandle].Length);
 #endif
 
 					cComCloseFileHandle(&(ComInstance.Files[FileHandle].File));
@@ -1328,7 +1329,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				cComFreeHandle(FileHandle);
 
 #ifdef DEBUG
-				printf("Data not appended\n");
+				w_system_printf("Data not appended\n");
 #endif
 			}
 		}
@@ -1341,7 +1342,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEDL;
 
 #ifdef DEBUG
-			printf("Invalid handle\n");
+			w_system_printf("Invalid handle\n");
 #endif
 		}
 	}
@@ -1411,8 +1412,8 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				pTxBuf->pFile->Pointer = ReadBytes;  // No of bytes read from file
 
 #ifdef DEBUG
-				printf("Bytes to read %d bytes read %d\n", BytesToRead, ReadBytes);
-				printf("FileSize: %d\n", pTxBuf->pFile->Size);
+				w_system_printf("Bytes to read %d bytes read %d\n", BytesToRead, ReadBytes);
+				w_system_printf("FileSize: %d\n", pTxBuf->pFile->Size);
 #endif
 
 				pReplyBeginRead->CmdSize += (CMDSIZE)pTxBuf->MsgLen;
@@ -1424,7 +1425,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if (pTxBuf->pFile->Pointer >= pTxBuf->pFile->Size)
 				{
 #ifdef DEBUG
-					printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
+					w_system_printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 					pReplyBeginRead->Status = END_OF_FILE;
@@ -1446,7 +1447,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				cComFreeHandle(FileHandle);
 
 #ifdef DEBUG
-				printf("File %s is not present\n", ComInstance.Files[FileHandle].Name);
+				w_system_printf("File %s is not present\n", ComInstance.Files[FileHandle].Name);
 #endif
 			}
 		}
@@ -1458,7 +1459,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pTxBuf->BlockLen = SIZEOF_RPLYBEGINREAD;
 
 #ifdef DEBUG
-			printf("No more handles\n");
+			w_system_printf("No more handles\n");
 #endif
 		}
 
@@ -1530,13 +1531,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 #endif
 
 #ifdef DEBUG
-				printf("Size %8lu - Loaded %8lu\n", (unsigned long)pTxBuf->pFile->Size, (unsigned long)pTxBuf->pFile->Length);
+				w_system_printf("Size %8lu - Loaded %8lu\n", (unsigned long)pTxBuf->pFile->Size, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 				if (ComInstance.Files[FileHandle].Pointer >= ComInstance.Files[FileHandle].Size)
 				{
 #ifdef DEBUG
-					printf("%s %lu bytes UpLoaded\n", ComInstance.Files[FileHandle].Name, (unsigned long)pTxBuf->pFile->Length);
+					w_system_printf("%s %lu bytes UpLoaded\n", ComInstance.Files[FileHandle].Name, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 					pReplyContinueRead->Status = END_OF_FILE;
@@ -1552,7 +1553,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEREAD;
 				cComFreeHandle(FileHandle);
 #ifdef DEBUG
-				printf("Data not read\n");
+				w_system_printf("Data not read\n");
 #endif
 			}
 		}
@@ -1563,7 +1564,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pReplyContinueRead->Handle = -1;
 			pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEREAD;
 #ifdef DEBUG
-			printf("Invalid handle\n");
+			w_system_printf("Invalid handle\n");
 #endif
 		}
 	}
@@ -1602,7 +1603,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			BytesToRead += (ULONG)(pBeginGetFile->BytesToReadMsb) << 8;
 
 #ifdef DEBUG
-			printf("File to get:  %s\n", ComInstance.Files[FileHandle].Name);
+			w_system_printf("File to get:  %s\n", ComInstance.Files[FileHandle].Name);
 #endif
 
 			pTxBuf->pFile->File = open(pTxBuf->pFile->Name, O_RDONLY, 0x444);
@@ -1638,8 +1639,8 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				pTxBuf->pFile->Pointer = ReadBytes;  // No of bytes read from file
 
 #ifdef DEBUG
-				printf("Bytes to read %d vs. bytes read %d\n", BytesToRead, ReadBytes);
-				printf("FileSize: %d\n", pTxBuf->pFile->Size);
+				w_system_printf("Bytes to read %d vs. bytes read %d\n", BytesToRead, ReadBytes);
+				w_system_printf("FileSize: %d\n", pTxBuf->pFile->Size);
 #endif
 
 				pReplyBeginGetFile->CmdSize += pTxBuf->MsgLen;
@@ -1651,7 +1652,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if (pTxBuf->pFile->Pointer >= pTxBuf->pFile->Size)
 				{
 #ifdef DEBUG
-					printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
+					w_system_printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 					// If last bytes has been returned and file is not open for writing
@@ -1676,7 +1677,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				cComFreeHandle(FileHandle);
 
 #ifdef DEBUG
-				printf("File %s is not present\n", ComInstance.Files[FileHandle].Name);
+				w_system_printf("File %s is not present\n", ComInstance.Files[FileHandle].Name);
 #endif
 			}
 		}
@@ -1688,7 +1689,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pTxBuf->BlockLen = SIZEOF_RPLYBEGINGETFILE;
 
 #ifdef DEBUG
-			printf("No more handles\n");
+			w_system_printf("No more handles\n");
 #endif
 		}
 	}
@@ -1767,7 +1768,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if (pTxBuf->pFile->Pointer >= pTxBuf->pFile->Size)
 				{
 #ifdef DEBUG
-					printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
+					w_system_printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 					// If last bytes has been returned and file is not open for writing
@@ -1780,7 +1781,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				}
 
 #ifdef DEBUG
-				printf("Size %8lu - Loaded %8lu\n", (unsigned long)pTxBuf->pFile->Size, (unsigned long)pTxBuf->pFile->Length);
+				w_system_printf("Size %8lu - Loaded %8lu\n", (unsigned long)pTxBuf->pFile->Size, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 #ifdef DEBUG
@@ -1797,7 +1798,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				cComFreeHandle(FileHandle);
 
 #ifdef DEBUG
-				printf("Data not read\n");
+				w_system_printf("Data not read\n");
 #endif
 			}
 		}
@@ -1809,7 +1810,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pTxBuf->BlockLen = SIZEOF_RPLYCONTINUEGETFILE;
 
 #ifdef DEBUG
-			printf("Invalid handle\n");
+			w_system_printf("Invalid handle\n");
 #endif
 		}
 	}
@@ -1997,7 +1998,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if (pTxBuf->pFile->Pointer >= pTxBuf->pFile->Size)
 				{
 #ifdef DEBUG
-					printf("Complete list of %lu Bytes uploaded\n", (unsigned long)pTxBuf->pFile->Length);
+					w_system_printf("Complete list of %lu Bytes uploaded\n", (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 					pReplyBeginList->Status = END_OF_FILE;
@@ -2185,7 +2186,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		if (pTxBuf->pFile->Pointer >= pTxBuf->pFile->Size)
 		{
 #ifdef DEBUG
-			printf("Complete list of %lu Bytes uploaded\n", (unsigned long)pTxBuf->pFile->Length);
+			w_system_printf("Complete list of %lu Bytes uploaded\n", (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 			pReplyContinueList->Status = END_OF_FILE;
@@ -2212,7 +2213,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		FileHandle = pCloseHandle->Handle;
 
 #ifdef DEBUG
-		printf("FileHandle to close = %d, Linux Handle = %d\n", FileHandle, ComInstance.Files[FileHandle].File);
+		w_system_printf("FileHandle to close = %d, Linux Handle = %d\n", FileHandle, ComInstance.Files[FileHandle].File);
 #endif
 
 		pReplyCloseHandle->CmdSize = SIZEOF_RPLYCLOSEHANDLE - sizeof(CMDSIZE);
@@ -2262,7 +2263,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		{
 			// chmod(Folder, DIRPERMISSIONS);
 #ifdef DEBUG
-			printf("Folder %s created\n", Folder);
+			w_system_printf("Folder %s created\n", Folder);
 #endif
 			SetUiUpdate();
 		}
@@ -2272,7 +2273,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pReplyMakeDir->Status = NO_PERMISSION;
 
 #ifdef DEBUG
-			printf("Folder %s not created (%s)\n", Folder, strerror(errno));
+			w_system_printf("Folder %s not created (%s)\n", Folder, strerror(errno));
 #endif
 		}
 		pTxBuf->BlockLen = SIZEOF_RPLYMAKEDIR;
@@ -2298,7 +2299,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		snprintf(Name, 60, "%s", (char*)(pRemove->Name));
 
 #ifdef DEBUG
-		printf("File to delete %s\n", Name);
+		w_system_printf("File to delete %s\n", Name);
 #endif
 
 		if (0 == remove(Name))
@@ -2311,7 +2312,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			pReplyRemove->Status = NO_PERMISSION;
 
 #ifdef DEBUG
-			printf("Folder %s not deleted (%s)\n", Folder, strerror(errno));
+			w_system_printf("Folder %s not deleted (%s)\n", Folder, strerror(errno));
 #endif
 		}
 		pTxBuf->BlockLen = SIZEOF_RPLYREMOVEFILE;
@@ -2626,7 +2627,7 @@ void      cComUpdate(void)
 							// NEW MOTOR/DAISY
 						case	DIR_CMD_NO_REPLY_WITH_BUSY: {
 #ifdef DEBUG
-							printf("Did we reach a *BUSY* DIRECT_COMMAND_NO_REPLY pComCmd.Size = %d\n", ((*pComCmd).CmdSize));
+							w_system_printf("Did we reach a *BUSY* DIRECT_COMMAND_NO_REPLY pComCmd.Size = %d\n", ((*pComCmd).CmdSize));
 #endif
 
 							Iterator = ((*pComCmd).CmdSize) - 7; // Incl. LEN bytes
@@ -2651,7 +2652,7 @@ void      cComUpdate(void)
 							for (Iterator = (((*pComCmd).CmdSize) - 7); Iterator < (((*pComCmd).CmdSize) - 3); Iterator++)
 							{
 #ifdef DEBUG
-								printf("Iterator = %d\n", Iterator);
+								w_system_printf("Iterator = %d\n", Iterator);
 #endif
 
 								ThisMagicCookie = (*pComCmd).PayLoad[Iterator];
@@ -2666,7 +2667,7 @@ void      cComUpdate(void)
 								MotorBusySignalPointer <<= 1;
 
 #ifdef DEBUG
-								printf("ThisMagicCookie = %d\n", ThisMagicCookie);
+								w_system_printf("ThisMagicCookie = %d\n", ThisMagicCookie);
 #endif
 
 								cDaisySetBusyFlags(cDaisyGetOwnLayer(), HelperByte, ThisMagicCookie);
@@ -2676,7 +2677,7 @@ void      cComUpdate(void)
 							ResetDelayCounter(MotorBusySignal);
 
 #ifdef DEBUG
-							printf("cMotorSetBusyFlags(%X)\n", MotorBusySignal);
+							w_system_printf("cMotorSetBusyFlags(%X)\n", MotorBusySignal);
 #endif
 
 							// New MotorSignal
@@ -2697,7 +2698,7 @@ void      cComUpdate(void)
 							// direct command
 
 #ifdef DEBUG
-							printf("Did we reach a DIRECT_COMMAND_REPLY\n");
+							w_system_printf("Did we reach a DIRECT_COMMAND_REPLY\n");
 #endif
 
 							if (0 == ComInstance.ReplyStatus)
@@ -2742,7 +2743,7 @@ void      cComUpdate(void)
 							// direct command
 
 #ifdef DEBUG
-							printf("Did we reach a DIRECT_COMMAND_NO_REPLY\n");
+							w_system_printf("Did we reach a DIRECT_COMMAND_NO_REPLY\n");
 #endif
 
 							//Do not reply even if error
@@ -2796,7 +2797,7 @@ void      cComUpdate(void)
 						case SYSTEM_REPLY_ERROR:
 						{
 #ifdef DEBUG
-							printf("\nsystem reply error\n");
+							w_system_printf("\nsystem reply error\n");
 #endif
 							cComSystemReplyError(pRxBuf, pTxBuf);
 						}
@@ -2807,7 +2808,7 @@ void      cComUpdate(void)
 							if (ChNo == USBDEV)
 							{
 #ifdef DEBUG
-								printf("Did we reach c_COM @ DAISY_COMMAND_REPLY?\n");
+								w_system_printf("Did we reach c_COM @ DAISY_COMMAND_REPLY?\n");
 #endif
 
 								cDaisyCmd(pRxBuf, pTxBuf);
@@ -2824,7 +2825,7 @@ void      cComUpdate(void)
 						{
 
 #ifdef DEBUG
-							printf("Did we reach c_COM @ DAISY_COMMAND_NO_REPLY?\n");
+							w_system_printf("Did we reach c_COM @ DAISY_COMMAND_NO_REPLY?\n");
 #endif
 
 							// A Daisy command without any reply
@@ -2935,31 +2936,31 @@ void      cComTxUpdate(UBYTE ChNo)
 		// returns from Commands (answers/errors).
 
 #ifdef DEBUG
-		printf("\n001\n");
+		w_system_printf("\n001\n");
 #endif
 
 		if (GetDaisyPushCounter() == DAISY_PUSH_NOT_UNLOCKED)  // It's the very first
 		{                                                     // (or one of the first ;-)) transmission(s)
 #ifdef DEBUG
-			printf("Not unlocked 001\n");
+			w_system_printf("Not unlocked 001\n");
 #endif
 
 			if (pTxBuf->Writing)  // Anything Pending?
 			{
 #ifdef DEBUG
-				printf("Not unlocked 002\n");
+				w_system_printf("Not unlocked 002\n");
 #endif
 
 				if (NULL != ComInstance.WriteChannel[ChNo])  // Valid channel?
 				{
 #ifdef DEBUG
-					printf("Not unlocked 003\n");
+					w_system_printf("Not unlocked 003\n");
 #endif
 
 					if ((ComInstance.WriteChannel[USBDEV](pTxBuf->Buf, pTxBuf->BlockLen)) != 0)
 					{
 #ifdef DEBUG
-						printf("Not (OR should be) unlocked 004\n");
+						w_system_printf("Not (OR should be) unlocked 004\n");
 #endif
 
 						pTxBuf->Writing = 0;
@@ -2977,25 +2978,25 @@ void      cComTxUpdate(UBYTE ChNo)
 			if (GetDaisyPushCounter() == 0)  // It's a NON DaisyChain time-slice
 			{
 #ifdef DEBUG
-				printf("Unlocked 001\n");
+				w_system_printf("Unlocked 001\n");
 #endif
 
 				if (pTxBuf->Writing)
 				{
 #ifdef DEBUG
-					printf("Unlocked 002\n");
+					w_system_printf("Unlocked 002\n");
 #endif
 
 					if (NULL != ComInstance.WriteChannel[ChNo])
 					{
 #ifdef DEBUG
-						printf("Unlocked 003\n");
+						w_system_printf("Unlocked 003\n");
 #endif
 
 						if (ComInstance.WriteChannel[ChNo](pTxBuf->Buf, pTxBuf->BlockLen))
 						{
 #ifdef DEBUG
-							printf("Unlocked 004\n");
+							w_system_printf("Unlocked 004\n");
 #endif
 
 							pTxBuf->Writing = 0;
@@ -3007,7 +3008,7 @@ void      cComTxUpdate(UBYTE ChNo)
 				else
 				{
 #ifdef DEBUG
-					printf("Unlocked 005\n");
+					w_system_printf("Unlocked 005\n");
 #endif
 
 					ResetDaisyPushCounter();      // Skip this "master" slice - use time with more benefit ;-)
@@ -3026,7 +3027,7 @@ void      cComTxUpdate(UBYTE ChNo)
 					Len = cDaisyData(&pData);
 
 #ifdef DEBUG
-					printf("Daisy Len = %d, Counter = %d\n", Len, GetDaisyPushCounter());
+					w_system_printf("Daisy Len = %d, Counter = %d\n", Len, GetDaisyPushCounter());
 #endif
 
 					if (Len > 0)
@@ -3035,7 +3036,7 @@ void      cComTxUpdate(UBYTE ChNo)
 						if ((ComInstance.WriteChannel[USBDEV](pData, Len)) != 0)
 						{
 #ifdef DEBUG
-							printf("Daisy OK tx%d\n", GetDaisyPushCounter());
+							w_system_printf("Daisy OK tx%d\n", GetDaisyPushCounter());
 #endif
 
 							DecrementDaisyPushCounter();
@@ -3045,7 +3046,7 @@ void      cComTxUpdate(UBYTE ChNo)
 						else
 						{
 #ifdef DEBUG
-							printf("Daisy FAIL in txing %d\n", GetDaisyPushCounter());  // TX upstream called
+							w_system_printf("Daisy FAIL in txing %d\n", GetDaisyPushCounter());  // TX upstream called
 #endif
 						}
 					}
@@ -3059,19 +3060,19 @@ void      cComTxUpdate(UBYTE ChNo)
 		if (pTxBuf->Writing)
 		{
 #ifdef DEBUG
-			printf("007\n");
+			w_system_printf("007\n");
 #endif
 
 			if (NULL != ComInstance.WriteChannel[ChNo])
 			{
 #ifdef DEBUG
-				printf("Tx Writing true in the bottom ChNo = %d - PushCounter = %d\n", ChNo, GetDaisyPushCounter());
+				w_system_printf("Tx Writing true in the bottom ChNo = %d - PushCounter = %d\n", ChNo, GetDaisyPushCounter());
 #endif
 
 				if (ComInstance.WriteChannel[ChNo](pTxBuf->Buf, pTxBuf->BlockLen))
 				{
 #ifdef DEBUG
-					printf("008\n");
+					w_system_printf("008\n");
 #endif
 
 					pTxBuf->Writing = 0;
@@ -3113,7 +3114,7 @@ void      cComTxUpdate(UBYTE ChNo)
 					{ //All Bytes has been read in the file - close handles (it is not GetFile command)
 
 #ifdef DEBUG
-						printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
+						w_system_printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 						cComCloseFileHandle(&(pTxBuf->pFile->File));
@@ -3155,7 +3156,7 @@ void      cComTxUpdate(UBYTE ChNo)
 					{
 
 #ifdef DEBUG
-						printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
+						w_system_printf("%s %lu bytes UpLoaded\n", pTxBuf->pFile->Name, (unsigned long)pTxBuf->pFile->Length);
 #endif
 					}
 				}
@@ -3245,7 +3246,7 @@ void      cComTxUpdate(UBYTE ChNo)
 					Len += NameLen;
 
 #ifdef DEBUG
-					printf("List entry no = %d; File name = %s\n", TmpN, pTxBuf->pFile->namelist[TmpN]->d_name);
+					w_system_printf("List entry no = %d; File name = %s\n", TmpN, pTxBuf->pFile->namelist[TmpN].name);
 #endif
 
 					// TODO: WARNING memory free commented
@@ -4054,7 +4055,7 @@ void      cComWriteFile(void)
 	FileType = *(DATA8*)PrimParPointer();
 
 #ifdef DEBUG
-	printf("%d [%s] ->> %d [%s]\n", FileType, (char*)pFileName, Hardware, (char*)pDeviceName);
+	w_system_printf("%d [%s] ->> %d [%s]\n", FileType, (char*)pFileName, Hardware, (char*)pDeviceName);
 #endif
 
 	switch (Hardware)
@@ -5308,17 +5309,17 @@ void      cComSet(void)
 		case HW_WIFI:
 		{
 #ifdef DEBUG
-			printf("\nSSID = %s\n", pName);
+			w_system_printf("\nSSID = %s\n", pName);
 #endif
 			if (OK == cWiFiGetIndexFromName((char*)pName, (UBYTE*)&Item))
 			{
 #ifdef DEBUG
-				printf("\nGot Index = %d\n", Item);
-				printf("\nGot Index from name = %s\n", pName);
+				w_system_printf("\nGot Index = %d\n", Item);
+				w_system_printf("\nGot Index from name = %s\n", pName);
 #endif
 				cWiFiMakePsk((char*)pName, (char*)pPin, (int)Item);
 #ifdef DEBUG
-				printf("\nPSK made\n");
+				w_system_printf("\nPSK made\n");
 #endif
 				DspStat = NOBREAK;
 			}
@@ -5392,7 +5393,7 @@ void      cComSet(void)
 				if (OK == cWiFiGetIndexFromName((char*)pName, (UBYTE*)&Item))
 				{
 #ifdef DEBUG
-					printf("cWiFiConnect => index: %d, Name: %s\n", Item, pName);
+					w_system_printf("cWiFiConnect => index: %d, Name: %s\n", Item, pName);
 #endif
 
 					if (cWiFiConnectToAp((int)Item) == BUSY) {
@@ -5403,7 +5404,7 @@ void      cComSet(void)
 					}
 
 #ifdef DEBUG
-					printf("We have tried to connect....\n");
+					w_system_printf("We have tried to connect....\n");
 #endif
 				}
 				else
@@ -5524,7 +5525,7 @@ void      cComSet(void)
 			if (Type)
 			{
 #ifdef DEBUG
-				printf("\nWPA encrypt called\n");
+				w_system_printf("\nWPA encrypt called\n");
 #endif
 
 				unsigned int LocalIndex = 0;
@@ -5534,7 +5535,7 @@ void      cComSet(void)
 			else
 			{
 #ifdef DEBUG
-				printf("\nNONE encrypt called\n");
+				w_system_printf("\nNONE encrypt called\n");
 #endif
 
 				cWiFiSetEncryptToNone(cWiFiGetApListSize());
@@ -5624,7 +5625,7 @@ void      cComRemove(void)
 		cWiFiGetIndexFromName((char*)pName, (UBYTE*)&LocalIndex);
 
 #ifdef DEBUG
-		printf("Removing Index: %d\n", LocalIndex);
+		w_system_printf("Removing Index: %d\n", LocalIndex);
 #endif
 
 		cWiFiDeleteAsKnown(LocalIndex);       // We removes the (favorit) "*"

@@ -17,6 +17,7 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "w_system.h"
 #include "c_md5.h"
 
 #include <stdio.h>
@@ -403,13 +404,13 @@ int md5_file(char* filename, int binary, unsigned char* md5_result)
 	fp = fopen(filename, OPENOPTS(binary));
 	if (fp == NULL)
 	{
-		printf("md5sum: %s: %s\n", filename, strerror(errno));
+		w_system_printf("md5sum: %s: %s\n", filename, strerror(errno));
 		return 0;
 	}
 
 	if (md5_stream(fp, md5_result))
 	{
-		printf("md5sum: %s: %s\n", filename, strerror(errno));
+		w_system_printf("md5sum: %s: %s\n", filename, strerror(errno));
 
 		if (fp != stdin)
 		{
@@ -421,7 +422,7 @@ int md5_file(char* filename, int binary, unsigned char* md5_result)
 
 	if (fp != stdin && fclose(fp) == EOF)
 	{
-		printf("md5sum: %s: %s\n", filename, strerror(errno));
+		w_system_printf("md5sum: %s: %s\n", filename, strerror(errno));
 		return 0;
 	}
 

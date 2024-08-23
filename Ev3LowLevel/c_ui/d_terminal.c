@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "w_system.h"
 #include "lms2012.h"
 
 #include <stdio.h>
@@ -70,13 +71,13 @@ RESULT dTerminalRead(UBYTE *pData)
 //        if (Tmp == 1) {
 //            Result = OK;
 //#ifdef  DEBUG_TRACE_KEY
-//            printf("[%c]",(char)*pData);
+//            w_system_printf("[%c]",(char)*pData);
 //#endif
 //        }
 //#ifdef  DEBUG_TRACE_KEY
 //        else {
 //            if (Tmp != OldTmp) {
-//                printf("{%d}",Tmp);
+//                w_system_printf("{%d}",Tmp);
 //            }
 //        }
 //        OldTmp = Tmp;

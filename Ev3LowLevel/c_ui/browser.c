@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "w_system.h"
 #include "lms2012.h"
 #include "button.h"
 #include "c_memory.h"
@@ -113,7 +114,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 			Result = OK;
 			*pType = 0;
 #ifdef DEBUG
-			printf("Browser interrupted\n");
+			w_system_printf("Browser interrupted\n");
 #endif
 		}
 	}
@@ -138,7 +139,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 		//    pAnswer[0]          =  0;
 		*pType = 0;
 #ifdef DEBUG
-		printf("Restarting browser\n");
+		w_system_printf("Restarting browser\n");
 #endif
 	}
 
@@ -210,7 +211,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 		{
 			UiInstance.UiUpdate = 0;
 #ifdef DEBUG
-			printf("Refreshing browser\n");
+			w_system_printf("Refreshing browser\n");
 #endif
 
 			if (pB->hFiles)
@@ -234,14 +235,14 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 				if (cMemoryOpenFolder(PrgId, TYPE_FOLDER, pB->TopFolder, &pB->hFolders) == OK)
 				{
 #ifdef DEBUG
-					printf("\n%d %d Opening browser in %s\n", PrgId, ObjId, (char*)pB->TopFolder);
+					w_system_printf("\n%d %d Opening browser in %s\n", PrgId, ObjId, (char*)pB->TopFolder);
 #endif
 					//******************************************************************************************************
 					if (pB->OpenFolder)
 					{
 						cMemoryGetItem(pB->PrgId, pB->hFolders, pB->OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB->SubFolder, &TmpType);
 #ifdef DEBUG
-						printf("Open  folder %3d (%s)\n", pB->OpenFolder, pB->SubFolder);
+						w_system_printf("Open  folder %3d (%s)\n", pB->OpenFolder, pB->SubFolder);
 #endif
 						if (strcmp((char*)pB->SubFolder, SDCARD_FOLDER) == 0)
 						{
@@ -275,7 +276,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 				else
 				{
 #ifdef DEBUG
-					printf("\n%d %d Open error\n", PrgId, ObjId);
+					w_system_printf("\n%d %d Open error\n", PrgId, ObjId);
 #endif
 					pB->PrgId = 0;
 					pB->ObjId = 0;
@@ -293,14 +294,14 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 				if (cMemoryOpenFolder(PrgId, FILETYPE_UNKNOWN, pB->TopFolder, &pB->hFiles) == OK)
 				{
 #ifdef DEBUG
-					printf("\n%d %d Opening browser in %s\n", PrgId, ObjId, (char*)pB->TopFolder);
+					w_system_printf("\n%d %d Opening browser in %s\n", PrgId, ObjId, (char*)pB->TopFolder);
 #endif
 
 				}
 				else
 				{
 #ifdef DEBUG
-					printf("\n%d %d Open error\n", PrgId, ObjId);
+					w_system_printf("\n%d %d Open error\n", PrgId, ObjId);
 #endif
 					pB->PrgId = 0;
 					pB->ObjId = 0;
@@ -370,7 +371,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 			{
 				// Close folder
 #ifdef DEBUG
-				printf("Close folder %3d\n", pB->OpenFolder);
+				w_system_printf("Close folder %3d\n", pB->OpenFolder);
 #endif
 
 				cMemoryCloseFolder(pB->PrgId, &pB->hFiles);
@@ -392,7 +393,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 				{
 					// Collapse sdcard
 #ifdef DEBUG
-					printf("Collapse sdcard\n");
+					w_system_printf("Collapse sdcard\n");
 #endif
 					if (pB->hFiles)
 					{
@@ -420,7 +421,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 				{
 					// Collapse usbstick
 #ifdef DEBUG
-					printf("Collapse usbstick\n");
+					w_system_printf("Collapse usbstick\n");
 #endif
 					if (pB->hFiles)
 					{
@@ -460,7 +461,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 
 
 #ifdef DEBUG
-					printf("Select file %3d\n", Item);
+					w_system_printf("Select file %3d\n", Item);
 #endif
 				}
 				else
@@ -472,14 +473,14 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 						Item = pB->OpenFolder;
 						Result = cMemoryGetItem(pB->PrgId, pB->hFolders, Item, Lng, pAnswer, pType);
 #ifdef DEBUG
-						printf("Select folder %3d\n", Item);
+						w_system_printf("Select folder %3d\n", Item);
 #endif
 					}
 					else
 					{ // Close folder
 
 #ifdef DEBUG
-						printf("Close folder %3d\n", pB->OpenFolder);
+						w_system_printf("Close folder %3d\n", pB->OpenFolder);
 #endif
 
 						cMemoryCloseFolder(pB->PrgId, &pB->hFiles);
@@ -507,7 +508,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 					snprintf((char*)pAnswer, Lng, "%s/%s", (char*)pB->FullPath, (char*)pB->Filename);
 					*pType = TYPE_BYTECODE;
 #ifdef DEBUG
-					printf("Select folder %3d\n", Item);
+					w_system_printf("Select folder %3d\n", Item);
 #endif
 				}
 				break;
@@ -518,7 +519,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 					pB->OpenFolder = pB->ItemPointer;
 					cMemoryGetItem(pB->PrgId, pB->hFolders, pB->OpenFolder, FOLDERNAME_SIZE + SUBFOLDERNAME_SIZE, pB->SubFolder, &TmpType);
 #ifdef DEBUG
-					printf("Open  folder %3d (%s)\n", pB->OpenFolder, pB->SubFolder);
+					w_system_printf("Open  folder %3d (%s)\n", pB->OpenFolder, pB->SubFolder);
 #endif
 					if (strcmp((char*)pB->SubFolder, SDCARD_FOLDER) == 0)
 					{
@@ -560,7 +561,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 					snprintf((char*)pAnswer, Lng, "%s", (char*)pB->FullPath);
 					Result = OK;
 #ifdef DEBUG
-					printf("Select folder %3d\n", Item);
+					w_system_printf("Select folder %3d\n", Item);
 #endif
 				}
 				break;
@@ -578,7 +579,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 						snprintf((char*)pAnswer, Lng, "%s", (char*)pB->FullPath);
 						Result = OK;
 #ifdef DEBUG
-						printf("Select file %3d\n", Item);
+						w_system_printf("Select file %3d\n", Item);
 #endif
 					}
 				}
@@ -665,16 +666,16 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 #ifndef DISABLE_SDCARD_SUPPORT
 			if (pB->Sdcard)
 			{
-				printf("SDCARD\n");
+				w_system_printf("SDCARD\n");
 			}
 #endif
 #ifndef DISABLE_USBSTICK_SUPPORT
 			if (pB->Usbstick)
 			{
-				printf("USBSTICK\n");
+				w_system_printf("USBSTICK\n");
 			}
 #endif
-			printf("Folders = %3d, OpenFolder = %3d, Files = %3d, ItemStart = %3d, ItemPointer = %3d, TotalItems = %3d\n\n", pB->Folders, pB->OpenFolder, pB->Files, pB->ItemStart, pB->ItemPointer, TotalItems);
+			w_system_printf("Folders = %3d, OpenFolder = %3d, Files = %3d, ItemStart = %3d, ItemPointer = %3d, TotalItems = %3d\n\n", pB->Folders, pB->OpenFolder, pB->Files, pB->ItemStart, pB->ItemPointer, TotalItems);
 #endif
 
 			// clear screen
@@ -707,11 +708,11 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 #ifdef DEBUG
 					if (pB->ItemPointer == (Tmp + pB->ItemStart))
 					{
-						printf("> ");
+						w_system_printf("> ");
 					}
 					else
 					{
-						printf("  ");
+						w_system_printf("  ");
 					}
 #endif
 
@@ -901,7 +902,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 						}
 
 #ifdef DEBUG
-						printf("%s %d %d %d\n", (char*)pB->Filename, Item, pB->OpenFolder, Priority);
+						w_system_printf("%s %d %d %d\n", (char*)pB->Filename, Item, pB->OpenFolder, Priority);
 #endif
 					}
 					else
@@ -933,7 +934,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 						}
 
 #ifdef DEBUG
-						printf(" | %s\n", (char*)pB->Filename);
+						w_system_printf(" | %s\n", (char*)pB->Filename);
 #endif
 
 					}
@@ -943,13 +944,13 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 #ifdef DEBUG
 				else
 				{
-					printf("\n");
+					w_system_printf("\n");
 				}
 #endif
 				OldPriority = Priority;
 			}
 #ifdef DEBUG
-			printf("\n");
+			w_system_printf("\n");
 #endif
 
 			cUiDrawBar(1, pB->ScrollStartX, pB->ScrollStartY, pB->ScrollWidth, pB->ScrollHeight, 0, TotalItems, pB->ItemPointer);
@@ -991,7 +992,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 				*pType = 0;
 
 #ifdef DEBUG
-				printf("%d %d Closing browser with [%s] type [%d]\n", PrgId, ObjId, (char*)pAnswer, *pType);
+				w_system_printf("%d %d Closing browser with [%s] type [%d]\n", PrgId, ObjId, (char*)pAnswer, *pType);
 #endif
 				Result = OK;
 			}
@@ -1029,7 +1030,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 		//* EXIT *****************************************************************************************************
 
 #ifdef DEBUG
-		printf("%d %d Return from browser with [%s] type [0x%02X]\n\n", PrgId, ObjId, (char*)pAnswer, *pType);
+		w_system_printf("%d %d Return from browser with [%s] type [0x%02X]\n\n", PrgId, ObjId, (char*)pAnswer, *pType);
 #endif
 	}
 

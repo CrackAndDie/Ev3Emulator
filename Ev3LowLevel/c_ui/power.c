@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "w_system.h"
 #include "lms2012.h"
 #include "c_ui.h"
 #include "power.h"
@@ -241,7 +242,7 @@ void cUiPowerCheckVoltage(void)
         if ((UiInstance.MilliSeconds - UiInstance.VoltageTimer) >= LOW_VOLTAGE_SHUTDOWN_TIME) {
             // Realy bad
 #ifdef DEBUG
-            printf("Shutting down due to low battery\n");
+            w_system_printf("Shutting down due to low battery\n");
 #endif
             UiInstance.ShutDown = 1;
         }
@@ -529,7 +530,7 @@ static float new_bat_temp(float V_bat, float I_bat)
     //Debug code:
 #ifdef __dbg1
     if (index < 500) {
-        printf("%c %f %f %f %f %f %f\n", has_passed_7v5_flag, R_1A, R_2A,
+        w_system_printf("%c %f %f %f %f %f %f\n", has_passed_7v5_flag, R_1A, R_2A,
                slope_A, intercept_b, R_bat_model - R_bat_model_old, R_bat);
     }
 #endif
@@ -589,7 +590,7 @@ static float new_bat_temp(float V_bat, float I_bat)
     //Debug code:
 #ifdef __dbg2
     if (index < 500) {
-        printf("%f %f %f %f %f <> %f %f %f %f %f\n",dT_bat_own, dT_bat_loss_to_elec,
+        w_system_printf("%f %f %f %f %f <> %f %f %f %f %f\n",dT_bat_own, dT_bat_loss_to_elec,
                dT_bat_gain_from_elec, dT_bat_loss_to_room, T_bat,
                dT_elec_own, dT_elec_loss_to_bat, dT_elec_gain_from_bat,
                dT_elec_loss_to_room, T_elec);
