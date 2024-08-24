@@ -934,7 +934,7 @@ static void cInputResetDevice(DATA8 Device, UWORD TypeIndex)
 static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 {
 	UWORD   Index;
-	char    Buf[INPUTS * 2 + 1];
+	static char    Buf[INPUTS * 2 + 1];
 	UWORD   TypeIndex;
 	DATA8   Layer;
 	DATA8   Port;
@@ -1014,7 +1014,9 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 					{
 						write(InputInstance.DcmFile, Buf, INPUTS);
 					}*/
+					w_system_printf("anime in cInputSetDeviceType with: %d \n", Buf);
 					w_input_writeData(2, Buf, INPUTS);
+					w_system_printf("anime2 in cInputSetDeviceType with: %d \n", Buf);
 
 					for (Index = 0; Index < INPUTS; Index++)
 					{ // build setup string for UART and IIC driver
@@ -4767,7 +4769,9 @@ void cInputWrite(void)
 						{
 							write(InputInstance.UartFile, Buffer, Bytes + 1);
 						}*/
+						w_system_printf("anime in cInputWrite with: %d \n", Buffer);
 						w_input_writeData(0, Buffer, Bytes + 1);
+						w_system_printf("anime2 in cInputWrite with: %d \n", Buffer);
 						DspStat = NOBREAK;
 					}
 				}
@@ -5031,7 +5035,9 @@ void cInputAutoID(void)
 
 	// Write the string to the kernel module (/dev/lms_analog)
 	// write(InputInstance.AdcFile, Buf, 6);
+	w_system_printf("anime in cInputAutoID with: %d \n", Buf);
 	w_input_writeData(1, Buf, 6);
+	w_system_printf("anime2 in cInputAutoID with: %d \n", Buf);
 }
 
 /*! \page cInput
@@ -5093,7 +5099,9 @@ void cInputSetConn(void)
 
 	// Write the string to the kernel module (/dev/lms_analog)
 	// write(InputInstance.AdcFile, Buf, 6);
+	w_system_printf("anime in cInputSetConn with: %d \n", Buf);
 	w_input_writeData(1, Buf, 6);
+	w_system_printf("anime2 in cInputSetConn with: %d \n", Buf);
 }
 
 /*! \page cInput
