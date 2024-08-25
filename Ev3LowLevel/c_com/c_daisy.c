@@ -2053,9 +2053,9 @@ RESULT cDaisyCheckForAttachedSlave(void)
 	char ProductBuffer[64];
 	RESULT Result = FAIL;
 
-	pIdVendor = fopen("/sys/bus/usb/devices/1-1/idVendor", "r");
+	pIdVendor = fopen("./sys/bus/usb/devices/1-1/idVendor", "r");
 
-	pIdProduct = fopen("/sys/bus/usb/devices/1-1/idProduct", "r");
+	pIdProduct = fopen("./sys/bus/usb/devices/1-1/idProduct", "r");
 
 	if ((pIdVendor != NULL) && (pIdProduct != NULL))
 	{

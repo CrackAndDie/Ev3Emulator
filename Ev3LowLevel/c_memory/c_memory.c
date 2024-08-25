@@ -369,7 +369,7 @@ RESULT    cMemoryInit(void)
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
-	File = fopen(PrgNameBuf, "r");
+	File = fopen(PrgNameBuf, "rb");
 	if (File >= MIN_HANDLE)
 	{
 		if (fread(MemoryInstance.Cache, sizeof(DATA8), sizeof(MemoryInstance.Cache), File) != sizeof(MemoryInstance.Cache))
@@ -449,7 +449,7 @@ RESULT    cMemoryExit(void)
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
-	File = fopen(PrgNameBuf, "w");
+	File = fopen(PrgNameBuf, "wb");
 	if (File >= MIN_HANDLE)
 	{
 		fwrite(MemoryInstance.Cache, sizeof(DATA8), sizeof(MemoryInstance.Cache), File);
@@ -1221,7 +1221,7 @@ DSPSTAT   cMemoryOpenFile(PRGID PrgId, DATA8 Access, char* pFileName, HANDLER* p
 	{
 	case OPEN_FOR_WRITE:
 	{
-		hFile = fopen(pFileName, "w");
+		hFile = fopen(pFileName, "wb");
 		// chmod(pFileName, FILEPERMISSIONS);
 #ifdef DEBUG_C_MEMORY_FILE
 		w_system_printf("Open for write  %5d %s\n", hFile, pFileName);
@@ -1231,7 +1231,7 @@ DSPSTAT   cMemoryOpenFile(PRGID PrgId, DATA8 Access, char* pFileName, HANDLER* p
 
 	case OPEN_FOR_APPEND:
 	{
-		hFile = fopen(pFileName, "a");
+		hFile = fopen(pFileName, "ab");
 		// chmod(pFileName, FILEPERMISSIONS);
 #ifdef DEBUG_C_MEMORY_FILE
 		w_system_printf("Open for append %5d %s\n", hFile, pFileName);
@@ -1241,7 +1241,7 @@ DSPSTAT   cMemoryOpenFile(PRGID PrgId, DATA8 Access, char* pFileName, HANDLER* p
 
 	case OPEN_FOR_READ:
 	{
-		hFile = fopen(pFileName, "r");
+		hFile = fopen(pFileName, "rb");
 		Result = NOBREAK;
 #ifdef DEBUG_C_MEMORY_FILE
 		w_system_printf("Open for read   %5d %s\n", hFile, pFileName);
@@ -1251,7 +1251,7 @@ DSPSTAT   cMemoryOpenFile(PRGID PrgId, DATA8 Access, char* pFileName, HANDLER* p
 
 	case OPEN_FOR_LOG:
 	{
-		hFile = fopen(pFileName, "a");
+		hFile = fopen(pFileName, "ab");
 		// chmod(pFileName, FILEPERMISSIONS);
 #ifdef DEBUG_C_MEMORY_FILE
 		w_system_printf("Open for append %5d %s\n", hFile, pFileName);
@@ -1484,7 +1484,7 @@ RESULT    cMemoryGetImage(DATA8* pFileName, DATA16 Size, UBYTE* pBmp)
 
 	if (ConstructFilename(TmpPrgId, (char*)pFileName, FilenameBuf, EXT_GRAPHICS) == OK)
 	{
-		File = fopen(FilenameBuf, "r");
+		File = fopen(FilenameBuf, "rb");
 		if (File >= MIN_HANDLE)
 		{
 			fread(pBmp, sizeof(UBYTE), (size_t)Size, File);
@@ -1889,7 +1889,7 @@ RESULT    cMemoryGetItemIcon(PRGID PrgId, HANDLER Handle, DATA16 Item, HANDLER* 
 
 			snprintf(Filename, MAX_FILENAME_SIZE, "%s/%s/%s%s", (char*)(*pMemory).Folder, (char*)(*pMemory).Entry[Item - 1], ICON_FILE_NAME, EXT_GRAPHICS);
 
-			hFile = fopen(Filename, "r");
+			hFile = fopen(Filename, "rb");
 
 			if (hFile >= MIN_HANDLE)
 			{
@@ -1944,7 +1944,7 @@ RESULT    cMemoryGetItemText(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Len
 
 	//      snprintf(Filename,MAX_FILENAME_SIZE,"%s/%s/%s%s",(char*)(*pMemory).Folder,(char*)(*pMemory).Entry[Item - 1],TEXT_FILE_NAME,EXT_TEXT);
 			snprintf(Filename, MAX_FILENAME_SIZE, "%s/%s%s", vmSETTINGS_DIR, (char*)(*pMemory).Entry[Item - 1], EXT_TEXT);
-			hFile = fopen(Filename, "r");
+			hFile = fopen(Filename, "rb");
 			if (hFile >= MIN_HANDLE)
 			{
 				Result = OK;
@@ -3060,7 +3060,7 @@ void      cMemoryFile(void)
 #ifdef DEBUG_TRACE_FILENAME
 				w_system_printf("c_memory  cMemoryFile: LOAD_IMAGE  [%s]\n", FilenameBuf);
 #endif
-				hFile = fopen(FilenameBuf, "r");
+				hFile = fopen(FilenameBuf, "rb");
 
 				if (hFile >= MIN_HANDLE)
 				{

@@ -26,6 +26,8 @@ endif ()
 # subtracting one here converts port number to enum value
 add_definitions ("-DDEBUG_UART=(${LMS2012_DEBUG_UART_PORT}-1)")
 set (LMS2012_DEBUG_OPTIONS
+    MEMORY_USAGE
+
     VM
     TRACE_TASK
     C_BT

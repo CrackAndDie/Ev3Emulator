@@ -942,7 +942,6 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 
 	if (cInputExpandDevice(Device, &Layer, &Port, &Output) == OK)
 	{ // Device within range
-
 		if (InputInstance.DeviceData[Device].Connection == CONN_NONE)
 		{
 			Type = TYPE_NONE;
@@ -952,7 +951,6 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 
 		if (Layer == 0)
 		{ // Local device
-
 			if (Output == 0)
 			{ // Input device
 
@@ -962,7 +960,6 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 
 					cInputFindDumbInputDevice(Device, Type, Mode, &TypeIndex);
 				}
-
 				// IF NOT FOUND YET - TRY TO FIND TYPE ANYWAY
 				if (TypeIndex == InputInstance.UnknownIndex)
 				{ // device not found or not "dumb" input/output device
@@ -1014,9 +1011,7 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 					{
 						write(InputInstance.DcmFile, Buf, INPUTS);
 					}*/
-					w_system_printf("anime in cInputSetDeviceType with: %d \n", Buf);
 					w_input_writeData(2, Buf, INPUTS);
-					w_system_printf("anime2 in cInputSetDeviceType with: %d \n", Buf);
 
 					for (Index = 0; Index < INPUTS; Index++)
 					{ // build setup string for UART and IIC driver
@@ -1157,10 +1152,13 @@ static void cInputCalDataInit(void)
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
-	File = fopen(PrgNameBuf, "r");
+	File = fopen(PrgNameBuf, "rb");
 	if (File >= MIN_HANDLE)
 	{
-		if (fread((UBYTE*)&InputInstance.Calib, sizeof(CALIB), sizeof(InputInstance.Calib), File) != sizeof(InputInstance.Calib))
+		size_t read_size = fread((UBYTE*)&InputInstance.Calib, 1, sizeof(InputInstance.Calib), File);
+		// TODO: WARNING removed cast to byte ptr
+		// size_t read_size = read(File, (UBYTE*)&InputInstance.Calib, sizeof(InputInstance.Calib));
+		if (read_size != sizeof(InputInstance.Calib))
 		{
 			fclose(File);
 			File = -1;
@@ -1188,10 +1186,12 @@ static void cInputCalDataExit(void)
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
-	File = fopen(PrgNameBuf, "w");
+	File = fopen(PrgNameBuf, "wb");
 	if (File >= MIN_HANDLE)
 	{
-		fwrite((UBYTE*)&InputInstance.Calib, sizeof(CALIB), sizeof(InputInstance.Calib), File);
+		fwrite((UBYTE*)&InputInstance.Calib, 1, sizeof(InputInstance.Calib), File);
+		// TODO: WARNING removed cast to byte ptr
+		// int wrote_size_d = write(File, (UBYTE*)&InputInstance.Calib, sizeof(InputInstance.Calib));
 		fclose(File);
 	}
 }

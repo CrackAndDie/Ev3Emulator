@@ -30,11 +30,11 @@
         <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
 
-	<ItemGroup>
-		<None Include="$(SolutionDir)externals\**" CopyToOutputDirectory="PreserveNewest" />
-	</ItemGroup>
-
 	<!--<ItemGroup>
 		<ProjectReference Include="..\Ev3CoreUnsafe\Ev3CoreUnsafe.csproj" />
 	</ItemGroup>-->
+
+    <ItemGroup>
+		<ProjectReference Include="..\Ev3LowLevelLib\Ev3LowLevelLib.csproj" />
+	</ItemGroup>
 </Project>

@@ -67,11 +67,11 @@ static void update_to_fb(void)
 			}
 
 			if (vmem[x / 3 + y * 60] & mask) {
-				outLcdMem[y * LCD_WIDTH + x] = 0;
+				outLcdMem[y * LCD_WIDTH + x] = 1;
 				// grx_fast_draw_pixel(x, y, GRX_COLOR_BLACK);
 			}
 			else {
-				outLcdMem[y * LCD_WIDTH + x] = 1;
+				outLcdMem[y * LCD_WIDTH + x] = 0;
 				// grx_fast_draw_pixel(x, y, GRX_COLOR_WHITE);
 			}
 		}

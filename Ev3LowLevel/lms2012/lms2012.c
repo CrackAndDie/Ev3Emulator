@@ -1374,8 +1374,9 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 		// Allocate memory for globals and objects
 
+		// TODO: WARNING: remade the size of image
 		RamSize = GetAmountOfRamForImage(pI);
-
+		RamSize = sizeof(FDESCR);
 		if (cMemoryOpen(PrgId, RamSize, (void**)&pData) == OK)
 		{ // Memory reserved
 
@@ -2118,7 +2119,7 @@ RESULT    mSchedInit(int argc)
 	// Be sure necessary files exist
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmWIFI_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, "w");
+	File = fopen(PrgNameBuf, "wb");
 	if (File >= MIN_HANDLE)
 	{
 		sprintf(ParBuf, "-\t");
@@ -2130,14 +2131,14 @@ RESULT    mSchedInit(int argc)
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmBLUETOOTH_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, "r");
+	File = fopen(PrgNameBuf, "rb");
 	if (File >= MIN_HANDLE)
 	{
 		fclose(File);
 	}
 	else
 	{
-		File = fopen(PrgNameBuf, "w");
+		File = fopen(PrgNameBuf, "wb");
 		if (File >= MIN_HANDLE)
 		{
 			sprintf(ParBuf, "-\t");
@@ -2150,7 +2151,7 @@ RESULT    mSchedInit(int argc)
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmSLEEP_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, "r");
+	File = fopen(PrgNameBuf, "rb");
 	if (File >= MIN_HANDLE)
 	{
 		ParBuf[0] = 0;
@@ -2179,7 +2180,7 @@ RESULT    mSchedInit(int argc)
 
 	if (!Ok)
 	{
-		File = fopen(PrgNameBuf, "w");
+		File = fopen(PrgNameBuf, "wb");
 		if (File >= MIN_HANDLE)
 		{
 			SetSleepMinutes((DATA8)0);
@@ -2191,7 +2192,7 @@ RESULT    mSchedInit(int argc)
 
 	Ok = 0;
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmVOLUME_FILE_NAME, vmEXT_TEXT);
-	File = fopen(PrgNameBuf, "r");
+	File = fopen(PrgNameBuf, "rb");
 	if (File >= MIN_HANDLE)
 	{
 		ParBuf[0] = 0;
@@ -2211,7 +2212,7 @@ RESULT    mSchedInit(int argc)
 
 #ifdef DISABLE_SOUND
 	SetVolumePercent((DATA8)0);
-	File = fopen(PrgNameBuf, "w");
+	File = fopen(PrgNameBuf, "wb");
 	if (File >= MIN_HANDLE)
 	{
 		sprintf(ParBuf, "%d%%\t", 0);
@@ -2222,7 +2223,7 @@ RESULT    mSchedInit(int argc)
 	if (!Ok)
 	{
 		SetVolumePercent((DATA8)DEFAULT_VOLUME);
-		File = fopen(PrgNameBuf, "w");
+		File = fopen(PrgNameBuf, "wb");
 		if (File >= MIN_HANDLE)
 		{
 			sprintf(ParBuf, "%d%%\t", DEFAULT_VOLUME);
@@ -2465,7 +2466,9 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 
 		ObjectExit();
 
+		w_system_printf("anime1 mSchedCtrl: %d \n", Result);
 		Result = ObjectExec();
+		w_system_printf("anime2 mSchedCtrl: %d \n", Result);
 
 		if (Result == STOP)
 		{
@@ -2484,7 +2487,9 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 
 	if (VMInstance.DispatchStatus != STOPBREAK)
 	{
+		w_system_printf("anime3 mSchedCtrl: %d \n", Result);
 		Result = ProgramExec();
+		w_system_printf("anime4 mSchedCtrl: %d \n", Result);
 	}
 
 	if (*pRestart == 1)
@@ -2496,6 +2501,8 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 	// TODO: sleep
 	// usleep(1);
 #endif
+
+	w_system_printf("An iteration of mSchedCtrl ran with result: %d \n", Result);
 
 	return (Result);
 }
@@ -2563,7 +2570,7 @@ int       lmsMain(int argc)
 		Restart = 0;
 		Result = mSchedInit(argc);
 
-		w_system_printf("result from schedinit: %d \n", Result);
+		w_system_printf("Result from schedinit: %d \n", Result);
 
 		if (Result == OK)
 		{

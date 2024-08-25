@@ -2,13 +2,13 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="$(SolutionDir)externals\**" CopyToOutputDirectory="PreserveNewest" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Ev3LowLevelLib\Ev3LowLevelLib.csproj" />
+    </ItemGroup>
 </Project>

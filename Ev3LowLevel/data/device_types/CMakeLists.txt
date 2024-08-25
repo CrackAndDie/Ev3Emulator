@@ -4,5 +4,6 @@ set (RCF_FILES
     typedata50.rcf
 )
 
-install (FILES ${RCF_FILES}
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/sys/settings)
+foreach (rcf ${RCF_FILES})
+    configure_file(${rcf} ${rcf} COPYONLY)
+endforeach ()

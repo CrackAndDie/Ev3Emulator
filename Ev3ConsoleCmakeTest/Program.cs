@@ -7,8 +7,8 @@ namespace Ev3ConsoleCmakeTest
 	{
 		static void Main(string[] args)
 		{
-			TestWrapper.Test();
-			// LmsWrapper.Lms();
+			// TestWrapper.Test();
+			LmsWrapper.Lms();
 			Console.WriteLine("Hello, World! ");
 		}
 	}

@@ -41,12 +41,27 @@ public class MainViewModel : ViewModelBase
 
 	private void UpdateLcd(IntPtr buf, int size)
 	{
-		var bmp = LcdWrapper.GetBitmap(buf, size);
+		//if (!_updatedLcd)
+		//	return;
 
-		Dispatcher.UIThread.Invoke(() =>
-        {
-            LcdBitmap = bmp;
-        });
+		//_updatedLcd = false;
+  //      var bmpData = LcdWrapper.GetBitmapData(buf, size);
+
+		//if (LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT != bmpData.Length)
+		//	return;
+
+        
+  //      Dispatcher.UIThread.Invoke(() =>
+  //      {
+		//	var bmp = new WriteableBitmap(new PixelSize(LcdWrapper.vmLCD_WIDTH, LcdWrapper.vmLCD_HEIGHT), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888);
+		//	using (var frameBuffer = bmp.Lock())
+		//	{
+		//		// * 4 because orig data is grayscale
+		//		Marshal.Copy(LcdWrapper.ConvertToRgba8888(bmpData), 0, frameBuffer.Address, bmpData.Length * 4);
+		//	}
+
+		//	LcdBitmap = bmp;
+		//});
     }
 
 	private void UpdateLed(int state)
@@ -73,7 +88,8 @@ public class MainViewModel : ViewModelBase
 	public ICommand StartCommand { get; set; }
 
 	[Notify]
-    public Bitmap LcdBitmap { get; set; }
+    public Bitmap LcdBitmap { get; set; } 
 
-	private Thread _ev3Thread;
+    private Thread _ev3Thread;
+	private bool _updatedLcd = true;
 }

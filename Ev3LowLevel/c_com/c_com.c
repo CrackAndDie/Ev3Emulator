@@ -335,7 +335,8 @@ RESULT    cComExit(void)
 {
 	RESULT  Result = FAIL;
 
-	fclose(ComInstance.Cmdfd);
+	// TODO: Cmdfd close commeted
+	// fclose(ComInstance.Cmdfd);
 
 	Result = OK;
 

@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ev3Core", "Ev3Core\Ev3Core.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ev3CoreUnsafe", "Ev3CoreUnsafe\Ev3CoreUnsafe.csproj", "{3AA651EB-A574-45BC-A1FC-8F976C6D8CC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ev3ConsoleCmakeTest", "Ev3ConsoleCmakeTest\Ev3ConsoleCmakeTest.csproj", "{54202DC8-15FB-4BB8-96CE-C1221B5215E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ev3ConsoleCmakeTest", "Ev3ConsoleCmakeTest\Ev3ConsoleCmakeTest.csproj", "{54202DC8-15FB-4BB8-96CE-C1221B5215E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ev3LowLevelLib", "Ev3LowLevelLib\Ev3LowLevelLib.csproj", "{4D5E105D-51B6-473C-9AFB-8E645087B3F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{54202DC8-15FB-4BB8-96CE-C1221B5215E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54202DC8-15FB-4BB8-96CE-C1221B5215E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54202DC8-15FB-4BB8-96CE-C1221B5215E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D5E105D-51B6-473C-9AFB-8E645087B3F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D5E105D-51B6-473C-9AFB-8E645087B3F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D5E105D-51B6-473C-9AFB-8E645087B3F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D5E105D-51B6-473C-9AFB-8E645087B3F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
