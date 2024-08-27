@@ -105,7 +105,7 @@
 // UI bootloader
 //*****************************************************************************
 
-UBYTE     UiImage[] =
+static UBYTE     UiImage[] =
 {
 	// IMAGE header
 	PROGRAMHeader(0,1,0),                 // VersionInfo,Objects,GlobalBytes
@@ -1358,6 +1358,7 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 	GBINDEX Index;
 	GBINDEX RamSize;
 	VARDATA* pData;
+	VARDATA* pDataInitial;
 	OBJID   ObjIndex;
 	DATA8   No;
 	DATA8   Disassemble;
@@ -1380,6 +1381,7 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 		if (cMemoryOpen(PrgId, RamSize, (void**)&pData) == OK)
 		{ // Memory reserved
 
+			pDataInitial = pData;
 		  // Save start of image
 			if (Deb == 1)
 			{
@@ -1474,9 +1476,9 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 					PRG currProg = VMInstance.Program[PrgId];
 					OBJ* currObj = currProg.pObjList[ObjIndex];
-					OBJHEAD currObjHead = currProg.pObjHead[ObjIndex];
-					IMGDATA ipIndexed = pI[(ULONG)currObjHead.OffsetToInstructions];
-					(*currObj).Ip = &ipIndexed;
+					OBJHEAD* currObjHead = &currProg.pObjHead[ObjIndex];
+					IMGDATA* ipIndexed = &pI[(ULONG)(*currObjHead).OffsetToInstructions];
+					(*currObj).Ip = ipIndexed;
 
 					(*VMInstance.Program[PrgId].pObjList[ObjIndex]).u.TriggerCount = VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
 
@@ -1509,8 +1511,9 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 					}
 
 					// Advance data pointer
-
-					pData = &pData[sizeof(OBJ) + VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes];
+					int offsettt = sizeof(OBJ) + VMInstance.Program[PrgId].pObjHead[ObjIndex].LocalBytes;
+					if ((pData + offsettt) - pDataInitial < RamSize)
+						pData = &pData[offsettt];
 				}
 
 				VMInstance.Program[PrgId].ObjectId = 1;
@@ -1626,6 +1629,8 @@ void      ProgramInit(void)
 			VMInstance.Debug = (*pProgram).Debug;
 
 		}
+		OBJ* tmpObj = VMInstance.pObjList[VMInstance.ObjectId];
+		int anime = 222;
 	}
 }
 
@@ -2063,17 +2068,19 @@ DATA8     CheckUsbstick(DATA8* pChanged, DATA32* pTotal, DATA32* pFree, DATA8 Fo
 
 RESULT    mSchedInit(int argc)
 {
-	DATA32  Result = OK;
-	PRGID   PrgId;
-	IMGHEAD* pImgHead;
-	DATA16  Loop;
-	DATA8   Ok;
-	DATA32  Total;
-	DATA32  Free;
-	float   Tmp;
-	int     File;
-	char    PrgNameBuf[vmFILENAMESIZE];
-	char    ParBuf[255];
+	static DATA32  Result = OK;
+	static PRGID   PrgId;
+	static IMGHEAD* pImgHead;
+	static DATA16  Loop;
+	static DATA8   Ok;
+	static DATA32  Total;
+	static DATA32  Free;
+	static float   Tmp;
+	static int     File;
+	static char    PrgNameBuf[vmFILENAMESIZE];
+	static char    ParBuf[255];
+
+	Result = OK;
 
 #ifndef Linux_X86
 	struct  timeval tv;
@@ -2290,6 +2297,8 @@ RESULT    mSchedInit(int argc)
 
 	ProgramReset(VMInstance.ProgramId, UiImage, (GP)VMInstance.FirstProgram, 0);
 
+	UBYTE* anime222 = UiImage;
+	OBJ* pProgram222 = VMInstance.Program[VMInstance.ProgramId].pObjList[1];
 	w_system_printf("Program reseted in schedinit \n");
 
 	return (RESULT)(Result);
@@ -2298,9 +2307,10 @@ RESULT    mSchedInit(int argc)
 
 RESULT    mSchedCtrl(UBYTE* pRestart)
 {
-	RESULT  Result = FAIL;
-	ULONG   Time;
-	IP      TmpIp;
+	static RESULT  Result = FAIL;
+	static ULONG   Time;
+	static IP      TmpIp;
+	Result = FAIL;
 #ifdef DEBUG_TRACE_VM
 	IMINDEX Index;
 #endif
@@ -2309,7 +2319,8 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 	IMINDEX Addr;
 #endif
 
-
+	UBYTE* anime222 = UiImage;
+	OBJ* pProgram222 = VMInstance.Program[VMInstance.ProgramId].pObjList[1];
 	if (VMInstance.DispatchStatus != STOPBREAK)
 	{
 		ProgramInit();

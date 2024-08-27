@@ -115,6 +115,10 @@ endforeach ()
 add_definitions("-DPROJECT=\"${PROJECT_NAME}\"" "-DVERS=${PROJECT_VERSION}")
 add_compile_options (-Wall)
 
+# add_compile_options (/MD /fsanitize=address /Zi)
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
+
 # Include sub-projects.
 add_subdirectory (low_level)
 # add_subdirectory (a_win)
