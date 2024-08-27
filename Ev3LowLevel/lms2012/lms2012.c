@@ -1376,7 +1376,7 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 		// TODO: WARNING: remade the size of image
 		RamSize = GetAmountOfRamForImage(pI);
-		RamSize = sizeof(FDESCR);
+		// RamSize = sizeof(FDESCR);
 		if (cMemoryOpen(PrgId, RamSize, (void**)&pData) == OK)
 		{ // Memory reserved
 
@@ -1472,7 +1472,11 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 					// Initialise instruction pointer, trigger counts and status
 
-					(*VMInstance.Program[PrgId].pObjList[ObjIndex]).Ip = &pI[(ULONG)VMInstance.Program[PrgId].pObjHead[ObjIndex].OffsetToInstructions];
+					PRG currProg = VMInstance.Program[PrgId];
+					OBJ* currObj = currProg.pObjList[ObjIndex];
+					OBJHEAD currObjHead = currProg.pObjHead[ObjIndex];
+					IMGDATA ipIndexed = pI[(ULONG)currObjHead.OffsetToInstructions];
+					(*currObj).Ip = &ipIndexed;
 
 					(*VMInstance.Program[PrgId].pObjList[ObjIndex]).u.TriggerCount = VMInstance.Program[PrgId].pObjHead[ObjIndex].TriggerCount;
 
@@ -1714,7 +1718,8 @@ DSPSTAT   ObjectInit(void)
 		if ((*VMInstance.pObjList[VMInstance.ObjectId]).ObjStatus == RUNNING)
 		{ // Restore object context
 
-			VMInstance.ObjectIp = (*VMInstance.pObjList[VMInstance.ObjectId]).Ip;
+			OBJ* tmpObj = VMInstance.pObjList[VMInstance.ObjectId];
+			VMInstance.ObjectIp = (*tmpObj).Ip;
 
 			VMInstance.ObjectLocal = (*VMInstance.pObjList[VMInstance.ObjectId]).pLocal;
 

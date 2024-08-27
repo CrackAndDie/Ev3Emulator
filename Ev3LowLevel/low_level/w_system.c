@@ -26,13 +26,13 @@ int w_system_printf(const char* format, ...) {
 #ifndef DEBUG_TO_FILE
 	res = vprintf(format, argptr);
 #else
-	/*int     File;
+	int     File;
 	File = fopen(__LOG_FILENAME, "a");
 	if (File >= MIN_HANDLE)
 	{
 		res = vfprintf(File, format, argptr);
 		fclose(File);
-	}*/
+	}
 #endif
 
 	va_end(argptr);
