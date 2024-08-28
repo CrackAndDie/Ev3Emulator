@@ -24,20 +24,39 @@
 			</Border>
 		</StackPanel>
 
-		<!--<ListBox Grid.Column="1"
-				 Background="Black"
-				 ItemsSource="{Binding OutputData}"
-				 AutoScrollToSelectedItem="True"
-				 SelectedItem="{Binding LastData}">
-			<ListBox.ItemTemplate>
-				<DataTemplate>
-					<TextBox Text="{Binding Text}"
-							 Background="Transparent"
-							 Foreground="{Binding Color}">
-						
-					</TextBox>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>-->
+		<Grid Grid.Column="1"
+			  ColumnDefinitions="*,*,*"
+			  RowDefinitions="*,*,*,*">
+			<Button x:Name="buttonBack"
+					Grid.Column="0"
+					Grid.Row="0"
+					Width="40"
+					Height="40"/>
+			<Button x:Name="buttonUp"
+					Grid.Column="1"
+					Grid.Row="1"
+					Width="40"
+					Height="40"/>
+			<Button x:Name="buttonRight"
+					Grid.Column="2"
+					Grid.Row="2"
+					Width="40"
+					Height="40"/>
+			<Button x:Name="buttonDown"
+					Grid.Column="1"
+					Grid.Row="3"
+					Width="40"
+					Height="40"/>
+			<Button x:Name="buttonLeft"
+					Grid.Column="0"
+					Grid.Row="2"
+					Width="40"
+					Height="40"/>
+			<Button x:Name="buttonCenter"
+					Grid.Column="1"
+					Grid.Row="2"
+					Width="40"
+					Height="40"/>
+		</Grid>
 	</Grid>
 </UserControl>

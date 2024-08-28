@@ -1755,7 +1755,7 @@ RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 		{
 			*pEntry = w_filesystem_readDir((*pMemory).pDir->name, (*pMemory).pDir->searchOffset);
 			(*pMemory).pDir->searchOffset++;
-			if (pEntry != NULL)
+			if (pEntry != NULL && (*pEntry).result == OK)
 			{ // More entries
 
 				if ((*pMemory).Entries < DIR_DEEPT)

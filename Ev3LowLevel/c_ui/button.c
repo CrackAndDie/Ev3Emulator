@@ -143,7 +143,7 @@ void cUiUpdateButtons(DATA16 Time)
 	// TODO: removed some unix buttons shite
 
 	// if we have real hardware buttons, check them
-	if (UiInstance.ButtonFile >= MIN_HANDLE) {
+	// if (UiInstance.ButtonFile >= MIN_HANDLE) {
 
 		unsigned char* states = w_buttons_getPressed();
 		for (Button = 0; Button < BUTTONS; Button++) {
@@ -168,8 +168,8 @@ void cUiUpdateButtons(DATA16 Time)
 				}
 			}
 		}
-		free(states);
-	}
+		// free(states);
+	// }
 
 	for (Button = 0; Button < BUTTONS; Button++) {
 		// Check virtual buttons (hardware, direct command, PC)

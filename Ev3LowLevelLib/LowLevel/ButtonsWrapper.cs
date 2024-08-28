@@ -9,9 +9,23 @@ namespace Ev3Emulator.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate IntPtr reg_w_button_getPressedAction();
 
-		public static void Init(reg_w_button_getPressedAction getPressed)
+		// up enter down right left back
+		public static void Init(Func<byte[]> getPressed)
 		{
-			reg_w_button_getPressed(getPressed);
+			_getPressed = getPressed;
+			_buttonsPointer = Marshal.AllocHGlobal(6); // for 6 buttons
+
+			reg_w_button_getPressed(GetPressed);
 		}
+
+		private static IntPtr GetPressed()
+		{
+			var bytes = _getPressed.Invoke();
+			Marshal.Copy(bytes, 0, _buttonsPointer, bytes.Length);
+			return _buttonsPointer;
+		}
+
+		private static Func<byte[]> _getPressed;
+		private static IntPtr _buttonsPointer;
 	}
 }

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Ev3Emulator.Interfaces;
 using Ev3Emulator.LowLevel;
 using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
@@ -24,10 +25,10 @@ public class MainViewModel : ViewModelBase
 
 	public override void OnViewReady()
 	{
-		base.OnViewReady();
-
 		if (Design.IsDesignMode)
 			return;
+
+		base.OnViewReady();
 
 		// inits
 		FilesystemWrapper.Init();
@@ -39,18 +40,8 @@ public class MainViewModel : ViewModelBase
 		ButtonsWrapper.Init(UpdateButtons);
 	}
 
-	private void UpdateLcd(IntPtr buf, int size)
+	private void UpdateLcd(byte[] bmpData)
 	{
-		if (!_updatedLcd)
-			return;
-
-		_updatedLcd = false;
-		var bmpData = LcdWrapper.GetBitmapData(buf, size);
-
-		if (LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT != bmpData.Length)
-			return;
-
-
 		Dispatcher.UIThread.Invoke(() =>
 		{
 			var bmp = new WriteableBitmap(new PixelSize(LcdWrapper.vmLCD_WIDTH, LcdWrapper.vmLCD_HEIGHT), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888);
@@ -59,9 +50,7 @@ public class MainViewModel : ViewModelBase
 				// * 4 because orig data is grayscale
 				Marshal.Copy(LcdWrapper.ConvertToRgba8888(bmpData), 0, frameBuffer.Address, bmpData.Length * 4);
 			}
-
 			LcdBitmap = bmp;
-			_updatedLcd = true;
 		});
 	}
 
@@ -70,17 +59,31 @@ public class MainViewModel : ViewModelBase
 		// TODO: 
 	}
 
-	private IntPtr UpdateButtons()
+	private byte[] UpdateButtons()
 	{
-		// TODO:
-		var bytes = new byte[] { 0, 0, 0, 0, 0, 0 };
-		IntPtr p = Marshal.AllocHGlobal(bytes.Length);
-		Marshal.Copy(bytes, 0, p, bytes.Length);
-		return p;
+		try
+		{
+			// TODO: think about it. could we get not prev values but wait or smth
+			Dispatcher.UIThread.Invoke(() =>
+			{
+				lock (_buttonsLock)
+					_lastButtons = GetView<IMainView>()?.GetButtons();
+			});
+
+			lock (_buttonsLock)
+				return _lastButtons ?? _defaultButtons;
+		}
+		catch (Exception ex)
+		{
+			return _defaultButtons;
+		}
 	}
 
 	private void OnStartCommand()
 	{
+		if (Design.IsDesignMode)
+			return;
+
 		_ev3Thread = new Thread(SystemWrapper.MainLms);
 		_ev3Thread.Start();
 	}
@@ -92,5 +95,8 @@ public class MainViewModel : ViewModelBase
     public Bitmap LcdBitmap { get; set; } 
 
     private Thread _ev3Thread;
-	private bool _updatedLcd = true;
+
+	private object _buttonsLock = new object();
+	private byte[] _lastButtons = _defaultButtons;
+	private static readonly byte[] _defaultButtons = { 0, 0, 0, 0, 0, 0 };
 }

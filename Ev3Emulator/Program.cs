@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Dialogs;
 using Avalonia.ReactiveUI;
 using System;
 
@@ -18,9 +19,14 @@ namespace Ev3Emulator
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .WithInterFont()
-                .LogToTrace()
-                .UseReactiveUI();
-    }
+				.UsePlatformDetect()
+                .With(new X11PlatformOptions
+                {
+                    EnableMultiTouch = true,
+                    UseDBusMenu = true
+                })
+                .With(new Win32PlatformOptions())
+                .UseSkia()
+                .UseManagedSystemDialogs();
+	}
 }

@@ -2,5 +2,6 @@
 {
     public interface IMainView
     {
+		byte[] GetButtons();
     }
 }

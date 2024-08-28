@@ -17,10 +17,28 @@ namespace Ev3Emulator.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_lcd_updateLedAction(int state);
 
-		public static void Init(reg_w_lcd_updateLcdAction updateLcd, reg_w_lcd_updateLedAction updateLed)
+		public static void Init(Action<byte[]> updateLcd, Action<int> updateLed)
 		{
-			reg_w_lcd_updateLcd(updateLcd);
-			reg_w_lcd_updateLed(updateLed);
+			_updateLcd = updateLcd;
+			_updateLed = updateLed;
+
+			reg_w_lcd_updateLcd(UpdateLcd);
+			reg_w_lcd_updateLed(UpdateLed);
+		}
+
+		private static void UpdateLcd(IntPtr buff, int size)
+		{
+			var bmpData = LcdWrapper.GetBitmapData(buff, size);
+
+			if (LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT != bmpData.Length)
+				return;
+
+			_updateLcd?.Invoke(bmpData);
+		}
+
+		private static void UpdateLed(int state)
+		{
+			_updateLed?.Invoke(state);
 		}
 
 		public static byte[] GetBitmapData(IntPtr buf, int size)
@@ -60,5 +78,8 @@ namespace Ev3Emulator.LowLevel
 				return (255, 136, 221, 178);
 			}
 		}
+
+		private static Action<byte[]> _updateLcd;
+		private static Action<int> _updateLed;
 	}
 }
