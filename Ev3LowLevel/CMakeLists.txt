@@ -108,7 +108,7 @@ foreach (OPTION ${LMS2012_DISABLE_OPTIONS})
     if (NOT LMS2012_ENABLE_${OPTION})
         add_definitions ("-DDISABLE_${OPTION}")
     endif ()
-endforeach ()
+endforeach () 
 
 # global compiler options
 

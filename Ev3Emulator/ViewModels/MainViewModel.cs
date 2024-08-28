@@ -48,7 +48,7 @@ public class MainViewModel : ViewModelBase
 			using (var frameBuffer = bmp.Lock())
 			{
 				// * 4 because orig data is grayscale
-				Marshal.Copy(LcdWrapper.ConvertToRgba8888(bmpData), 0, frameBuffer.Address, bmpData.Length * 4);
+				Marshal.Copy(bmpData, 0, frameBuffer.Address, bmpData.Length);
 			}
 			LcdBitmap = bmp;
 		});

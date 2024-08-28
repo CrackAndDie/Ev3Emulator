@@ -33,7 +33,7 @@ namespace Ev3Emulator.LowLevel
 			if (LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT != bmpData.Length)
 				return;
 
-			_updateLcd?.Invoke(bmpData);
+			_updateLcd?.Invoke(LcdWrapper.ConvertToRgba8888(bmpData));
 		}
 
 		private static void UpdateLed(int state)
