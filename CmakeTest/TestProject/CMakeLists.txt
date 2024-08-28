@@ -4,6 +4,7 @@
 
 # Add source to this project's executable.
 add_library (TestProject SHARED "TestProject.c" "TestProject.h" "Another.h" "Another.c")
+add_definitions(/fsanitize=address /Zi)
 
 set(CMAKE_CXX_STANDARD 11)
 

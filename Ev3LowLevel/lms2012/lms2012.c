@@ -1341,6 +1341,11 @@ UWORD     GetChecksum(IP pI)
 }
 #endif
 
+static GBINDEX MemSizeAligner(GBINDEX sz) {
+	GBINDEX tail = sz % 4;
+	return sz + (4 - tail);
+}
+
 
 /*! \brief    Initialise program for execution
  *
@@ -1377,6 +1382,10 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 		// TODO: WARNING: remade the size of image
 		RamSize = GetAmountOfRamForImage(pI);
+		if (RamSize == 21) {
+			RamSize = 64;
+		}
+		// RamSize = MemSizeAligner(RamSize);
 		// RamSize = sizeof(FDESCR);
 		if (cMemoryOpen(PrgId, RamSize, (void**)&pData) == OK)
 		{ // Memory reserved

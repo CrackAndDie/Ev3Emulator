@@ -3079,7 +3079,8 @@ void      cMemoryFile(void)
 
 					fclose(hFile);
 				}
-				*(DATA32*)PrimParPointer() = ISize;
+				void* tmpPPP = PrimParPointer();
+				*(DATA16*)tmpPPP = (DATA16)ISize;
 				*(DATA32*)PrimParPointer() = ImagePointer;
 			}
 			else
