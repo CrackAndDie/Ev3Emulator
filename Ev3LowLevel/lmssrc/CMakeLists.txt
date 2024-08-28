@@ -55,39 +55,7 @@ macro (add_lms_app TARGET)
         list (APPEND LMSSRC_RSF_LIST ${rsf})
     endforeach ()
 
-    if (LMSSRC_ARCHIVE)
-        set (raf ${CMAKE_CURRENT_BINARY_DIR}/${LMSSRC_ARCHIVE}.raf)
-        foreach (file ${LMSSRC_RBF_LIST} ${LMSSRC_RGF_LIST} ${LMSSRC_RSF_LIST})
-            file (RELATIVE_PATH file ${CMAKE_CURRENT_BINARY_DIR} ${file})
-            list (APPEND raf_files ${file})
-        endforeach ()
 
-        add_custom_command (OUTPUT ${raf}
-            COMMAND tar
-                --transform=s,^,${LMSSRC_ARCHIVE}/,
-                -czf ${raf}
-                ${raf_files}
-            WORKING_DIRECTORY
-                ${CMAKE_CURRENT_BINARY_DIR}
-            DEPENDS
-                ${LMSSRC_RBF_LIST}
-                ${LMSSRC_RGF_LIST}
-                ${LMSSRC_RSF_LIST}
-        )
-
-        add_custom_target (${TARGET} ALL DEPENDS ${raf})
-        install (FILES ${raf}
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/${LMSSRC_INSTALL_PATH})
-    else ()
-        add_custom_target (${TARGET} ALL
-            DEPENDS
-                ${LMSSRC_RBF_LIST}
-                ${LMSSRC_RGF_LIST}
-                ${LMSSRC_RSF_LIST}
-        )
-        install (FILES ${LMSSRC_RBF_LIST} ${LMSSRC_RGF_LIST} ${LMSSRC_RSF_LIST}
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/${LMSSRC_INSTALL_PATH})
-    endif ()
 
 endmacro ()
 
@@ -95,8 +63,8 @@ add_subdirectory (Bluetooth)
 add_subdirectory ("Brick Datalog")
 add_subdirectory ("Brick Info")
 add_subdirectory ("Brick Name")
-add_subdirectory ("Brick Program")
-add_subdirectory (Debug)
+# add_subdirectory ("Brick Program")
+# add_subdirectory (Debug)
 add_subdirectory (Demo)
 add_subdirectory ("IR Control")
 add_subdirectory ("Motor Control")
@@ -108,3 +76,9 @@ add_subdirectory (Volume)
 add_subdirectory (WiFi)
 add_subdirectory (tst)
 add_subdirectory (ui)
+
+
+# custom shite
+add_subdirectory (prjs)
+add_subdirectory (apps)
+add_subdirectory (tools)

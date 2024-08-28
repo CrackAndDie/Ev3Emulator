@@ -262,10 +262,11 @@ typedef enum {
 //***********************************************************************************************************************
 
 #define   TYPEDATE_FILE_NAME    "typedata"            //!< TypeData filename
+#define   TYPEDATE_FILE_NAME_WITH_PATH    "device_types/typedata"            //!< TypeData filename
 #define   ICON_FILE_NAME        "icon"                //!< Icon image filename
 #define   TEXT_FILE_NAME        "text"                //!< Text filename
 
-#define   DEMO_FILE_NAME        "./lms_os/data/brick_program/Demo.rpf"
+#define   DEMO_FILE_NAME        "./lms_os/prjs/BrkProg_SAVE/Demo.rpf"
 
 // Memory
 
@@ -297,7 +298,7 @@ typedef enum {
 #define   USBSTICK_MOUNT        "./mount_usbstick"
 #define   USBSTICK_UNMOUNT      "./unmount_usbstick"
 
-#define   DEFAULT_FOLDER        "./lms_os/lmssrc/ui"                  //!< Folder containing the first small programs
+#define   DEFAULT_FOLDER        "./lms_os/ui"                  //!< Folder containing the first small programs
 #define   DEFAULT_UI            "ui"                  //!< Default user interface
 
 #define   DEFAULT_VOLUME        vmDEFAULT_VOLUME

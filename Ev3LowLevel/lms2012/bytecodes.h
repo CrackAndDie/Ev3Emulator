@@ -119,6 +119,7 @@
 #define vmPULSE_KEY (4)
 #define vmSDCARD_FOLDER "./lms_os/prjs/SD_Card"  // Folder for SD card mount
 #define vmSETTINGS_DIR "./lms_os/sys/settings"  // Folder for non volatile settings
+#define vmCUSTOM_DATA_DIR "./lms_os/data"  // Folder for non volatile settings
 #define vmSLEEP_FILE_NAME "Sleep"  // File used in "Sleep" app to save status
 #define vmTMP_DIR "./lms_os/tmp"  // Temporary folder
 #define vmTOOLS_DIR "./lms_os/tools"  // Tools folder

@@ -660,7 +660,7 @@ static void cInputTypeDataInit(void)
 	}
 
 	//  w_system_printf("Search start\n");
-	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, TYPEDATE_FILE_NAME, EXT_CONFIG);
+	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmCUSTOM_DATA_DIR, TYPEDATE_FILE_NAME_WITH_PATH, EXT_CONFIG);
 
 	if (cInputInsertTypeDataFile(PrgNameBuf) == OK)
 	{
@@ -669,7 +669,7 @@ static void cInputTypeDataInit(void)
 
 	for (Index = TYPE_THIRD_PARTY_START; Index <= TYPE_THIRD_PARTY_END; Index++)
 	{
-		snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%02d%s", vmSETTINGS_DIR, TYPEDATE_FILE_NAME, Index, EXT_CONFIG);
+		snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%02d%s", vmCUSTOM_DATA_DIR, TYPEDATE_FILE_NAME_WITH_PATH, Index, EXT_CONFIG);
 		if (cInputInsertTypeDataFile(PrgNameBuf) == OK)
 		{
 			TypeDataFound = 1;

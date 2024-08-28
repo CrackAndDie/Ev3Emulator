@@ -1605,6 +1605,8 @@ void      ProgramEnd(PRGID PrgId)
 		if (PrgId == VMInstance.ProgramId)
 		{
 			SetDispatchStatus(PRGBREAK);
+
+			VMInstance.pObjList = NULL;
 		}
 
 		VMInstance.Program[PrgId].Result = OK;
@@ -1810,24 +1812,29 @@ RESULT    ObjectExec(void)
 	}
 	else
 	{
-		do
-		{
-			// Next object
-			if (++VMInstance.ObjectId > VMInstance.Objects)
+		if (VMInstance.pObjList == NULL) {
+			Result = STOP;
+		}
+		else {
+			do
 			{
-				// wrap around
+				// Next object
+				if (++VMInstance.ObjectId > VMInstance.Objects)
+				{
+					// wrap around
 
-				VMInstance.ObjectId = 1;
-			}
+					VMInstance.ObjectId = 1;
+				}
 
-			if (++TmpId > VMInstance.Objects)
-			{
-				// no programs running
+				if (++TmpId > VMInstance.Objects)
+				{
+					// no programs running
 
-				Result = STOP;
-			}
+					Result = STOP;
+				}
 
-		} while ((Result == OK) && ((*VMInstance.pObjList[VMInstance.ObjectId]).ObjStatus != RUNNING));
+			} while ((Result == OK) && ((*VMInstance.pObjList[VMInstance.ObjectId]).ObjStatus != RUNNING));
+		}
 	}
 
 	return (Result);
@@ -2481,11 +2488,12 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 			{
 				LogErrorNumber(VM_PROGRAM_INSTRUCTION_BREAK);
 			}
-			TmpIp = VMInstance.ObjectIp - 1;
+			// TODO: deallocated mem was used here
+			/*TmpIp = VMInstance.ObjectIp - 1;
 			snprintf(VMInstance.PrintBuffer, PRINTBUFFERSIZE, "\n%4u [%2d] ", (UWORD)(((ULONG)TmpIp) - (ULONG)VMInstance.pImage), VMInstance.ObjectId);
 			VmPrint(VMInstance.PrintBuffer);
 			snprintf(VMInstance.PrintBuffer, PRINTBUFFERSIZE, "VM       ERROR    [0x%02X]\n", *TmpIp);
-			VmPrint(VMInstance.PrintBuffer);
+			VmPrint(VMInstance.PrintBuffer);*/
 			VMInstance.Program[VMInstance.ProgramId].Result = FAIL;
 		}
 
