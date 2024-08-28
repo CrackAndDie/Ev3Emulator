@@ -298,7 +298,7 @@ typedef enum {
 #define   USBSTICK_MOUNT        "./mount_usbstick"
 #define   USBSTICK_UNMOUNT      "./unmount_usbstick"
 
-#define   DEFAULT_FOLDER        "./lms_os/ui"                  //!< Folder containing the first small programs
+#define   DEFAULT_FOLDER        "./lms_os/sys/ui"                  //!< Folder containing the first small programs
 #define   DEFAULT_UI            "ui"                  //!< Default user interface
 
 #define   DEFAULT_VOLUME        vmDEFAULT_VOLUME
