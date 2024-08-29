@@ -1,8 +1,8 @@
-# Install script for directory: D:/Scripts/Ev3Emulator/Ev3LowLevel/data
+# Install script for directory: D:/kakish/Ev3Emulator/Ev3LowLevel/data
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "D:/Scripts/Ev3Emulator/Ev3LowLevel/out/install/x86-debug")
+  set(CMAKE_INSTALL_PREFIX "D:/kakish/Ev3Emulator/Ev3LowLevel/out/install/x86-debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,8 +34,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("D:/Scripts/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/data/brick_program/cmake_install.cmake")
-  include("D:/Scripts/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/data/device_types/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/data/brick_program/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/data/device_types/cmake_install.cmake")
 
 endif()
 

@@ -34,8 +34,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/apps/Brick Datalog/cmake_install.cmake")
   include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/apps/Brick Program/cmake_install.cmake")
-  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/apps/Debug/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/apps/IR Control/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/apps/Motor Control/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/apps/Port View/cmake_install.cmake")
 
 endif()
 

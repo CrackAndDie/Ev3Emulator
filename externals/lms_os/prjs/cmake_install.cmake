@@ -38,6 +38,9 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/prjs/BrkProg_SAVE/cmake_install.cmake")
   include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/prjs/SD_Card/cmake_install.cmake")
   include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/prjs/USB_Stick/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/prjs/Demo/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/prjs/SelfTest/cmake_install.cmake")
+  include("D:/kakish/Ev3Emulator/Ev3LowLevel/out/build/x86-debug/lmssrc/prjs/TEST/cmake_install.cmake")
 
 endif()
 

@@ -1,4 +1,4 @@
-# Install script for directory: D:/kakish/Ev3Emulator/Ev3LowLevel/data/brick_program
+# Install script for directory: D:/kakish/Ev3Emulator/Ev3LowLevel/lmssrc/tools/Volume
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

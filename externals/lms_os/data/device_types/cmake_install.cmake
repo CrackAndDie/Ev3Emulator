@@ -1,8 +1,8 @@
-# Install script for directory: D:/Scripts/Ev3Emulator/Ev3LowLevel/data/device_types
+# Install script for directory: D:/kakish/Ev3Emulator/Ev3LowLevel/data/device_types
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "D:/Scripts/Ev3Emulator/Ev3LowLevel/out/install/x86-debug")
+  set(CMAKE_INSTALL_PREFIX "D:/kakish/Ev3Emulator/Ev3LowLevel/out/install/x86-debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

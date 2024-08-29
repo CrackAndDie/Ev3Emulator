@@ -33,7 +33,9 @@ bld/
 [Ll]ogs/
 
 #------------ev3 low level shite
-!/Ev3LowLevel/lmssrc/Debug
+!/Ev3LowLevel/lmssrc/tools/Debug
+!/Ev3LowLevel/lmssrc/apps/Debug
+!/externals/lms_os/tools/Debug
 
 #------------
 
