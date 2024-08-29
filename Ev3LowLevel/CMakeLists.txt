@@ -118,7 +118,7 @@ add_definitions("-DPROJECT=\"${PROJECT_NAME}\"" "-DVERS=${PROJECT_VERSION}")
 add_compile_options (-Wall)
 
 # uncomment to enable bound checks
-# add_definitions(/fsanitize=address)
+add_definitions(/fsanitize=address)
 
 # Include sub-projects.
 add_subdirectory (low_level)

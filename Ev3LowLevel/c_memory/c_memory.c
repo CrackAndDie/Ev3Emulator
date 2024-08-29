@@ -305,7 +305,7 @@ DSPSTAT   cMemoryFreeHandle(PRGID PrgId, HANDLER Handle)
 			}
 
 #ifdef DEBUG
-			w_system_printf("  cMemoryFreeHandle    %-8p S=%8lu H=%1u\n", MemoryInstance.pPoolList[PrgId][Handle].pPool, (long unsigned int)MemoryInstance.pPoolList[PrgId][Handle].Size, Handle);
+			w_system_printf("  cMemoryFreeHandle    %-8p S=%8lu P=%1u H=%1u\n", MemoryInstance.pPoolList[PrgId][Handle].pPool, (long unsigned int)MemoryInstance.pPoolList[PrgId][Handle].Size, (unsigned int)PrgId, Handle);
 #endif
 			cMemoryFree(MemoryInstance.pPoolList[PrgId][Handle].pPool);
 			MemoryInstance.pPoolList[PrgId][Handle].pPool = NULL;
@@ -2239,19 +2239,19 @@ void      cMemoryCloseFolder(PRGID PrgId, HANDLER* pHandle)
  *
  *\n
  *  - CMD = GET_FOLDERS
- *    -  \param  (DATA8)    NAME    - First character in folder name (ex "../prjs/")\n
+ *    -  \param  (DATA8)    NAME    - First character in folder name (ex "./lms_os/prjs/")\n
  *    -  \return (DATA8)    ITEMS   - No of sub folders\n
  *
  *\n
  *  - CMD = GET_SUBFOLDER_NAME
- *    -  \param  (DATA8)    NAME    - First character in folder name (ex "../prjs/")\n
+ *    -  \param  (DATA8)    NAME    - First character in folder name (ex "./lms_os/prjs/")\n
  *    -  \param  (DATA8)    ITEM    - Sub folder index [1..ITEMS]\n
  *    -  \param  (DATA8)    LENGTH  - Maximal string length\n
  *    -  \return (DATA8)    STRING  - First character in character string\n
  *
  *\n
  *  - CMD = DEL_SUBFOLDER
- *    -  \param  (DATA8)    NAME    - First character in folder name (ex "../prjs/")\n
+ *    -  \param  (DATA8)    NAME    - First character in folder name (ex "./lms_os/prjs/")\n
  *    -  \param  (DATA8)    ITEM    - Sub folder index [1..ITEMS]\n
  *
  *\n
@@ -2266,14 +2266,14 @@ void      cMemoryCloseFolder(PRGID PrgId, HANDLER* pHandle)
  *
  *\n
  *  - CMD = GET_IMAGE
- *    -  \param  (DATA8)    NAME    - First character in folder name (ex "../prjs/")\n
+ *    -  \param  (DATA8)    NAME    - First character in folder name (ex "./lms_os/prjs/")\n
  *    -  \param  (DATA16)   PRGID   - Program id (see \ref prgid)\n
  *    -  \param  (DATA8)    ITEM    - Sub folder index [1..ITEMS]\n
  *    -  \return (DATA32)   *IP     - Address of image\n
  *
  *\n
  *  - CMD = GET_ITEM
- *    -  \param  (DATA8)    NAME    - First character in folder name (ex "../prjs/")\n
+ *    -  \param  (DATA8)    NAME    - First character in folder name (ex "./lms_os/prjs/")\n
  *    -  \param  (DATA8)    STRING  - First character in item name string\n
  *    -  \return (DATA8)    ITEM    - Sub folder index [1..ITEMS]\n
  *
@@ -4417,42 +4417,42 @@ void      cMemoryUsage(void)
  *\n
  *  - CMD = SPLIT
  *\n  Split filename into Folder, name, extension \n
- *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "../folder/subfolder/name.ext"\n
+ *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "./lms_os/folder/subfolder/name.ext"\n
  *    -  \param  (DATA8)    LENGTH      - Maximal length for each of the below parameters\n
- *    -  \return (DATA8)    FOLDER      - First character in folder name (character string) "../folder/subfolder"\n
+ *    -  \return (DATA8)    FOLDER      - First character in folder name (character string) "./lms_os/folder/subfolder"\n
  *    -  \return (DATA8)    NAME        - First character in name (character string) "name"\n
  *    -  \return (DATA8)    EXT         - First character in extension (character string) ".ext"\n
  *
  *\n
  *  - CMD = MERGE
  *\n  Merge Folder, name, extension into filename\n
- *    -  \param  (DATA8)    FOLDER      - First character in folder name (character string) "../folder/subfolder"\n
+ *    -  \param  (DATA8)    FOLDER      - First character in folder name (character string) "./lms_os/folder/subfolder"\n
  *    -  \param  (DATA8)    NAME        - First character in name (character string) "name"\n
  *    -  \param  (DATA8)    EXT         - First character in extension (character string) ".ext"\n
  *    -  \param  (DATA8)    LENGTH      - Maximal length for the below parameter\n
- *    -  \return (DATA8)    FILENAME    - First character in file name (character string) "../folder/subfolder/name.ext"\n
+ *    -  \return (DATA8)    FILENAME    - First character in file name (character string) "./lms_os/folder/subfolder/name.ext"\n
  *
  *\n
  *  - CMD = CHECK
  *\n  Check filename\n
- *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "../folder/subfolder/name.ext"\n
+ *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "./lms_os/folder/subfolder/name.ext"\n
  *    -  \return (DATA8)    OK          - Filename ok (0 = FAIL, 1 = OK)\n
  *
  *\n
  *  - CMD = PACK
  *\n  Pack file or folder into "raf" container\n
- *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "../folder/subfolder/name.ext"\n
+ *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "./lms_os/folder/subfolder/name.ext"\n
  *
  *\n
  *  - CMD = UNPACK
  *\n  Unpack "raf" container\n
- *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "../folder/subfolder/name"\n
+ *    -  \param  (DATA8)    FILENAME    - First character in file name (character string) "./lms_os/folder/subfolder/name"\n
  *
  *\n
  *  - CMD = GET_FOLDERNAME
  *\n  Get current folder name\n
  *    -  \param  (DATA8)    LENGTH      - Maximal length for the below parameter\n
- *    -  \return (DATA8)    FOLDERNAME  - First character in folder name (character string) "../folder/subfolder"\n
+ *    -  \return (DATA8)    FOLDERNAME  - First character in folder name (character string) "./lms_os/folder/subfolder"\n
  *
  *\n
  *

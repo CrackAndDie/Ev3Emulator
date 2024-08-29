@@ -1662,6 +1662,9 @@ void      cUiRead(void)
 	case scGET_SHUTDOWN:
 	{
 		*(DATA8*)PrimParPointer() = UiInstance.ShutDown;
+		if (UiInstance.ShutDown) {
+			w_system_printf("Shutdown in scGET_SHUTDOWN in c_ui was 1 \n");
+		}
 		UiInstance.ShutDown = 0;
 	}
 	break;

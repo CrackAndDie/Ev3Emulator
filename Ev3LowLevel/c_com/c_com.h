@@ -233,7 +233,7 @@ Byte 5:     System Command. see following defines */
   File download:
   ---------------
 
-	Download file "../apps/tst/tst.rbf"
+	Download file "./lms_os/apps/tst/tst.rbf"
 
 	  BEGIN_DOWNLOAD:
 
@@ -824,7 +824,7 @@ opINFO GET_ID Example \verbatim
 <hr size="1"/>
 opPROGRAM_START Example \verbatim
 
-  Run app byte code file (../apps/tst/tst.rbf) in user slot (1):
+  Run app byte code file (./lms_os/apps/tst/tst.rbf) in user slot (1):
 
 
 	opFILE,LC0(LOAD_IMAGE),LC0(USER_SLOT),LCS,'.','.','/','a','p','p','s','/','t','s','t','/','t','s','t','.','r','b','f',0,LV0(0),LV0(4),

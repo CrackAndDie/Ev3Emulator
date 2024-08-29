@@ -668,12 +668,12 @@ void cUiPowerInitTemperature(void)
     char    *Str;
     LFILE   *pFile;
 
-    mkdir("../prjs/TempTest",DIRPERMISSIONS);
-    chmod("../prjs/TempTest",DIRPERMISSIONS);
+    mkdir("./lms_os/prjs/TempTest",DIRPERMISSIONS);
+    chmod("./lms_os/prjs/TempTest",DIRPERMISSIONS);
     sync();
 
     Tmp  =  0;
-    pFile = fopen ("../prjs/Const/TempConst.rtf","r");
+    pFile = fopen ("./lms_os/prjs/Const/TempConst.rtf","r");
     if (pFile) {
         do {
             Str           =  fgets(Buffer,250,pFile);
@@ -703,8 +703,8 @@ void cUiPowerInitTemperature(void)
         K_elec_to_room        =  Const[10];
     }
 
-    TempFile  =  open("../prjs/TempTest/TempFile.rtf",O_CREAT | O_WRONLY | O_APPEND | O_SYNC,FILEPERMISSIONS);
-    chmod("../prjs/TempTest/TempFile.rtf",FILEPERMISSIONS);
+    TempFile  =  open("./lms_os/prjs/TempTest/TempFile.rtf",O_CREAT | O_WRONLY | O_APPEND | O_SYNC,FILEPERMISSIONS);
+    chmod("./lms_os/prjs/TempTest/TempFile.rtf",FILEPERMISSIONS);
     if (TempFile >= MIN_HANDLE) {
         if (Tmp) {
             BufferSize  =  snprintf(Buffer,250,"* TempConst.rtf ************************\n");

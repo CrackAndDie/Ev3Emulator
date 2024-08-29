@@ -1140,7 +1140,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 					if (Folder[Tmp] == '/')
 					{
 						Folder[Tmp + 1] = 0;
-						if ((strcmp("~/", Folder) != 0) && (strcmp("../", Folder) != 0))
+						if ((strcmp("~/", Folder) != 0) && (strcmp("./lms_os/", Folder) != 0))
 						{
 							if (w_filesystem_createDir(Folder) == 0)
 							{
@@ -1857,7 +1857,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			{
 				if (pTxBuf->pFile->File == 0)
 				{
-					// here if no files found, equal to error as "./" and "../" normally
+					// here if no files found, equal to error as "./" and "./lms_os/" normally
 					// always found
 					pReplyBeginList->ListSizeLsb = 0;
 					pReplyBeginList->ListSizeNsb1 = 0;

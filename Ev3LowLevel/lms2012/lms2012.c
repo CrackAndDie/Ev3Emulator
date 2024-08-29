@@ -1382,9 +1382,11 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 		// TODO: WARNING: remade the size of image
 		RamSize = GetAmountOfRamForImage(pI);
-		if (RamSize == 21) {
+		/*if (RamSize == 21) {
 			RamSize = 64;
-		}
+		}*/
+		RamSize += sizeof(OBJ);
+
 		// RamSize = MemSizeAligner(RamSize);
 		// RamSize = sizeof(FDESCR);
 		if (cMemoryOpen(PrgId, RamSize, (void**)&pData) == OK)
@@ -1606,7 +1608,7 @@ void      ProgramEnd(PRGID PrgId)
 		{
 			SetDispatchStatus(PRGBREAK);
 
-			VMInstance.pObjList = NULL;
+			// VMInstance.pObjList = NULL;
 		}
 
 		VMInstance.Program[PrgId].Result = OK;
