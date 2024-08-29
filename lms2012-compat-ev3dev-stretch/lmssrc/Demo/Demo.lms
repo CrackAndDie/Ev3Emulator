@@ -46,7 +46,7 @@ Loop:
 /*
 r/home/tcp/projects/lms2012/lms2012/Linux_X86/prjs/Demo/Demo.rbf
 r/home/root/prjs/Demo/Demo.rbf
-r../prjs/Demo/Demo.rbf
+r./lms_os/prjs/Demo/Demo.rbf
 */
 /*
 vmthread  MAIN

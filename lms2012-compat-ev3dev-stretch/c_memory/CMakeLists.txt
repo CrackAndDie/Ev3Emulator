@@ -10,3 +10,4 @@ target_include_directories (c_memory PUBLIC
     ${CMAKE_SOURCE_DIR}/c_com
     ${CMAKE_SOURCE_DIR}/c_ui
 )
+add_dependencies (c_memory bytecodes.h)

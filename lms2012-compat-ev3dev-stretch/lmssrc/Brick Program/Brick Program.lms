@@ -1634,7 +1634,7 @@ NotGetWidth:                                                          //    }
                                                                       //    {
                                                                       //
   // Save file                                                        //
-  STRINGS(ADD,'../apps/Brick Program/',RUN_FILE,Name)                 //      STRINGS(ADD,'../apps/Brick Program/',RUN_FILE,Name)
+  STRINGS(ADD,'./lms_os/apps/Brick Program/',RUN_FILE,Name)                 //      STRINGS(ADD,'./lms_os/apps/Brick Program/',RUN_FILE,Name)
   CALL(SaveFile,Name)                                                 //      CALL(SaveFile,Name)
   // Run file                                                         //
   FILE(LOAD_IMAGE,USER_SLOT,Name,Size,hFile)                          //      FILE(LOAD_IMAGE,USER_SLOT,Name,Size,hFile)

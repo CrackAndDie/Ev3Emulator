@@ -840,9 +840,9 @@ AppsInitialized:                                                      //    }
   MOVE8_8(0,Type)                                                     //      Type  =  0
   MOVE16_16(USER_SLOT,Slot)                                           //      Slot  =  USER_SLOT
                                                                       //  
-  STRINGS(COMPARE,String,'../apps/Debug/Debug',Flag)                  //      STRINGS(COMPARE,String,'../apps/Debug/Debug',Flag)
+  STRINGS(COMPARE,String,'./lms_os/apps/Debug/Debug',Flag)                  //      STRINGS(COMPARE,String,'./lms_os/apps/Debug/Debug',Flag)
   JR_TRUE(Flag,AppsDebug)                                             //
-  STRINGS(COMPARE,String,'../apps/Brick Program/Brick Program',Flag)  //      STRINGS(COMPARE,String,'../apps/Brick Program/Brick Program',Flag)
+  STRINGS(COMPARE,String,'./lms_os/apps/Brick Program/Brick Program',Flag)  //      STRINGS(COMPARE,String,'./lms_os/apps/Brick Program/Brick Program',Flag)
   JR_FALSE(Flag,AppsNotDebug)                                         //      if (Flag)
 AppsDebug:                                                            //      {
   MOVE16_16(DEBUG_SLOT,Slot)                                          //        Slot  =  DEBUG_SLOT
@@ -895,7 +895,7 @@ SettingsInitialized:                                                  //    }
                                                                       //
   MOVE16_16(USER_SLOT,Slot)                                           //      Slot  =  USER_SLOT
                                                                       //  
-  STRINGS(COMPARE,String,'../tools/Debug/Debug',Flag)                 //      STRINGS(COMPARE,String,'../tools/Debug/Debug',Flag)
+  STRINGS(COMPARE,String,'./lms_os/tools/Debug/Debug',Flag)                 //      STRINGS(COMPARE,String,'./lms_os/tools/Debug/Debug',Flag)
   JR_FALSE(Flag,AppsNotDebug)                                         //      if (Flag)
 AppsDebug:                                                            //      {
   MOVE16_16(DEBUG_SLOT,Slot)                                          //        Slot  =  DEBUG_SLOT
@@ -1139,7 +1139,7 @@ NoUsbstick5:                                                          //    }
   CP_EQ8(FileType,TYPE_PROGRAM,Flag)                                  //    if (FileType == TYPE_PROGRAM)
   JR_FALSE(Flag,NotProgram6)                                          //    {
                                                                       //
-  STRINGS(COMPARE,Name,'../prjs/BrkProg_SAVE/Demo.rpf',Flag)          //      STRINGS(COMPARE,Name,'../prjs/BrkProg_SAVE/Demo.rpf',Flag)
+  STRINGS(COMPARE,Name,'./lms_os/prjs/BrkProg_SAVE/Demo.rpf',Flag)          //      STRINGS(COMPARE,Name,'./lms_os/prjs/BrkProg_SAVE/Demo.rpf',Flag)
   JR_TRUE(Flag,Demo)                                                  //      if (!Flag)
                                                                       //      {
                                                                       //

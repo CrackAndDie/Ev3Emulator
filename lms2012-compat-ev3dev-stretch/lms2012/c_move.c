@@ -24,36 +24,36 @@
 #include  "c_move.h"
 
 
- //******* BYTE CODE SNIPPETS **************************************************
+//******* BYTE CODE SNIPPETS **************************************************
 
- /*! \page cMove Move
-  *  <hr size="1"/>
-  *  <b>     opINIT_BYTES (DESTINATION, LENGTH, SOURCE)  </b>
-  *
-  *- Move LENGTH number of DATA8 from BYTE STREAM to memory DESTINATION START\n
-  *- Dispatch status unchanged
-  *
-  *  \return (DATA8)   DESTINATION   - First element in DATA8 array to be initiated
-  *  \param  (DATA32)  LENGTH        - Number of elements to initiate
-  *  \param  (DATA8)   SOURCE        - First element to initiate DATA8 array with
-  */
-  /*! \brief  opINIT_BYTES
-   *
-   */
+/*! \page cMove Move
+ *  <hr size="1"/>
+ *  <b>     opINIT_BYTES (DESTINATION, LENGTH, SOURCE)  </b>
+ *
+ *- Move LENGTH number of DATA8 from BYTE STREAM to memory DESTINATION START\n
+ *- Dispatch status unchanged
+ *
+ *  \return (DATA8)   DESTINATION   - First element in DATA8 array to be initiated
+ *  \param  (DATA32)  LENGTH        - Number of elements to initiate
+ *  \param  (DATA8)   SOURCE        - First element to initiate DATA8 array with
+ */
+/*! \brief  opINIT_BYTES
+ *
+ */
 void      cMoveInitBytes(void)
 {
-	DATA8* pDestination;
-	DATA32  Length;
+  DATA8   *pDestination;
+  DATA32  Length;
 
-	pDestination = (DATA8*)PrimParPointer();
-	Length = *(DATA32*)PrimParPointer();
+  pDestination  =  (DATA8*)PrimParPointer();
+  Length        = *(DATA32*)PrimParPointer();
 
-	while (Length)
-	{
-		*pDestination = *(DATA8*)PrimParPointer();
-		pDestination++;
-		Length--;
-	}
+  while (Length)
+  {
+    *pDestination  =  *(DATA8*)PrimParPointer();
+    pDestination++;
+    Length--;
+  }
 }
 
 
@@ -67,15 +67,15 @@ void      cMoveInitBytes(void)
  *  \param  (DATA8)   SOURCE
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opMOVE8_8
-  *
-  */
+/*! \brief  opMOVE8_8
+ *
+ */
 void      cMove8to8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -89,23 +89,23 @@ void      cMove8to8(void)
  *  \param  (DATA8)   SOURCE
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opMOVE8_16
-  *
-  */
+/*! \brief  opMOVE8_16
+ *
+ */
 void      cMove8to16(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
+  Tmp  =  *(DATA8*)PrimParPointer();
 
-	if (Tmp != DATA8_NAN)
-	{
-		*(DATA16*)PrimParPointer() = (DATA16)Tmp;
-	}
-	else
-	{
-		*(DATA16*)PrimParPointer() = DATA16_NAN;
-	}
+  if (Tmp != DATA8_NAN)
+  {
+    *(DATA16*)PrimParPointer()  =  (DATA16)Tmp;
+  }
+  else
+  {
+    *(DATA16*)PrimParPointer()  =  DATA16_NAN;
+  }
 }
 
 
@@ -119,22 +119,22 @@ void      cMove8to16(void)
  *  \param  (DATA8)   SOURCE
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opMOVE8_32
-  *
-  */
+/*! \brief  opMOVE8_32
+ *
+ */
 void      cMove8to32(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	if (Tmp != DATA8_NAN)
-	{
-		*(DATA32*)PrimParPointer() = (DATA32)Tmp;
-	}
-	else
-	{
-		*(DATA32*)PrimParPointer() = DATA32_NAN;
-	}
+  Tmp  =  *(DATA8*)PrimParPointer();
+  if (Tmp != DATA8_NAN)
+  {
+    *(DATA32*)PrimParPointer()  =  (DATA32)Tmp;
+  }
+  else
+  {
+    *(DATA32*)PrimParPointer()  =  DATA32_NAN;
+  }
 }
 
 
@@ -148,22 +148,22 @@ void      cMove8to32(void)
  *  \param  (DATA8)   SOURCE
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opMOVE8_F
-  *
-  */
+/*! \brief  opMOVE8_F
+ *
+ */
 void      cMove8toF(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	if (Tmp != DATA8_NAN)
-	{
-		*(DATAF*)PrimParPointer() = (DATAF)Tmp;
-	}
-	else
-	{
-		*(DATAF*)PrimParPointer() = DATAF_NAN;
-	}
+  Tmp  =  *(DATA8*)PrimParPointer();
+  if (Tmp != DATA8_NAN)
+  {
+    *(DATAF*)PrimParPointer()  =  (DATAF)Tmp;
+  }
+  else
+  {
+    *(DATAF*)PrimParPointer()  =  DATAF_NAN;
+  }
 }
 
 
@@ -177,30 +177,30 @@ void      cMove8toF(void)
  *  \param  (DATA16)  SOURCE
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opMOVE16_8
-  *
-  */
+/*! \brief  opMOVE16_8
+ *
+ */
 void      cMove16to8(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	if (Tmp != DATA16_NAN)
-	{
-		if (Tmp > (DATA16)DATA8_MAX)
-		{
-			Tmp = (DATA16)DATA8_MAX;
-		}
-		if (Tmp < (DATA16)DATA8_MIN)
-		{
-			Tmp = (DATA16)DATA8_MIN;
-		}
-		*(DATA8*)PrimParPointer() = (DATA8)Tmp;
-	}
-	else
-	{
-		*(DATA8*)PrimParPointer() = DATA8_NAN;
-	}
+  Tmp  =  *(DATA16*)PrimParPointer();
+  if (Tmp != DATA16_NAN)
+  {
+    if (Tmp > (DATA16)DATA8_MAX)
+    {
+      Tmp  =  (DATA16)DATA8_MAX;
+    }
+    if (Tmp < (DATA16)DATA8_MIN)
+    {
+      Tmp  =  (DATA16)DATA8_MIN;
+    }
+    *(DATA8*)PrimParPointer()  =  (DATA8)Tmp;
+  }
+  else
+  {
+    *(DATA8*)PrimParPointer()  =  DATA8_NAN;
+  }
 }
 
 
@@ -214,15 +214,15 @@ void      cMove16to8(void)
  *  \param  (DATA16)  SOURCE
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opMOVE16_16
-  *
-  */
+/*! \brief  opMOVE16_16
+ *
+ */
 void      cMove16to16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -236,22 +236,22 @@ void      cMove16to16(void)
  *  \param  (DATA16)  SOURCE
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opMOVE16_32
-  *
-  */
+/*! \brief  opMOVE16_32
+ *
+ */
 void      cMove16to32(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	if (Tmp != DATA16_NAN)
-	{
-		*(DATA32*)PrimParPointer() = (DATA32)Tmp;
-	}
-	else
-	{
-		*(DATA32*)PrimParPointer() = DATA32_NAN;
-	}
+  Tmp  =  *(DATA16*)PrimParPointer();
+  if (Tmp != DATA16_NAN)
+  {
+    *(DATA32*)PrimParPointer()  =  (DATA32)Tmp;
+  }
+  else
+  {
+    *(DATA32*)PrimParPointer()  =  DATA32_NAN;
+  }
 }
 
 
@@ -265,22 +265,22 @@ void      cMove16to32(void)
  *  \param  (DATA16)  SOURCE
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opMOVE16_F
-  *
-  */
+/*! \brief  opMOVE16_F
+ *
+ */
 void      cMove16toF(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	if (Tmp != DATA16_NAN)
-	{
-		*(DATAF*)PrimParPointer() = (DATAF)Tmp;
-	}
-	else
-	{
-		*(DATAF*)PrimParPointer() = DATAF_NAN;
-	}
+  Tmp  =  *(DATA16*)PrimParPointer();
+  if (Tmp != DATA16_NAN)
+  {
+    *(DATAF*)PrimParPointer()  =  (DATAF)Tmp;
+  }
+  else
+  {
+    *(DATAF*)PrimParPointer()  =  DATAF_NAN;
+  }
 }
 
 
@@ -294,30 +294,30 @@ void      cMove16toF(void)
  *  \param  (DATA32)  SOURCE
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opMOVE32_8
-  *
-  */
+/*! \brief  opMOVE32_8
+ *
+ */
 void      cMove32to8(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	if (Tmp != DATA32_NAN)
-	{
-		if (Tmp > (DATA32)DATA8_MAX)
-		{
-			Tmp = (DATA32)DATA8_MAX;
-		}
-		if (Tmp < (DATA32)DATA8_MIN)
-		{
-			Tmp = (DATA32)DATA8_MIN;
-		}
-		*(DATA8*)PrimParPointer() = (DATA8)Tmp;
-	}
-	else
-	{
-		*(DATA8*)PrimParPointer() = DATA8_NAN;
-	}
+  Tmp  =  *(DATA32*)PrimParPointer();
+  if (Tmp != DATA32_NAN)
+  {
+    if (Tmp > (DATA32)DATA8_MAX)
+    {
+      Tmp  =  (DATA32)DATA8_MAX;
+    }
+    if (Tmp < (DATA32)DATA8_MIN)
+    {
+      Tmp  =  (DATA32)DATA8_MIN;
+    }
+    *(DATA8*)PrimParPointer()  =  (DATA8)Tmp;
+  }
+  else
+  {
+    *(DATA8*)PrimParPointer()  =  DATA8_NAN;
+  }
 }
 
 
@@ -331,30 +331,30 @@ void      cMove32to8(void)
  *  \param  (DATA32)  SOURCE
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opMOVE32_16
-  *
-  */
+/*! \brief  opMOVE32_16
+ *
+ */
 void      cMove32to16(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	if (Tmp != DATA32_NAN)
-	{
-		if (Tmp > (DATA32)DATA16_MAX)
-		{
-			Tmp = (DATA32)DATA16_MAX;
-		}
-		if (Tmp < (DATA32)DATA16_MIN)
-		{
-			Tmp = (DATA32)DATA16_MIN;
-		}
-		*(DATA16*)PrimParPointer() = (DATA16)Tmp;
-	}
-	else
-	{
-		*(DATA16*)PrimParPointer() = DATA16_NAN;
-	}
+  Tmp  =  *(DATA32*)PrimParPointer();
+  if (Tmp != DATA32_NAN)
+  {
+    if (Tmp > (DATA32)DATA16_MAX)
+    {
+      Tmp  =  (DATA32)DATA16_MAX;
+    }
+    if (Tmp < (DATA32)DATA16_MIN)
+    {
+      Tmp  =  (DATA32)DATA16_MIN;
+    }
+    *(DATA16*)PrimParPointer()  =  (DATA16)Tmp;
+  }
+  else
+  {
+    *(DATA16*)PrimParPointer()  =  DATA16_NAN;
+  }
 }
 
 
@@ -368,15 +368,15 @@ void      cMove32to16(void)
  *  \param  (DATA32)  SOURCE
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opMOVE32_32
-  *
-  */
+/*! \brief  opMOVE32_32
+ *
+ */
 void      cMove32to32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -390,22 +390,22 @@ void      cMove32to32(void)
  *  \param  (DATA32)  SOURCE
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opMOVE32_F
-  *
-  */
+/*! \brief  opMOVE32_F
+ *
+ */
 void      cMove32toF(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	if (Tmp != DATA32_NAN)
-	{
-		*(DATAF*)PrimParPointer() = (DATAF)Tmp;
-	}
-	else
-	{
-		*(DATAF*)PrimParPointer() = DATAF_NAN;
-	}
+  Tmp  =  *(DATA32*)PrimParPointer();
+  if (Tmp != DATA32_NAN)
+  {
+    *(DATAF*)PrimParPointer()  =  (DATAF)Tmp;
+  }
+  else
+  {
+    *(DATAF*)PrimParPointer()  =  DATAF_NAN;
+  }
 }
 
 
@@ -419,30 +419,30 @@ void      cMove32toF(void)
  *  \param  (DATAF)   SOURCE
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opMOVEF_8
-  *
-  */
+/*! \brief  opMOVEF_8
+ *
+ */
 void      cMoveFto8(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	if (!(isnan(Tmp)))
-	{
-		if (Tmp > (DATAF)DATA8_MAX)
-		{
-			Tmp = (DATAF)DATA8_MAX;
-		}
-		if (Tmp < (DATAF)DATA8_MIN)
-		{
-			Tmp = (DATAF)DATA8_MIN;
-		}
-		*(DATA8*)PrimParPointer() = (DATA8)Tmp;
-	}
-	else
-	{
-		*(DATA8*)PrimParPointer() = DATA8_NAN;
-	}
+  Tmp  =  *(DATAF*)PrimParPointer();
+  if (!(isnan(Tmp)))
+  {
+    if (Tmp > (DATAF)DATA8_MAX)
+    {
+      Tmp  =  (DATAF)DATA8_MAX;
+    }
+    if (Tmp < (DATAF)DATA8_MIN)
+    {
+      Tmp  =  (DATAF)DATA8_MIN;
+    }
+    *(DATA8*)PrimParPointer()  =  (DATA8)Tmp;
+  }
+  else
+  {
+    *(DATA8*)PrimParPointer()  =  DATA8_NAN;
+  }
 }
 
 
@@ -456,30 +456,30 @@ void      cMoveFto8(void)
  *  \param  (DATAF)   SOURCE
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opMOVEF_16
-  *
-  */
+/*! \brief  opMOVEF_16
+ *
+ */
 void      cMoveFto16(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	if (!(isnan(Tmp)))
-	{
-		if (Tmp > (DATAF)DATA16_MAX)
-		{
-			Tmp = (DATAF)DATA16_MAX;
-		}
-		if (Tmp < (DATAF)DATA16_MIN)
-		{
-			Tmp = (DATAF)DATA16_MIN;
-		}
-		*(DATA16*)PrimParPointer() = (DATA16)Tmp;
-	}
-	else
-	{
-		*(DATA16*)PrimParPointer() = DATA16_NAN;
-	}
+  Tmp  =  *(DATAF*)PrimParPointer();
+  if (!(isnan(Tmp)))
+  {
+    if (Tmp > (DATAF)DATA16_MAX)
+    {
+      Tmp  =  (DATAF)DATA16_MAX;
+    }
+    if (Tmp < (DATAF)DATA16_MIN)
+    {
+      Tmp  =  (DATAF)DATA16_MIN;
+    }
+    *(DATA16*)PrimParPointer()  =  (DATA16)Tmp;
+  }
+  else
+  {
+    *(DATA16*)PrimParPointer()  =  DATA16_NAN;
+  }
 }
 
 
@@ -493,30 +493,30 @@ void      cMoveFto16(void)
  *  \param  (DATAF)   SOURCE
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opMOVEF_32
-  *
-  */
+/*! \brief  opMOVEF_32
+ *
+ */
 void      cMoveFto32(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	if (!(isnan(Tmp)))
-	{
-		if (Tmp > (DATAF)DATA32_MAX)
-		{
-			Tmp = (DATAF)DATA32_MAX;
-		}
-		if (Tmp < (DATAF)DATA32_MIN)
-		{
-			Tmp = (DATAF)DATA32_MIN;
-		}
-		*(DATA32*)PrimParPointer() = (DATA32)Tmp;
-	}
-	else
-	{
-		*(DATA32*)PrimParPointer() = DATA32_NAN;
-	}
+  Tmp  =  *(DATAF*)PrimParPointer();
+  if (!(isnan(Tmp)))
+  {
+    if (Tmp > (DATAF)DATA32_MAX)
+    {
+      Tmp  =  (DATAF)DATA32_MAX;
+    }
+    if (Tmp < (DATAF)DATA32_MIN)
+    {
+      Tmp  =  (DATAF)DATA32_MIN;
+    }
+    *(DATA32*)PrimParPointer()  =  (DATA32)Tmp;
+  }
+  else
+  {
+    *(DATA32*)PrimParPointer()  =  DATA32_NAN;
+  }
 }
 
 
@@ -530,15 +530,15 @@ void      cMoveFto32(void)
  *  \param  (DATAF)   SOURCE
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opMOVEF_F
-  *
-  */
+/*! \brief  opMOVEF_F
+ *
+ */
 void      cMoveFtoF(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	*(DATAF*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATAF*)PrimParPointer();
+  *(DATAF*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -553,17 +553,17 @@ void      cMoveFtoF(void)
  *  \param  (DATA8)   INDEX       - Index to array member to read\n
  *  \return (DATA8)   DESTINATION - Variable to receive read value\n
  */
- /*! \brief  opREAD8
-  *
-  */
+/*! \brief  opREAD8
+ *
+ */
 void      cMoveRead8(void)
 {
-	DATA8* pTmp;
-	DATA8   Index;
+  DATA8   *pTmp;
+  DATA8   Index;
 
-	pTmp = (DATA8*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = pTmp[Index];
+  pTmp    =  (DATA8*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  pTmp[Index];
 }
 
 
@@ -578,17 +578,17 @@ void      cMoveRead8(void)
  *  \param  (DATA8)   INDEX       - Index to array member to read\n
  *  \return (DATA16)  DESTINATION - Variable to receive read value\n
  */
- /*! \brief  opREAD16
-  *
-  */
+/*! \brief  opREAD16
+ *
+ */
 void      cMoveRead16(void)
 {
-	DATA16* pTmp;
-	DATA8   Index;
+  DATA16  *pTmp;
+  DATA8   Index;
 
-	pTmp = (DATA16*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = pTmp[Index];
+  pTmp    =  (DATA16*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  pTmp[Index];
 }
 
 
@@ -603,17 +603,17 @@ void      cMoveRead16(void)
  *  \param  (DATA8)   INDEX       - Index to array member to read\n
  *  \return (DATA32)  DESTINATION - Variable to receive read value\n
  */
- /*! \brief  opREAD32
-  *
-  */
+/*! \brief  opREAD32
+ *
+ */
 void      cMoveRead32(void)
 {
-	DATA32* pTmp;
-	DATA8   Index;
+  DATA32  *pTmp;
+  DATA8   Index;
 
-	pTmp = (DATA32*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = pTmp[Index];
+  pTmp    =  (DATA32*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  pTmp[Index];
 }
 
 
@@ -628,17 +628,17 @@ void      cMoveRead32(void)
  *  \param  (DATA8)   INDEX       - Index to array member to read\n
  *  \return (DATAF)   DESTINATION - Variable to receive read value\n
  */
- /*! \brief  opREADF
-  *
-  */
+/*! \brief  opREADF
+ *
+ */
 void      cMoveReadF(void)
 {
-	DATAF* pTmp;
-	DATA8   Index;
+  DATAF   *pTmp;
+  DATA8   Index;
 
-	pTmp = (DATAF*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	*(DATAF*)PrimParPointer() = pTmp[Index];
+  pTmp    =  (DATAF*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  *(DATAF*)PrimParPointer()  =  pTmp[Index];
 }
 
 
@@ -653,19 +653,19 @@ void      cMoveReadF(void)
  *  \param  (DATA8)   INDEX       - Index to array member to write\n
  *  \param  (DATA8)   DESTINATION - Array to receive write value\n
  */
- /*! \brief  opWRITE8
-  *
-  */
+/*! \brief  opWRITE8
+ *
+ */
 void      cMoveWrite8(void)
 {
-	DATA8   Tmp;
-	DATA8* pTmp;
-	DATA8   Index;
+  DATA8   Tmp;
+  DATA8   *pTmp;
+  DATA8   Index;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	pTmp = (DATA8*)PrimParPointer();
-	pTmp[Index] = Tmp;
+  Tmp     = *(DATA8*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  pTmp    =  (DATA8*)PrimParPointer();
+  pTmp[Index]  =  Tmp;
 }
 
 
@@ -680,19 +680,19 @@ void      cMoveWrite8(void)
  *  \param  (DATA8)   INDEX       - Index to array member to write\n
  *  \param  (DATA16)  DESTINATION - Array to receive write value\n
  */
- /*! \brief  opWRITE16
-  *
-  */
+/*! \brief  opWRITE16
+ *
+ */
 void      cMoveWrite16(void)
 {
-	DATA16  Tmp;
-	DATA16* pTmp;
-	DATA8   Index;
+  DATA16  Tmp;
+  DATA16  *pTmp;
+  DATA8   Index;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	pTmp = (DATA16*)PrimParPointer();
-	pTmp[Index] = Tmp;
+  Tmp     = *(DATA16*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  pTmp    =  (DATA16*)PrimParPointer();
+  pTmp[Index]  =  Tmp;
 }
 
 
@@ -707,19 +707,19 @@ void      cMoveWrite16(void)
  *  \param  (DATA8)   INDEX       - Index to array member to write\n
  *  \param  (DATA32)  DESTINATION - Array to receive write value\n
  */
- /*! \brief  opWRITE32
-  *
-  */
+/*! \brief  opWRITE32
+ *
+ */
 void      cMoveWrite32(void)
 {
-	DATA32  Tmp;
-	DATA32* pTmp;
-	DATA8   Index;
+  DATA32  Tmp;
+  DATA32  *pTmp;
+  DATA8   Index;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	pTmp = (DATA32*)PrimParPointer();
-	pTmp[Index] = Tmp;
+  Tmp     = *(DATA32*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  pTmp    =  (DATA32*)PrimParPointer();
+  pTmp[Index]  =  Tmp;
 }
 
 
@@ -734,19 +734,19 @@ void      cMoveWrite32(void)
  *  \param  (DATA8)   INDEX       - Index to array member to write\n
  *  \param  (DATAF)   DESTINATION - Array to receive write value\n
  */
- /*! \brief  opWRITEF
-  *
-  */
+/*! \brief  opWRITEF
+ *
+ */
 void      cMoveWriteF(void)
 {
-	DATAF   Tmp;
-	DATAF* pTmp;
-	DATA8   Index;
+  DATAF   Tmp;
+  DATAF   *pTmp;
+  DATA8   Index;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	Index = *(DATA8*)PrimParPointer();
-	pTmp = (DATAF*)PrimParPointer();
-	pTmp[Index] = Tmp;
+  Tmp     = *(DATAF*)PrimParPointer();
+  Index   = *(DATA8*)PrimParPointer();
+  pTmp    =  (DATAF*)PrimParPointer();
+  pTmp[Index]  =  Tmp;
 }
 
 

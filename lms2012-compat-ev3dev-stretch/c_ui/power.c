@@ -28,12 +28,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define CALL_INTERVAL   400   // [mS]
 
 #define AVR_CIN         300
 #define AVR_COUT        30
 #define AVR_VIN         30
+
+/**
+ * @brief Read Value from a sysfs power_supply attribute.
+ *
+ * @param  fd An open file handle.
+ * @return The floating point representation of the value.
+ */
+static DATAF cUiPowerReadAttr(int fd)
+{
+    char str[20 + 1] = { 0 };
+    int value;
+
+    lseek(fd, 0, SEEK_SET);
+    read(fd, str, 20);
+    value = atoi(str);
+
+    // value is in μV/μA
+    return (DATAF)value / 1000000;
+}
 
 /**
  * @brief Opens files for battery voltage and current.
@@ -52,9 +72,65 @@
  */
 void cUiPowerOpenBatteryFiles(void)
 {
+    struct udev_enumerate *enumerate;
+    struct udev_list_entry *list;
+
     UiInstance.BatteryVoltageNowFile = -1;
     UiInstance.BatteryCurrentNowFile = -1;
-    fprintf(stderr, "Failed to find system power supply\n");
+    enumerate = udev_enumerate_new(VMInstance.udev);
+    udev_enumerate_add_match_subsystem(enumerate, "power_supply");
+    udev_enumerate_add_match_property(enumerate, "POWER_SUPPLY_SCOPE", "System");
+    udev_enumerate_add_match_property(enumerate, "POWER_SUPPLY_TYPE", "Battery");
+    udev_enumerate_scan_devices(enumerate);
+    list = udev_enumerate_get_list_entry(enumerate);
+    if (!list) {
+        fprintf(stderr, "Failed to find system power supply\n");
+    } else {
+        // just taking the first match in the list
+        const char *path = udev_list_entry_get_name(list);
+        char attr_path[255 + 1] = { 0 };
+        int fd;
+
+        snprintf(attr_path, 255, "%s/voltage_now", path);
+        fd = open(attr_path, O_RDONLY);
+        if (fd == -1) {
+            fprintf(stderr, "Could not open '%s': %s\n", attr_path,
+                    strerror(errno));
+            UiInstance.VinCnt = DEFAULT_BATTERY_VOLTAGE;
+        } else {
+            UiInstance.BatteryVoltageNowFile = fd;
+            UiInstance.VinCnt = cUiPowerReadAttr(fd);
+        }
+
+        snprintf(attr_path, 255, "%s/current_now", path);
+        fd = open(attr_path, O_RDONLY);
+        if (fd == -1) {
+            fprintf(stderr, "Could not open '%s': %s\n", attr_path,
+                    strerror(errno));
+        } else {
+            UiInstance.BatteryCurrentNowFile = fd;
+            UiInstance.CinCnt = cUiPowerReadAttr(fd);
+        }
+
+        // Check to see if this is a rechargeable battery
+        snprintf(attr_path, 255, "%s/technology", path);
+        fd = open(attr_path, O_RDONLY);
+        if (fd == -1) {
+            UiInstance.Accu = 0;
+        } else {
+            char technology[20 + 1] = { 0 };
+
+            read(fd, technology, 20);
+            close(fd);
+
+            if (strstr(technology, "LION")) {
+                UiInstance.Accu = 1;
+            } else {
+                UiInstance.Accu = 0;
+            }
+        }
+    }
+    udev_enumerate_unref(enumerate);
 }
 
 void cUiPowerUpdateCnt(void)
@@ -62,7 +138,17 @@ void cUiPowerUpdateCnt(void)
     UiInstance.VinCnt  *= AVR_VIN  - 1;
     UiInstance.CinCnt  *= AVR_CIN  - 1;
     UiInstance.CoutCnt *= AVR_COUT - 1;
-   
+
+    if (UiInstance.BatteryVoltageNowFile != -1) {
+        UiInstance.VinCnt += cUiPowerReadAttr(UiInstance.BatteryVoltageNowFile);
+    } else {
+        UiInstance.VinCnt += DEFAULT_BATTERY_VOLTAGE;
+    }
+    if (UiInstance.BatteryCurrentNowFile != -1) {
+        UiInstance.CinCnt += cUiPowerReadAttr(UiInstance.BatteryCurrentNowFile);
+    }
+    UiInstance.CoutCnt += 0;
+
     UiInstance.VinCnt  /= AVR_VIN;
     UiInstance.CinCnt  /= AVR_CIN;
     UiInstance.CoutCnt /= AVR_COUT;

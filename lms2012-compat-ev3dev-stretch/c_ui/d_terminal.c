@@ -21,18 +21,39 @@
 #include "lms2012.h"
 
 #include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
 
+static struct termios TerminalAttr;
+static struct termios TerminalSavedAttr;
 static RESULT TerminalResult = FAIL;
+
 
 RESULT dTerminalInit(void)
 {
     RESULT Result = FAIL;
+
+    if (tcgetattr(STDIN_FILENO, &TerminalAttr) >= 0) {
+        TerminalSavedAttr = TerminalAttr;
+
+        TerminalAttr.c_lflag     &= ~(ECHO | ICANON | IEXTEN);
+        TerminalAttr.c_lflag     |= ECHO;
+        TerminalAttr.c_iflag     &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+        TerminalAttr.c_cflag     &= ~(CSIZE | PARENB);
+        TerminalAttr.c_cflag     |=  CS8;
+
+        TerminalAttr.c_cc[VMIN]   = 0;
+        TerminalAttr.c_cc[VTIME]  = 0;
+
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &TerminalAttr) >= 0) {
+            Result = OK;
+        }
+    }
     TerminalResult = Result;
 
     return Result;
 }
 
-// TODO: wtf is terminal
 RESULT dTerminalRead(UBYTE *pData)
 {
 #ifdef  DEBUG_TRACE_KEY
@@ -44,13 +65,13 @@ RESULT dTerminalRead(UBYTE *pData)
     if (TerminalResult == OK) {
         Result = BUSY;
 
-        /*Tmp = read(STDIN_FILENO, pData, 1);
+        Tmp = read(STDIN_FILENO, pData, 1);
         if (Tmp == 1) {
             Result = OK;
 #ifdef  DEBUG_TRACE_KEY
             printf("[%c]",(char)*pData);
 #endif
-        }*/
+        }
 #ifdef  DEBUG_TRACE_KEY
         else {
             if (Tmp != OldTmp) {
@@ -64,24 +85,22 @@ RESULT dTerminalRead(UBYTE *pData)
     return Result;
 }
 
-// TODO: wtf is terminal
 RESULT dTerminalWrite(UBYTE *pData, UWORD Cnt)
 {
     if (TerminalResult == OK) {
-        /*if (write(STDOUT_FILENO, pData, Cnt) != Cnt) {
+        if (write(STDOUT_FILENO, pData, Cnt) != Cnt) {
             TerminalResult = FAIL;
-        }*/
+        }
     }
 
     return OK;
 }
 
-// TODO: wtf is terminal
 RESULT dTerminalExit(void)
 {
-   /* if (TerminalResult == OK) {
+    if (TerminalResult == OK) {
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &TerminalSavedAttr);
-    }*/
+    }
     TerminalResult = FAIL;
 
     return OK;

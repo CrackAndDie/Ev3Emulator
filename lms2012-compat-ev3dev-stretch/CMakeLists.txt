@@ -74,8 +74,6 @@ option (LMS2012_ENABLE_VIRTUAL_BATT_TEMP "Enable guessing of battery temperature
 
 # translate options into defines
 
-# add_definitions("-DEV3RCV_INSTALL_DATADIR=\"./install_datadir\"")
-
 add_definitions("-D${LMS2012_SPECIALVERS}VERS")
 if (LMS2012_ENABLE_TERMINAL)
     add_definitions ("-DTERMINAL_ENABLED=1")
@@ -170,22 +168,22 @@ endforeach ()
 # global compiler options
 
 add_definitions("-DPROJECT=\"${PROJECT_NAME}\"" "-DVERS=${PROJECT_VERSION}")
-add_compile_options (-Wall)
+add_compile_options (-Wall -Werror -Wno-unused-result)
 
 
 # global dependencies
 
-# find_package (PkgConfig REQUIRED)
-# pkg_check_modules (LMS2012_DEPS REQUIRED
-#     alsa
-#     dbus-1
-#     gio-2.0
-#     gio-unix-2.0
-#     glib-2.0
-#     grx-3.0
-#     libudev
-#     libusb-1.0
-# )
+find_package (PkgConfig REQUIRED)
+pkg_check_modules (LMS2012_DEPS REQUIRED
+    alsa
+    dbus-1
+    gio-2.0
+    gio-unix-2.0
+    glib-2.0
+    grx-3.0
+    libudev
+    libusb-1.0
+)
 
 add_subdirectory (c_com)
 add_subdirectory (c_dynload)
@@ -199,4 +197,3 @@ add_subdirectory (data)
 add_subdirectory (doc)
 add_subdirectory (lms2012)
 add_subdirectory (lmssrc)
-add_subdirectory (externed)

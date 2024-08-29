@@ -29,6 +29,10 @@
 #define MAX_KEYB_WIDTH      12
 #define MAX_KEYB_HEIGHT     4
 
+#include "keyboardc.xbm"
+#include "keyboards.xbm"
+#include "keyboardn.xbm"
+
 DATA8 cUiKeyboard(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon, DATA8 Lng,
                   DATA8 *pText, DATA8 *pCharSet, DATA8 *pAnswer)
 {
@@ -228,7 +232,7 @@ DATA8 cUiKeyboard(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon, DATA8 Lng,
 
         switch (pK->Layout)
         {
-            /*case 0 :
+            case 0 :
             {
                 dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pK->ScreenStartX,pK->ScreenStartY,keyboardc_width,keyboardc_height,(UBYTE*)keyboardc_bits);
             }
@@ -244,8 +248,7 @@ DATA8 cUiKeyboard(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon, DATA8 Lng,
             {
                 dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pK->ScreenStartX,pK->ScreenStartY,keyboardn_width,keyboardn_height,(UBYTE*)keyboardn_bits);
             }
-            break;*/
-            // TODO!!! draw keyboard
+            break;
 
         }
         if ((Icon >= 0) && (Icon < N_ICON_NOS))

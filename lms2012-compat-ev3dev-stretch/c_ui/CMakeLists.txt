@@ -24,6 +24,7 @@ target_include_directories (c_ui PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LMS2012_DEPS_INCLUDE_DIRS}
 )
+add_dependencies (c_ui bytecodes.h)
 
 set (C_UI_ICONS
     small_icons

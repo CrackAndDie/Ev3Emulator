@@ -13,3 +13,4 @@ target_include_directories (c_input PUBLIC
     ${CMAKE_SOURCE_DIR}/c_ui
     ${LMS2012_DEPS_INCLUDE_DIRS}
 )
+add_dependencies (c_input bytecodes.h)

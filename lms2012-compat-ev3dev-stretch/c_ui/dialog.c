@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "POP2.xbm"
+#include "POP3.xbm"
+
 DATA8 cUiNotification(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2,
                       DATA8 Icon3, DATA8 *pText, DATA8 *pState)
 {
@@ -49,8 +52,8 @@ DATA8 cUiNotification(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2,
         *pState             =  1;
         pQ->ScreenStartX  =  X;
         pQ->ScreenStartY  =  Y;
-        pQ->ScreenWidth   =  144;
-        pQ->ScreenHeight  =  65;
+        pQ->ScreenWidth   =  POP3_width;
+        pQ->ScreenHeight  =  POP3_height;
         pQ->IconStartY    =  pQ->ScreenStartY + 10;
         pQ->IconWidth     =  dLcdGetIconWidth(LARGE_ICON);
         pQ->IconHeight    =  dLcdGetIconHeight(LARGE_ICON);
@@ -195,8 +198,7 @@ DATA8 cUiNotification(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2,
 //* UPDATE ***************************************************************************************************
         pQ->NeedUpdate    =  0;
 
-        // TODO: draw pop3
-        //dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pQ->ScreenStartX,pQ->ScreenStartY,POP3_width,POP3_height,(UBYTE*)POP3_bits);
+        dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pQ->ScreenStartX,pQ->ScreenStartY,POP3_width,POP3_height,(UBYTE*)POP3_bits);
 
         X2                  =  pQ->IconStartX;
 
@@ -300,10 +302,9 @@ DATA8 cUiQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2,
 //* UPDATE ***************************************************************************************************
         pQ->NeedUpdate    =  0;
 
-        // TODO: draw pop3
-        //dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pQ->ScreenStartX,pQ->ScreenStartY,POP3_width,POP3_height,(UBYTE*)POP3_bits);
-        pQ->ScreenWidth   =  144;
-        pQ->ScreenHeight  =  65;
+        dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pQ->ScreenStartX,pQ->ScreenStartY,POP3_width,POP3_height,(UBYTE*)POP3_bits);
+        pQ->ScreenWidth   =  POP3_width;
+        pQ->ScreenHeight  =  POP3_height;
 
         pQ->IconStartX    =  pQ->ScreenStartX + (pQ->ScreenWidth / 2);
         if (pQ->NoOfIcons > 1)
@@ -397,8 +398,8 @@ RESULT cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 *pState,
         *pState             =  1;
         pQ->ScreenStartX  =  X;
         pQ->ScreenStartY  =  Y;
-        pQ->ScreenWidth   =  144;
-        pQ->ScreenHeight  =  48;
+        pQ->ScreenWidth   =  POP2_width;
+        pQ->ScreenHeight  =  POP2_height;
         pQ->IconWidth     =  dLcdGetIconWidth(LARGE_ICON);
         pQ->IconHeight    =  dLcdGetIconHeight(LARGE_ICON);
         pQ->Frame         =  2;
@@ -469,10 +470,9 @@ RESULT cUiIconQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 *pState,
 //* UPDATE ***************************************************************************************************
         pQ->NeedUpdate    =  0;
 
-        // TODO: draw pop2
-        //dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pQ->ScreenStartX,pQ->ScreenStartY,POP2_width,POP2_height,(UBYTE*)POP2_bits);
-        pQ->ScreenWidth   =  144;
-        pQ->ScreenHeight  =  48;
+        dLcdDrawPicture(UiInstance.pLcd->Lcd,Color,pQ->ScreenStartX,pQ->ScreenStartY,POP2_width,POP2_height,(UBYTE*)POP2_bits);
+        pQ->ScreenWidth   =  POP2_width;
+        pQ->ScreenHeight  =  POP2_height;
 
         // Show icons
         Loop  =  0;

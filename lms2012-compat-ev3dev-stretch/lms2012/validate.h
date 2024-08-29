@@ -22,35 +22,9 @@
 #ifndef VALIDATE_H_
 #define VALIDATE_H_
 
-RESULT    cValidateInit(void);
+RESULT cValidateInit(void);
+RESULT cValidateExit(void);
+RESULT cValidateDisassemble(IP pI, IMINDEX *pIndex, LABEL *pLabel);
+RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL *pLabel, DATA8 Disassemble);
 
-RESULT    cValidateExit(void);
-
-RESULT    cValidateDisassemble(IP pI,IMINDEX *pIndex,LABEL *pLabel);
-
-RESULT    cValidateProgram(PRGID PrgId,IP pI,LABEL *pLabel,DATA8 Disassemble);
-
-
-typedef struct
-{
-  //*****************************************************************************
-  // Validate Global variables
-  //*****************************************************************************
-
-  int       Row;
-  IMINDEX   ValidateErrorIndex;
-}
-VALIDATE_GLOBALS;
-
-#ifndef LEGO_SIMULATION
-extern VALIDATE_GLOBALS ValidateInstance;
-#else
-extern VALIDATE_GLOBALS * gValidateInstance;
-#define ValidateInstance (*gValidateInstance)
-
-void setValidateInstance(VALIDATE_GLOBALS * _Instance);
-VALIDATE_GLOBALS * getValidateInstance();
-#endif
-
-
-  #endif /* VALIDATE_H_ */
+#endif /* VALIDATE_H_ */

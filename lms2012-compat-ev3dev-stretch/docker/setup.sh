@@ -34,10 +34,10 @@ docker build \
     "${script_dir}/"
 
 docker rm --force ${container_name} >/dev/null 2>&1 || true
-docker run \
-    --volume "$(readlink -f ${build_dir}):/build" \
-    --volume "$(pwd):/src" \
-    --workdir /build \
+MSYS_NO_PATHCONV=1 docker run \
+    --volume "D:\\downloads\\lms2012-compat-ev3dev-stretch\\build-armel:/build" \
+    --volume "D:\\downloads\\lms2012-compat-ev3dev-stretch:/src" \
+    --workdir "/build" \
     --name ${container_name} \
     --env "TERM=${TERM}" \
     --env "DESTDIR=/build/dist" \
@@ -45,7 +45,7 @@ docker run \
     --detach \
     ${image_name} tail
 
-docker exec --tty ${container_name} cmake /src \
+MSYS_NO_PATHCONV=1 docker exec --tty ${container_name} cmake /src \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_TOOLCHAIN_FILE=/home/compiler/toolchain-${arch}.cmake
 

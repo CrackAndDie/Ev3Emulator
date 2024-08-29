@@ -26,30 +26,30 @@
 #include  <string.h>
 
 
- //******* BYTE CODE SNIPPETS **************************************************
+//******* BYTE CODE SNIPPETS **************************************************
 
- /*! \page cMath Math
-  *  <hr size="1"/>
-  *  <b>     opADD8 (SOURCE1, SOURCE2, DESTINATION)  </b>
-  *
-  *- Add two 8 bit values DESTINATION = SOURCE1 + SOURCE2\n
-  *- Dispatch status unchanged
-  *
-  *  \param  (DATA8)   SOURCE1
-  *  \param  (DATA8)   SOURCE2
-  *  \return (DATA8)   DESTINATION
-  */
-  /*! \brief  opADD8
-   *
-   *
-   */
+/*! \page cMath Math
+ *  <hr size="1"/>
+ *  <b>     opADD8 (SOURCE1, SOURCE2, DESTINATION)  </b>
+ *
+ *- Add two 8 bit values DESTINATION = SOURCE1 + SOURCE2\n
+ *- Dispatch status unchanged
+ *
+ *  \param  (DATA8)   SOURCE1
+ *  \param  (DATA8)   SOURCE2
+ *  \return (DATA8)   DESTINATION
+ */
+/*! \brief  opADD8
+ *
+ *
+ */
 void      cMathAdd8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp += *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  Tmp +=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -64,17 +64,17 @@ void      cMathAdd8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opADD16
-  *
-  *
-  */
+/*! \brief  opADD16
+ *
+ *
+ */
 void      cMathAdd16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp += *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  Tmp +=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -89,17 +89,17 @@ void      cMathAdd16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opADD32
-  *
-  *
-  */
+/*! \brief  opADD32
+ *
+ *
+ */
 void      cMathAdd32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp += *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  Tmp +=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -114,17 +114,17 @@ void      cMathAdd32(void)
  *  \param  (DATAF)   SOURCE2
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opADDF
-  *
-  *
-  */
+/*! \brief  opADDF
+ *
+ *
+ */
 void      cMathAddF(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	Tmp += *(DATAF*)PrimParPointer();
-	*(DATAF*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATAF*)PrimParPointer();
+  Tmp +=  *(DATAF*)PrimParPointer();
+  *(DATAF*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -139,17 +139,17 @@ void      cMathAddF(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opSUB8
-  *
-  *
-  */
+/*! \brief  opSUB8
+ *
+ *
+ */
 void      cMathSub8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp -= *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  Tmp -=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -164,17 +164,17 @@ void      cMathSub8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opSUB16
-  *
-  *
-  */
+/*! \brief  opSUB16
+ *
+ *
+ */
 void      cMathSub16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp -= *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  Tmp -=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -189,17 +189,17 @@ void      cMathSub16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opSUB32
-  *
-  *
-  */
+/*! \brief  opSUB32
+ *
+ *
+ */
 void      cMathSub32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp -= *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  Tmp -=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -214,17 +214,17 @@ void      cMathSub32(void)
  *  \param  (DATAF)   SOURCE2
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opSUBF
-  *
-  *
-  */
+/*! \brief  opSUBF
+ *
+ *
+ */
 void      cMathSubF(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	Tmp -= *(DATAF*)PrimParPointer();
-	*(DATAF*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATAF*)PrimParPointer();
+  Tmp -=  *(DATAF*)PrimParPointer();
+  *(DATAF*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -239,17 +239,17 @@ void      cMathSubF(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opMUL8
-  *
-  *
-  */
+/*! \brief  opMUL8
+ *
+ *
+ */
 void      cMathMul8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp *= *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  Tmp *=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -264,17 +264,17 @@ void      cMathMul8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opMUL16
-  *
-  *
-  */
+/*! \brief  opMUL16
+ *
+ *
+ */
 void      cMathMul16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp *= *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  Tmp *=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -289,17 +289,17 @@ void      cMathMul16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opMUL32
-  *
-  *
-  */
+/*! \brief  opMUL32
+ *
+ *
+ */
 void      cMathMul32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp *= *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  Tmp *=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -314,17 +314,17 @@ void      cMathMul32(void)
  *  \param  (DATAF)   SOURCE2
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opMULF
-  *
-  *
-  */
+/*! \brief  opMULF
+ *
+ *
+ */
 void      cMathMulF(void)
 {
-	DATAF   Tmp;
+  DATAF   Tmp;
 
-	Tmp = *(DATAF*)PrimParPointer();
-	Tmp *= *(DATAF*)PrimParPointer();
-	*(DATAF*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATAF*)PrimParPointer();
+  Tmp *=  *(DATAF*)PrimParPointer();
+  *(DATAF*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -339,32 +339,32 @@ void      cMathMulF(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opDIV8
-  *
-  *
-  */
+/*! \brief  opDIV8
+ *
+ *
+ */
 void      cMathDiv8(void)
 {
-	DATA8   X, Y;
+  DATA8   X,Y;
 
-	X = *(DATA8*)PrimParPointer();
-	Y = *(DATA8*)PrimParPointer();
-	if (Y == 0)
-	{
-		if (X > 0)
-		{
-			X = (DATA8)DATA8_MAX;
-		}
-		if (X < 0)
-		{
-			X = (DATA8)DATA8_MIN;
-		}
-	}
-	else
-	{
-		X /= Y;
-	}
-	*(DATA8*)PrimParPointer() = X;
+  X  =  *(DATA8*)PrimParPointer();
+  Y  =  *(DATA8*)PrimParPointer();
+  if (Y == 0)
+  {
+    if (X > 0)
+    {
+      X  =  (DATA8)DATA8_MAX;
+    }
+    if (X < 0)
+    {
+      X  =  (DATA8)DATA8_MIN;
+    }
+  }
+  else
+  {
+    X /=  Y;
+  }
+  *(DATA8*)PrimParPointer()  =  X;
 }
 
 
@@ -379,32 +379,32 @@ void      cMathDiv8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opDIV16
-  *
-  *
-  */
+/*! \brief  opDIV16
+ *
+ *
+ */
 void      cMathDiv16(void)
 {
-	DATA16  X, Y;
+  DATA16  X,Y;
 
-	X = *(DATA16*)PrimParPointer();
-	Y = *(DATA16*)PrimParPointer();
-	if (Y == 0)
-	{
-		if (X > 0)
-		{
-			X = (DATA16)DATA16_MAX;
-		}
-		if (X < 0)
-		{
-			X = (DATA16)DATA16_MIN;
-		}
-	}
-	else
-	{
-		X /= Y;
-	}
-	*(DATA16*)PrimParPointer() = X;
+  X  =  *(DATA16*)PrimParPointer();
+  Y  =  *(DATA16*)PrimParPointer();
+  if (Y == 0)
+  {
+    if (X > 0)
+    {
+      X  =  (DATA16)DATA16_MAX;
+    }
+    if (X < 0)
+    {
+      X  =  (DATA16)DATA16_MIN;
+    }
+  }
+  else
+  {
+    X /=  Y;
+  }
+  *(DATA16*)PrimParPointer()  =  X;
 }
 
 
@@ -419,32 +419,32 @@ void      cMathDiv16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opDIV32
-  *
-  *
-  */
+/*! \brief  opDIV32
+ *
+ *
+ */
 void      cMathDiv32(void)
 {
-	DATA32  X, Y;
+  DATA32  X,Y;
 
-	X = *(DATA32*)PrimParPointer();
-	Y = *(DATA32*)PrimParPointer();
-	if (Y == 0)
-	{
-		if (X > 0)
-		{
-			X = (DATA32)DATA32_MAX;
-		}
-		if (X < 0)
-		{
-			X = (DATA32)DATA32_MIN;
-		}
-	}
-	else
-	{
-		X /= Y;
-	}
-	*(DATA32*)PrimParPointer() = X;
+  X  =  *(DATA32*)PrimParPointer();
+  Y  =  *(DATA32*)PrimParPointer();
+  if (Y == 0)
+  {
+    if (X > 0)
+    {
+      X  =  (DATA32)DATA32_MAX;
+    }
+    if (X < 0)
+    {
+      X  =  (DATA32)DATA32_MIN;
+    }
+  }
+  else
+  {
+    X /=  Y;
+  }
+  *(DATA32*)PrimParPointer()  =  X;
 }
 
 
@@ -459,18 +459,18 @@ void      cMathDiv32(void)
  *  \param  (DATAF)   SOURCE2
  *  \return (DATAF)   DESTINATION
  */
- /*! \brief  opDIVF
-  *
-  *
-  */
+/*! \brief  opDIVF
+ *
+ *
+ */
 void      cMathDivF(void)
 {
-	DATAF   X, Y;
+  DATAF   X,Y;
 
-	X = *(DATAF*)PrimParPointer();
-	Y = *(DATAF*)PrimParPointer();
-	X /= Y;
-	*(DATAF*)PrimParPointer() = X;
+  X  =  *(DATAF*)PrimParPointer();
+  Y  =  *(DATAF*)PrimParPointer();
+  X /=  Y;
+  *(DATAF*)PrimParPointer()  =  X;
 }
 
 
@@ -485,17 +485,17 @@ void      cMathDivF(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opOR8
-  *
-  *
-  */
+/*! \brief  opOR8
+ *
+ *
+ */
 void      cMathOr8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp |= *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  Tmp |=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -510,17 +510,17 @@ void      cMathOr8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opOR16
-  *
-  *
-  */
+/*! \brief  opOR16
+ *
+ *
+ */
 void      cMathOr16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp |= *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  Tmp |=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -535,17 +535,17 @@ void      cMathOr16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opOR32
-  *
-  *
-  */
+/*! \brief  opOR32
+ *
+ *
+ */
 void      cMathOr32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp |= *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  Tmp |=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -560,17 +560,17 @@ void      cMathOr32(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opAND8
-  *
-  *
-  */
+/*! \brief  opAND8
+ *
+ *
+ */
 void      cMathAnd8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp &= *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  Tmp &=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -585,17 +585,17 @@ void      cMathAnd8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opAND16
-  *
-  *
-  */
+/*! \brief  opAND16
+ *
+ *
+ */
 void      cMathAnd16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp &= *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  Tmp &=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -610,17 +610,17 @@ void      cMathAnd16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opAND32
-  *
-  *
-  */
+/*! \brief  opAND32
+ *
+ *
+ */
 void      cMathAnd32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp &= *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  Tmp &=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -635,17 +635,17 @@ void      cMathAnd32(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opXOR8
-  *
-  *
-  */
+/*! \brief  opXOR8
+ *
+ *
+ */
 void      cMathXor8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp ^= *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA8*)PrimParPointer();
+  Tmp ^=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -660,17 +660,17 @@ void      cMathXor8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opXOR16
-  *
-  *
-  */
+/*! \brief  opXOR16
+ *
+ *
+ */
 void      cMathXor16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp ^= *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA16*)PrimParPointer();
+  Tmp ^=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -685,17 +685,17 @@ void      cMathXor16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opXOR32
-  *
-  *
-  */
+/*! \brief  opXOR32
+ *
+ *
+ */
 void      cMathXor32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp ^= *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp  =  *(DATA32*)PrimParPointer();
+  Tmp ^=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -710,17 +710,17 @@ void      cMathXor32(void)
  *  \param  (DATA8)   SOURCE2
  *  \return (DATA8)   DESTINATION
  */
- /*! \brief  opRL8
-  *
-  *
-  */
+/*! \brief  opRL8
+ *
+ *
+ */
 void      cMathRl8(void)
 {
-	DATA8   Tmp;
+  DATA8   Tmp;
 
-	Tmp = *(DATA8*)PrimParPointer();
-	Tmp <<= *(DATA8*)PrimParPointer();
-	*(DATA8*)PrimParPointer() = Tmp;
+  Tmp   =  *(DATA8*)PrimParPointer();
+  Tmp <<=  *(DATA8*)PrimParPointer();
+  *(DATA8*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -735,17 +735,17 @@ void      cMathRl8(void)
  *  \param  (DATA16)  SOURCE2
  *  \return (DATA16)  DESTINATION
  */
- /*! \brief  opRL16
-  *
-  *
-  */
+/*! \brief  opRL16
+ *
+ *
+ */
 void      cMathRl16(void)
 {
-	DATA16  Tmp;
+  DATA16  Tmp;
 
-	Tmp = *(DATA16*)PrimParPointer();
-	Tmp <<= *(DATA16*)PrimParPointer();
-	*(DATA16*)PrimParPointer() = Tmp;
+  Tmp   =  *(DATA16*)PrimParPointer();
+  Tmp <<=  *(DATA16*)PrimParPointer();
+  *(DATA16*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -760,17 +760,17 @@ void      cMathRl16(void)
  *  \param  (DATA32)  SOURCE2
  *  \return (DATA32)  DESTINATION
  */
- /*! \brief  opRL32
-  *
-  *
-  */
+/*! \brief  opRL32
+ *
+ *
+ */
 void      cMathRl32(void)
 {
-	DATA32  Tmp;
+  DATA32  Tmp;
 
-	Tmp = *(DATA32*)PrimParPointer();
-	Tmp <<= *(DATA32*)PrimParPointer();
-	*(DATA32*)PrimParPointer() = Tmp;
+  Tmp   =  *(DATA32*)PrimParPointer();
+  Tmp <<=  *(DATA32*)PrimParPointer();
+  *(DATA32*)PrimParPointer()  =  Tmp;
 }
 
 
@@ -918,240 +918,240 @@ void      cMathRl32(void)
  *\n
  *
  */
- /*! \brief  opMATH
-  *
-  *
-  */
+/*! \brief  opMATH
+ *
+ *
+ */
 void      cMath(void)
 {
-	DATAF   X;
-	DATAF   Y;
-	DATA8   X8;
-	DATA8   Y8;
-	DATA16  X16;
-	DATA16  Y16;
-	DATA32  X32;
-	DATA32  Y32;
-	DATA8   Cmd;
-	char    Buf[64];
-	char* pBuf;
+  DATAF   X;
+  DATAF   Y;
+  DATA8   X8;
+  DATA8   Y8;
+  DATA16  X16;
+  DATA16  Y16;
+  DATA32  X32;
+  DATA32  Y32;
+  DATA8   Cmd;
+  char    Buf[64];
+  char    *pBuf;
 
-	Cmd = *(DATA8*)PrimParPointer();
+  Cmd           =  *(DATA8*)PrimParPointer();
 
-	switch (Cmd)
-	{
-	case EXP:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = expf(X);
-	}
-	break;
+  switch (Cmd)
+  {
+    case scEXP:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  expf(X);
+    }
+    break;
 
-	case POW:
-	{
-		X = *(DATAF*)PrimParPointer();
-		Y = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = powf(X, Y);
-	}
-	break;
+    case scPOW:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      Y  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  powf(X,Y);
+    }
+    break;
 
-	case MOD8:
-	{
-		X8 = *(DATA8*)PrimParPointer();
-		Y8 = *(DATA8*)PrimParPointer();
-		if (Y8 == (DATA8)0)
-		{
-			*(DATA8*)PrimParPointer() = (DATA8)0;
-		}
-		else
-		{
-			*(DATA8*)PrimParPointer() = X8 % Y8;
-		}
-	}
-	break;
+    case scMOD8:
+    {
+      X8    =  *(DATA8*)PrimParPointer();
+      Y8    =  *(DATA8*)PrimParPointer();
+      if (Y8 == (DATA8)0)
+      {
+        *(DATA8*)PrimParPointer()  =  (DATA8)0;
+      }
+      else
+      {
+        *(DATA8*)PrimParPointer()  =  X8 % Y8;
+      }
+    }
+    break;
 
-	case MOD16:
-	{
-		X16 = *(DATA16*)PrimParPointer();
-		Y16 = *(DATA16*)PrimParPointer();
-		if (Y16 == (DATA16)0)
-		{
-			*(DATA16*)PrimParPointer() = (DATA16)0;
-		}
-		else
-		{
-			*(DATA16*)PrimParPointer() = X16 % Y16;
-		}
-	}
-	break;
+    case scMOD16:
+    {
+      X16   =  *(DATA16*)PrimParPointer();
+      Y16   =  *(DATA16*)PrimParPointer();
+      if (Y16 == (DATA16)0)
+      {
+        *(DATA16*)PrimParPointer()  =  (DATA16)0;
+      }
+      else
+      {
+        *(DATA16*)PrimParPointer()  =  X16 % Y16;
+      }
+    }
+    break;
 
-	case MOD32:
-	{
-		X32 = *(DATA32*)PrimParPointer();
-		Y32 = *(DATA32*)PrimParPointer();
-		if (Y32 == (DATA32)0)
-		{
-			*(DATA32*)PrimParPointer() = (DATA32)0;
-		}
-		else
-		{
-			*(DATA32*)PrimParPointer() = X32 % Y32;
-		}
-	}
-	break;
+    case scMOD32:
+    {
+      X32   =  *(DATA32*)PrimParPointer();
+      Y32   =  *(DATA32*)PrimParPointer();
+      if (Y32 == (DATA32)0)
+      {
+        *(DATA32*)PrimParPointer()  =  (DATA32)0;
+      }
+      else
+      {
+        *(DATA32*)PrimParPointer()  =  X32 % Y32;
+      }
+    }
+    break;
 
-	case MOD:
-	{
-		X = *(DATAF*)PrimParPointer();
-		Y = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = fmod(X, Y);
-	}
-	break;
+    case scMOD:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      Y  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  fmod(X,Y);
+    }
+    break;
 
-	case FLOOR:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = floor(X);
-	}
-	break;
+    case scFLOOR:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  floor(X);
+    }
+    break;
 
-	case CEIL:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = ceil(X);
-	}
-	break;
+    case scCEIL:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  ceil(X);
+    }
+    break;
 
-	case ROUND:
-	{
-		X = *(DATAF*)PrimParPointer();
-		if (X < (DATAF)0)
-		{
-			*(DATAF*)PrimParPointer() = ceil(X - (DATAF)0.5);
-		}
-		else
-		{
-			*(DATAF*)PrimParPointer() = floor(X + (DATAF)0.5);
-		}
-	}
-	break;
+    case scROUND:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      if (X < (DATAF)0)
+      {
+        *(DATAF*)PrimParPointer()  =  ceil(X - (DATAF)0.5);
+      }
+      else
+      {
+        *(DATAF*)PrimParPointer()  =  floor(X + (DATAF)0.5);
+      }
+    }
+    break;
 
-	case ABS:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = fabs(X);
-	}
-	break;
+    case scABS:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  fabs(X);
+    }
+    break;
 
-	case NEGATE:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = (DATAF)0 - X;
-	}
-	break;
+    case scNEGATE:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  (DATAF)0 - X;
+    }
+    break;
 
-	case TRUNC:
-	{
-		X = *(DATAF*)PrimParPointer();
-		Y8 = *(DATA8*)PrimParPointer();
+    case scTRUNC:
+    {
+      X   =  *(DATAF*)PrimParPointer();
+      Y8  =  *(DATA8*)PrimParPointer();
 
-		if (Y8 > 9)
-		{
-			Y8 = 9;
-		}
-		if (Y8 < 0)
-		{
-			Y8 = 0;
-		}
+      if (Y8 > 9)
+      {
+        Y8  =  9;
+      }
+      if (Y8 < 0)
+      {
+        Y8  =  0;
+      }
 
-		snprintf(Buf, 64, "%f", X);
+      snprintf(Buf,64,"%f",X);
 
-		pBuf = strstr(Buf, ".");
-		if (pBuf != NULL)
-		{
-			pBuf[Y8 + 1] = 0;
-		}
-		sscanf(Buf, "%f", &X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+      pBuf  =  strstr(Buf,".");
+      if (pBuf != NULL)
+      {
+        pBuf[Y8 + 1]  =  0;
+      }
+      sscanf(Buf,"%f",&X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	case SQRT:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = sqrt(X);
-	}
-	break;
+    case scSQRT:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  sqrt(X);
+    }
+    break;
 
-	case LOG:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = log10(X);
-	}
-	break;
+    case scLOG:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  log10(X);
+    }
+    break;
 
-	case LN:
-	{
-		X = *(DATAF*)PrimParPointer();
-		*(DATAF*)PrimParPointer() = log(X);
-	}
-	break;
+    case scLN:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      *(DATAF*)PrimParPointer()  =  log(X);
+    }
+    break;
 
-	case SIN:
-	{
-		X = *(DATAF*)PrimParPointer();
-		X = DegToRad(X);
-		X = sinf(X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+    case scSIN:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      X  =  DegToRad(X);
+      X  =  sinf(X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	case COS:
-	{
-		X = *(DATAF*)PrimParPointer();
-		X = DegToRad(X);
-		X = cosf(X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+    case scCOS:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      X  =  DegToRad(X);
+      X  =  cosf(X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	case TAN:
-	{
-		X = *(DATAF*)PrimParPointer();
-		X = DegToRad(X);
-		X = tanf(X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+    case scTAN:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      X  =  DegToRad(X);
+      X  =  tanf(X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	case ASIN:
-	{
-		X = *(DATAF*)PrimParPointer();
-		X = asinf(X);
-		X = RadToDeg(X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+    case scASIN:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      X  =  asinf(X);
+      X  =  RadToDeg(X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	case ACOS:
-	{
-		X = *(DATAF*)PrimParPointer();
-		X = acosf(X);
-		X = RadToDeg(X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+    case scACOS:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      X  =  acosf(X);
+      X  =  RadToDeg(X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	case ATAN:
-	{
-		X = *(DATAF*)PrimParPointer();
-		X = atanf(X);
-		X = RadToDeg(X);
-		*(DATAF*)PrimParPointer() = X;
-	}
-	break;
+    case scATAN:
+    {
+      X  =  *(DATAF*)PrimParPointer();
+      X  =  atanf(X);
+      X  =  RadToDeg(X);
+      *(DATAF*)PrimParPointer()  =  X;
+    }
+    break;
 
-	}
+  }
 
 }
 

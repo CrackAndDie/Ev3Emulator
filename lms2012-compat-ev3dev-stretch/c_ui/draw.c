@@ -484,7 +484,7 @@ void cUiDraw(void)
     switch (Cmd)
     { // Function
 
-        case UPDATE:
+        case scUPDATE:
         {
             if (Blocked == 0)
             {
@@ -494,7 +494,7 @@ void cUiDraw(void)
         }
         break;
 
-        case CLEAN:
+        case scCLEAN:
         {
             if (Blocked == 0)
             {
@@ -512,7 +512,7 @@ void cUiDraw(void)
         }
         break;
 
-        case TEXTBOX:
+        case scTEXTBOX:
         {
             X         =  *(DATA16*)PrimParPointer();  // start x
             Y         =  *(DATA16*)PrimParPointer();  // start y
@@ -539,7 +539,7 @@ void cUiDraw(void)
         }
         break;
 
-        case FILLRECT:
+        case scFILLRECT:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -554,7 +554,7 @@ void cUiDraw(void)
         }
         break;
 
-        case INVERSERECT:
+        case scINVERSERECT:
         {
             X         =  *(DATA16*)PrimParPointer();
             Y         =  *(DATA16*)PrimParPointer();
@@ -568,7 +568,7 @@ void cUiDraw(void)
         }
         break;
 
-        case RECT:
+        case scRECTANGLE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -583,7 +583,7 @@ void cUiDraw(void)
         }
         break;
 
-        case PIXEL:
+        case scPIXEL:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -596,7 +596,7 @@ void cUiDraw(void)
         }
         break;
 
-        case LINE:
+        case scLINE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -611,7 +611,7 @@ void cUiDraw(void)
         }
         break;
 
-        case DOTLINE:
+        case scDOTLINE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -628,7 +628,7 @@ void cUiDraw(void)
         }
         break;
 
-        case CIRCLE:
+        case scCIRCLE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -645,7 +645,7 @@ void cUiDraw(void)
         }
         break;
 
-        case FILLCIRCLE:
+        case scFILLCIRCLE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -662,7 +662,7 @@ void cUiDraw(void)
         }
         break;
 
-        case TEXT:
+        case scTEXT:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -676,7 +676,7 @@ void cUiDraw(void)
         }
         break;
 
-        case ICON:
+        case scICON:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -691,7 +691,7 @@ void cUiDraw(void)
         }
         break;
 
-        case BMPFILE:
+        case scBMPFILE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -700,7 +700,6 @@ void cUiDraw(void)
 
             if (Blocked == 0)
             {
-                // TODO: check this is a shite probably
                 if (cMemoryGetImage(pText,LCD_BUFFER_SIZE,pBmp) == OK)
                 {
                     dLcdDrawBitmap(UiInstance.pLcd->Lcd,Color,X,Y,pBmp);
@@ -710,7 +709,7 @@ void cUiDraw(void)
         }
         break;
 
-        case PICTURE:
+        case scPICTURE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -727,7 +726,7 @@ void cUiDraw(void)
         }
         break;
 
-        case VALUE:
+        case scVALUE:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();
@@ -775,7 +774,7 @@ void cUiDraw(void)
         }
         break;
 
-        case VIEW_VALUE:
+        case scVIEW_VALUE:
         {
             Color       =  *(DATA8*)PrimParPointer();
             X           =  *(DATA16*)PrimParPointer();
@@ -881,7 +880,7 @@ void cUiDraw(void)
         }
         break;
 
-        case VIEW_UNIT:
+        case scVIEW_UNIT:
         {
             Color       =  *(DATA8*)PrimParPointer();
             X           =  *(DATA16*)PrimParPointer();
@@ -995,7 +994,7 @@ void cUiDraw(void)
         }
         break;
 
-        case NOTIFICATION:
+        case scNOTIFICATION:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();  // start x
@@ -1022,7 +1021,7 @@ void cUiDraw(void)
         }
         break;
 
-        case QUESTION:
+        case scQUESTION:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();  // start x
@@ -1050,7 +1049,7 @@ void cUiDraw(void)
         break;
 
 
-        case ICON_QUESTION:
+        case scICON_QUESTION:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();  // start x
@@ -1075,7 +1074,7 @@ void cUiDraw(void)
         break;
 
 
-        case KEYBOARD:
+        case scKEYBOARD:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();  // start x
@@ -1110,7 +1109,7 @@ void cUiDraw(void)
         }
         break;
 
-        case BROWSE:
+        case scBROWSE:
         {
             Type      =  *(DATA8*)PrimParPointer();   // Browser type
             X         =  *(DATA16*)PrimParPointer();  // start x
@@ -1142,7 +1141,7 @@ void cUiDraw(void)
         }
         break;
 
-        case VERTBAR:
+        case scVERTBAR:
         {
             Color     =  *(DATA8*)PrimParPointer();
             X         =  *(DATA16*)PrimParPointer();  // start x
@@ -1160,7 +1159,7 @@ void cUiDraw(void)
         }
         break;
 
-        case SELECT_FONT:
+        case scSELECT_FONT:
         {
             UiInstance.Font  =  *(DATA8*)PrimParPointer();
             if (Blocked == 0)
@@ -1177,13 +1176,13 @@ void cUiDraw(void)
         }
         break;
 
-        case TOPLINE:
+        case scTOPLINE:
         {
             UiInstance.TopLineEnabled  =  *(DATA8*)PrimParPointer();
         }
         break;
 
-        case FILLWINDOW:
+        case scFILLWINDOW:
         {
             Color     =  *(DATA8*)PrimParPointer();
             Y         =  *(DATA16*)PrimParPointer();  // start y
@@ -1234,7 +1233,7 @@ void cUiDraw(void)
         }
         break;
 
-        case STORE:
+        case scSTORE:
         {
             No  =  *(DATA8*)PrimParPointer();
             if (Blocked == 0)
@@ -1247,7 +1246,7 @@ void cUiDraw(void)
         }
         break;
 
-        case RESTORE:
+        case scRESTORE:
         {
             No  =  *(DATA8*)PrimParPointer();
             if (Blocked == 0)
@@ -1261,7 +1260,7 @@ void cUiDraw(void)
         }
         break;
 
-        case GRAPH_SETUP:
+        case scGRAPH_SETUP:
         {
             X         =  *(DATA16*)PrimParPointer();  // start x
             X1        =  *(DATA16*)PrimParPointer();  // size y
@@ -1279,7 +1278,7 @@ void cUiDraw(void)
         }
         break;
 
-        case GRAPH_DRAW:
+        case scGRAPH_DRAW:
         {
             View      =  *(DATA8*)PrimParPointer();   // view
 
@@ -1292,7 +1291,7 @@ void cUiDraw(void)
         }
         break;
 
-        case SCROLL:
+        case scSCROLL:
         {
             Y  =  *(DATA16*)PrimParPointer();
             if ((Y > 0) && (Y < LCD_HEIGHT))
@@ -1302,7 +1301,7 @@ void cUiDraw(void)
         }
         break;
 
-        case POPUP:
+        case scPOPUP:
         {
             Open  =  *(DATA8*)PrimParPointer();
             if (Blocked == 0)
