@@ -9,6 +9,7 @@ using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
 using Prism.Commands;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Input;
@@ -31,6 +32,7 @@ public class MainViewModel : ViewModelBase
 		base.OnViewReady();
 
 		// inits
+		SystemWrapper.LmsExited += OnLmsVmExited;
 		FilesystemWrapper.Init();
 		TimeWrapper.Init();
 		InputWrapper.Init(); // TODO:
@@ -84,8 +86,16 @@ public class MainViewModel : ViewModelBase
 		if (Design.IsDesignMode)
 			return;
 
+		if (_ev3Thread != null && _ev3Thread.IsAlive)
+			return;
+
 		_ev3Thread = new Thread(SystemWrapper.MainLms);
 		_ev3Thread.Start();
+	}
+
+	private void OnLmsVmExited()
+	{
+		UpdateLcd(LcdWrapper.ConvertToRgba8888(new byte[LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT]));
 	}
 
 	[Notify]

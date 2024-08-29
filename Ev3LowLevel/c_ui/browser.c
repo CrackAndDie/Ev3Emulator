@@ -337,6 +337,7 @@ RESULT cUiBrowser(DATA8 Type, DATA16 X, DATA16 Y, DATA16 X1, DATA16 Y1,
 		TmpResult = OK;
 		switch (Type)
 		{
+		// case BROWSE_CACHE:
 		case BROWSE_FOLDERS:
 		case BROWSE_FOLDS_FILES:
 		{

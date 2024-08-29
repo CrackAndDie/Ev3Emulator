@@ -2385,7 +2385,9 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 				cValidateDisassemble(VMInstance.pImage, &Index, VMInstance.Program[VMInstance.ProgramId].Label);
 			}
 #endif
-			PrimDispatchTable[*(VMInstance.ObjectIp++)]();
+			int tmpIndd = *(VMInstance.ObjectIp++);
+			// w_system_printf("Calling in mSchedCtrl: %d \n", tmpIndd);
+			PrimDispatchTable[tmpIndd]();
 			VMInstance.InstrCnt++;
 #ifdef DEBUG_TRACE_TASK
 			if (VMInstance.Program[USER_SLOT].Status != STOPPED)
@@ -2499,9 +2501,7 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 
 		ObjectExit();
 
-		w_system_printf("anime1 mSchedCtrl: %d \n", Result);
 		Result = ObjectExec();
-		w_system_printf("anime2 mSchedCtrl: %d \n", Result);
 
 		if (Result == STOP)
 		{
@@ -2520,9 +2520,7 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 
 	if (VMInstance.DispatchStatus != STOPBREAK)
 	{
-		w_system_printf("anime3 mSchedCtrl: %d \n", Result);
 		Result = ProgramExec();
-		w_system_printf("anime4 mSchedCtrl: %d \n", Result);
 	}
 
 	if (*pRestart == 1)
@@ -2535,7 +2533,7 @@ RESULT    mSchedCtrl(UBYTE* pRestart)
 	// usleep(1);
 #endif
 
-	w_system_printf("An iteration of mSchedCtrl ran with result: %d \n", Result);
+	// w_system_printf("An iteration of mSchedCtrl ran with result: %d \n", Result);
 
 	return (Result);
 }
@@ -2613,6 +2611,7 @@ int       lmsMain(int argc)
 				Result = mSchedCtrl(&Restart);
 			} while (Result == OK);
 
+			w_system_printf("Exiting from mSchedCtrl: %d \n", Result);
 			Result = mSchedExit();
 		}
 		else
