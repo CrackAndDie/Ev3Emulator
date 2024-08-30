@@ -23,11 +23,11 @@
 #define C_COM_H_
 
 #include  <sys/types.h>
- //#ifdef _WIN32
- //#include "dirent_win.h"
- //#else
- //#include <dirent.h>
- //#endif
+ #ifdef _WIN32
+ #include "dirent_win.h"
+ #else
+ #include <dirent.h>
+ #endif
 
 
 #include  "w_filesystem.h"
@@ -1475,7 +1475,7 @@ RESULT    cComGetDeviceData(DATA8 Layer, DATA8 Port, DATA8 Length, DATA8* pType,
 typedef   struct
 {
 	char    Name[vmFILENAMESIZE];         //!< File name
-	FILESYSTEM_ENTITY* namelist;
+	struct  dirent** namelist;
 	ULONG   Size;                         //!< File size
 	int     File;
 
@@ -1499,7 +1499,7 @@ typedef   struct
 	UBYTE     SubState;
 	UBYTE     Writing;
 	// the name of the dir
-	FILESYSTEM_ENTITY* pDir;
+	DIR* pDir;
 	UBYTE     Folder[vmFILENAMESIZE];
 }TXBUF;
 

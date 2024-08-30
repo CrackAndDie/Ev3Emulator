@@ -59,11 +59,11 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-//#ifdef _WIN32
-//#include "dirent_win.h"
-//#else
-//#include <dirent.h>
-//#endif
+#ifdef _WIN32
+#include "dirent_win.h"
+#else
+#include <dirent.h>
+#endif
 
 #ifdef    DEBUG_C_COM
 #define   DEBUG
@@ -493,7 +493,7 @@ UWORD cComReadBuffer(UBYTE* pBuffer, UWORD Size)
 
 UWORD cComWriteBuffer(UBYTE* pBuffer, UWORD Size)
 {
-	UWORD Length;
+	UWORD Length = 0;
 
 	/*if (FULL_SPEED == cDaisyGetUsbUpStreamSpeed()) {
 		Length = write(ComInstance.Cmdfd, pBuffer, 64);
@@ -652,27 +652,25 @@ DATA8     cComGetHandle(char* pName)
 }
 
 
-UBYTE     cComGetNxtFile(FILESYSTEM_ENTITY* pDir, UBYTE* pName)
+UBYTE     cComGetNxtFile(DIR* pDir, UBYTE* pName)
 {
 	UBYTE     RtnVal = 0;
-	FILESYSTEM_ENTITY* pDirPtr = (FILESYSTEM_ENTITY*)malloc(sizeof(FILESYSTEM_ENTITY));
+	struct    dirent* pDirPtr;
 
-	*pDirPtr = w_filesystem_readDir(pDir->name, pDir->searchOffset);
-	pDir->searchOffset++;
-	while ((NULL != pDirPtr) && (pDirPtr->isDir) && (pDirPtr->result == OK))
+	pDirPtr = readdir(pDir);
+	while ((NULL != pDirPtr) && (DT_REG != pDirPtr->d_type))
 	{
-		*pDirPtr = w_filesystem_readDir(pDir->name, pDir->searchOffset);
-		pDir->searchOffset++;
+		pDirPtr = readdir(pDir);
 	}
 
-	if (NULL != pDirPtr && (pDirPtr->result == OK))
+	if (NULL != pDirPtr)
 	{
-		snprintf((char*)pName, FILENAME_SIZE, "%s", pDirPtr->name);
+		snprintf((char*)pName, FILENAME_SIZE, "%s", pDirPtr->d_name);
 		RtnVal = 1;
 	}
 	else
 	{
-		w_filesystem_closeDir(pDir);
+		closedir(pDir);
 	}
 
 	return(RtnVal);
@@ -731,7 +729,7 @@ void      cComCreateBeginDl(TXBUF* pTxBuf, UBYTE* pName)
 			pTxBuf->Buf[0] = (UBYTE)(MAX_MSG_SIZE - 2);
 			pTxBuf->Buf[1] = (UBYTE)((MAX_MSG_SIZE - 2) >> 8);
 
-			ReadBytes = read(pTxBuf->pFile->File, &(pTxBuf->Buf[Index]), (pTxBuf->BufSize - Index));
+			ReadBytes = fread(&(pTxBuf->Buf[Index]), 1, (pTxBuf->BufSize - Index), pTxBuf->pFile->File);
 			pTxBuf->BlockLen = pTxBuf->BufSize;
 
 			pTxBuf->SubState = FILE_IN_PROGRESS_WAIT_FOR_REPLY;
@@ -749,13 +747,13 @@ void      cComCreateBeginDl(TXBUF* pTxBuf, UBYTE* pName)
 			if ((pTxBuf->BufSize - Index) < pTxBuf->pFile->Size)
 			{
 				// Complete msg exceeds buffer size
-				ReadBytes = read(pTxBuf->pFile->File, &(pTxBuf->Buf[Index]), (pTxBuf->BufSize - Index));
+				ReadBytes = fread(&(pTxBuf->Buf[Index]), 1, (pTxBuf->BufSize - Index), pTxBuf->pFile->File);
 				pTxBuf->BlockLen = pTxBuf->BufSize;
 			}
 			else
 			{
 				// Complete msg can fit in buffer
-				ReadBytes = read(pTxBuf->pFile->File, &(pTxBuf->Buf[Index]), pTxBuf->pFile->Size);
+				ReadBytes = fread(&(pTxBuf->Buf[Index]), 1, pTxBuf->pFile->Size, pTxBuf->pFile->File);
 				pTxBuf->BlockLen = pTxBuf->pFile->Size + Index;
 
 				// Close handles
@@ -791,7 +789,7 @@ void      cComCreateContinueDl(RXBUF* pRxBuf, TXBUF* pTxBuf)
 	if ((MAX_MSG_SIZE - SIZEOF_CONTINUEDL) < (pTxBuf->pFile->Size - pTxBuf->pFile->Pointer))
 	{
 		// Msg cannot hold complete file
-		ReadBytes = read(pTxBuf->pFile->File, &(pTxBuf->Buf[SIZEOF_CONTINUEDL]), (pTxBuf->BufSize - SIZEOF_CONTINUEDL));
+		ReadBytes = fread(&(pTxBuf->Buf[SIZEOF_CONTINUEDL]), 1, (pTxBuf->BufSize - SIZEOF_CONTINUEDL), pTxBuf->pFile->File);
 		pTxBuf->BlockLen = pTxBuf->BufSize;
 
 		pContinueDl->CmdSize += ReadBytes;
@@ -807,12 +805,12 @@ void      cComCreateContinueDl(RXBUF* pRxBuf, TXBUF* pTxBuf)
 		if ((pTxBuf->BufSize - SIZEOF_CONTINUEDL) < (pTxBuf->pFile->Size - pTxBuf->pFile->Pointer))
 		{
 			// Complete msg exceeds buffer size
-			ReadBytes = read(pTxBuf->pFile->File, &(pTxBuf->Buf[SIZEOF_CONTINUEDL]), (pTxBuf->BufSize - SIZEOF_CONTINUEDL));
+			ReadBytes = fread(&(pTxBuf->Buf[SIZEOF_CONTINUEDL]), 1, (pTxBuf->BufSize - SIZEOF_CONTINUEDL), pTxBuf->pFile->File);
 		}
 		else
 		{
 			// Complete msg can fit in buffer
-			ReadBytes = read(pTxBuf->pFile->File, &(pTxBuf->Buf[SIZEOF_CONTINUEDL]), (pTxBuf->pFile->Size - pTxBuf->pFile->Pointer));
+			ReadBytes = fread(&(pTxBuf->Buf[SIZEOF_CONTINUEDL]), 1, (pTxBuf->pFile->Size - pTxBuf->pFile->Pointer), pTxBuf->pFile->File);
 
 			// Close handles
 			cComCloseFileHandle(&(pTxBuf->pFile->File));
@@ -974,36 +972,36 @@ void      cComSystemReplyError(RXBUF* pRxBuf, TXBUF* pTxBuf)
 }
 
 
-void      cComGetNameFromScandirList(FILESYSTEM_ENTITY* NameList, char* pBuffer, ULONG* pNameLen, UBYTE* pFolder)
+void      cComGetNameFromScandirList(struct  dirent* NameList, char* pBuffer, ULONG* pNameLen, UBYTE* pFolder)
 {
 	char    FileName[MD5LEN + 1 + FILENAMESIZE];
 	struct  stat FileInfo;
-	ULONG   Md5Sum[4];
+	static ULONG   Md5Sum[4];
 
 	*pNameLen = 0;
 
 	//If type is a directory the add "/" at the end
-	if (NameList->isDir)
+	if ((DT_LNK == NameList->d_type) || (DT_DIR == NameList->d_type))
 	{
-		strncpy(pBuffer, NameList->name, FILENAMESIZE);   // Need to copy to tmp var to be able to add "/" for folders
-		*pNameLen = strlen(NameList->name);               // + 1 is the new line character
+		strncpy(pBuffer, NameList->d_name, FILENAMESIZE);   // Need to copy to tmp var to be able to add "/" for folders
+		*pNameLen = strlen(NameList->d_name);               // + 1 is the new line character
 
-		strcat(pBuffer, "/");
+		strncat(pBuffer, "/", 2);
 		(*pNameLen)++;
 
-		strcat(pBuffer, "\n");
+		strncat(pBuffer, "\n", 2);
 		(*pNameLen)++;
 
 	}
 	else
 	{
 
-		if (!NameList->isDir)
+		if (DT_REG == NameList->d_type)
 		{
 			/* If it is a file then add 16 bytes MD5SUM + space */
 			strcpy(FileName, (char*)pFolder);
 			strcat(FileName, "/");
-			strcat(FileName, NameList->name);
+			strcat(FileName, NameList->d_name);
 
 			/* Get the MD5sum and put in the buffer */
 			// md5_file(FileName, 0, (unsigned char *)Md5Sum);
@@ -1018,8 +1016,8 @@ void      cComGetNameFromScandirList(FILESYSTEM_ENTITY* NameList, char* pBuffer,
 			*pNameLen += sprintf(&(pBuffer[MD5LEN + 1]), "%08X ", (ULONG)FileInfo.st_size);
 
 			/* Insert Filename */
-			strcat(pBuffer, NameList->name);
-			*pNameLen += strlen(NameList->name);
+			strcat(pBuffer, NameList->d_name);
+			*pNameLen += strlen(NameList->d_name);
 
 			strcat(pBuffer, "\n");
 			(*pNameLen)++;
@@ -1142,9 +1140,9 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 						Folder[Tmp + 1] = 0;
 						if ((strcmp("~/", Folder) != 0) && (strcmp("./lms_os/", Folder) != 0))
 						{
-							if (w_filesystem_createDir(Folder) == 0)
+							if (mkdir(Folder, DIRPERMISSIONS) == 0)
 							{
-								// chmod(Folder, DIRPERMISSIONS);
+								chmod(Folder, DIRPERMISSIONS);
 #ifdef DEBUG
 								w_system_printf("Folder %s created\n", Folder);
 #endif
@@ -1188,7 +1186,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 						BytesToWrite = ComInstance.Files[FileHandle].Size;
 					}
 
-					write(pRxBuf->pFile->File, &(pRxBuf->Buf[MsgHeaderSize]), (size_t)BytesToWrite);
+					fwrite(&(pRxBuf->Buf[MsgHeaderSize]), 1, (size_t)BytesToWrite, pRxBuf->pFile->File);
 					ComInstance.Files[FileHandle].Length += (ULONG)BytesToWrite;
 					pRxBuf->RxBytes = (ULONG)BytesToWrite;
 					pRxBuf->pFile->Pointer = (ULONG)BytesToWrite;
@@ -1302,7 +1300,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 #endif
 				}
 
-				write(ComInstance.Files[FileHandle].File, (pContiDl->PayLoad), (size_t)BytesToWrite);
+				fwrite((pContiDl->PayLoad), 1, (size_t)BytesToWrite, ComInstance.Files[FileHandle].File);
 				pRxBuf->pFile->Pointer += BytesToWrite;
 				pRxBuf->RxBytes = BytesToWrite;
 
@@ -1399,14 +1397,14 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if ((pTxBuf->MsgLen + SIZEOF_RPLYBEGINREAD) <= pTxBuf->BufSize)
 				{
 					// Read all requested bytes as they can fit into the buffer
-					ReadBytes = read(pTxBuf->pFile->File, pReplyBeginRead->PayLoad, pTxBuf->MsgLen);
+					ReadBytes = fread(pReplyBeginRead->PayLoad, 1, pTxBuf->MsgLen, pTxBuf->pFile->File);
 					pTxBuf->BlockLen = pTxBuf->MsgLen + SIZEOF_RPLYBEGINREAD;
 					pTxBuf->State = TXIDLE;
 				}
 				else
 				{
 					// Read only up to full buffer size
-					ReadBytes = read(pTxBuf->pFile->File, pReplyBeginRead->PayLoad, (pTxBuf->BufSize - SIZEOF_RPLYBEGINREAD));
+					ReadBytes = fread(pReplyBeginRead->PayLoad, 1, (pTxBuf->BufSize - SIZEOF_RPLYBEGINREAD), pTxBuf->pFile->File);
 					pTxBuf->BlockLen = pTxBuf->BufSize - SIZEOF_RPLYBEGINREAD;
 					pTxBuf->State = TXFILEUPLOAD;
 				}
@@ -1514,13 +1512,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if ((BytesToRead + SIZEOF_RPLYCONTINUEREAD) <= pTxBuf->BufSize)
 				{
 					// Read all requested bytes as they can fit into the buffer
-					ReadBytes = read(pTxBuf->pFile->File, pReplyContinueRead->PayLoad, (size_t)BytesToRead);
+					ReadBytes = fread(pReplyContinueRead->PayLoad, 1, (size_t)BytesToRead, pTxBuf->pFile->File);
 					pTxBuf->BlockLen = BytesToRead + SIZEOF_RPLYCONTINUEREAD;
 					pTxBuf->State = TXIDLE;
 				}
 				else
 				{
-					ReadBytes = read(pTxBuf->pFile->File, pReplyContinueRead->PayLoad, (size_t)(pTxBuf->BufSize - SIZEOF_RPLYCONTINUEREAD));
+					ReadBytes = fread(pReplyContinueRead->PayLoad, 1, (size_t)(pTxBuf->BufSize - SIZEOF_RPLYCONTINUEREAD), pTxBuf->pFile->File);
 					pTxBuf->BlockLen = pTxBuf->BufSize - SIZEOF_RPLYCONTINUEREAD;
 					pTxBuf->State = TXFILEUPLOAD;
 				}
@@ -1626,14 +1624,14 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if ((pTxBuf->MsgLen + SIZEOF_RPLYBEGINGETFILE) <= pTxBuf->BufSize)
 				{
 					// Read all requested bytes as they can fit into the buffer
-					ReadBytes = read(pTxBuf->pFile->File, pReplyBeginGetFile->PayLoad, pTxBuf->MsgLen);
+					ReadBytes = fread(pReplyBeginGetFile->PayLoad, 1, pTxBuf->MsgLen, pTxBuf->pFile->File);
 					pTxBuf->BlockLen = ReadBytes + SIZEOF_RPLYBEGINGETFILE;
 					pTxBuf->State = TXIDLE;
 				}
 				else
 				{
 					// Read only up to full buffer size
-					ReadBytes = read(pTxBuf->pFile->File, pReplyBeginGetFile->PayLoad, (pTxBuf->BufSize - SIZEOF_RPLYBEGINGETFILE));
+					ReadBytes = fread(pReplyBeginGetFile->PayLoad, 1, (pTxBuf->BufSize - SIZEOF_RPLYBEGINGETFILE), pTxBuf->pFile->File);
 					pTxBuf->BlockLen = pTxBuf->BufSize - SIZEOF_RPLYBEGINGETFILE;
 					pTxBuf->State = TXGETFILE;
 				}
@@ -1748,13 +1746,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if ((BytesToRead + SIZEOF_RPLYCONTINUEGETFILE) <= pTxBuf->BufSize)
 				{
 					// Read all requested bytes as they can fit into the buffer
-					ReadBytes = read(pTxBuf->pFile->File, pReplyContinueGetFile->PayLoad, (size_t)BytesToRead);
+					ReadBytes = fread(pReplyContinueGetFile->PayLoad, 1, (size_t)BytesToRead, pTxBuf->pFile->File);
 					pTxBuf->BlockLen = ReadBytes + SIZEOF_RPLYCONTINUEGETFILE;
 					pTxBuf->State = TXIDLE;
 				}
 				else
 				{
-					ReadBytes = read(pTxBuf->pFile->File, pReplyContinueGetFile->PayLoad, (size_t)(pTxBuf->BufSize - SIZEOF_RPLYCONTINUEGETFILE));
+					ReadBytes = fread(pReplyContinueGetFile->PayLoad, 1, (size_t)(pTxBuf->BufSize - SIZEOF_RPLYCONTINUEGETFILE), pTxBuf->pFile->File);
 					pTxBuf->BlockLen = ReadBytes + SIZEOF_RPLYCONTINUEGETFILE;
 					pTxBuf->State = TXGETFILE;
 				}
@@ -1849,15 +1847,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			BytesToRead += (ULONG)pBeginList->BytesToReadMsb << 8;
 
 			snprintf((char*)pTxBuf->Folder, FILENAMESIZE, "%s", (char*)pBeginList->Path);
-			// pTxBuf->pFile->File = scandir((char*)pTxBuf->Folder, &(pTxBuf->pFile->namelist), 0, NULL);
-
-			pTxBuf->pFile->namelist = w_filesystem_scanDir((char*)pTxBuf->Folder, &pTxBuf->pFile->File, 1);
+			pTxBuf->pFile->File = scandir((char*)pTxBuf->Folder, &(pTxBuf->pFile->namelist), 0, NULL);
 
 			if (pTxBuf->pFile->File <= 0)
 			{
 				if (pTxBuf->pFile->File == 0)
 				{
-					// here if no files found, equal to error as "./" and "./lms_os/" normally
+					// here if no files found, equal to error as "./" and "../" normally
 					// always found
 					pReplyBeginList->ListSizeLsb = 0;
 					pReplyBeginList->ListSizeNsb1 = 0;
@@ -1898,10 +1894,10 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				// Start by calculating the length of the entire list
 				while (TmpN--)
 				{
-					if (1)
+					if ((DT_REG == pTxBuf->pFile->namelist[TmpN]->d_type) || (DT_DIR == pTxBuf->pFile->namelist[TmpN]->d_type) || (DT_LNK == pTxBuf->pFile->namelist[TmpN]->d_type))
 					{
-						Len += strlen(pTxBuf->pFile->namelist[TmpN].name);
-						if (pTxBuf->pFile->namelist[TmpN].isDir)
+						Len += strlen(pTxBuf->pFile->namelist[TmpN]->d_name);
+						if (DT_REG != pTxBuf->pFile->namelist[TmpN]->d_type)
 						{
 							// Make room room for ending "/"
 							Len++;
@@ -1960,7 +1956,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				{
 					TmpN--;
 
-					cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+					cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 
 					if (0 != NameLen)
 					{
@@ -1971,8 +1967,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 							while (*pSrcAdr) *pDstAdr++ = *pSrcAdr++;
 							Len += NameLen;
 
-							// TODO: WARNING memory free commented
-							// free((pTxBuf->pFile->namelist[TmpN]));
+							free(pTxBuf->pFile->namelist[TmpN]);
 
 							if (BytesToSend == Len)
 							{
@@ -2001,7 +1996,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				if (pTxBuf->pFile->Pointer >= pTxBuf->pFile->Size)
 				{
 #ifdef DEBUG
-					w_system_printf("Complete list of %lu Bytes uploaded\n", (unsigned long)pTxBuf->pFile->Length);
+					printf("Complete list of %lu Bytes uploaded\n", (unsigned long)pTxBuf->pFile->Length);
 #endif
 
 					pReplyBeginList->Status = END_OF_FILE;
@@ -2262,9 +2257,9 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 
 		snprintf(Folder, sizeof(ComInstance.Files[FileHandle].Name), "%s", (char*)(pMakeDir->Dir));
 
-		if (0 == w_filesystem_createDir(Folder))
+		if (0 == mkdir(Folder, DIRPERMISSIONS))
 		{
-			// chmod(Folder, DIRPERMISSIONS);
+			chmod(Folder, DIRPERMISSIONS);
 #ifdef DEBUG
 			w_system_printf("Folder %s created\n", Folder);
 #endif
@@ -2435,8 +2430,8 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 
 			if (UpdateFile >= 0)
 			{
-				write(UpdateFile, &Dummy, 1);
-				close(UpdateFile);
+				fwrite(&Dummy, 1, 1, UpdateFile);
+				fclose(UpdateFile);
 				system("reboot -d -f -i");
 			}
 		}
@@ -2892,7 +2887,7 @@ void      cComUpdate(void)
 						BytesToWrite = pRxBuf->BufSize;
 					}
 
-					write(pRxBuf->pFile->File, pRxBuf->Buf, (size_t)BytesToWrite);
+					fwrite(pRxBuf->Buf, 1, (size_t)BytesToWrite, pRxBuf->pFile->File);
 					pRxBuf->pFile->Pointer += (ULONG)BytesToWrite;
 					pRxBuf->RxBytes += (ULONG)BytesToWrite;
 
@@ -3098,14 +3093,14 @@ void      cComTxUpdate(UBYTE ChNo)
 
 			if (MsgLeft > pTxBuf->BufSize)
 			{
-				ReadBytes = read(pTxBuf->pFile->File, pTxBuf->Buf, (size_t)pTxBuf->BufSize);
+				ReadBytes = fread(pTxBuf->Buf, 1, (size_t)pTxBuf->BufSize, pTxBuf->pFile->File);
 				pTxBuf->pFile->Pointer += ReadBytes;
 				pTxBuf->SendBytes += ReadBytes;
 				pTxBuf->State = TXFILEUPLOAD;
 			}
 			else
 			{
-				ReadBytes = read(pTxBuf->pFile->File, pTxBuf->Buf, (size_t)MsgLeft);
+				ReadBytes = fread(pTxBuf->Buf, 1, (size_t)MsgLeft, pTxBuf->pFile->File);
 				pTxBuf->pFile->Pointer += ReadBytes;
 				pTxBuf->SendBytes += ReadBytes;
 
@@ -3140,14 +3135,14 @@ void      cComTxUpdate(UBYTE ChNo)
 
 			if (MsgLeft > pTxBuf->BufSize)
 			{
-				ReadBytes = read(pTxBuf->pFile->File, pTxBuf->Buf, (size_t)pTxBuf->BufSize);
+				ReadBytes = fread(pTxBuf->Buf, 1, (size_t)pTxBuf->BufSize, pTxBuf->pFile->File);
 				pTxBuf->pFile->Pointer += ReadBytes;
 				pTxBuf->SendBytes += ReadBytes;
 				pTxBuf->State = TXGETFILE;
 			}
 			else
 			{
-				ReadBytes = read(pTxBuf->pFile->File, pTxBuf->Buf, (size_t)MsgLeft);
+				ReadBytes = fread(pTxBuf->Buf, 1, (size_t)MsgLeft, pTxBuf->pFile->File);
 				pTxBuf->pFile->Pointer += ReadBytes;
 				pTxBuf->SendBytes += ReadBytes;
 
@@ -3241,7 +3236,7 @@ void      cComTxUpdate(UBYTE ChNo)
 
 				TmpN--;
 
-				cComGetNameFromScandirList(&(pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
+				cComGetNameFromScandirList((pTxBuf->pFile->namelist[TmpN]), (char*)TmpFileName, &NameLen, (UBYTE*)pTxBuf->Folder);
 
 				if ((NameLen + Len) <= BytesToSend)                         // Does the next name fit into the buffer?
 				{
@@ -3249,11 +3244,10 @@ void      cComTxUpdate(UBYTE ChNo)
 					Len += NameLen;
 
 #ifdef DEBUG
-					w_system_printf("List entry no = %d; File name = %s\n", TmpN, pTxBuf->pFile->namelist[TmpN].name);
+					printf("List entry no = %d; File name = %s\n", TmpN, pTxBuf->pFile->namelist[TmpN]->d_name);
 #endif
 
-					// TODO: WARNING memory free commented
-					// free(pTxBuf->pFile->namelist[TmpN]);
+					free(pTxBuf->pFile->namelist[TmpN]);
 
 					if (BytesToSend == Len)
 					{ // buffer is filled up now exit
@@ -4092,7 +4086,7 @@ void      cComWriteFile(void)
 			pTxBuf->pDir->isDir = 1;
 			pTxBuf->pDir->exists = 1;
 			pTxBuf->pDir->name = (char*)pFileName;*/
-			pTxBuf->pDir = w_filesystem_openDir((char*)pFileName);
+			pTxBuf->pDir = (DIR*)opendir((char*)pFileName);
 
 			if (cComGetNxtFile(pTxBuf->pDir, pName))
 			{

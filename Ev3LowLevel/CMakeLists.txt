@@ -5,6 +5,7 @@ cmake_minimum_required (VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 11)
 
+
 project (Ev3LowLevel VERSION 3.22 LANGUAGES C)
 
 set (LMS2012_SPECIALVERS "COMPAT")

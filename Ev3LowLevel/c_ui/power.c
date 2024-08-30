@@ -47,8 +47,8 @@ static DATAF cUiPowerReadAttr(int fd)
     char str[20 + 1] = { 0 };
     int value;
 
-    lseek(fd, 0, SEEK_SET);
-    read(fd, str, 20);
+    fseek(fd, 0, SEEK_SET);
+    fread(str, 1, 20, fd);
     value = atoi(str);
 
     // value is in μV/μA

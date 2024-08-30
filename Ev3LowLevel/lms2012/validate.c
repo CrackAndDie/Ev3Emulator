@@ -24,6 +24,11 @@
 
 #include "w_filesystem.h"
 #include "w_system.h"
+#ifdef _WIN32
+#include "dirent_win.h"
+#else
+#include <dirent.h>
+#endif
 
 #include "bytecodes.h"
 #include "lmstypes.h"
@@ -757,7 +762,7 @@ RESULT cValidateInit(void)
 	UWORD   OpCode;
 	char    Buffer[8000];
 
-	w_filesystem_createDir("./lms_os/bytecodeassembler");
+	mkdir("./lms_os/bytecodeassembler", DIRPERMISSIONS);
 
 	pFile = fopen("./lms_os/bytecodeassembler/o.c", "w");
 	fprintf(pFile, "//******************************************************************************\n");
@@ -800,7 +805,7 @@ RESULT cValidateInit(void)
 	if (system("./lms_os/projects/lms2012/bytecodeassembler/oasm") >= 0)
 	{
 		w_system_printf("Compiling\n");
-		w_filesystem_sync();
+		sync();
 	}
 
 

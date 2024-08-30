@@ -34,38 +34,38 @@ namespace Ev3Emulator.LowLevel
 
 	public static class FilesystemWrapper
 	{
-		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
-		private extern static void reg_w_filesystem_createDir(w_filesystem_createDirAction createDir);
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate int w_filesystem_createDirAction(string name);
+		//[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		//private extern static void reg_w_filesystem_createDir(w_filesystem_createDirAction createDir);
+		//[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		//public delegate int w_filesystem_createDirAction(string name);
 
-		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
-		private extern static void reg_w_filesystem_readDir(w_filesystem_readDirAction readDir);
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate FILESYSTEM_ENTITY w_filesystem_readDirAction(string name, int offset);
+		//[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		//private extern static void reg_w_filesystem_readDir(w_filesystem_readDirAction readDir);
+		//[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		//public delegate FILESYSTEM_ENTITY w_filesystem_readDirAction(string name, int offset);
 
-		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
-		private extern static void reg_w_filesystem_scanDir(w_filesystem_scanDirAction scanDir);
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate IntPtr w_filesystem_scanDirAction(string name, ref int amount, byte sort);
+		//[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		//private extern static void reg_w_filesystem_scanDir(w_filesystem_scanDirAction scanDir);
+		//[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		//public delegate IntPtr w_filesystem_scanDirAction(string name, ref int amount, byte sort);
 
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
 		private extern static void reg_w_filesystem_getUsedMemory(w_filesystem_getUsedMemoryAction getUsedMemory);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate int w_filesystem_getUsedMemoryAction();
 
-		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
-		private extern static void reg_w_filesystem_sync(w_filesystem_syncAction sync);
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void w_filesystem_syncAction();
+		//[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		//private extern static void reg_w_filesystem_sync(w_filesystem_syncAction sync);
+		//[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		//public delegate void w_filesystem_syncAction();
 
 		public static void Init()
 		{
-			reg_w_filesystem_createDir(CreateDir);
-			reg_w_filesystem_readDir(ReadDir);
-			reg_w_filesystem_scanDir(ScanDir);
+			//reg_w_filesystem_createDir(CreateDir);
+			//reg_w_filesystem_readDir(ReadDir);
+			//reg_w_filesystem_scanDir(ScanDir);
 			reg_w_filesystem_getUsedMemory(GetUsedMemory);
-			reg_w_filesystem_sync(Sync);
+			// reg_w_filesystem_sync(Sync);
 		}
 
 		private static int CreateDir(string path)

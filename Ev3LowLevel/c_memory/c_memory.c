@@ -63,11 +63,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-//#ifdef _WIN32
-//#include "dirent_win.h"
-//#else
-//#include <dirent.h>
-//#endif
+#ifdef _WIN32
+#include "dirent_win.h"
+#else
+#include <dirent.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -292,7 +292,7 @@ DSPSTAT   cMemoryFreeHandle(PRGID PrgId, HANDLER Handle)
 				{
 					(*pFDescr).Access = 0;
 					fclose((*pFDescr).hFile);
-					w_filesystem_sync();
+					sync();
 					Result = NOBREAK;
 				}
 #ifdef DEBUG
@@ -717,8 +717,8 @@ int       cMemorySort(void* ppFirst, void* ppSecond)
 	char* pFirst;
 	char* pSecond;
 
-	pFirst = (char*)(*(const struct FILESYSTEM_ENTITY**)ppFirst)->name;
-	pSecond = (char*)(*(const struct FILESYSTEM_ENTITY**)ppSecond)->name;
+	pFirst = (char*)(*(const struct dirent**)ppFirst)->d_name;
+	pSecond = (char*)(*(const struct dirent**)ppSecond)->d_name;
 
 	First = FindDot(pFirst);
 	Second = FindDot(pSecond);
@@ -756,26 +756,23 @@ int       cMemorySort(void* ppFirst, void* ppSecond)
 
 DATA8     cMemoryFindSubFolders(char* pFolderName)
 {
-	struct  FILESYSTEM_ENTITY* NameList;
+	struct  dirent** NameList;
 	int     Items;
 	DATA8   Folders = 0;
 
-	NameList = w_filesystem_scanDir(pFolderName, &Items, 1);
-
-	// Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct FILESYSTEM_ENTITY**, const struct FILESYSTEM_ENTITY**))cMemorySort);
-
+	Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
 	if (Items >= 0)
 	{
 		while (Items--)
 		{
-			if (NameList[Items].name[0] != '.')
+			if ((*NameList[Items]).d_name[0] != '.')
 			{
-				if ((NameList[Items].name[0] != 'C') || (NameList[Items].name[1] != 'V') || (NameList[Items].name[2] != 'S'))
+				if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
 				{
 					Folders++;
 				}
 			}
-			// free(NameList[Items]);
+			free(NameList[Items]);
 		}
 		free(NameList);
 	}
@@ -845,52 +842,49 @@ DATA8     cMemoryFindType(char* pExt)
 DATA8     cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, char* pFolderName, char* pSubFolderName)
 {
 	DATA8   Filetype = 0;
-	struct  FILESYSTEM_ENTITY* NameList;
+	struct  dirent** NameList;
 	int     Items;
 	int     Tmp;
 	DATA8   Char;
 	DATA8   Folders = 0;
 
 	pSubFolderName[0] = 0;
-
-	NameList = w_filesystem_scanDir(pFolderName, &Items, 1);
-	// Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct FILESYSTEM_ENTITY**, const struct FILESYSTEM_ENTITY**))cMemorySort);
-
+	Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
 	Tmp = 0;
 
 	if (Items >= 0)
 	{
 		while (Tmp < Items)
 		{
-			if (NameList[Tmp].name[0] != '.')
+			if ((*NameList[Tmp]).d_name[0] != '.')
 			{
-				if ((NameList[Tmp].name[0] != 'C') || (NameList[Tmp].name[1] != 'V') || (NameList[Tmp].name[2] != 'S'))
+				if (((*NameList[Tmp]).d_name[0] != 'C') || ((*NameList[Tmp]).d_name[1] != 'V') || ((*NameList[Tmp]).d_name[2] != 'S'))
 				{
 					Folders++;
 					if (Item == Folders)
 					{
 						Char = 0;
-						while ((NameList[Tmp].name[Char]) && (NameList[Tmp].name[Char] != '.'))
+						while (((*NameList[Tmp]).d_name[Char]) && ((*NameList[Tmp]).d_name[Char] != '.'))
 						{
 							Char++;
 						}
-						if (NameList[Tmp].name[Char] == '.')
+						if ((*NameList[Tmp]).d_name[Char] == '.')
 						{
-							Filetype = cMemoryFindType(&NameList[Tmp].name[Char]);
+							Filetype = cMemoryFindType(&(*NameList[Tmp]).d_name[Char]);
 
 							// delete extension
-							NameList[Tmp].name[Char] = 0;
-							snprintf((char*)pSubFolderName, (int)MaxLength, "%s", NameList[Tmp].name);
+							(*NameList[Tmp]).d_name[Char] = 0;
+							snprintf((char*)pSubFolderName, (int)MaxLength, "%s", (*NameList[Tmp]).d_name);
 						}
 						else
 						{ // must be a folder or file without extension
-							snprintf((char*)pSubFolderName, (int)MaxLength, "%s", NameList[Tmp].name);
+							snprintf((char*)pSubFolderName, (int)MaxLength, "%s", (*NameList[Tmp]).d_name);
 							Filetype = TYPE_FOLDER;
 						}
 					}
 				}
 			}
-			// free(NameList[Tmp]);
+			free(NameList[Tmp]);
 			Tmp++;
 		}
 		free(NameList);
@@ -902,8 +896,8 @@ DATA8     cMemoryGetSubFolderName(DATA8 Item, DATA8 MaxLength, char* pFolderName
 
 void      cMemoryDeleteSubFolders(char* pFolderName)
 {
-	struct  FILESYSTEM_ENTITY* d = (FILESYSTEM_ENTITY*)malloc(sizeof(FILESYSTEM_ENTITY));
-	struct FILESYSTEM_ENTITY* dir;
+	struct  dirent* d;
+	DIR* dir;
 	char    buf[256];
 	DATA8   DeleteOk = 1;
 
@@ -914,26 +908,21 @@ void      cMemoryDeleteSubFolders(char* pFolderName)
 
 	if (DeleteOk)
 	{
-		dir = w_filesystem_openDir(pFolderName);
+		dir = opendir(pFolderName);
 
 		if (dir != NULL)
 		{
-			*d = w_filesystem_readDir(dir->name, dir->searchOffset);
-			dir->searchOffset++;
-			while ((d->result == OK) && d->exists)
+			while ((d = readdir(dir)))
 			{
 #ifdef DEBUG
-				w_system_printf("%s\n", d->name);
+				printf("%s\n", d->d_name);
 #endif
 
-				sprintf(buf, "%s/%s", pFolderName, d->name);
+				sprintf(buf, "%s/%s", pFolderName, d->d_name);
 				remove(buf);
 				cMemoryDeleteCacheFile(buf);
-
-				*d = w_filesystem_readDir(dir->name, dir->searchOffset);
-				dir->searchOffset++;
 			}
-			w_filesystem_closeDir(dir);
+			closedir(dir);
 			remove(pFolderName);
 		}
 		else
@@ -947,7 +936,7 @@ void      cMemoryDeleteSubFolders(char* pFolderName)
 
 DATA32    cMemoryFindSize(char* pFolderName, DATA32* pFiles)
 {
-	struct  FILESYSTEM_ENTITY* NameList;
+	struct  dirent** NameList;
 	struct  stat Status;
 	int     Items;
 	DATA32  Size = 0;
@@ -956,17 +945,16 @@ DATA32    cMemoryFindSize(char* pFolderName, DATA32* pFiles)
 	if (stat(pFolderName, &Status) == 0)
 	{
 		Size += (DATA32)Status.st_size;
-		NameList = w_filesystem_scanDir(pFolderName, &Items, 1);
-		// Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
+		Items = scandir(pFolderName, &NameList, 0, (int (*)(const struct dirent**, const struct dirent**))cMemorySort);
 		if (Items >= 0)
 		{
 			*pFiles = (DATA32)Items;
 
 			while (Items--)
 			{
-				stat(NameList[Items].name, &Status);
+				stat((*NameList[Items]).d_name, &Status);
 				Size += (DATA32)Status.st_size;
-				// free(NameList[Items]);
+				free(NameList[Items]);
 			}
 			free(NameList);
 		}
@@ -1035,24 +1023,23 @@ DATA8     cMemoryGetCacheFiles(void)
 
 DATA8     cMemoryFindFiles(char* pFolderName)
 {
-	struct  FILESYSTEM_ENTITY* NameList;
+	struct  dirent** NameList;
 	int     Items;
 	DATA8   Files = 0;
 
-	// Items = scandir(pFolderName, &NameList, 0, alphasort);
-	NameList = w_filesystem_scanDir(pFolderName, &Items, 2);
+	Items = scandir(pFolderName, &NameList, 0, alphasort);
 	if (Items >= 0)
 	{
 		while (Items--)
 		{
-			if (NameList[Items].name[0] != '.')
+			if ((*NameList[Items]).d_name[0] != '.')
 			{
-				if ((NameList[Items].name[0] != 'C') || (NameList[Items].name[1] != 'V') || (NameList[Items].name[2] != 'S'))
+				if (((*NameList[Items]).d_name[0] != 'C') || ((*NameList[Items]).d_name[1] != 'V') || ((*NameList[Items]).d_name[2] != 'S'))
 				{
 					Files++;
 				}
 			}
-			// free(NameList[Items]);
+			free(NameList[Items]);
 		}
 		free(NameList);
 	}
@@ -1302,7 +1289,7 @@ DSPSTAT   cMemoryWriteFile(PRGID PrgId, HANDLER Handle, DATA32 Size, DATA8 Del, 
 			cMemoryGetUsage(NULL, &Free, 1);
 			if (((Size + (KB - 1)) / KB) <= Free)
 			{
-				if (write((*pFDescr).hFile, pSource, Size) == Size)
+				if (fwrite(pSource, 1, Size, (*pFDescr).hFile) == Size)
 				{
 #ifdef DEBUG_C_MEMORY_FILE
 					w_system_printf("Write to  %-2d    %5d %s [%d]\n", Handle, (*pFDescr).hFile, (*pFDescr).Filename, Size);
@@ -1312,7 +1299,7 @@ DSPSTAT   cMemoryWriteFile(PRGID PrgId, HANDLER Handle, DATA32 Size, DATA8 Del, 
 						if (Del != DEL_NONE)
 						{
 							Size = strlen(Delimiter[Del]);
-							if (write((*pFDescr).hFile, Delimiter[Del], Size) == Size)
+							if (fwrite(Delimiter[Del], 1, Size, (*pFDescr).hFile) == Size)
 							{
 								Result = NOBREAK;
 							}
@@ -1364,7 +1351,7 @@ DSPSTAT   cMemoryReadFile(PRGID PrgId, HANDLER Handle, DATA32 Size, DATA8 Del, D
 				Last = 0;
 				while ((No == 1) && (Size > 0))
 				{
-					No = (DATA8)read((*pFDescr).hFile, &Tmp, 1);
+					No = (DATA8)fread(&Tmp, 1, 1, (*pFDescr).hFile);
 
 					if (Del < DELS)
 					{
@@ -1536,7 +1523,7 @@ RESULT    cMemoryGetMediaName(char* pChar, char* pName)
 
 typedef   struct
 {
-	FILESYSTEM_ENTITY* pDir;
+	DIR* pDir;
 	DATA16  Entries;
 	DATA8   Type;
 	DATA8   Sort;
@@ -1698,7 +1685,7 @@ RESULT    cMemoryOpenFolder(PRGID PrgId, DATA8 Type, DATA8* pFolderName, HANDLER
 		(*pMemory).Entries = 0;
 		(*pMemory).Type = Type;
 		snprintf((char*)(*pMemory).Folder, MAX_FILENAME_SIZE, "%s", (char*)pFolderName);
-		(*pMemory).pDir = w_filesystem_openDir((char*)(*pMemory).Folder);
+		(*pMemory).pDir = opendir((char*)(*pMemory).Folder);
 		if ((*pMemory).pDir == NULL)
 		{
 			Result = FAIL;
@@ -1743,7 +1730,7 @@ RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 	RESULT  Result;
 	FOLDER* pMemory;
 	char    Ext[vmEXTSIZE];
-	struct  FILESYSTEM_ENTITY* pEntry = (FILESYSTEM_ENTITY*)malloc(sizeof(FILESYSTEM_ENTITY));
+	struct  dirent* pEntry;
 
 	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
 	*pItems = 0;
@@ -1753,39 +1740,38 @@ RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 
 		if ((*pMemory).pDir != NULL)
 		{
-			*pEntry = w_filesystem_readDir((*pMemory).pDir->name, (*pMemory).pDir->searchOffset);
-			(*pMemory).pDir->searchOffset++;
-			if (pEntry != NULL && (*pEntry).result == OK)
+			pEntry = readdir((*pMemory).pDir);
+			if (pEntry != NULL)
 			{ // More entries
 
 				if ((*pMemory).Entries < DIR_DEEPT)
 				{
-					if ((*pEntry).name[0] != '.')
+					if ((*pEntry).d_name[0] != '.')
 					{
-						if (strcmp((*pEntry).name, "CVS") != 0)
+						if (strcmp((*pEntry).d_name, "CVS") != 0)
 						{
 							if ((*pMemory).Type == TYPE_FOLDER)
 							{
-								if ((*pEntry).isDir)
+								if (((*pEntry).d_type == DT_DIR) || ((*pEntry).d_type == DT_LNK))
 								{ // Folders
 
-									cMemorySortEntry(pMemory, 1, (*pEntry).name);
+									cMemorySortEntry(pMemory, (*pEntry).d_type, (*pEntry).d_name);
 #ifdef DEBUG
-									w_system_printf("[%s](%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pEntry).name);
+									printf("[%s](%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pEntry).d_name);
 #endif
 								}
 							}
 							else
 							{
-								if (!(*pEntry).isDir)
+								if ((*pEntry).d_type == DT_REG)
 								{ // Files
 
-									FindName((*pEntry).name, NULL, NULL, Ext);
+									FindName((*pEntry).d_name, NULL, NULL, Ext);
 									if (cMemoryFindType(Ext))
 									{
-										cMemorySortEntry(pMemory, 2, (*pEntry).name);
+										cMemorySortEntry(pMemory, (*pEntry).d_type, (*pEntry).d_name);
 #ifdef DEBUG
-										w_system_printf("[%s](%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pEntry).name);
+										printf("[%s](%d) %s\n", (char*)(*pMemory).Folder, (*pMemory).Sort, (*pEntry).d_name);
 #endif
 									}
 								}
@@ -1799,7 +1785,7 @@ RESULT    cMemoryGetFolderItems(PRGID PrgId, HANDLER Handle, DATA16* pItems)
 			{ // No more entries
 
 				cMemorySortList(pMemory);
-				w_filesystem_closeDir((*pMemory).pDir);
+				closedir((*pMemory).pDir);
 				(*pMemory).pDir = NULL;
 			}
 		}
@@ -2076,7 +2062,7 @@ void      cMemoryCloseFolder(PRGID PrgId, HANDLER* pHandle)
 
 		if ((*pMemory).pDir != NULL)
 		{
-			w_filesystem_closeDir((*pMemory).pDir);
+			closedir((*pMemory).pDir);
 		}
 		cMemoryFreePool(PrgId, (void*)pMemory);
 	}
@@ -2481,7 +2467,7 @@ void      cMemoryFile(void)
 		pDestination = (DATA8*)Buffer;
 		DataF = (DATAF)0;
 		DspStat = cMemoryReadFile(TmpPrgId, TmpHandle, (DATA32)Lng, Del, pDestination);
-		sscanf(Buffer, "%f", &DataF);
+		int __unused = sscanf(Buffer, "%f", &DataF);
 
 		*(DATAF*)PrimParPointer() = DataF;
 	}
@@ -2813,7 +2799,7 @@ void      cMemoryFile(void)
 						if (DspStat == NOBREAK)
 						{
 							DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle2);
-							w_filesystem_sync();
+							sync();
 						}
 					}
 				}
@@ -2866,7 +2852,7 @@ void      cMemoryFile(void)
 #endif
 				DspStat = cMemoryCloseFile(TmpPrgId, TmpHandle);
 
-				w_filesystem_sync();
+				sync();
 			}
 		}
 		DspStat = NOBREAK;
@@ -2959,7 +2945,9 @@ void      cMemoryFile(void)
 		}
 		else
 		{
-			w_filesystem_createDir((char*)PathBuf);
+			mkdir((char*)PathBuf, DIRPERMISSIONS);
+			chmod((char*)PathBuf, DIRPERMISSIONS);
+			sync();
 
 #ifdef DEBUG_TRACE_FILENAME
 			w_system_printf("c_memory  cMemoryFile: MAKE_FOLDER [%s]\n", PathBuf);
@@ -3000,7 +2988,7 @@ void      cMemoryFile(void)
 #ifdef DEBUG_TRACE_FILENAME
 					w_system_printf("  c_memory  cMemoryFile: remove    [%s]\n", DestinationBuf);
 #endif
-					w_filesystem_sync();
+					sync();
 				}
 
 				Size = cMemoryFindSize((char*)SourceBuf, &Files);
@@ -3015,7 +3003,7 @@ void      cMemoryFile(void)
 					DspStat = FAILBREAK;
 				}
 
-				w_filesystem_sync();
+				sync();
 				SetUiUpdate();
 			}
 		}
@@ -4265,7 +4253,7 @@ void      cMemoryArrayAppend(void)
 	void* pValue;
 	DESCR* pDescr;
 	DATA32  Elements;
-	DATA32  Index;
+	DATA32  Index = 0;
 	void* pArray;
 	DATA8* pData8;
 	DATA16* pData16;
@@ -4624,7 +4612,7 @@ void      cMemoryFileName(void)
 
 		snprintf(Buffer, 2 * MAX_FILENAME_SIZE + 32, "tar -cz -f %s%s%s -C %s %s%s &> /dev/null", Folder, Name, vmEXT_ARCHIVE, Folder, Name, Ext);
 		system(Buffer);
-		w_filesystem_sync();
+		sync();
 	}
 	break;
 
@@ -4637,7 +4625,7 @@ void      cMemoryFileName(void)
 
 		snprintf(Buffer, 2 * MAX_FILENAME_SIZE + 32, "tar -xz -f %s%s%s -C %s &> /dev/null", Folder, Name, vmEXT_ARCHIVE, Folder);
 		system(Buffer);
-		w_filesystem_sync();
+		sync();
 	}
 	break;
 

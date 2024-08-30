@@ -129,6 +129,22 @@
 #define vmWIFIPASSKEYSIZE (33)  // WiFi pass key size (including zero termination)
 #define vmWIFI_FILE_NAME "WiFi"  // File used in "WiFi" app to save status
 
+// Permissions
+
+#ifdef _WIN32
+
+#define   FILEPERMISSIONS               0
+#define   DIRPERMISSIONS                0
+#define   SYSPERMISSIONS                0
+
+#else
+
+#define   FILEPERMISSIONS               (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+#define   DIRPERMISSIONS                (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
+#define   SYSPERMISSIONS                (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+
+#endif
+
 // Opcodes
 
 typedef enum { 

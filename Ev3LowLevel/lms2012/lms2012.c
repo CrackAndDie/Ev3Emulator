@@ -2134,9 +2134,9 @@ RESULT    mSchedInit(int argc)
 	w_system_printf("PrimDispatchTable filled in schedinit \n");
 
 	// Be sure necessary folders exist
-	if (w_filesystem_createDir(vmSETTINGS_DIR) == 0)
+	if (mkdir(vmSETTINGS_DIR, DIRPERMISSIONS) == 0)
 	{
-		// chmod(vmSETTINGS_DIR, DIRPERMISSIONS); // TODO: chmod
+		chmod(vmSETTINGS_DIR, DIRPERMISSIONS); 
 	}
 
 	w_system_printf("Dir created in schedinit: %s \n", vmSETTINGS_DIR);
@@ -4627,7 +4627,7 @@ void  System(void)
 #ifndef DISABLE_SYSTEM_BYTECODE
 	Status = (DATA32)system((char*)pCmd);
 #endif
-	w_filesystem_sync();
+	sync();
 
 	*(DATA32*)PrimParPointer() = Status;
 }
