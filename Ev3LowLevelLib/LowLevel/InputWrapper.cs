@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ev3Emulator.LowLevel
 {
@@ -68,6 +69,27 @@ namespace Ev3Emulator.LowLevel
 		public ushort Align;
 	}
 
+    public unsafe struct ANALOG
+    {
+        public fixed short InPin1[4];         //!< Analog value at input port connection 1
+        public fixed short InPin6[4];         //!< Analog value at input port connection 6
+        public fixed short OutPin5[4];       //!< Analog value at output port connection 5
+        public short BatteryTemp;            //!< Battery temperature
+        public short MotorCurrent;           //!< Current flowing to motors
+        public short BatteryCurrent;         //!< Current flowing from the battery
+        public short Cell123456;             //!< Voltage at battery cell 1, 2, 3,4, 5, and 6
+
+        public fixed short OutPin5Low[4];    //!< Analog value at output port connection 5 when connection 6 is low
+
+        public fixed sbyte Updated[4];
+
+        public fixed sbyte InDcm[4];          //!< Input port device types
+        public fixed sbyte InConn[4];
+
+        public fixed sbyte OutDcm[4];        //!< Output port device types
+        public fixed sbyte OutConn[4];
+    }
+
 	public static class InputWrapper
 	{
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
@@ -95,7 +117,12 @@ namespace Ev3Emulator.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_input_ioctlUARTDEVCONAction(int par, IntPtr data);
 
-		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+        private extern static void reg_w_input_updateANALOG(reg_w_input_updateANALOGAction updateANALOG);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void reg_w_input_updateANALOGAction(IntPtr data);
+
+        [DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
 		private extern static void reg_w_input_writeData(reg_w_input_writeDataAction writeData);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_input_writeDataAction(int par, IntPtr data, int len);
@@ -108,11 +135,13 @@ namespace Ev3Emulator.LowLevel
 			reg_w_input_ioctlIICDEVCON(IoctlIICDEVCON);
 			reg_w_input_ioctlUARTCTL(IoctlUARTCTL);
 			reg_w_input_ioctlUARTDEVCON(IoctlUARTDEVCON);
+            reg_w_input_updateANALOG(UpdateANALOG);
 			reg_w_input_writeData(WriteData);
 		}
 
-		private static void IoctlIICDAT(int par, IntPtr data)
+		private unsafe static void IoctlIICDAT(int par, IntPtr data)
 		{
+			var dt = (IICDAT*)data.ToPointer();
 			// TODO: ...
 		}
 
@@ -121,22 +150,33 @@ namespace Ev3Emulator.LowLevel
 			// TODO: ...
 		}
 
-		private static void IoctlIICDEVCON(int par, IntPtr data)
+		private unsafe static void IoctlIICDEVCON(int par, IntPtr data)
 		{
-			// TODO: ...
-		}
+            var dt = (DEVCON*)data.ToPointer();
+            // TODO: ...
+        }
 
 		private static void IoctlUARTCTL(int par, IntPtr data)
 		{
 			// TODO: ...
 		}
 
-		private static void IoctlUARTDEVCON(int par, IntPtr data)
+		private unsafe static void IoctlUARTDEVCON(int par, IntPtr data)
 		{
-			// TODO: ...
-		}
+            var dt = (DEVCON*)data.ToPointer();
+            // TODO: ...
+        }
 
-		private static void WriteData(int par, IntPtr data, int len)
+        private unsafe static void UpdateANALOG(IntPtr data)
+        {
+            var dt = (ANALOG*)data.ToPointer();
+
+			dt->OutConn[1] = 125;
+			dt->OutDcm[1] = 8;
+            // TODO: ...
+        }
+
+        private static void WriteData(int par, IntPtr data, int len)
 		{
 			// TODO: ...
 		}

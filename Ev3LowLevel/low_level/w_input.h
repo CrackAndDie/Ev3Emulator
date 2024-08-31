@@ -23,6 +23,10 @@ __declspec(dllexport) void reg_w_input_ioctlUARTCTL(void (*f)(int par, UARTCTL* 
 void (*w_input_ioctlUARTDEVCON)(int par, DEVCON* data);
 __declspec(dllexport) void reg_w_input_ioctlUARTDEVCON(void (*f)(int par, DEVCON* data));
 
+// update ANALOG
+void (*w_input_updateANALOG)(ANALOG* data);
+__declspec(dllexport) void reg_w_input_updateANALOG(void (*f)(ANALOG* data));
+
 // ------- writes
 
 // write to uart/adc/dcm  -  0, 1, 2

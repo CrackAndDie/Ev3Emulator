@@ -2913,6 +2913,8 @@ static void cInputDcmUpdate(UWORD Time)
 
 	if (InputInstance.DCMUpdate)
 	{
+		w_input_updateANALOG(InputInstance.pAnalog);
+
 		for (Device = 0; Device < DEVICES; Device++)
 		{
 
