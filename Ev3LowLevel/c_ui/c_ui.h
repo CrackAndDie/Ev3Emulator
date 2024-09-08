@@ -404,6 +404,8 @@ typedef   struct
   OBJID     ScreenObjId;
 
   DATA8     ShutDown;
+  DATA8     BeforeShutDown;
+
   DATA8     Accu;
   DATA8     PowerShutdown;
   DATA8     PowerState;

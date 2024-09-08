@@ -9,13 +9,19 @@ void w_system_startMain(void) {
 	// init shite
 
 	// clear log file
-	int     File;
+	ptrdiff_t     File;
 	File = fopen(__LOG_FILENAME, "w");
 	fclose(File);
 
 	w_system_printf("starting main... \n");
 
 	lmsMain(0);
+}
+
+void w_system_stopMain(void) {
+	w_system_printf("stopping main from outside... \n");
+
+	lmsStop();
 }
 
 int w_system_printf(const char* format, ...) {
@@ -26,7 +32,7 @@ int w_system_printf(const char* format, ...) {
 #ifndef DEBUG_TO_FILE
 	res = vprintf(format, argptr);
 #else
-	int     File;
+	ptrdiff_t     File;
 	File = fopen(__LOG_FILENAME, "a");
 	if (File >= MIN_HANDLE)
 	{

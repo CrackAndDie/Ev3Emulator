@@ -52,12 +52,12 @@ namespace Ev3Emulator.LowLevel
 			return data;
 		}
 
-		public static byte[] ConvertToRgba8888(byte[] data)
+		public static byte[] ConvertToRgba8888(byte[] data, bool isDisabled = false)
 		{
 			byte[] outData = new byte[data.Length * 4];
 			for (int i = 0; i < data.Length; i++)
 			{
-				var clr = GetColor(data[i]);
+				var clr = GetColor(data[i], isDisabled);
 				outData[i * 4] = (byte)clr.R;
 				outData[i * 4 + 1] = (byte)clr.G;
 				outData[i * 4 + 2] = (byte)clr.B;
@@ -67,9 +67,12 @@ namespace Ev3Emulator.LowLevel
 			return outData;
 		}
 
-		private static (byte A, byte R, byte G, byte B) GetColor(byte clr)
+		private static (byte A, byte R, byte G, byte B) GetColor(byte clr, bool isDisabled = false)
 		{
-			if (clr > 0)
+			if (isDisabled)
+                return (255, 36, 121, 78);
+
+            if (clr > 0)
 			{
 				return (0, 0, 0, 0);
 			}

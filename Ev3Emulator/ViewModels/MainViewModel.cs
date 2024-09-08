@@ -5,15 +5,14 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Ev3Emulator.Interfaces;
 using Ev3Emulator.LowLevel;
+using Ev3LowLevelLib;
+using Hypocrite.Core.Container;
 using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
 using Prism.Commands;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace Ev3Emulator.ViewModels;
 
@@ -21,7 +20,6 @@ public class MainViewModel : ViewModelBase
 {
 	public MainViewModel()
 	{
-		StartCommand = new DelegateCommand(OnStartCommand);
 	}
 
 	public override void OnViewReady()
@@ -32,15 +30,17 @@ public class MainViewModel : ViewModelBase
 		base.OnViewReady();
 
 		// inits
-		SystemWrapper.LmsExited += OnLmsVmExited;
-		FilesystemWrapper.Init();
-		TimeWrapper.Init();
-		InputWrapper.Init(); // TODO:
-		MotorsWrapper.Init(); // TODO:
-		SoundWrapper.Init(); // TODO:
-		LcdWrapper.Init(UpdateLcd, UpdateLed);
-		ButtonsWrapper.Init(UpdateButtons);
-	}
+		Ev3Entity.Init();
+		Ev3Entity.InitLcd(UpdateLcd, UpdateLed);
+        Ev3Entity.InitButtons(UpdateButtons);
+        Ev3Entity.LmsExited += OnLmsVmExited;
+
+		GetView<IMainView>().CenterButtonPressed += OnCenterButtonPressed;
+		GetView<IMainView>().CenterButtonReleased += OnCenterButtonReleased;
+
+		// resets
+		OnLmsVmExited();
+    }
 
 	private void UpdateLcd(byte[] bmpData)
 	{
@@ -75,37 +75,39 @@ public class MainViewModel : ViewModelBase
 			lock (_buttonsLock)
 				return _lastButtons ?? _defaultButtons;
 		}
-		catch (Exception ex)
+		catch (Exception)
 		{
 			return _defaultButtons;
 		}
 	}
 
-	private void OnStartCommand()
+	private void OnCenterButtonPressed()
 	{
-		if (Design.IsDesignMode)
-			return;
+        if (Design.IsDesignMode)
+            return;
 
-		if (_ev3Thread != null && _ev3Thread.IsAlive)
-			return;
+        Ev3Entity.OnCenterButtonPressed();
+    }
 
-		_ev3Thread = new Thread(SystemWrapper.MainLms);
-		_ev3Thread.Start();
-	}
+	private void OnCenterButtonReleased()
+	{
+        if (Design.IsDesignMode)
+            return;
+
+        Ev3Entity.OnCenterButtonReleased();
+    }
 
 	private void OnLmsVmExited()
 	{
-		UpdateLcd(LcdWrapper.ConvertToRgba8888(new byte[LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT]));
+		UpdateLcd(LcdWrapper.ConvertToRgba8888(new byte[LcdWrapper.vmLCD_WIDTH * LcdWrapper.vmLCD_HEIGHT], true));
 	}
 
-	[Notify]
-	public ICommand StartCommand { get; set; }
+	[Injection]
+	public Ev3Entity Ev3Entity { get; set; }
 
 	[Notify]
     public Bitmap LcdBitmap { get; set; } 
-
-    private Thread _ev3Thread;
-
+    
 	private object _buttonsLock = new object();
 	private byte[] _lastButtons = _defaultButtons;
 	private static readonly byte[] _defaultButtons = { 0, 0, 0, 0, 0, 0 };

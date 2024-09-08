@@ -238,6 +238,7 @@ RESULT    cUiInit(void)
 	UiInstance.ScreenObjId = -1;
 
 	UiInstance.ShutDown = 0;
+	UiInstance.BeforeShutDown = 0;
 
 	UiInstance.PowerShutdown = 0;
 	UiInstance.PowerState = 0;

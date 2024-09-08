@@ -746,6 +746,7 @@ extern    DATA8     LogErrorNumberExists(ERR Error);
 
 
 int      lmsMain(int argc);
+void      lmsStop(void);
 
 
 void      Error(void);
@@ -1273,6 +1274,8 @@ typedef struct
   ULONG     Value;
   HANDLER   Handle;
 
+  UBYTE ShouldBeStopped;
+
   ERR       Errors[ERROR_BUFFER_SIZE];
   UBYTE     ErrorIn;
   UBYTE     ErrorOut;
@@ -1302,7 +1305,7 @@ typedef struct
 
   ANALOG    Analog;
   ANALOG    *pAnalog;
-  int       AdcFile;
+  ptrdiff_t       AdcFile;
 
 #ifdef ENABLE_STATUS_TEST
   DATA8     Status;

@@ -64,7 +64,7 @@ typedef enum {
 
 typedef struct {
     bool no_sound;
-    int hSoundFile;
+    ptrdiff_t hSoundFile;
     int event_fd;
     /*snd_pcm_t *pcm;
     snd_mixer_t *mixer;
@@ -320,7 +320,7 @@ RESULT cSoundClose(void)
 
 RESULT cSoundUpdate(void)
 {
-    int     BytesRead;
+    ptrdiff_t     BytesRead;
     UWORD   BytesToRead;
     // UBYTE   BytesWritten = 0;
     RESULT  Result = FAIL;

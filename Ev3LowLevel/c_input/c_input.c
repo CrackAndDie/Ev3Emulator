@@ -1148,7 +1148,7 @@ static void cInputCalDataInit(void)
 {
 	DATA8   Type;
 	DATA8   Mode;
-	int     File;
+	ptrdiff_t     File;
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);
@@ -1182,7 +1182,7 @@ static void cInputCalDataInit(void)
 
 static void cInputCalDataExit(void)
 {
-	int     File;
+	ptrdiff_t     File;
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmCALDATA_FILE_NAME, vmEXT_CONFIG);

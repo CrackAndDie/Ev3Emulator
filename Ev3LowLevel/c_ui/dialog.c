@@ -369,6 +369,13 @@ DATA8 cUiQuestion(DATA8 Color, DATA16 X, DATA16 Y, DATA8 Icon1, DATA8 Icon2,
         cUiButtonClearAll();
         Result    =  OK;
         *pState   =  0;
+
+        // WARNING - mega kostyl :))))
+        if (Icon1 == OFF && *pAnswer == 1 && *pText == 0) {
+            // this is probably turning off
+            UiInstance.BeforeShutDown = 1;
+        }
+        
     }
     if (cUiButtonGetShortPress(BACK_BUTTON))
     {

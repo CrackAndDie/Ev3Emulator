@@ -23,6 +23,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using Ev3Emulator.Modules;
+using Ev3LowLevelLib;
 
 namespace Ev3Emulator;
 
@@ -38,13 +39,20 @@ public partial class App : ApplicationBase
         base.Initialize();              // <-- Required
     }
 
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Exit += OnApplicationExit;
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+
     protected override AvaloniaObject CreateShell()
     {
         var viewModelService = Container.Resolve<IViewModelResolverService>();
         viewModelService.RegisterViewModelAssembly(Assembly.GetExecutingAssembly());
-
-		// init ev3
-		
 
 		return base.CreateShell();
     }
@@ -58,8 +66,7 @@ public partial class App : ApplicationBase
         containerRegistry.RegisterSingleton<IViewModelResolverService, ViewModelResolverService>();
         containerRegistry.RegisterSingleton<IWindowProgressService, WindowProgressService>();
 
-        // registering backend services
-        // RegistrationHelper.RegisterBackendServices(containerRegistry);
+        containerRegistry.RegisterSingleton<Ev3Entity, Ev3Entity>();
 
         RegisterAppServices(containerRegistry);
     }
@@ -73,6 +80,11 @@ public partial class App : ApplicationBase
     {
         base.ConfigureModuleCatalog(moduleCatalog);
         moduleCatalog.AddModule<MainModule>();
+    }
+
+    private void OnApplicationExit(object sender, ControlledApplicationLifetimeExitEventArgs args)
+    {
+        Container.Resolve<Ev3Entity>().StopVm();
     }
 
     private void CheckForLogPathExistance()

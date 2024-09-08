@@ -1280,7 +1280,9 @@ GBINDEX   GetAmountOfRamForImage(IP pI)
 
 	Bytes += (*(IMGHEAD*)pI).GlobalBytes;
 	Bytes = (Bytes + 3) & 0xFFFFFFFC;
-	Bytes += sizeof(VMInstance.pObjList) * (NoOfObj + 1);
+	// TODO: warning commented because of x64
+	// Bytes += sizeof(VMInstance.pObjList) * (NoOfObj + 1);
+	Bytes += 4 * (NoOfObj + 1);
 
 	pHead = (OBJHEAD*)&pI[sizeof(IMGHEAD)];
 
@@ -1297,7 +1299,9 @@ GBINDEX   GetAmountOfRamForImage(IP pI)
 
 	Bytes += (*(IMGHEAD*)pI).GlobalBytes;
 	Bytes = (Bytes + 3) & 0xFFFFFFFC;
-	Bytes += sizeof(VMInstance.pObjList) * (NoOfObj + 1);
+	// TODO: warning commented because of x64
+	// Bytes += sizeof(VMInstance.pObjList) * (NoOfObj + 1);
+	Bytes += 4 * (NoOfObj + 1);
 
 	pHead = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
 
@@ -1467,7 +1471,9 @@ RESULT    ProgramReset(PRGID PrgId, IP pI, GP pG, UBYTE Deb)
 
 				pData = (VARDATA*)(((ULONG)pData + 3) & 0xFFFFFFFC);
 				VMInstance.Program[PrgId].pObjList = (OBJ**)pData;
-				pData = &pData[sizeof(VMInstance.Program[PrgId].pObjList) * (VMInstance.Program[PrgId].Objects + 1)];
+				// TODO: warning commented because of x64
+				// pData = &pData[sizeof(VMInstance.Program[PrgId].pObjList) * (VMInstance.Program[PrgId].Objects + 1)];
+				pData = &pData[4 * (VMInstance.Program[PrgId].Objects + 1)];
 
 				// Make pointer to access object headers starting at one (not zero)
 
@@ -1643,7 +1649,6 @@ void      ProgramInit(void)
 
 		}
 		OBJ* tmpObj = VMInstance.pObjList[VMInstance.ObjectId];
-		int anime = 222;
 	}
 }
 
@@ -1814,7 +1819,7 @@ RESULT    ObjectExec(void)
 	}
 	else
 	{
-		if (VMInstance.pObjList == NULL) {
+		if (VMInstance.pObjList == NULL || UiInstance.ShutDown || UiInstance.BeforeShutDown) {
 			Result = STOP;
 		}
 		else {
@@ -2094,7 +2099,7 @@ RESULT    mSchedInit(int argc)
 	static DATA32  Total;
 	static DATA32  Free;
 	static float   Tmp;
-	static int     File;
+	static ptrdiff_t     File;
 	static char    PrgNameBuf[vmFILENAMESIZE];
 	static char    ParBuf[255];
 
@@ -2591,6 +2596,8 @@ int       lmsMain(int argc)
 	RESULT  Result = FAIL;
 	UBYTE   Restart;
 
+	VMInstance.ShouldBeStopped = 0;
+
 	// TODO: make the working directory configurable via environment variable so
 	// that we can run debug instances without messing up the system install
 	/*if (chdir("/var/lib/lms2012/sys") == -1) {
@@ -2611,6 +2618,13 @@ int       lmsMain(int argc)
 			{
 				// g_main_context_iteration(NULL, FALSE);
 				Result = mSchedCtrl(&Restart);
+
+				// when stopping from outside
+				if (VMInstance.ShouldBeStopped)
+				{
+					w_system_printf("ShouldBeStopped set to 1 \n");
+					Result = STOP;
+				}
 			} while (Result == OK);
 
 			w_system_printf("Exiting from mSchedCtrl: %d \n", Result);
@@ -2625,6 +2639,10 @@ int       lmsMain(int argc)
 	} while (Restart);
 
 	return ((int)Result);
+}
+
+void lmsStop(void) {
+	VMInstance.ShouldBeStopped = 1;
 }
 
 
@@ -4812,7 +4830,7 @@ void      Monitor(void)
 RESULT    TstOpen(UWORD Time)
 {
 	RESULT  Result = FAIL;
-	int     File;
+	ptrdiff_t     File;
 
 	if ((Time > 0) && (Time <= 30000))
 	{
@@ -4850,7 +4868,7 @@ RESULT    TstOpen(UWORD Time)
 
 void      TstClose(void)
 {
-	int     File;
+	ptrdiff_t     File;
 
 	if (VMInstance.Test != 0)
 	{
@@ -5241,7 +5259,7 @@ void      Tst(void)
 	DATA16  Value;
 	TSTPIN  Tstpin;
 	TSTUART Tstuart;
-	int     File;
+	ptrdiff_t     File;
 
 	Cmd = *(DATA8*)PrimParPointer();
 

@@ -15,48 +15,47 @@
 	<Grid ColumnDefinitions="*,*">
 		<StackPanel VerticalAlignment="Center"
 					HorizontalAlignment="Center">
-			<Button Content="Start"
-					Command="{Binding StartCommand}"/>
 			<Border Background="Gray">
 				<Image Source="{Binding LcdBitmap}"
 					   Width="178"
 					   Height="128"/>
 			</Border>
+        
+			<Grid ColumnDefinitions="*,*,*"
+				  RowDefinitions="*,*,*,*">
+				<Button x:Name="buttonBack"
+						Grid.Column="0"
+						Grid.Row="0"
+						Width="40"
+						Height="40"/>
+				<Button x:Name="buttonUp"
+						Grid.Column="1"
+						Grid.Row="1"
+						Width="40"
+						Height="40"/>
+				<Button x:Name="buttonRight"
+						Grid.Column="2"
+						Grid.Row="2"
+						Width="40"
+						Height="40"/>
+				<Button x:Name="buttonDown"
+						Grid.Column="1"
+						Grid.Row="3"
+						Width="40"
+						Height="40"/>
+				<Button x:Name="buttonLeft"
+						Grid.Column="0"
+						Grid.Row="2"
+						Width="40"
+						Height="40"/>
+				<Button x:Name="buttonCenter"
+						Grid.Column="1"
+						Grid.Row="2"
+						Width="40"
+						Height="40"/>
+			</Grid>
 		</StackPanel>
 
-		<Grid Grid.Column="1"
-			  ColumnDefinitions="*,*,*"
-			  RowDefinitions="*,*,*,*">
-			<Button x:Name="buttonBack"
-					Grid.Column="0"
-					Grid.Row="0"
-					Width="40"
-					Height="40"/>
-			<Button x:Name="buttonUp"
-					Grid.Column="1"
-					Grid.Row="1"
-					Width="40"
-					Height="40"/>
-			<Button x:Name="buttonRight"
-					Grid.Column="2"
-					Grid.Row="2"
-					Width="40"
-					Height="40"/>
-			<Button x:Name="buttonDown"
-					Grid.Column="1"
-					Grid.Row="3"
-					Width="40"
-					Height="40"/>
-			<Button x:Name="buttonLeft"
-					Grid.Column="0"
-					Grid.Row="2"
-					Width="40"
-					Height="40"/>
-			<Button x:Name="buttonCenter"
-					Grid.Column="1"
-					Grid.Row="2"
-					Width="40"
-					Height="40"/>
-		</Grid>
+		
 	</Grid>
 </UserControl>

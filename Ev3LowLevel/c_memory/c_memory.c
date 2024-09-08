@@ -365,7 +365,7 @@ RESULT    cMemoryInit(void)
 	DATA8   Tmp;
 	PRGID   TmpPrgId;
 	HANDLER TmpHandle;
-	int     File;
+	ptrdiff_t     File;
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
@@ -445,7 +445,7 @@ RESULT    cMemoryClose(PRGID PrgId)
 RESULT    cMemoryExit(void)
 {
 	RESULT  Result = FAIL;
-	int     File;
+	ptrdiff_t     File;
 	char    PrgNameBuf[vmFILENAMESIZE];
 
 	snprintf(PrgNameBuf, vmFILENAMESIZE, "%s/%s%s", vmSETTINGS_DIR, vmLASTRUN_FILE_NAME, vmEXT_CONFIG);
@@ -1198,7 +1198,7 @@ DSPSTAT   cMemoryOpenFile(PRGID PrgId, DATA8 Access, char* pFileName, HANDLER* p
 	DSPSTAT Result = FAILBREAK;
 	FDESCR* pFDescr;
 	struct  stat FileStatus;
-	int     hFile = -1;
+	ptrdiff_t     hFile = -1;
 
 	*pHandle = 0;
 	*pSize = 0;
@@ -1464,7 +1464,7 @@ RESULT    cMemoryGetImage(DATA8* pFileName, DATA16 Size, UBYTE* pBmp)
 {
 	RESULT  Result = FAIL;
 	PRGID   TmpPrgId;
-	int     File;
+	ptrdiff_t     File;
 	char    FilenameBuf[MAX_FILENAME_SIZE];
 
 	TmpPrgId = CurrentProgramId();
@@ -1862,7 +1862,7 @@ RESULT    cMemoryGetItemIcon(PRGID PrgId, HANDLER Handle, DATA16 Item, HANDLER* 
 	DATA32  ISize;
 	IP      pImage;
 	struct  stat FileStatus;
-	int     hFile;
+	ptrdiff_t     hFile;
 
 	Result = cMemoryGetPointer(PrgId, Handle, ((void**)&pMemory));
 
@@ -1911,7 +1911,7 @@ RESULT    cMemoryGetItemText(PRGID PrgId, HANDLER Handle, DATA16 Item, DATA8 Len
 	RESULT  Result = FAIL;
 	FOLDER* pMemory;
 	char    Filename[MAX_FILENAME_SIZE];
-	int     hFile;
+	ptrdiff_t     hFile;
 	DATA8   Tmp;
 	char    Termination[2] = "\t";
 	size_t No;
@@ -2324,7 +2324,7 @@ void      cMemoryFile(void)
 	DATA8   Tmp;
 	DATA8   Del;
 	DATA8* pFolderName;
-	int     hFile;
+	ptrdiff_t     hFile;
 	char    Buffer[LOGBUFFER_SIZE];
 	DATAF   DataF;
 	DATA16  Bytes;

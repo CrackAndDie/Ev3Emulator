@@ -2,6 +2,7 @@
 #define   W_SYSTEM_H_
 
 __declspec(dllexport) void w_system_startMain(void);
+__declspec(dllexport) void w_system_stopMain(void);
 
 // ------- helpers
 
