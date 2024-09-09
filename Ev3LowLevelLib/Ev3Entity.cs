@@ -6,6 +6,7 @@ namespace Ev3LowLevelLib
     {
         public void Init()
         {
+            SystemWrapper.Init();
             FilesystemWrapper.Init();
             TimeWrapper.Init();
             InputWrapper.Init(); // TODO:
@@ -27,9 +28,17 @@ namespace Ev3LowLevelLib
 
         public void StopVm()
         {
-            SystemWrapper.StopLms();
-            _ev3Thread.Join();
-        }
+            if (IsVmRunning)
+            {
+				SystemWrapper.StopLms();
+				// _ev3Thread.Join(); // does not work https://stackoverflow.com/questions/6427079/join-refuses-to-acknowledge-that-a-child-thread-has-terminated-after-the-isaliv
+				// so i use pseudo join hehehe :)))
+				//while (_ev3Thread.IsAlive)
+				//{
+				//	Thread.Sleep(100);
+				//}
+			}
+		}
 
         public void OnCenterButtonPressed()
         {
@@ -54,7 +63,9 @@ namespace Ev3LowLevelLib
                 return;
 
             _ev3Thread = new Thread(SystemWrapper.MainLms);
-            _ev3Thread.Start();
+            // _ev3Thread.IsBackground = true;
+
+			_ev3Thread.Start();
         }
 
         private void OnLmsVmExited()

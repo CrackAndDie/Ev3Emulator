@@ -13,6 +13,7 @@ using Prism.Commands;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Ev3Emulator.ViewModels;
 
@@ -44,16 +45,23 @@ public class MainViewModel : ViewModelBase
 
 	private void UpdateLcd(byte[] bmpData)
 	{
-		Dispatcher.UIThread.Invoke(() =>
+		try
 		{
-			var bmp = new WriteableBitmap(new PixelSize(LcdWrapper.vmLCD_WIDTH, LcdWrapper.vmLCD_HEIGHT), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888);
-			using (var frameBuffer = bmp.Lock())
+			Dispatcher.UIThread.Invoke(() =>
 			{
-				// * 4 because orig data is grayscale
-				Marshal.Copy(bmpData, 0, frameBuffer.Address, bmpData.Length);
-			}
-			LcdBitmap = bmp;
-		});
+				var bmp = new WriteableBitmap(new PixelSize(LcdWrapper.vmLCD_WIDTH, LcdWrapper.vmLCD_HEIGHT), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888);
+				using (var frameBuffer = bmp.Lock())
+				{
+					// * 4 because orig data is grayscale
+					Marshal.Copy(bmpData, 0, frameBuffer.Address, bmpData.Length);
+				}
+				LcdBitmap = bmp;
+			});
+		}
+		catch (TaskCanceledException)
+		{
+			// ui is dead
+		}
 	}
 
 	private void UpdateLed(int state)

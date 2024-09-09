@@ -746,7 +746,6 @@ extern    DATA8     LogErrorNumberExists(ERR Error);
 
 
 int      lmsMain(int argc);
-void      lmsStop(void);
 
 
 void      Error(void);

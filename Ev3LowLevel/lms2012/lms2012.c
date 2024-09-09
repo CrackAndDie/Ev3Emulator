@@ -2620,7 +2620,7 @@ int       lmsMain(int argc)
 				Result = mSchedCtrl(&Restart);
 
 				// when stopping from outside
-				if (VMInstance.ShouldBeStopped)
+				if (w_system_getStopMain())
 				{
 					w_system_printf("ShouldBeStopped set to 1 \n");
 					Result = STOP;
@@ -2640,11 +2640,6 @@ int       lmsMain(int argc)
 
 	return ((int)Result);
 }
-
-void lmsStop(void) {
-	VMInstance.ShouldBeStopped = 1;
-}
-
 
 PRIM      PrimDispatchTable[PRIMDISPATHTABLE_SIZE] =
 {

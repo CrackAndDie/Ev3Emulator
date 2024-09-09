@@ -24,6 +24,8 @@ using System.Reflection;
 using System.Threading;
 using Ev3Emulator.Modules;
 using Ev3LowLevelLib;
+using Prism.Events;
+using Ev3Emulator.Events;
 
 namespace Ev3Emulator;
 
@@ -41,12 +43,9 @@ public partial class App : ApplicationBase
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Exit += OnApplicationExit;
-        }
+        Container.Resolve<IEventAggregator>().GetEvent<AppCloseEvent>().Subscribe(OnApplicationExit);
 
-        base.OnFrameworkInitializationCompleted();
+		base.OnFrameworkInitializationCompleted();
     }
 
     protected override AvaloniaObject CreateShell()
@@ -82,7 +81,7 @@ public partial class App : ApplicationBase
         moduleCatalog.AddModule<MainModule>();
     }
 
-    private void OnApplicationExit(object sender, ControlledApplicationLifetimeExitEventArgs args)
+    private void OnApplicationExit()
     {
         Container.Resolve<Ev3Entity>().StopVm();
     }

@@ -18,10 +18,10 @@ void w_system_startMain(void) {
 	lmsMain(0);
 }
 
-void w_system_stopMain(void) {
-	w_system_printf("stopping main from outside... \n");
 
-	lmsStop();
+void reg_w_system_getStopMain(unsigned char (*f)(void))
+{
+	w_system_getStopMain = f;
 }
 
 int w_system_printf(const char* format, ...) {

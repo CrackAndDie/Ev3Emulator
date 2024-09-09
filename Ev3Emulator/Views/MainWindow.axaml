@@ -13,11 +13,24 @@
         x:Class="Ev3Emulator.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="Ev3Emulator"
-        x:CompileBindings="False">
-    <ContentControl x:Name="frame"
-                    Grid.Row="0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    prismRegions:RegionManager.RegionName="{x:Static views:Regions.MAIN_REGION}"
-                    prismRegions:RegionManager.RegionManager="{Binding RegionManager}" />
+		SystemDecorations="None"
+        x:CompileBindings="False"
+		x:Name="thisWindow">
+	<Grid RowDefinitions="20,*">
+		<Grid>
+			<Border Background="Gray"
+					x:Name="WindowHeader"/>
+			<Button Content="x"
+					HorizontalAlignment="Right"
+					Command="{Binding CloseCommand}"
+					CommandParameter="{Binding , ElementName=thisWindow}"/>
+		</Grid>
+		
+		<ContentControl x:Name="frame"
+                        Grid.Row="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        prismRegions:RegionManager.RegionName="{x:Static views:Regions.MAIN_REGION}"
+                        prismRegions:RegionManager.RegionManager="{Binding RegionManager}" />
+	</Grid>
 </Window>
