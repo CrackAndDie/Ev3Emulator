@@ -10,7 +10,6 @@
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="Ev3Emulator.Views.MainView"
-             x:DataType="vm:MainViewModel"
 			 x:CompileBindings="False">
 	
 	<Grid ColumnDefinitions="*,*">
@@ -58,6 +57,7 @@
 		</StackPanel>
 
 		<ContentControl prism:RegionManager.RegionName="RightSideRegion"
-						prism:RegionManager.RegionManager="{Binding RegionManager}" />
+						prism:RegionManager.RegionManager="{Binding RegionManager}" 
+						Grid.Column="1"/>
 	</Grid>
 </UserControl>

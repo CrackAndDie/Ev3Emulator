@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Ev3Emulator.Entities;
 using Ev3Emulator.Extensions;
 using Ev3Emulator.Interfaces;
 using Ev3Emulator.LowLevel;
@@ -118,8 +119,8 @@ public class MainViewModel : ViewModelBase
 	public Ev3Entity Ev3Entity { get; set; }
 
 	[Notify]
-    public Bitmap LcdBitmap { get; set; } 
-    
+    public Bitmap LcdBitmap { get; set; }
+
 	private object _buttonsLock = new object();
 	private byte[] _lastButtons = _defaultButtons;
 	private static readonly byte[] _defaultButtons = { 0, 0, 0, 0, 0, 0 };

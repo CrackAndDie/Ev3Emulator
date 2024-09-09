@@ -2,20 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Ev3Emulator.RightMainView">
-	<UserControl.Resources>
-		<ResourceInclude Source="avares://Ev3Emulator/Views/Other/SensorDataTemplate.axaml" />
-	</UserControl.Resources>
+             xmlns:local="clr-namespace:Ev3Emulator.Views"
+             xmlns:other="clr-namespace:Ev3Emulator.Views.Other"
+             xmlns:vm="clr-namespace:Ev3Emulator.ViewModels"
+             xmlns:prism="http://prismlibrary.com/"
+		     xmlns:prismRegions="clr-namespace:Prism.Regions;assembly=Prism.Avalonia"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="Ev3Emulator.Views.RightMainView"
+			 x:CompileBindings="False">
 	<Grid>
 		<TabControl Margin="5">
 			<TabItem Header="Out ports">
-				<ListBox ItemTemplate="{StaticResource SensDataTemplate}"
-						 ItemsSource="{Binding OutPorts}">
+				<ListBox ItemsSource="{Binding OutPorts}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<other:SensorControl/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
 				</ListBox>
 			</TabItem>
 			<TabItem Header="In ports">
-				<TextBlock Margin="5">This is tab 2 content</TextBlock>
+				<ListBox ItemsSource="{Binding InPorts}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<other:SensorControl/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
 			</TabItem>
 		</TabControl>
 	</Grid>
