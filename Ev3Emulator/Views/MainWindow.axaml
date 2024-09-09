@@ -11,7 +11,6 @@
         Width="600" 
         Height="450"
         x:Class="Ev3Emulator.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
         Title="Ev3Emulator"
 		SystemDecorations="None"
         x:CompileBindings="False"

@@ -12,6 +12,7 @@
              x:Class="Ev3Emulator.Views.MainView"
              x:DataType="vm:MainViewModel"
 			 x:CompileBindings="False">
+	
 	<Grid ColumnDefinitions="*,*">
 		<StackPanel VerticalAlignment="Center"
 					HorizontalAlignment="Center">
@@ -56,6 +57,7 @@
 			</Grid>
 		</StackPanel>
 
-		
+		<ContentControl prism:RegionManager.RegionName="RightSideRegion"
+						prism:RegionManager.RegionManager="{Binding RegionManager}" />
 	</Grid>
 </UserControl>

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Ev3Emulator.Extensions;
 using Ev3Emulator.Interfaces;
 using Ev3Emulator.LowLevel;
 using Ev3LowLevelLib;
@@ -25,10 +26,13 @@ public class MainViewModel : ViewModelBase
 
 	public override void OnViewReady()
 	{
+		base.OnViewReady();
+
 		if (Design.IsDesignMode)
 			return;
 
-		base.OnViewReady();
+		if (RegionManager.Regions["RightSideRegion"].Views.Count() == 0)
+			RegionManager.ReqNav(typeof(IRightMainView), "RightSideRegion");
 
 		// inits
 		Ev3Entity.Init();

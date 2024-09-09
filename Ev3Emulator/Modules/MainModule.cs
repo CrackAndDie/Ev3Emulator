@@ -19,6 +19,7 @@ namespace Ev3Emulator.Modules
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterViewForNavigation<IMainView, MainView>();
+            containerRegistry.RegisterViewForNavigation<IRightMainView, RightMainView>();
         }
     }
 }

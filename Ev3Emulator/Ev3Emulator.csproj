@@ -34,7 +34,11 @@
 		<ProjectReference Include="..\Ev3CoreUnsafe\Ev3CoreUnsafe.csproj" />
 	</ItemGroup>-->
 
-    <ItemGroup>
+	<!--<ItemGroup>
 		<ProjectReference Include="..\Ev3LowLevelLib\Ev3LowLevelLib.csproj" />
-	</ItemGroup>
+	</ItemGroup>-->
+
+    <ItemGroup>
+      <Folder Include="Resources\" />
+    </ItemGroup>
 </Project>

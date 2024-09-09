@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Ev3Emulator.RightMainView">
+	<UserControl.Resources>
+		<ResourceInclude Source="avares://Ev3Emulator/Views/Other/SensorDataTemplate.axaml" />
+	</UserControl.Resources>
+	<Grid>
+		<TabControl Margin="5">
+			<TabItem Header="Out ports">
+				<ListBox ItemTemplate="{StaticResource SensDataTemplate}"
+						 ItemsSource="{Binding OutPorts}">
+				</ListBox>
+			</TabItem>
+			<TabItem Header="In ports">
+				<TextBlock Margin="5">This is tab 2 content</TextBlock>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</UserControl>

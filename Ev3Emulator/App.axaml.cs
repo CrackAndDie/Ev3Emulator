@@ -26,6 +26,7 @@ using Ev3Emulator.Modules;
 using Ev3LowLevelLib;
 using Prism.Events;
 using Ev3Emulator.Events;
+using Avalonia.Controls;
 
 namespace Ev3Emulator;
 
@@ -43,14 +44,20 @@ public partial class App : ApplicationBase
 
     public override void OnFrameworkInitializationCompleted()
     {
-        Container.Resolve<IEventAggregator>().GetEvent<AppCloseEvent>().Subscribe(OnApplicationExit);
-
 		base.OnFrameworkInitializationCompleted();
+
+		if (Design.IsDesignMode)
+			return;
+
+		Container.Resolve<IEventAggregator>().GetEvent<AppCloseEvent>().Subscribe(OnApplicationExit);
     }
 
     protected override AvaloniaObject CreateShell()
     {
-        var viewModelService = Container.Resolve<IViewModelResolverService>();
+		if (Design.IsDesignMode)
+			return null;
+
+		var viewModelService = Container.Resolve<IViewModelResolverService>();
         viewModelService.RegisterViewModelAssembly(Assembly.GetExecutingAssembly());
 
 		return base.CreateShell();
@@ -60,7 +67,10 @@ public partial class App : ApplicationBase
     {
         base.RegisterTypes(containerRegistry);
 
-        CheckForLogPathExistance();
+		if (Design.IsDesignMode)
+			return;
+
+		CheckForLogPathExistance();
         containerRegistry.RegisterInstance<ILoggingService>(new Log4netLoggingService(Path.Combine(logFileFolder, logFileName)));
         containerRegistry.RegisterSingleton<IViewModelResolverService, ViewModelResolverService>();
         containerRegistry.RegisterSingleton<IWindowProgressService, WindowProgressService>();
@@ -72,18 +82,27 @@ public partial class App : ApplicationBase
 
     private void RegisterAppServices(IContainerRegistry containerRegistry)
     {
-        containerRegistry.RegisterSingleton<IBaseWindow, MainWindow>();
+		if (Design.IsDesignMode)
+			return;
+
+		containerRegistry.RegisterSingleton<IBaseWindow, MainWindow>();
     }
 
     protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
     {
-        base.ConfigureModuleCatalog(moduleCatalog);
+		if (Design.IsDesignMode)
+			return;
+
+		base.ConfigureModuleCatalog(moduleCatalog);
         moduleCatalog.AddModule<MainModule>();
     }
 
     private void OnApplicationExit()
     {
-        Container.Resolve<Ev3Entity>().StopVm();
+		if (Design.IsDesignMode)
+			return;
+
+		Container.Resolve<Ev3Entity>().StopVm();
     }
 
     private void CheckForLogPathExistance()

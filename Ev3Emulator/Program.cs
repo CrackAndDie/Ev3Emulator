@@ -26,7 +26,6 @@ namespace Ev3Emulator
                     UseDBusMenu = true
                 })
                 .With(new Win32PlatformOptions())
-                .UseSkia()
-                .UseManagedSystemDialogs();
+                .UseSkia();
 	}
 }

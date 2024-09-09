@@ -17,7 +17,10 @@ namespace Ev3Emulator.ViewModels
 
         private void OnCloseCommand(Window window)
         {
-            EventAggregator.GetEvent<AppCloseEvent>().Publish();
+			if (Design.IsDesignMode)
+				return;
+
+			EventAggregator.GetEvent<AppCloseEvent>().Publish();
             window.Close();
 		}
 
