@@ -6,7 +6,11 @@
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
 
-    <ItemGroup>
-        <None Include="$(SolutionDir)externals\**" CopyToOutputDirectory="PreserveNewest" />
-    </ItemGroup>
+    <!--<ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x86'">
+        <None Include="$(SolutionDir)externals\win-32\**" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>-->
+
+	<ItemGroup Condition="True">
+		<None Include="$(SolutionDir)externals\win-32\**" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
 </Project>
