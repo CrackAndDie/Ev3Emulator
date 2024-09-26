@@ -143,26 +143,28 @@ namespace Ev3Emulator.LowLevel
 			reg_w_input_writeData(WriteData);
 
 			// init current analog
-			_currentAnalogData.OutPortUpdateStep[0] = 0;
-			_currentAnalogData.OutPortUpdateStep[1] = 0;
-			_currentAnalogData.OutPortUpdateStep[2] = 0;
-			_currentAnalogData.OutPortUpdateStep[3] = 0;
+			CurrentAnalogData.OutPortUpdateStep[0] = 0;
+			CurrentAnalogData.OutPortUpdateStep[1] = 0;
+			CurrentAnalogData.OutPortUpdateStep[2] = 0;
+			CurrentAnalogData.OutPortUpdateStep[3] = 0;
 		}
 
 		public unsafe static void SetOutPort(int port, SensorType sens)
 		{
+			// TODO: locks
 			var sensData = SensorData.AllSensorData[sens];
-			_currentAnalogData.OutDcm[port] = (sbyte)sensData.Dcm;
-			_currentAnalogData.OutConn[port] = (sbyte)sensData.Conn;
+			CurrentAnalogData.OutDcm[port] = (sbyte)sensData.Dcm;
+			CurrentAnalogData.OutConn[port] = (sbyte)sensData.Conn;
 
-			_currentAnalogData.OutPortUpdateStep[port] = 1; // step to update the port
+			CurrentAnalogData.OutPortUpdateStep[port] = 1; // step to update the port
 		}
 
 		public unsafe static void SetInPort(int port, SensorType sens)
 		{
+			// TODO: locks
 			var sensData = SensorData.AllSensorData[sens];
-			_currentAnalogData.InDcm[port] = (sbyte)sensData.Dcm;
-			_currentAnalogData.InDcm[port] = (sbyte)sensData.Conn;
+			CurrentAnalogData.InDcm[port] = (sbyte)sensData.Dcm;
+			CurrentAnalogData.InDcm[port] = (sbyte)sensData.Conn;
 		}
 
 		private unsafe static void IoctlIICDAT(int par, IntPtr data)
@@ -201,21 +203,21 @@ namespace Ev3Emulator.LowLevel
 			{
 				// this kostyl is because port cannot be chaned directly from for example large motor to medium
 				// it has to be reseted at first and only then set to a new value
-				if (_currentAnalogData.OutPortUpdateStep[i] == 1)
+				if (CurrentAnalogData.OutPortUpdateStep[i] == 1)
 				{
 					dt->OutConn[i] = 0;
 					dt->OutDcm[i] = 0;
-					_currentAnalogData.OutPortUpdateStep[i] = 0; // reset update step
+					CurrentAnalogData.OutPortUpdateStep[i] = 0; // reset update step
 				}
 				else
 				{
-					dt->OutConn[i] = _currentAnalogData.OutConn[i];
-					dt->OutDcm[i] = _currentAnalogData.OutDcm[i];
+					dt->OutConn[i] = CurrentAnalogData.OutConn[i];
+					dt->OutDcm[i] = CurrentAnalogData.OutDcm[i];
 				}
 
 				// TODO: doesn't work :(
-				dt->InConn[i] = _currentAnalogData.InConn[i];
-				dt->InDcm[i] = _currentAnalogData.InDcm[i];
+				dt->InConn[i] = CurrentAnalogData.InConn[i];
+				dt->InDcm[i] = CurrentAnalogData.InDcm[i];
 			}
 			
             // TODO: ...
@@ -226,6 +228,6 @@ namespace Ev3Emulator.LowLevel
 			// TODO: ...
 		}
 
-		private static ANALOG _currentAnalogData = new ANALOG();
+		internal static ANALOG CurrentAnalogData = new ANALOG();
 	}
 }

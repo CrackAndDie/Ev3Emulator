@@ -59,4 +59,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Ev3LowLevelLib\Ev3LowLevelLib.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="ViewModels\Other\" />
+	</ItemGroup>
 </Project>

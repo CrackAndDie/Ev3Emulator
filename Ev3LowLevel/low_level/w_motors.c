@@ -14,3 +14,8 @@ void reg_w_motors_setData(void (*f)(char* data, int len))
 {
     w_motors_setData = f;
 }
+
+void reg_w_motors_updateMotorData(void (*f)(MOTORDATA* data, int index, UBYTE isReset))
+{
+    w_motors_updateMotorData = f;
+}

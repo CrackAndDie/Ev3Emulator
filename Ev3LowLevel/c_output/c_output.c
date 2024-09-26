@@ -1561,6 +1561,7 @@ void      cOutputRead(void)
 	{
 		if (No < OUTPUTS)
 		{
+			w_motors_updateMotorData(&OutputInstance.pMotor[No], No, 0);
 			Speed = OutputInstance.pMotor[No].Speed;
 			Tacho = OutputInstance.pMotor[No].TachoCounts;
 		}
@@ -1782,6 +1783,7 @@ void      cOutputClrCount(void)
 			if (ClrCnt[1] & (1 << Tmp))
 			{
 				OutputInstance.pMotor[Tmp].TachoSensor = 0;
+				w_motors_updateMotorData(&OutputInstance.pMotor[Tmp], Tmp, 1);
 			}
 		}
 	}
@@ -1840,6 +1842,7 @@ void      cOutputGetCount(void)
 	{
 		if (No < OUTPUTS)
 		{
+			w_motors_updateMotorData(&OutputInstance.pMotor[No], No, 0);
 			Tacho = OutputInstance.pMotor[No].TachoSensor;
 		}
 	}
