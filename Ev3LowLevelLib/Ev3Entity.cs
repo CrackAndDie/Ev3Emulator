@@ -16,7 +16,19 @@ namespace Ev3LowLevelLib
             SystemWrapper.LmsExited += OnLmsVmExited;
         }
 
-        public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
+		#region Out ports
+        public void SetOutPort(int port, SensorType sens)
+        {
+            InputWrapper.SetOutPort(port, sens);
+		}
+
+		public void SetInPort(int port, SensorType sens)
+		{
+			InputWrapper.SetInPort(port, sens);
+		}
+		#endregion
+
+		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
         {
             LcdWrapper.Init(updateLcd, updateLed);
         }
@@ -26,7 +38,8 @@ namespace Ev3LowLevelLib
             ButtonsWrapper.Init(getPressed);
         }
 
-        public void StopVm()
+		#region Lms vm
+		public void StopVm()
         {
             if (IsVmRunning)
             {
@@ -72,8 +85,9 @@ namespace Ev3LowLevelLib
         {
             LmsExited?.Invoke();
         }
+		#endregion
 
-        public event Action LmsExited;
+		public event Action LmsExited;
 
         public bool IsVmRunning => (_ev3Thread != null && _ev3Thread.IsAlive);
 

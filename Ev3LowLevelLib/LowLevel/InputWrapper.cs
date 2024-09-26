@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Ev3LowLevelLib;
 
 namespace Ev3Emulator.LowLevel
 {
@@ -88,7 +89,10 @@ namespace Ev3Emulator.LowLevel
 
         public fixed sbyte OutDcm[4];        //!< Output port device types
         public fixed sbyte OutConn[4];
-    }
+
+		// non converted (custom shite here)
+		public fixed sbyte OutPortUpdateStep[4];
+	}
 
 	public static class InputWrapper
 	{
@@ -128,7 +132,7 @@ namespace Ev3Emulator.LowLevel
 		public delegate void reg_w_input_writeDataAction(int par, IntPtr data, int len);
 
 		// TODO: custom handler post processed
-		public static void Init()
+		public unsafe static void Init()
 		{
 			reg_w_input_ioctlIICDAT(IoctlIICDAT);
 			reg_w_input_ioctlIICSTR(IoctlIICSTR);
@@ -137,6 +141,28 @@ namespace Ev3Emulator.LowLevel
 			reg_w_input_ioctlUARTDEVCON(IoctlUARTDEVCON);
             reg_w_input_updateANALOG(UpdateANALOG);
 			reg_w_input_writeData(WriteData);
+
+			// init current analog
+			_currentAnalogData.OutPortUpdateStep[0] = 0;
+			_currentAnalogData.OutPortUpdateStep[1] = 0;
+			_currentAnalogData.OutPortUpdateStep[2] = 0;
+			_currentAnalogData.OutPortUpdateStep[3] = 0;
+		}
+
+		public unsafe static void SetOutPort(int port, SensorType sens)
+		{
+			var sensData = SensorData.AllSensorData[sens];
+			_currentAnalogData.OutDcm[port] = (sbyte)sensData.Dcm;
+			_currentAnalogData.OutConn[port] = (sbyte)sensData.Conn;
+
+			_currentAnalogData.OutPortUpdateStep[port] = 1; // step to update the port
+		}
+
+		public unsafe static void SetInPort(int port, SensorType sens)
+		{
+			var sensData = SensorData.AllSensorData[sens];
+			_currentAnalogData.InDcm[port] = (sbyte)sensData.Dcm;
+			_currentAnalogData.InDcm[port] = (sbyte)sensData.Conn;
 		}
 
 		private unsafe static void IoctlIICDAT(int par, IntPtr data)
@@ -171,8 +197,27 @@ namespace Ev3Emulator.LowLevel
         {
             var dt = (ANALOG*)data.ToPointer();
 
-			dt->OutConn[1] = 125;
-			dt->OutDcm[1] = 8;
+			for (int i = 0; i < 4; ++i)
+			{
+				// this kostyl is because port cannot be chaned directly from for example large motor to medium
+				// it has to be reseted at first and only then set to a new value
+				if (_currentAnalogData.OutPortUpdateStep[i] == 1)
+				{
+					dt->OutConn[i] = 0;
+					dt->OutDcm[i] = 0;
+					_currentAnalogData.OutPortUpdateStep[i] = 0; // reset update step
+				}
+				else
+				{
+					dt->OutConn[i] = _currentAnalogData.OutConn[i];
+					dt->OutDcm[i] = _currentAnalogData.OutDcm[i];
+				}
+
+				// TODO: doesn't work :(
+				dt->InConn[i] = _currentAnalogData.InConn[i];
+				dt->InDcm[i] = _currentAnalogData.InDcm[i];
+			}
+			
             // TODO: ...
         }
 
@@ -180,5 +225,7 @@ namespace Ev3Emulator.LowLevel
 		{
 			// TODO: ...
 		}
+
+		private static ANALOG _currentAnalogData = new ANALOG();
 	}
 }

@@ -12,7 +12,7 @@
              x:Class="Ev3Emulator.Views.MainView"
 			 x:CompileBindings="False">
 	
-	<Grid ColumnDefinitions="*,*">
+	<Grid ColumnDefinitions="230,*">
 		<StackPanel VerticalAlignment="Center"
 					HorizontalAlignment="Center">
 			<Border Background="Gray">

@@ -1,5 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Ev3LowLevelLib;
+using Hypocrite.Core.Extensions;
 using Hypocrite.Core.Mvvm;
 using Hypocrite.Core.Mvvm.Attributes;
 using System.Collections.Generic;
@@ -8,12 +10,21 @@ namespace Ev3Emulator.Entities
 {
 	public class SensorEntity : BindableObject
 	{
-		public SensorEntity(bool isOut)
+		public SensorEntity(bool isOut, int index)
 		{
-			_isOut = isOut;	
+			_isOut = isOut;
+			Index = index;
+
+			this.WhenPropertyChanged(x => x.SelectedSensor).Subscribe(OnSelectedSensorChanged);
+		}
+
+		private void OnSelectedSensorChanged(int sens)
+		{
+			RaisePropertyChanged(nameof(SensorItself));
 		}
 
 		private bool _isOut = false;
+		public int Index { get; set; }
 
 		private const string _pathToIcons = "avares://Ev3Emulator/Resources/SensorIcons";
 		public static Bitmap[] AllAvailableSensors =
@@ -37,5 +48,41 @@ namespace Ev3Emulator.Entities
 
 		[Notify]
 		public int SelectedSensor { get; set; }
+
+		public SensorType SelectedSensorType 
+		{
+			get 
+			{
+				if (_isOut)
+				{
+					switch (SelectedSensor)
+					{
+						case 1:
+							return SensorType.LargeMotor;
+						case 2:
+							return SensorType.MediumMotor;
+					}
+				}
+				else
+				{
+					switch (SelectedSensor)
+					{
+						case 1:
+							return SensorType.TouchSensor;
+						case 2:
+							return SensorType.UsSensor;
+						case 3:
+							return SensorType.IrSensor;
+						case 4:
+							return SensorType.GyroSensor;
+						case 5:
+							return SensorType.ColorSensor;
+					}
+				}
+				return SensorType.None;
+			} 
+		}
+
+		public SensorEntity SensorItself => this;
 	}
 }

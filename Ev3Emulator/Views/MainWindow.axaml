@@ -8,7 +8,7 @@
 		xmlns:prismRegions="clr-namespace:Prism.Regions;assembly=Prism.Avalonia"
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d" 
-        Width="600" 
+        Width="670" 
         Height="450"
         x:Class="Ev3Emulator.Views.MainWindow"
         Title="Ev3Emulator"
