@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:prism="http://prismlibrary.com/"
+		     xmlns:prismRegions="clr-namespace:Prism.Regions;assembly=Prism.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Ev3Emulator.Views.Other.SensorControl"
 			 x:CompileBindings="False">
@@ -17,6 +19,10 @@
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
+
+			<ContentControl prism:RegionManager.RegionName="{Binding RegionName}"
+							prism:RegionManager.RegionManager="{Binding RegionManager}"
+							Grid.Column="1"/>
 		</Grid>
 	</Border>
 </UserControl>

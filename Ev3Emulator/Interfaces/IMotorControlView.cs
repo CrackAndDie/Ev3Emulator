@@ -2,7 +2,7 @@
 
 namespace Ev3Emulator.Interfaces
 {
-	public interface IRightMainView : IView
+	public interface IMotorControlView : IView
 	{
 	}
 }

@@ -1,14 +1,17 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Ev3Emulator.Extensions;
+using Ev3Emulator.Interfaces;
 using Ev3LowLevelLib;
 using Hypocrite.Core.Extensions;
 using Hypocrite.Core.Mvvm;
 using Hypocrite.Core.Mvvm.Attributes;
+using Hypocrite.Mvvm;
 using System.Collections.Generic;
 
 namespace Ev3Emulator.Entities
 {
-	public class SensorEntity : BindableObject
+	public class SensorEntity : ViewModelBase
 	{
 		public SensorEntity(bool isOut, int index)
 		{
@@ -21,10 +24,22 @@ namespace Ev3Emulator.Entities
 		private void OnSelectedSensorChanged(int sens)
 		{
 			RaisePropertyChanged(nameof(SensorItself));
+
+			RegionManager.Regions[RegionName].RemoveAll();
+			switch (SelectedSensorType)
+			{
+				case SensorType.None:
+					break;
+				case SensorType.LargeMotor:
+					RegionManager.ReqNav(typeof(IMotorControlView), RegionName);
+					break;
+			}
 		}
 
 		private bool _isOut = false;
 		public int Index { get; set; }
+
+		public string RegionName => (_isOut ? "Out" : "In") + $"{Index}Region";
 
 		private const string _pathToIcons = "avares://Ev3Emulator/Resources/SensorIcons";
 		public static Bitmap[] AllAvailableSensors =
