@@ -98,6 +98,7 @@
 #include <math.h>
 #include "w_system.h"
 #include "w_input.h"
+#include "w_motors.h"
 
 #include "lms2012.h"
 #include "c_input.h"
@@ -2514,6 +2515,7 @@ static DATAF cInputReadDeviceRaw(DATA8 Device, DATA8 Index, DATA16 Time, DATA16*
 				}
 				else
 				{
+					w_motors_updateMotorData(&OutputInstance.pMotor[Device - INPUT_DEVICES], Device - INPUT_DEVICES, 0);
 					if (InputInstance.DeviceMode[Device] == 2)
 					{
 						InputInstance.DeviceData[Device].Raw[Index] = (DATAF)OutputInstance.pMotor[Device - INPUT_DEVICES].Speed;
@@ -2634,6 +2636,7 @@ static void cInputWriteDeviceRaw(DATA8 Device, DATA8 Connection, DATA8 Type, DAT
 		{
 			OutputInstance.pMotor[Device - INPUT_DEVICES].TachoSensor = (DATA32)DataF;
 		}
+		w_motors_updateMotorData(&OutputInstance.pMotor[Device - INPUT_DEVICES], Device - INPUT_DEVICES, 1);
 		InputInstance.DeviceData[Device].DevStatus = OK;
 	}
 }

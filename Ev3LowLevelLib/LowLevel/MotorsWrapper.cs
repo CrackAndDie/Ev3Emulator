@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ev3LowLevelLib;
+using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -9,6 +10,13 @@ namespace Ev3Emulator.LowLevel
 		public int TachoCounts; // probably unreseted
 		public sbyte Speed;
 		public int TachoSensor; // probably reseted after each task 
+	}
+
+	public unsafe struct MOTORDATAFLOATED
+	{
+		public float TachoCounts; // probably unreseted
+		public sbyte Speed;
+		public float TachoSensor; // probably reseted after each task 
 	}
 
 	public static class MotorsWrapper
@@ -40,13 +48,44 @@ namespace Ev3Emulator.LowLevel
 			reg_w_motors_setBusyFlags(SetBusyFlags);
 			reg_w_motors_setData(SetData);
 			reg_w_motors_updateMotorData(UpdateMotorData);
+
+			_calcTachoTaskCts = new CancellationTokenSource();
+			_calcTachoTask = Task.Run(async () =>
+			{
+				while (_calcTachoTaskCts != null && !_calcTachoTaskCts.IsCancellationRequested)
+				{
+					for (int i = 0; i < 4; ++i)
+					{
+						int speed;
+						lock (_currentMotorDataLock)
+							speed = CurrentMotorData[i].Speed;
+						SetMotorTachoDelta(i, speed / 10f);
+					}
+					await Task.Delay(100);
+				}
+			}, _calcTachoTaskCts.Token);
 		}
 
-		public static void SetMotorTachoDelta(int port, int delta)
+		// it is public because it is like when you rotate the wheel via arm
+		public static void SetMotorSpeed(int port, int speed)
 		{
-			// TODO: locks
-			CurrentMotorData[port].TachoCounts += delta;
-			CurrentMotorData[port].TachoSensor += delta;
+			lock (_currentMotorDataLock)
+				CurrentMotorData[port].Speed = (sbyte)speed;
+			SetMotorSpeedEvent?.Invoke(port, speed);
+		}
+
+		public static void StopWrapper()
+		{
+			_calcTachoTaskCts?.Cancel();
+		}
+
+		private static void SetMotorTachoDelta(int port, float delta)
+		{
+			lock (_currentMotorDataLock)
+			{
+				CurrentMotorData[port].TachoCounts += delta;
+				CurrentMotorData[port].TachoSensor += delta;
+			}
 		}
 
 		private static void GetBusyFlags(ref int f1, ref int f2)
@@ -59,25 +98,66 @@ namespace Ev3Emulator.LowLevel
 			// TODO: 
 		}
 
-		private static void SetData(IntPtr data, int len)
+		private unsafe static void SetData(IntPtr data, int len)
 		{
+			var dt = (byte*)data.ToPointer();
+			if (dt == null) // if nullptr
+				return;
+
+			switch ((Op)dt[0])
+			{
+				case Op.opOUTPUT_POWER:
+					var ports = NosToMotorPorts(dt[1]);
+					foreach (var port in ports)
+					{
+						SetMotorSpeed(port, (sbyte)dt[2]);
+					}
+					break;
+			}
 			// TODO: 
+			// SetMotorSpeed
 		}
 
-		private unsafe static void UpdateMotorData(IntPtr data, int index, byte isReset)
+		private unsafe static void UpdateMotorData(IntPtr data, int index, byte isSet)
 		{
 			var dt = (MOTORDATA*)data.ToPointer();
-			if (isReset == 1)
+			lock (_currentMotorDataLock)
 			{
-				CurrentMotorData[index].TachoSensor = 0;
-			}
-			else
-			{
-				dt->TachoCounts = CurrentMotorData[index].TachoCounts;
-				dt->TachoSensor = CurrentMotorData[index].TachoSensor;
+				if (isSet == 1)
+				{
+					CurrentMotorData[index].TachoSensor = dt->TachoSensor;
+					CurrentMotorData[index].Speed = dt->Speed;
+					SetMotorSpeedEvent?.Invoke(index, CurrentMotorData[index].Speed);
+				}
+				else
+				{
+					dt->Speed = (sbyte)CurrentMotorData[index].Speed;
+					dt->TachoCounts = (int)CurrentMotorData[index].TachoCounts;
+					dt->TachoSensor = (int)CurrentMotorData[index].TachoSensor;
+				}
 			}
 		}
 
-		internal static MOTORDATA[] CurrentMotorData = new MOTORDATA[4];
+		private static List<int> NosToMotorPorts(int nos)
+		{
+			List<int> ports = new List<int>();
+			if ((nos & 1) != 0)
+				ports.Add(0);
+			if ((nos & 2) != 0)
+				ports.Add(1);
+			if ((nos & 4) != 0)
+				ports.Add(2);
+			if ((nos & 8) != 0)
+				ports.Add(3);
+			return ports;
+		}
+
+		public static event Action<int, int> SetMotorSpeedEvent;
+
+		private static object _currentMotorDataLock = new object();
+		private static MOTORDATAFLOATED[] CurrentMotorData = new MOTORDATAFLOATED[4];
+
+		private static Task _calcTachoTask = null;
+		private static CancellationTokenSource _calcTachoTaskCts = null;
 	}
 }

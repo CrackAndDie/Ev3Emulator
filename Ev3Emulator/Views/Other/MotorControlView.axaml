@@ -10,5 +10,15 @@
 			 d:DesignHeight="450"
              x:Class="Ev3Emulator.Views.Other.MotorControlView"
 			 x:CompileBindings="False">
-  Welcome to Avalonia!
+	<Grid ColumnDefinitions="*,30">
+		<Slider Maximum="50"
+				Minimum="-50"
+				Ticks="10"
+				PointerPressed="Slider_PointerPressed"
+				PointerReleased="Slider_PointerReleased"
+				HorizontalAlignment="Stretch"
+				Name="tachoSlider"/>
+		<TextBlock Text="{Binding CurrentMotorSpeed}"
+				   Grid.Column="1"/>
+	</Grid>
 </UserControl>

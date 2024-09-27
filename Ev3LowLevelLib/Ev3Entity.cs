@@ -14,9 +14,12 @@ namespace Ev3LowLevelLib
             SoundWrapper.Init(); // TODO:
 
             SystemWrapper.LmsExited += OnLmsVmExited;
-        }
 
-		#region Out ports
+            MotorsWrapper.SetMotorSpeedEvent += OnSetMotorSpeed;
+
+		}
+
+		#region Ports
         public void SetOutPort(int port, SensorType sens)
         {
             InputWrapper.SetOutPort(port, sens);
@@ -26,6 +29,21 @@ namespace Ev3LowLevelLib
 		{
 			InputWrapper.SetInPort(port, sens);
 		}
+		#endregion
+
+		#region Motors
+		// it is public because it is like when you rotate the wheel via arm
+		public void SetMotorSpeed(int port, int speed)
+        {
+            MotorsWrapper.SetMotorSpeed(port, speed);
+		}
+
+		private void OnSetMotorSpeed(int port, int speed)
+		{
+			MotorSpeedChanged?.Invoke(port, speed);
+		}
+
+		public event Action<int, int> MotorSpeedChanged;
 		#endregion
 
 		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
@@ -85,14 +103,14 @@ namespace Ev3LowLevelLib
         {
             LmsExited?.Invoke();
         }
-		#endregion
 
 		public event Action LmsExited;
 
-        public bool IsVmRunning => (_ev3Thread != null && _ev3Thread.IsAlive);
+		public bool IsVmRunning => (_ev3Thread != null && _ev3Thread.IsAlive);
 
-        private Thread _ev3Thread;
-        private const int _pressTime = 2000; // in ms
-        private CancellationTokenSource _pressCts;
-    }
+		private Thread _ev3Thread;
+		private const int _pressTime = 2000; // in ms
+		private CancellationTokenSource _pressCts;
+		#endregion
+	}
 }
