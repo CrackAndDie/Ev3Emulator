@@ -82,7 +82,7 @@ namespace Ev3Emulator.LowLevel
 
         public fixed short OutPin5Low[4];    //!< Analog value at output port connection 5 when connection 6 is low
 
-        public fixed sbyte Updated[4];
+        public fixed sbyte Updated[4];		// set to 1 when update INPUT value
 
         public fixed sbyte InDcm[4];          //!< Input port device types
         public fixed sbyte InConn[4];
@@ -164,7 +164,16 @@ namespace Ev3Emulator.LowLevel
 			// TODO: locks
 			var sensData = SensorData.AllSensorData[sens];
 			CurrentAnalogData.InDcm[port] = (sbyte)sensData.Dcm;
-			CurrentAnalogData.InDcm[port] = (sbyte)sensData.Conn;
+			CurrentAnalogData.InConn[port] = (sbyte)sensData.Conn;
+
+			CurrentAnalogData.Updated[port] = 1;
+		}
+
+		internal unsafe static void SetPortRawValue(int port, short value)
+		{
+			CurrentAnalogData.InPin6[port] = value;
+
+			CurrentAnalogData.Updated[port] = 1;
 		}
 
 		private unsafe static void IoctlIICDAT(int par, IntPtr data)
@@ -215,9 +224,13 @@ namespace Ev3Emulator.LowLevel
 					dt->OutDcm[i] = CurrentAnalogData.OutDcm[i];
 				}
 
-				// TODO: doesn't work :(
 				dt->InConn[i] = CurrentAnalogData.InConn[i];
 				dt->InDcm[i] = CurrentAnalogData.InDcm[i];
+				dt->Updated[i] = CurrentAnalogData.Updated[i]; // updated status
+				dt->InPin6[i] = CurrentAnalogData.InPin6[i]; // raw values
+				// reset updated status
+				//if (CurrentAnalogData.Updated[i] == 1)
+				//	CurrentAnalogData.Updated[i] = 0; // TODO: uncomment
 			}
 			
             // TODO: ...

@@ -46,6 +46,13 @@ namespace Ev3LowLevelLib
 		public event Action<int, int> MotorSpeedChanged;
 		#endregion
 
+		#region Touch sensor
+		public void SetTouchSensor(int port, bool value)
+		{
+			InputWrapper.SetPortRawValue(port, (short)(value ? 2000 : 1000)); // the values are from typedata.rcf
+		}
+		#endregion
+
 		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
         {
             LcdWrapper.Init(updateLcd, updateLed);

@@ -34,6 +34,9 @@ namespace Ev3Emulator.Entities
 				case SensorType.LargeMotor:
 					RegionManager.ReqNav(typeof(IMotorControlView), RegionName, new SensorViewNavigationParameters() { Port = Index });
 					break;
+				case SensorType.TouchSensor:
+					RegionManager.ReqNav(typeof(ITouchControlView), RegionName, new SensorViewNavigationParameters() { Port = Index });
+					break;
 			}
 		}
 
