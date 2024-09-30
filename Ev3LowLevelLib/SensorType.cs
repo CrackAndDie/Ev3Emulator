@@ -16,7 +16,7 @@
 	{
 		public static readonly Dictionary<SensorType, SensorData> AllSensorData = new Dictionary<SensorType, SensorData>()
 		{
-			{ SensorType.None, new SensorData() { SensorType = SensorType.None, Dcm = 0, Conn = 0 } },
+			{ SensorType.None, new SensorData() { SensorType = SensorType.None, Dcm = 0, Conn = 126 } },
 			{ SensorType.MediumMotor, new SensorData() { SensorType = SensorType.MediumMotor, Dcm = 8, Conn = 125 } },
 			{ SensorType.LargeMotor, new SensorData() { SensorType = SensorType.LargeMotor, Dcm = 7, Conn = 125 } },
 			{ SensorType.TouchSensor, new SensorData() { SensorType = SensorType.TouchSensor, Dcm = 16, Conn = 121 } },

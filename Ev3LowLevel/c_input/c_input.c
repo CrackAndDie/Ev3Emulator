@@ -2744,73 +2744,76 @@ static DATAF cInputReadDeviceSi(DATA8 Device, DATA8 Index, DATA16 Time, DATA16* 
 
 static RESULT cInputCheckUartInfo(UBYTE Port)
 {
-	RESULT  Result = BUSY;
+	RESULT  Result = OK;
 	TYPES* pTmp;
 
 
 	// if (InputInstance.UartFile >= MIN_HANDLE)
 	{ // Driver installed
 
-		if (((*InputInstance.pUart).Status[Port] & UART_PORT_CHANGED))
-		{ // something has changed
+//		if (((*InputInstance.pUart).Status[Port] & UART_PORT_CHANGED))
+//		{ // something has changed
+//
+//			if (InputInstance.TmpMode[Port] > 0)
+//			{ // check each mode
+//
+//				InputInstance.TmpMode[Port]--;
+//
+//				// Get info
+//				InputInstance.UartCtl.Port = Port;
+//				InputInstance.UartCtl.Mode = InputInstance.TmpMode[Port];
+//				// ioctl(InputInstance.UartFile, UART_READ_MODE_INFO, &InputInstance.UartCtl);
+//
+//				w_input_ioctlUARTCTL(UART_READ_MODE_INFO, &InputInstance.UartCtl);
+//
+//				if (InputInstance.UartCtl.TypeData.Name[0])
+//				{ // Info available
+//
+//					Result = cInputGetNewTypeDataPointer(InputInstance.UartCtl.TypeData.Name, InputInstance.UartCtl.TypeData.Type, InputInstance.UartCtl.TypeData.Mode, CONN_INPUT_UART, &pTmp);
+//					if (pTmp != NULL)
+//					{ // Table index found
+//
+//						if (InputInstance.DeviceType[Port] == TYPE_UNKNOWN)
+//						{ // Use first mode info to set type
+//
+//							InputInstance.DeviceType[Port] = InputInstance.UartCtl.TypeData.Type;
+//						}
+//
+//						if (Result == OK)
+//						{ // New mode
+//
+//						  // Insert in table
+//							Memcpy(pTmp, &InputInstance.UartCtl.TypeData, sizeof(TYPES));
+//
+//						}
+//#ifndef DISABLE_DAISYCHAIN
+//						if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)&InputInstance.UartCtl.TypeData) == BUSY)
+//						{ // Chain not ready - roll back
+//
+//							ioctl(InputInstance.UartFile, UART_NACK_MODE_INFO, &InputInstance.UartCtl);
+//							InputInstance.TmpMode[Port]++;
+//						}
+//#endif
+//
+//#ifdef BUFPRINTSIZE
+//						BufPrint('p', "P=%d T=%-3d M=%d N=%s\r\n", Port, InputInstance.UartCtl.TypeData.Type, InputInstance.UartCtl.TypeData.Mode, InputInstance.UartCtl.TypeData.Name);
+//#endif
+//					}
+//				}
+//			}
+//			else
+//			{ // All modes received set device mode 0
+//
+//				InputInstance.UartCtl.Port = Port;
+//				// ioctl(InputInstance.UartFile, UART_CLEAR_CHANGED, &InputInstance.UartCtl);
+//				w_input_ioctlUARTCTL(UART_CLEAR_CHANGED, &InputInstance.UartCtl);
+//				(*InputInstance.pUart).Status[Port] &= ~UART_PORT_CHANGED;
+//				cInputSetDeviceType(Port, InputInstance.DeviceType[Port], 0, __LINE__);
+//			}
+//		}
 
-			if (InputInstance.TmpMode[Port] > 0)
-			{ // check each mode
-
-				InputInstance.TmpMode[Port]--;
-
-				// Get info
-				InputInstance.UartCtl.Port = Port;
-				InputInstance.UartCtl.Mode = InputInstance.TmpMode[Port];
-				// ioctl(InputInstance.UartFile, UART_READ_MODE_INFO, &InputInstance.UartCtl);
-
-				w_input_ioctlUARTCTL(UART_READ_MODE_INFO, &InputInstance.UartCtl);
-
-				if (InputInstance.UartCtl.TypeData.Name[0])
-				{ // Info available
-
-					Result = cInputGetNewTypeDataPointer(InputInstance.UartCtl.TypeData.Name, InputInstance.UartCtl.TypeData.Type, InputInstance.UartCtl.TypeData.Mode, CONN_INPUT_UART, &pTmp);
-					if (pTmp != NULL)
-					{ // Table index found
-
-						if (InputInstance.DeviceType[Port] == TYPE_UNKNOWN)
-						{ // Use first mode info to set type
-
-							InputInstance.DeviceType[Port] = InputInstance.UartCtl.TypeData.Type;
-						}
-
-						if (Result == OK)
-						{ // New mode
-
-						  // Insert in table
-							Memcpy(pTmp, &InputInstance.UartCtl.TypeData, sizeof(TYPES));
-
-						}
-#ifndef DISABLE_DAISYCHAIN
-						if (cInputComSetDeviceInfo(MAX_DEVICE_INFOLENGTH, (UBYTE*)&InputInstance.UartCtl.TypeData) == BUSY)
-						{ // Chain not ready - roll back
-
-							ioctl(InputInstance.UartFile, UART_NACK_MODE_INFO, &InputInstance.UartCtl);
-							InputInstance.TmpMode[Port]++;
-						}
-#endif
-
-#ifdef BUFPRINTSIZE
-						BufPrint('p', "P=%d T=%-3d M=%d N=%s\r\n", Port, InputInstance.UartCtl.TypeData.Type, InputInstance.UartCtl.TypeData.Mode, InputInstance.UartCtl.TypeData.Name);
-#endif
-					}
-				}
-			}
-			else
-			{ // All modes received set device mode 0
-
-				InputInstance.UartCtl.Port = Port;
-				// ioctl(InputInstance.UartFile, UART_CLEAR_CHANGED, &InputInstance.UartCtl);
-				w_input_ioctlUARTCTL(UART_CLEAR_CHANGED, &InputInstance.UartCtl);
-				(*InputInstance.pUart).Status[Port] &= ~UART_PORT_CHANGED;
-				cInputSetDeviceType(Port, InputInstance.DeviceType[Port], 0, __LINE__);
-			}
-		}
+		InputInstance.DeviceType[Port] = InputInstance.pAnalog->InDcm[Port]; 
+		cInputSetDeviceType(Port, InputInstance.DeviceType[Port], 0, __LINE__);
 
 		if (((*InputInstance.pUart).Status[Port] & UART_DATA_READY))
 		{
