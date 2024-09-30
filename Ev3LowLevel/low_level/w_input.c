@@ -31,6 +31,11 @@ void reg_w_input_updateANALOG(void (*f)(ANALOG* data))
     w_input_updateANALOG = f;
 }
 
+void reg_w_input_updateUART(void (*f)(float* data, int port, int index, int mode))
+{
+    w_input_updateUART = f;
+}
+
 // ------- writes
 
 void reg_w_input_writeData(void (*f)(int par, unsigned char* data, int len))

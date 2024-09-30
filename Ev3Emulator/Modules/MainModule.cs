@@ -25,6 +25,7 @@ namespace Ev3Emulator.Modules
 			// control views
 			containerRegistry.RegisterViewForNavigation<IMotorControlView, MotorControlView>();
 			containerRegistry.RegisterViewForNavigation<ITouchControlView, TouchControlView>();
+			containerRegistry.RegisterViewForNavigation<IDistanceControlView, DistanceControlView>();
 		}
     }
 }

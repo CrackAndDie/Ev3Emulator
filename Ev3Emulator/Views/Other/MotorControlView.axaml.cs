@@ -9,7 +9,6 @@ namespace Ev3Emulator.Views.Other;
 
 public partial class MotorControlView : UserControl, IMotorControlView
 {
-	private Task _updateSpeedTask = null;
 	private CancellationTokenSource _updateSpeedTaskCts = null;
 	public event Action<int> UpdateSpeed;
 
@@ -24,7 +23,7 @@ public partial class MotorControlView : UserControl, IMotorControlView
 	private void Slider_PointerPressed(object sender, Avalonia.Input.PointerPressedEventArgs e)
 	{
 		_updateSpeedTaskCts = new CancellationTokenSource();
-		_updateSpeedTask = Task.Run(async () =>
+		Task.Run(async () =>
 		{
 			while (!_updateSpeedTaskCts.IsCancellationRequested)
 			{
@@ -40,9 +39,6 @@ public partial class MotorControlView : UserControl, IMotorControlView
 	private void Slider_PointerReleased(object sender, Avalonia.Input.PointerReleasedEventArgs e)
 	{
 		_updateSpeedTaskCts.Cancel();
-		// _updateSpeedTaskCts.Dispose();
-		// _updateSpeedTask.Dispose();
-		_updateSpeedTask = null;
 		UpdateSpeed?.Invoke((int)0);
 		tachoSlider.Value = 0;
 	}

@@ -1,7 +1,7 @@
-﻿using System.Runtime.InteropServices;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System;
+using System.Runtime.InteropServices;
 using Ev3LowLevelLib;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ev3Emulator.LowLevel
 {
@@ -94,6 +94,11 @@ namespace Ev3Emulator.LowLevel
 		public fixed sbyte OutPortUpdateStep[4];
 	}
 
+	public unsafe struct CUSTOM_RAW_DATA_HOLDER
+	{
+		public fixed float RawData[8];
+	}
+
 	public static class InputWrapper
 	{
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
@@ -126,20 +131,28 @@ namespace Ev3Emulator.LowLevel
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void reg_w_input_updateANALOGAction(IntPtr data);
 
-        [DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		private extern static void reg_w_input_updateUART(reg_w_input_updateUARTAction updateUART);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void reg_w_input_updateUARTAction(IntPtr data, int port, int index, int mode);
+
+		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
 		private extern static void reg_w_input_writeData(reg_w_input_writeDataAction writeData);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_input_writeDataAction(int par, IntPtr data, int len);
 
 		// TODO: custom handler post processed
-		public unsafe static void Init()
+		public unsafe static void Init(Action<IntPtr, int, int, int> updateUart)
 		{
+			_updateUart = updateUart;
+
 			reg_w_input_ioctlIICDAT(IoctlIICDAT);
 			reg_w_input_ioctlIICSTR(IoctlIICSTR);
 			reg_w_input_ioctlIICDEVCON(IoctlIICDEVCON);
 			reg_w_input_ioctlUARTCTL(IoctlUARTCTL);
 			reg_w_input_ioctlUARTDEVCON(IoctlUARTDEVCON);
             reg_w_input_updateANALOG(UpdateANALOG);
+			reg_w_input_updateUART(UpdateUART);
 			reg_w_input_writeData(WriteData);
 
 			// init current analog
@@ -147,6 +160,11 @@ namespace Ev3Emulator.LowLevel
 			CurrentAnalogData.OutPortUpdateStep[1] = 0;
 			CurrentAnalogData.OutPortUpdateStep[2] = 0;
 			CurrentAnalogData.OutPortUpdateStep[3] = 0;
+
+			CurrentAnalogData.Updated[0] = 1;
+			CurrentAnalogData.Updated[1] = 1;
+			CurrentAnalogData.Updated[2] = 1;
+			CurrentAnalogData.Updated[3] = 1;
 		}
 
 		public unsafe static void SetOutPort(int port, SensorType sens)
@@ -172,8 +190,6 @@ namespace Ev3Emulator.LowLevel
 		internal unsafe static void SetPortRawValue(int port, short value)
 		{
 			CurrentAnalogData.InPin6[port] = value;
-
-			CurrentAnalogData.Updated[port] = 1;
 		}
 
 		private unsafe static void IoctlIICDAT(int par, IntPtr data)
@@ -227,20 +243,27 @@ namespace Ev3Emulator.LowLevel
 				dt->InConn[i] = CurrentAnalogData.InConn[i];
 				dt->InDcm[i] = CurrentAnalogData.InDcm[i];
 				dt->Updated[i] = CurrentAnalogData.Updated[i]; // updated status
-				dt->InPin6[i] = CurrentAnalogData.InPin6[i]; // raw values
+				dt->InPin6[i] = CurrentAnalogData.InPin6[i];   // raw values
 				// reset updated status
-				//if (CurrentAnalogData.Updated[i] == 1)
-				//	CurrentAnalogData.Updated[i] = 0; // TODO: uncomment
+				if (CurrentAnalogData.Updated[i] == 1)
+					CurrentAnalogData.Updated[i] = 0; // TODO: uncomment
 			}
-			
-            // TODO: ...
-        }
 
-        private static void WriteData(int par, IntPtr data, int len)
+			// TODO: ...
+		}
+
+		private unsafe static void UpdateUART(IntPtr data, int port, int index, int mode)
+		{
+			_updateUart?.Invoke(data, port, index, mode);
+		}
+
+		private static void WriteData(int par, IntPtr data, int len)
 		{
 			// TODO: ...
 		}
 
 		internal static ANALOG CurrentAnalogData = new ANALOG();
+
+		private static Action<IntPtr, int, int, int> _updateUart;
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using Ev3Emulator.LowLevel;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System;
 
 namespace Ev3LowLevelLib
 {
@@ -9,7 +11,7 @@ namespace Ev3LowLevelLib
             SystemWrapper.Init();
             FilesystemWrapper.Init();
             TimeWrapper.Init();
-            InputWrapper.Init(); // TODO:
+            InputWrapper.Init(OnUpdateUart); // TODO:
             MotorsWrapper.Init(); // TODO:
             SoundWrapper.Init(); // TODO:
 
@@ -51,6 +53,61 @@ namespace Ev3LowLevelLib
 		{
 			InputWrapper.SetPortRawValue(port, (short)(value ? 2000 : 1000)); // the values are from typedata.rcf
 		}
+		#endregion
+
+		#region Common sensors
+        private unsafe void OnUpdateUart(IntPtr data, int port, int index, int mode)
+        {
+			// TODO: idk what is INDEX but it should be checked on ir sensor
+			// (probably DataSets is amount of data to be sent and index is a current element in the pckt)
+			var dt = (float*)data.ToPointer();
+
+			float outData = 0;
+			switch (InputWrapper.CurrentAnalogData.InDcm[port])
+			{
+				// us
+				case 30:
+					outData = GetUsData(port, index, mode);
+					break;
+			}
+
+			dt[index] = outData;
+		}
+		#endregion
+
+		#region Us sensor
+		public void InitUsSensor(int port, Func<float> updateUsSensor)
+		{
+			_getUsSensor[port] = updateUsSensor;
+		}
+
+		public void ResetUsSensor(int port)
+		{
+			_getUsSensor[port] = null;
+		}
+
+		private float GetUsData(int port, int index, int mode)
+        {
+			var usAct = _getUsSensor[port];
+			if (usAct == null)
+				return 0;
+
+			// TODO: check: no need to do anything with index???
+
+			switch (mode)
+			{
+				case 0:
+					return usAct.Invoke() * 10;
+				case 1:
+					return (usAct.Invoke()) * (1 / 2.54f) * 10;
+				case 2:
+					// TODO: idk what is mode 2 for us sens
+					return 0;
+			}
+			return 0;
+		}
+
+		public Func<float>[] _getUsSensor = new Func<float>[4];
 		#endregion
 
 		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)

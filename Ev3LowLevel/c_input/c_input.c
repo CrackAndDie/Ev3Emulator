@@ -909,6 +909,54 @@ static RESULT cInputFindDevice(DATA8 Type, DATA8 Mode, UWORD* pTypeIndex)
 	return (Result);
 }
 
+static RESULT cInputGetDeviceModesAmount(DATA8 Type)
+{
+	RESULT  Result = OK;
+	UWORD   Index = 0;
+	UWORD   Amount = 0;
+
+	while ((Index < InputInstance.MaxDeviceTypes) && (Result != OK))
+	{
+		if (Type == InputInstance.TypeData[Index].Type)
+		{ // type match
+
+			Amount++;
+		}
+		Index++;
+	}
+	return (Result);
+}
+
+static RESULT cInputGetDeviceName(DATA8 Type, DATA8 Mode, char* Name)
+{
+	RESULT  Result = OK;
+	UWORD   Index = 0;
+	int     Count;
+
+	while ((Index < InputInstance.MaxDeviceTypes) && (Result != OK))
+	{
+		if (Type == InputInstance.TypeData[Index].Type)
+		{ // type match
+
+			if (Mode == InputInstance.TypeData[Index].Mode)
+			{ // mode match
+
+				Count = 0;
+				while ((InputInstance.TypeData[Index].Name[Count]) && (Count < TYPE_NAME_LENGTH))
+				{
+					Name[Count] = InputInstance.TypeData[Index].Name[Count];
+					Count++;
+				}
+
+				// skip looping
+				Result = OK;
+			}
+		}
+		Index++;
+	}
+	return (Result);
+}
+
 static void cInputResetDevice(DATA8 Device, UWORD TypeIndex)
 {
 	PRGID   TmpPrgId;
@@ -2421,12 +2469,14 @@ static DATAF cInputReadDeviceRaw(DATA8 Device, DATA8 Index, DATA16 Time, DATA16*
 					{
 						// Device is a UART sensor
 
-						pResult = (void*)&(*InputInstance.pUart).Raw[Device];
+						// pResult = (void*)&(*InputInstance.pUart).Raw[Device];
 						DataSets = InputInstance.TypeData[InputInstance.DeviceData[Device].TypeIndex].DataSets;
+						int mode = InputInstance.TypeData[InputInstance.DeviceData[Device].TypeIndex].Mode;
 
 						if (Index < DataSets)
 						{
-							switch (InputInstance.TypeData[InputInstance.DeviceData[Device].TypeIndex].Format & 0x0F)
+							w_input_updateUART(InputInstance.DeviceData[Device].Raw, Device, Index, mode);
+							/*switch (InputInstance.TypeData[InputInstance.DeviceData[Device].TypeIndex].Format & 0x0F)
 							{
 							case DATA_8:
 							{
@@ -2458,7 +2508,7 @@ static DATAF cInputReadDeviceRaw(DATA8 Device, DATA8 Index, DATA16 Time, DATA16*
 							}
 							break;
 
-							}
+							}*/
 						}
 						else
 						{
@@ -2746,6 +2796,7 @@ static RESULT cInputCheckUartInfo(UBYTE Port)
 {
 	RESULT  Result = OK;
 	TYPES* pTmp;
+	UWORD ModesAmount = 0;
 
 
 	// if (InputInstance.UartFile >= MIN_HANDLE)
@@ -2812,8 +2863,15 @@ static RESULT cInputCheckUartInfo(UBYTE Port)
 //			}
 //		}
 
-		InputInstance.DeviceType[Port] = InputInstance.pAnalog->InDcm[Port]; 
-		cInputSetDeviceType(Port, InputInstance.DeviceType[Port], 0, __LINE__);
+		DATA8 deviceType = InputInstance.pAnalog->InDcm[Port];
+		InputInstance.DeviceType[Port] = deviceType;
+
+		ModesAmount = cInputGetDeviceModesAmount(deviceType);
+		for (int i = 0; i < ModesAmount; ++i) {
+			// cInputGetDeviceName();
+			Result = cInputGetNewTypeDataPointer('\0', deviceType, i, CONN_INPUT_UART, &pTmp);
+		}
+		// cInputSetDeviceType(Port, deviceType, 0, __LINE__);
 
 		if (((*InputInstance.pUart).Status[Port] & UART_DATA_READY))
 		{
