@@ -69,6 +69,10 @@ namespace Ev3LowLevelLib
 				case 30:
 					outData = GetUsData(port, index, mode);
 					break;
+				// ir
+				case 33:
+					outData = GetIrData(port, index, mode);
+					break;
 			}
 
 			dt[index] = outData;
@@ -102,12 +106,49 @@ namespace Ev3LowLevelLib
 					return (usAct.Invoke()) * (1 / 2.54f) * 10;
 				case 2:
 					// TODO: idk what is mode 2 for us sens
+					// could not be done probably http://legoengineering.com/ev3-sensors/index.html
 					return 0;
 			}
 			return 0;
 		}
 
-		public Func<float>[] _getUsSensor = new Func<float>[4];
+		private Func<float>[] _getUsSensor = new Func<float>[4];
+		#endregion
+
+		#region Ir sensor
+		public void InitIrSensor(int port, Func<sbyte> updateIrSensor)
+		{
+			_getIrSensor[port] = updateIrSensor;
+		}
+
+		public void ResetIrSensor(int port)
+		{
+			_getIrSensor[port] = null;
+		}
+
+		private float GetIrData(int port, int index, int mode)
+		{
+			var irAct = _getIrSensor[port];
+			if (irAct == null)
+				return 0;
+
+			// TODO: check: no need to do anything with index???
+
+			switch (mode)
+			{
+				case 0:
+					return irAct.Invoke();
+				case 1:
+				case 2:
+					// TODO: idk what is mode 1/2 for ir sens
+					// could not be implemented http://legoengineering.com/ev3-sensors/index.html
+					// because of beacon remote ctrl
+					return 0;
+			}
+			return 0;
+		}
+
+		private Func<sbyte>[] _getIrSensor = new Func<sbyte>[4];
 		#endregion
 
 		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)

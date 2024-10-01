@@ -11,7 +11,7 @@
              x:Class="Ev3Emulator.Views.Other.DistanceControlView"
 			 x:CompileBindings="False">
 	<Grid ColumnDefinitions="*,30">
-		<Slider Maximum="255"
+		<Slider Maximum="{Binding MaxDistance}"
 				Minimum="0"
 				Ticks="10"
 				Value="10"

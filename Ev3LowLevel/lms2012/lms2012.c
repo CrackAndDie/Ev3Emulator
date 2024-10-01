@@ -2625,6 +2625,8 @@ int       lmsMain(int argc)
 					w_system_printf("ShouldBeStopped set to 1 \n");
 					Result = STOP;
 				}
+
+				w_system_sleep_ms(10);
 			} while (Result == OK);
 
 			w_system_printf("Exiting from mSchedCtrl: %d \n", Result);

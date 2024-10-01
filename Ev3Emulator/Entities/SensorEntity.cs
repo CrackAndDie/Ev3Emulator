@@ -38,6 +38,8 @@ namespace Ev3Emulator.Entities
 					RegionManager.ReqNav(typeof(ITouchControlView), RegionName, new SensorViewNavigationParameters() { Port = Index });
 					break;
 				case SensorType.UsSensor:
+					RegionManager.ReqNav(typeof(IDistanceControlView), RegionName, new SensorViewNavigationParameters() { Port = Index, IsSonic = true });
+					break;
 				case SensorType.IrSensor:
 					RegionManager.ReqNav(typeof(IDistanceControlView), RegionName, new SensorViewNavigationParameters() { Port = Index });
 					break;

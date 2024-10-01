@@ -245,8 +245,8 @@ namespace Ev3Emulator.LowLevel
 				dt->Updated[i] = CurrentAnalogData.Updated[i]; // updated status
 				dt->InPin6[i] = CurrentAnalogData.InPin6[i];   // raw values
 				// reset updated status
-				if (CurrentAnalogData.Updated[i] == 1)
-					CurrentAnalogData.Updated[i] = 0; // TODO: uncomment
+				//if (CurrentAnalogData.Updated[i] == 1)
+				//	CurrentAnalogData.Updated[i] = 0; // TODO: uncomment
 			}
 
 			// TODO: ...
