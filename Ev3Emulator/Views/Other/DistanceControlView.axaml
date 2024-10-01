@@ -15,8 +15,6 @@
 				Minimum="0"
 				Ticks="10"
 				Value="10"
-				PointerPressed="Slider_PointerPressed"
-				PointerReleased="Slider_PointerReleased"
 				HorizontalAlignment="Stretch"
 				Name="distSlider"/>
 		<TextBlock Text="{Binding CurrentDistance}"

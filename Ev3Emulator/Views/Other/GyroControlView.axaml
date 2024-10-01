@@ -12,8 +12,6 @@
 				Minimum="-180"
 				Ticks="10"
 				Value="0"
-				PointerPressed="Slider_PointerPressed"
-				PointerReleased="Slider_PointerReleased"
 				HorizontalAlignment="Stretch"
 				Name="gyroSlider"/>
 		<TextBlock Text="{Binding CurrentRotation}"

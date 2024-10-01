@@ -27,6 +27,7 @@ namespace Ev3Emulator.Modules
 			containerRegistry.RegisterViewForNavigation<ITouchControlView, TouchControlView>();
 			containerRegistry.RegisterViewForNavigation<IDistanceControlView, DistanceControlView>();
 			containerRegistry.RegisterViewForNavigation<IGyroControlView, GyroControlView>();
+			containerRegistry.RegisterViewForNavigation<IColorControlView, ColorControlView>();
 		}
     }
 }

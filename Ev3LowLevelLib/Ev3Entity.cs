@@ -208,6 +208,47 @@ namespace Ev3LowLevelLib
 		private MeanFilter[] _gyroRateFilters = new MeanFilter[] { new MeanFilter(5), new MeanFilter(5), new MeanFilter(5), new MeanFilter(5) };
 		#endregion
 
+		#region Color sensor
+		// color, reflect, ambient
+		public void InitColorSensor(int port, Func<(byte, byte, byte)> updateColorSensor)
+		{
+			_getColorSensor[port] = updateColorSensor;
+		}
+
+		public void ResetColorSensor(int port)
+		{
+			_getColorSensor[port] = null;
+		}
+
+		private float GetColorData(int port, int index, int mode)
+		{
+			var colorAct = _getColorSensor[port];
+			if (colorAct == null)
+				return 0;
+
+			// TODO: check: no need to do anything with index???
+
+			float val = 0;
+
+			var result = colorAct.Invoke();
+			switch (mode)
+			{
+				case 0:
+					val = result.Item2; // reflect
+					break;
+				case 1:
+					val = result.Item3; // ambient
+					break;
+				case 2:
+					val = result.Item1; // color
+					break;
+			}
+			return val;
+		}
+
+		private Func<(byte, byte, byte)>[] _getColorSensor = new Func<(byte, byte, byte)>[4];
+		#endregion
+
 		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
         {
             LcdWrapper.Init(updateLcd, updateLed);
