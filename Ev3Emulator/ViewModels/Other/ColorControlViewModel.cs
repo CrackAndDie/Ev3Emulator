@@ -24,6 +24,8 @@ namespace Ev3Emulator.ViewModels.Other
 				_currentReflect = r;
 				_currentAmbient = a;
 			};
+
+			RaisePropertyChanged(nameof(AllColors));
 		}
 
 		public override void OnNavigatedFrom(NavigationContext navigationContext)
@@ -44,7 +46,7 @@ namespace Ev3Emulator.ViewModels.Other
 		[Notify]
 		public int SelectedColor { get; set; } = 0;
 
-		public IBrush[] AllColors = new IBrush[] 
+		public IBrush[] AllColors { get; set; } = new IBrush[] 
 		{ 
 			Brushes.Firebrick, // TODO: no color
 			Brushes.Black, 

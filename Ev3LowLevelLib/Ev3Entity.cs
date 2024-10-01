@@ -79,6 +79,10 @@ namespace Ev3LowLevelLib
 				case 32:
 					outData = GetGyroData(port, index, mode);
 					break;
+				// color
+				case 29:
+					outData = GetColorData(port, index, mode);
+					break;
 			}
 
 			dt[index] = outData;
