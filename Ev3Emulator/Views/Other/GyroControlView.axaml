@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+			 d:DesignWidth="800" 
+			 d:DesignHeight="450"
+             x:Class="Ev3Emulator.Views.Other.GyroControlView"
+			 x:CompileBindings="False">
+	<Grid ColumnDefinitions="*,30">
+		<Slider Maximum="180"
+				Minimum="-180"
+				Ticks="10"
+				Value="0"
+				PointerPressed="Slider_PointerPressed"
+				PointerReleased="Slider_PointerReleased"
+				HorizontalAlignment="Stretch"
+				Name="gyroSlider"/>
+		<TextBlock Text="{Binding CurrentRotation}"
+				   Grid.Column="1"/>
+	</Grid>
+</UserControl>

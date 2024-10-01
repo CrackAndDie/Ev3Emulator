@@ -43,6 +43,9 @@ namespace Ev3Emulator.Entities
 				case SensorType.IrSensor:
 					RegionManager.ReqNav(typeof(IDistanceControlView), RegionName, new SensorViewNavigationParameters() { Port = Index });
 					break;
+				case SensorType.GyroSensor:
+					RegionManager.ReqNav(typeof(IGyroControlView), RegionName, new SensorViewNavigationParameters() { Port = Index });
+					break;
 			}
 		}
 

@@ -1,6 +1,8 @@
 ﻿using Ev3Emulator.LowLevel;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System;
+using System.Diagnostics;
+using Ev3LowLevelLib.Other;
 
 namespace Ev3LowLevelLib
 {
@@ -72,6 +74,10 @@ namespace Ev3LowLevelLib
 				// ir
 				case 33:
 					outData = GetIrData(port, index, mode);
+					break;
+				// gyro
+				case 32:
+					outData = GetGyroData(port, index, mode);
 					break;
 			}
 
@@ -149,6 +155,57 @@ namespace Ev3LowLevelLib
 		}
 
 		private Func<sbyte>[] _getIrSensor = new Func<sbyte>[4];
+		#endregion
+
+		#region Gyro sensor
+		public void InitGyroSensor(int port, Func<short> updateGyroSensor)
+		{
+			_getGyroSensor[port] = updateGyroSensor;
+			_lastGyroValues[port] = 0;
+			_lastGyroTimestamps[port] = Stopwatch.GetTimestamp();
+		}
+
+		public void ResetGyroSensor(int port)
+		{
+			_getGyroSensor[port] = null;
+		}
+
+		private float GetGyroData(int port, int index, int mode)
+		{
+			var gyroAct = _getGyroSensor[port];
+			if (gyroAct == null)
+				return 0;
+
+			var ticks = Stopwatch.GetTimestamp() - _lastGyroTimestamps[port];
+			_lastGyroTimestamps[port] = Stopwatch.GetTimestamp();
+
+			// TODO: check: no need to do anything with index???
+
+			float val = 0;
+
+			var gyro = gyroAct.Invoke();
+			var gDiff = gyro - _lastGyroValues[port];
+			var coeff = 1 / (ticks / (float)Stopwatch.Frequency);
+			var degPerSec = _gyroRateFilters[port].Update(gDiff * coeff);
+
+			_lastGyroValues[port] = gyro;
+
+			switch (mode)
+			{
+				case 0:
+					val = gyro;
+					break;
+				case 1:
+					val = degPerSec;
+					break;
+			}
+			return val;
+		}
+
+		private Func<short>[] _getGyroSensor = new Func<short>[4];
+		private float[] _lastGyroValues = new float[4];
+		private long[] _lastGyroTimestamps = new long[4];
+		private MeanFilter[] _gyroRateFilters = new MeanFilter[] { new MeanFilter(5), new MeanFilter(5), new MeanFilter(5), new MeanFilter(5) };
 		#endregion
 
 		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
