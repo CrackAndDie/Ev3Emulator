@@ -20,24 +20,40 @@
 
     <ItemGroup>
       <None Remove="Resources\SensorIcons\color_sens.bmp" />
+      <None Remove="Resources\SensorIcons\color_sens.png" />
       <None Remove="Resources\SensorIcons\gyro_sens.bmp" />
+      <None Remove="Resources\SensorIcons\gyro_sens.png" />
       <None Remove="Resources\SensorIcons\ir_sens.bmp" />
+      <None Remove="Resources\SensorIcons\ir_sens.png" />
       <None Remove="Resources\SensorIcons\lrg_motor.bmp" />
+      <None Remove="Resources\SensorIcons\lrg_motor.png" />
       <None Remove="Resources\SensorIcons\med_motor.bmp" />
+      <None Remove="Resources\SensorIcons\med_motor.png" />
       <None Remove="Resources\SensorIcons\other.bmp" />
+      <None Remove="Resources\SensorIcons\other.png" />
       <None Remove="Resources\SensorIcons\touch.bmp" />
+      <None Remove="Resources\SensorIcons\touch.png" />
       <None Remove="Resources\SensorIcons\us_sens.bmp" />
+      <None Remove="Resources\SensorIcons\us_sens.png" />
     </ItemGroup>
 
     <ItemGroup>
       <AvaloniaResource Include="Resources\SensorIcons\color_sens.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\color_sens.png" />
       <AvaloniaResource Include="Resources\SensorIcons\gyro_sens.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\gyro_sens.png" />
       <AvaloniaResource Include="Resources\SensorIcons\ir_sens.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\ir_sens.png" />
       <AvaloniaResource Include="Resources\SensorIcons\lrg_motor.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\lrg_motor.png" />
       <AvaloniaResource Include="Resources\SensorIcons\med_motor.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\med_motor.png" />
       <AvaloniaResource Include="Resources\SensorIcons\other.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\other.png" />
       <AvaloniaResource Include="Resources\SensorIcons\touch.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\touch.png" />
       <AvaloniaResource Include="Resources\SensorIcons\us_sens.bmp" />
+      <AvaloniaResource Include="Resources\SensorIcons\us_sens.png" />
     </ItemGroup>
 
     <ItemGroup>

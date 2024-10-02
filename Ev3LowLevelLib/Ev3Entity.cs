@@ -253,9 +253,9 @@ namespace Ev3LowLevelLib
 		private Func<(byte, byte, byte)>[] _getColorSensor = new Func<(byte, byte, byte)>[4];
 		#endregion
 
-		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed)
+		public void InitLcd(Action<byte[]> updateLcd, Action<int> updateLed, bool desertColors = false)
         {
-            LcdWrapper.Init(updateLcd, updateLed);
+            LcdWrapper.Init(updateLcd, updateLed, desertColors);
         }
 
         public void InitButtons(Func<byte[]> getPressed)

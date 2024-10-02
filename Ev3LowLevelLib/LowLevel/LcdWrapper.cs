@@ -17,10 +17,11 @@ namespace Ev3Emulator.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void reg_w_lcd_updateLedAction(int state);
 
-		public static void Init(Action<byte[]> updateLcd, Action<int> updateLed)
+		public static void Init(Action<byte[]> updateLcd, Action<int> updateLed, bool desertColors = false)
 		{
 			_updateLcd = updateLcd;
 			_updateLed = updateLed;
+			_desertColors = desertColors;
 
 			reg_w_lcd_updateLcd(UpdateLcd);
 			reg_w_lcd_updateLed(UpdateLed);
@@ -57,12 +58,16 @@ namespace Ev3Emulator.LowLevel
 			byte[] outData = new byte[data.Length * 4];
 			for (int i = 0; i < data.Length; i++)
 			{
-				var clr = GetColor(data[i], isDisabled);
+				(byte A, byte R, byte G, byte B) clr;
+				if (!_desertColors)
+					clr = GetColor(data[i], isDisabled);
+				else
+					clr = GetDesertColor(data[i], isDisabled);
 				outData[i * 4] = (byte)clr.R;
 				outData[i * 4 + 1] = (byte)clr.G;
 				outData[i * 4 + 2] = (byte)clr.B;
 
-				outData[i * 4 + 3] = 255; // alpha
+				outData[i * 4 + 3] = (byte)clr.A; // alpha
 			}
 			return outData;
 		}
@@ -74,7 +79,7 @@ namespace Ev3Emulator.LowLevel
 
             if (clr > 0)
 			{
-				return (0, 0, 0, 0);
+				return (255, 0, 0, 0);
 			}
 			else
 			{
@@ -82,7 +87,24 @@ namespace Ev3Emulator.LowLevel
 			}
 		}
 
+		private static (byte A, byte R, byte G, byte B) GetDesertColor(byte clr, bool isDisabled = false)
+		{
+			if (isDisabled)
+				return (40, 0, 0, 0);
+
+			if (clr > 0)
+			{
+				return (255, 0, 0, 0);
+			}
+			else
+			{
+				return (0, 0, 0, 0);
+			}
+		}
+
 		private static Action<byte[]> _updateLcd;
 		private static Action<int> _updateLed;
+
+		private static bool _desertColors = false; // just for Ev3Emulator themes
 	}
 }

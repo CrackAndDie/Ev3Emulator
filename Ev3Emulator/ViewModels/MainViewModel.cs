@@ -37,7 +37,7 @@ public class MainViewModel : ViewModelBase
 
 		// inits
 		Ev3Entity.Init();
-		Ev3Entity.InitLcd(UpdateLcd, UpdateLed);
+		Ev3Entity.InitLcd(UpdateLcd, UpdateLed, true);
         Ev3Entity.InitButtons(UpdateButtons);
         Ev3Entity.LmsExited += OnLmsVmExited;
 

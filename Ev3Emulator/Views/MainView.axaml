@@ -23,7 +23,11 @@
 			<StackPanel VerticalAlignment="Center"
 						HorizontalAlignment="Center"
 						Margin="8">
-				<Border Background="Gray">
+				<Border Background="Transparent"
+						CornerRadius="4"
+						BorderThickness="1"
+						BorderBrush="Black"
+						ClipToBounds="True">
 					<Image Source="{Binding LcdBitmap}"
 						   Width="178"
 						   Height="128"/>

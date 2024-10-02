@@ -13,9 +13,17 @@
 					  ItemsSource="{Binding AllSensors}">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
-						<Image Source="{Binding }"
-							   Width="50"
-							   Height="50"/>
+						<Border CornerRadius="4"
+								BorderThickness="1"
+								BorderBrush="Black"
+								Background="Transparent"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center"
+								ClipToBounds="True">
+							<Image Source="{Binding }"
+								   Width="50"
+								   Height="50"/>
+						</Border>
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>

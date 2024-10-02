@@ -60,19 +60,19 @@ namespace Ev3Emulator.Entities
 		private const string _pathToIcons = "avares://Ev3Emulator/Resources/SensorIcons";
 		public static Bitmap[] AllAvailableSensors =
 		{
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/other.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/touch.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/us_sens.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/ir_sens.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/gyro_sens.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/color_sens.bmp"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/other.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/touch.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/us_sens.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/ir_sens.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/gyro_sens.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/color_sens.png"))),
 		};
 
 		public static Bitmap[] AllAvailableMotors =
 		{
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/other.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/lrg_motor.bmp"))),
-			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/med_motor.bmp"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/other.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/lrg_motor.png"))),
+			new Bitmap(AssetLoader.Open(new System.Uri($"{_pathToIcons}/med_motor.png"))),
 		};
 
 		public Bitmap[] AllSensors => _isOut ? AllAvailableMotors : AllAvailableSensors;
