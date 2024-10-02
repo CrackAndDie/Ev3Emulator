@@ -92,6 +92,7 @@ namespace Ev3Emulator.LowLevel
 
 		// non converted (custom shite here)
 		public fixed sbyte OutPortUpdateStep[4];
+		public fixed sbyte InPortUpdateStep[4];
 	}
 
 	public unsafe struct CUSTOM_RAW_DATA_HOLDER
@@ -184,6 +185,8 @@ namespace Ev3Emulator.LowLevel
 			CurrentAnalogData.InDcm[port] = (sbyte)sensData.Dcm;
 			CurrentAnalogData.InConn[port] = (sbyte)sensData.Conn;
 
+			CurrentAnalogData.InPortUpdateStep[port] = 1; // step to update the port
+
 			CurrentAnalogData.Updated[port] = 1;
 		}
 
@@ -240,8 +243,18 @@ namespace Ev3Emulator.LowLevel
 					dt->OutDcm[i] = CurrentAnalogData.OutDcm[i];
 				}
 
-				dt->InConn[i] = CurrentAnalogData.InConn[i];
-				dt->InDcm[i] = CurrentAnalogData.InDcm[i];
+				if (CurrentAnalogData.InPortUpdateStep[i] == 1)
+				{
+					dt->InConn[i] = 0;
+					dt->InDcm[i] = 0;
+					CurrentAnalogData.InPortUpdateStep[i] = 0; // reset update step
+				}
+				else
+				{
+					dt->InConn[i] = CurrentAnalogData.InConn[i];
+					dt->InDcm[i] = CurrentAnalogData.InDcm[i];
+				}
+					
 				dt->Updated[i] = CurrentAnalogData.Updated[i]; // updated status
 				dt->InPin6[i] = CurrentAnalogData.InPin6[i];   // raw values
 				// reset updated status

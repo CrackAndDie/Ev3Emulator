@@ -5,10 +5,14 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <LangVersion>latest</LangVersion>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <PlatformTarget>x86</PlatformTarget>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
     </PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<DefineConstants>$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
+	</PropertyGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
@@ -58,5 +62,9 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Ev3LowLevelLib\Ev3LowLevelLib.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Assets\Fonts\Montserrat\" />
 	</ItemGroup>
 </Project>

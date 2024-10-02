@@ -5,4 +5,15 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="/Styles/Button.axaml" />
+				<ResourceInclude Source="/Styles/TabControl.axaml" />
+				<ResourceInclude Source="/Styles/ListBox.axaml" />
+			</ResourceDictionary.MergedDictionaries>
+
+			<FontFamily x:Key="MontsFont">avares://Ev3Emulator/Assets/Fonts/Montserrat#Montserrat</FontFamily>
+		</ResourceDictionary>
+	</Application.Resources>
 </Application>

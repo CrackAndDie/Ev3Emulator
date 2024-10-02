@@ -1,9 +1,12 @@
 ﻿using Avalonia.Controls;
-using Ev3Emulator.Events;
+using Avalonia.Controls.Shapes;
+using Ev3LowLevelLib;
 using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
 using Prism.Commands;
 using Prism.Events;
+using System;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace Ev3Emulator.ViewModels
@@ -12,19 +15,16 @@ namespace Ev3Emulator.ViewModels
     {
         public MainWindowViewModel()
         {
-            CloseCommand = new DelegateCommand<Window>(OnCloseCommand);
-        }
-
-        private void OnCloseCommand(Window window)
+            OpenGitHubCommand = new DelegateCommand(OnOpenGitHubCommand);
+		}
+		private void OnOpenGitHubCommand()
         {
-			if (Design.IsDesignMode)
-				return;
-
-			EventAggregator.GetEvent<AppCloseEvent>().Publish();
-            window.Close();
+            string link = "https://github.com/CrackAndDie/Ev3Emulator";
+			// TODO: use launcher or custom for each platform
+			Process.Start(new ProcessStartInfo("cmd", $"/c start {link}") { CreateNoWindow = true });
 		}
 
         [Notify]
-        public ICommand CloseCommand { get; set; }
-    }
+        public ICommand OpenGitHubCommand { get; set; }
+	}
 }

@@ -14,21 +14,54 @@
              x:Class="Ev3Emulator.Views.RightMainView"
 			 x:CompileBindings="False">
 	<Grid>
-		<TabControl Margin="5">
-			<TabItem Header="Out ports">
-				<ListBox ItemsSource="{Binding OutPorts}">
+		<TabControl Margin="5"
+					Theme="{StaticResource MainTabControl}">
+			<TabItem Header="Out ports"
+					 DockPanel.Dock="Left">
+				<ListBox ItemsSource="{Binding OutPorts}"
+						 Background="Transparent"
+						 BorderThickness="0"
+						 ItemContainerTheme="{StaticResource UnclickableListBoxItem}">
+					<ListBox.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="Vertical" />
+						</ItemsPanelTemplate>
+					</ListBox.ItemsPanel>
 					<ListBox.ItemTemplate>
 						<DataTemplate>
-							<other:SensorControl/>
+							<Grid>
+								<other:SensorControl Margin="8,16"/>
+								<Rectangle Fill="Black"
+										   HorizontalAlignment="Stretch"
+										   Margin="8,0"
+										   Height="1"
+										   VerticalAlignment="Bottom"/>
+							</Grid>
 						</DataTemplate>
 					</ListBox.ItemTemplate>
 				</ListBox>
 			</TabItem>
-			<TabItem Header="In ports">
-				<ListBox ItemsSource="{Binding InPorts}">
+			<TabItem Header="In ports"
+					 DockPanel.Dock="Left">
+				<ListBox ItemsSource="{Binding InPorts}"
+						 Background="Transparent"
+						 BorderThickness="0"
+						 ItemContainerTheme="{StaticResource UnclickableListBoxItem}">
+					<ListBox.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="Vertical" />
+						</ItemsPanelTemplate>
+					</ListBox.ItemsPanel>
 					<ListBox.ItemTemplate>
 						<DataTemplate>
-							<other:SensorControl/>
+							<Grid>
+								<other:SensorControl Margin="8,16"/>
+								<Rectangle Fill="Black"
+										   HorizontalAlignment="Stretch"
+										   Margin="8,0"
+										   Height="1"
+										   VerticalAlignment="Bottom"/>
+							</Grid>
 						</DataTemplate>
 					</ListBox.ItemTemplate>
 				</ListBox>

@@ -24,8 +24,6 @@ using System.Reflection;
 using System.Threading;
 using Ev3Emulator.Modules;
 using Ev3LowLevelLib;
-using Prism.Events;
-using Ev3Emulator.Events;
 using Avalonia.Controls;
 
 namespace Ev3Emulator;
@@ -49,8 +47,11 @@ public partial class App : ApplicationBase
 		if (Design.IsDesignMode)
 			return;
 
-		Container.Resolve<IEventAggregator>().GetEvent<AppCloseEvent>().Subscribe(OnApplicationExit);
-    }
+		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+		{
+			desktop.Exit += OnApplicationExit;
+		}
+	}
 
     protected override AvaloniaObject CreateShell()
     {
@@ -97,7 +98,7 @@ public partial class App : ApplicationBase
         moduleCatalog.AddModule<MainModule>();
     }
 
-    private void OnApplicationExit()
+    private void OnApplicationExit(object sender, ControlledApplicationLifetimeExitEventArgs args)
     {
 		if (Design.IsDesignMode)
 			return;

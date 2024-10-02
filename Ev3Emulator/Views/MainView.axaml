@@ -13,48 +13,81 @@
 			 x:CompileBindings="False">
 	
 	<Grid ColumnDefinitions="230,*">
-		<StackPanel VerticalAlignment="Center"
-					HorizontalAlignment="Center">
-			<Border Background="Gray">
-				<Image Source="{Binding LcdBitmap}"
-					   Width="178"
-					   Height="128"/>
-			</Border>
-        
-			<Grid ColumnDefinitions="*,*,*"
-				  RowDefinitions="*,*,*,*">
-				<Button x:Name="buttonBack"
-						Grid.Column="0"
-						Grid.Row="0"
-						Width="40"
-						Height="40"/>
-				<Button x:Name="buttonUp"
-						Grid.Column="1"
-						Grid.Row="1"
-						Width="40"
-						Height="40"/>
-				<Button x:Name="buttonRight"
-						Grid.Column="2"
-						Grid.Row="2"
-						Width="40"
-						Height="40"/>
-				<Button x:Name="buttonDown"
-						Grid.Column="1"
-						Grid.Row="3"
-						Width="40"
-						Height="40"/>
-				<Button x:Name="buttonLeft"
-						Grid.Column="0"
-						Grid.Row="2"
-						Width="40"
-						Height="40"/>
-				<Button x:Name="buttonCenter"
-						Grid.Column="1"
-						Grid.Row="2"
-						Width="40"
-						Height="40"/>
-			</Grid>
-		</StackPanel>
+		<Border CornerRadius="8"
+				BorderThickness="1"
+				BorderBrush="Black"
+				Background="Transparent"
+				VerticalAlignment="Center"
+				HorizontalAlignment="Center"
+				BoxShadow="0 4 12 0 #22000000">
+			<StackPanel VerticalAlignment="Center"
+						HorizontalAlignment="Center"
+						Margin="8">
+				<Border Background="Gray">
+					<Image Source="{Binding LcdBitmap}"
+						   Width="178"
+						   Height="128"/>
+				</Border>
+
+				<Grid ColumnDefinitions="*,*,*"
+					  RowDefinitions="*,*,*,*">
+					<Button x:Name="buttonBack"
+							Grid.Column="0"
+							Grid.Row="0"
+							Width="36"
+							Height="25"
+							VerticalAlignment="Center"
+							HorizontalAlignment="Center"
+							Theme="{StaticResource MainButton}"
+							Margin="0,2"/>
+					<Button x:Name="buttonUp"
+							Grid.Column="1"
+							Grid.Row="1"
+							Width="36"
+							Height="36"
+							VerticalAlignment="Center"
+							HorizontalAlignment="Center"
+							Theme="{StaticResource MainButton}"
+							Margin="0,2"/>
+					<Button x:Name="buttonRight"
+							Grid.Column="2"
+							Grid.Row="2"
+							Width="36"
+							Height="36"
+							VerticalAlignment="Center"
+							HorizontalAlignment="Left"
+							Theme="{StaticResource MainButton}"
+							Margin="2,2"/>
+					<Button x:Name="buttonDown"
+							Grid.Column="1"
+							Grid.Row="3"
+							Width="36"
+							Height="36"
+							VerticalAlignment="Center"
+							HorizontalAlignment="Center"
+							Theme="{StaticResource MainButton}"
+							Margin="0,2,0,10"/>
+					<Button x:Name="buttonLeft"
+							Grid.Column="0"
+							Grid.Row="2"
+							Width="36"
+							Height="36"
+							VerticalAlignment="Center"
+							HorizontalAlignment="Right"
+							Theme="{StaticResource MainButton}"
+							Margin="2,2"/>
+					<Button x:Name="buttonCenter"
+							Grid.Column="1"
+							Grid.Row="2"
+							Width="36"
+							Height="36"
+							VerticalAlignment="Center"
+							HorizontalAlignment="Center"
+							Theme="{StaticResource MainButton}"
+							Margin="0,2"/>
+				</Grid>
+			</StackPanel>
+		</Border>
 
 		<ContentControl prism:RegionManager.RegionName="RightSideRegion"
 						prism:RegionManager.RegionManager="{Binding RegionManager}" 
