@@ -17,7 +17,6 @@
 				VerticalAlignment="Center"
 				HorizontalAlignment="Left"
 				FontFamily="{StaticResource MontsFont}"
-				Padding="5"
-				Margin="0,8,0,0"/>
+				Padding="5"/>
 	</Grid>
 </UserControl>

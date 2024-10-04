@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using Avalonia;
+using Avalonia.Media;
 using Ev3Emulator.Entities;
 using Ev3Emulator.Interfaces;
 using Ev3LowLevelLib;
@@ -21,8 +22,8 @@ namespace Ev3Emulator.ViewModels.Other
 
 			GetView<IColorControlView>().UpdateSensor += (r, a) =>
 			{
-				_currentReflect = r;
-				_currentAmbient = a;
+				CurrentReflect = r;
+				CurrentAmbient = a;
 			};
 
 			RaisePropertyChanged(nameof(AllColors));
@@ -37,7 +38,7 @@ namespace Ev3Emulator.ViewModels.Other
 
 		private (byte, byte, byte) GetColorData()
 		{
-			return ((byte)SelectedColor, _currentReflect, _currentAmbient);
+			return ((byte)SelectedColor, CurrentReflect, CurrentAmbient);
 		}
 
 		[Injection]
@@ -45,10 +46,14 @@ namespace Ev3Emulator.ViewModels.Other
 
 		[Notify]
 		public int SelectedColor { get; set; } = 0;
+		[Notify]
+		public byte CurrentReflect { get; set; } = 0;
+		[Notify]
+		public byte CurrentAmbient { get; set; } = 0;
 
 		public IBrush[] AllColors { get; set; } = new IBrush[] 
-		{ 
-			Brushes.Firebrick, // TODO: no color
+		{
+			_noneColor,
 			Brushes.Black, 
 			Brushes.Blue, 
 			Brushes.Green, 
@@ -58,8 +63,20 @@ namespace Ev3Emulator.ViewModels.Other
 			Brushes.Brown, 
 		};
 
+		private static IBrush _noneColor = new LinearGradientBrush()
+		{
+			StartPoint = RelativePoint.Parse("0%,0%"),
+			EndPoint = RelativePoint.Parse("100%,100%"),
+			GradientStops = new GradientStops()
+			{
+				new GradientStop(Colors.AliceBlue, 0),
+				new GradientStop(Colors.AliceBlue, 0.47),
+				new GradientStop(Colors.Red, 0.5),
+				new GradientStop(Colors.AliceBlue, 0.53),
+				new GradientStop(Colors.AliceBlue, 1),
+			}
+		};
+
 		private SensorViewNavigationParameters _navigationParameters;
-		private byte _currentReflect = 0;
-		private byte _currentAmbient = 0;
 	}
 }

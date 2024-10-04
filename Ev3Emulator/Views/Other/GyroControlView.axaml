@@ -7,14 +7,30 @@
 			 d:DesignHeight="450"
              x:Class="Ev3Emulator.Views.Other.GyroControlView"
 			 x:CompileBindings="False">
-	<Grid ColumnDefinitions="*,30">
+	<Grid ColumnDefinitions="Auto,*"
+		  RowDefinitions="*,*">
+		<TextBlock Text="Rot:"
+				   FontWeight="Medium"
+				   FontFamily="{StaticResource MontsFont}"
+				   VerticalAlignment="Center"
+				   Grid.Column="0"
+				   Grid.Row="0"
+				   Grid.RowSpan="2"
+				   Margin="0,0,14,0"/>
 		<Slider Maximum="180"
 				Minimum="-180"
-				Ticks="10"
-				Value="0"
+				TickFrequency="1"
+				Grid.Column="1"
+				Grid.Row="0"
+				Theme="{StaticResource MainSlider}"
+				VerticalAlignment="Center"
 				HorizontalAlignment="Stretch"
 				Name="gyroSlider"/>
 		<TextBlock Text="{Binding CurrentRotation}"
-				   Grid.Column="1"/>
+				   Grid.Column="1"
+				   Grid.Row="1"
+				   VerticalAlignment="Center"
+				   FontWeight="Medium"
+				   FontFamily="{StaticResource MontsFont}"/>
 	</Grid>
 </UserControl>

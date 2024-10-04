@@ -27,6 +27,7 @@ namespace Ev3Emulator.ViewModels.Other
 				Ev3Entity.InitIrSensor(_navigationParameters.Port, GetIrDistance);
 			}
 
+			CurrentDistance = 10;
 			GetView<IDistanceControlView>().UpdateDistance += (v) =>
 			{
 				CurrentDistance = v;
