@@ -15,6 +15,7 @@ namespace Ev3Emulator.ViewModels.Other
 			base.OnViewReady();
 
 			Ev3Entity.MotorSpeedChanged += OnMotorSpeedChanged;
+			Ev3Entity.MotorTachoChanged += OnMotorTachoChanged;
 
 			_navigationParameters = GetNavigationParameters<SensorViewNavigationParameters>();
 
@@ -39,11 +40,21 @@ namespace Ev3Emulator.ViewModels.Other
 			CurrentMotorSpeed = speed;
 		}
 
+		private void OnMotorTachoChanged(int port, int tacho)
+		{
+			if (_navigationParameters.Port != port)
+				return;
+
+			CurrentMotorTacho = tacho;
+		}
+
 		[Injection]
 		public Ev3Entity Ev3Entity { get; set; }
 
 		[Notify]
 		public int CurrentMotorSpeed { get; set; }
+		[Notify]
+		public int CurrentMotorTacho { get; set; }
 
 		private SensorViewNavigationParameters _navigationParameters;
 	}

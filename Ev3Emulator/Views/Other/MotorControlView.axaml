@@ -10,13 +10,51 @@
 			 d:DesignHeight="450"
              x:Class="Ev3Emulator.Views.Other.MotorControlView"
 			 x:CompileBindings="False">
-	<Grid ColumnDefinitions="*,30">
-		<Slider Maximum="50"
-				Minimum="-50"
-				Ticks="10"
+	<Grid ColumnDefinitions="Auto,*"
+		  RowDefinitions="*,*">
+		<TextBlock Text="Hand rot:"
+				   FontWeight="Medium"
+				   FontFamily="{StaticResource MontsFont}"
+				   VerticalAlignment="Center"
+				   Grid.Column="0"
+				   Grid.Row="0"/>
+		<Slider Maximum="100"
+				Minimum="-100"
+				TickFrequency="1"
+				Grid.Column="1"
+				Grid.Row="0"
+				Theme="{StaticResource MainSlider}"
 				HorizontalAlignment="Stretch"
+				VerticalAlignment="Center"
 				Name="tachoSlider"/>
-		<TextBlock Text="{Binding CurrentMotorSpeed}"
-				   Grid.Column="1"/>
+		<TextBlock Text="Curr speed:"
+				   FontWeight="Medium"
+				   FontFamily="{StaticResource MontsFont}"
+				   VerticalAlignment="Center"
+				   Grid.Row="1"
+				   Grid.Column="0"/>
+
+		<StackPanel Orientation="Horizontal"
+					Grid.Row="1"
+					Grid.Column="1"
+					VerticalAlignment="Center">
+			<TextBlock Text="{Binding CurrentMotorSpeed}"
+					   FontWeight="Medium"
+					   FontFamily="{StaticResource MontsFont}"
+					   VerticalAlignment="Center"
+					   Width="70"
+					   Margin="6,0"/>
+
+			<TextBlock Text="Tacho ticks:"
+				   FontWeight="Medium"
+				   FontFamily="{StaticResource MontsFont}"
+				   VerticalAlignment="Center"/>
+			<TextBlock Text="{Binding CurrentMotorTacho}"
+					   FontWeight="Medium"
+					   FontFamily="{StaticResource MontsFont}"
+					   VerticalAlignment="Center"
+					   Width="70"
+					   Margin="6,0"/>
+		</StackPanel>
 	</Grid>
 </UserControl>

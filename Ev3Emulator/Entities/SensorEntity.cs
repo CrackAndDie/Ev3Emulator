@@ -18,6 +18,10 @@ namespace Ev3Emulator.Entities
 			_isOut = isOut;
 			Index = index;
 
+			string[] tmpLetters = { "A", "B", "C", "D" };
+			string[] tmpNumbers = { "1", "2", "3", "4" };
+			PortName = isOut ? tmpLetters[index] : tmpNumbers[index];
+
 			this.WhenPropertyChanged(x => x.SelectedSensor).Subscribe(OnSelectedSensorChanged);
 		}
 
@@ -79,6 +83,8 @@ namespace Ev3Emulator.Entities
 
 		[Notify]
 		public int SelectedSensor { get; set; }
+		[Notify]
+		public string PortName { get; set; }
 
 		public SensorType SelectedSensorType 
 		{

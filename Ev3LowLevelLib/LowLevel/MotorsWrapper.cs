@@ -86,6 +86,7 @@ namespace Ev3Emulator.LowLevel
 				CurrentMotorData[port].TachoCounts += delta;
 				CurrentMotorData[port].TachoSensor += delta;
 			}
+			GetMotorTachoEvent?.Invoke(port, (int)CurrentMotorData[port].TachoCounts);
 		}
 
 		private static void GetBusyFlags(ref int f1, ref int f2)
@@ -153,6 +154,7 @@ namespace Ev3Emulator.LowLevel
 		}
 
 		public static event Action<int, int> SetMotorSpeedEvent;
+		public static event Action<int, int> GetMotorTachoEvent;
 
 		private static object _currentMotorDataLock = new object();
 		private static MOTORDATAFLOATED[] CurrentMotorData = new MOTORDATAFLOATED[4];

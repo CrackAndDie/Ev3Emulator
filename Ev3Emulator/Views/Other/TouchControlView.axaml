@@ -11,6 +11,13 @@
              x:Class="Ev3Emulator.Views.Other.TouchControlView">
 	<Grid ColumnDefinitions="*">
 		<Button Content="Touch"
-				Name="touchButton"/>
+				Theme="{StaticResource MainButton}"
+				Name="touchButton"
+				FontWeight="Medium"
+				VerticalAlignment="Center"
+				HorizontalAlignment="Left"
+				FontFamily="{StaticResource MontsFont}"
+				Padding="5"
+				Margin="0,8,0,0"/>
 	</Grid>
 </UserControl>

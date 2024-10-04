@@ -20,6 +20,7 @@ namespace Ev3LowLevelLib
             SystemWrapper.LmsExited += OnLmsVmExited;
 
             MotorsWrapper.SetMotorSpeedEvent += OnSetMotorSpeed;
+            MotorsWrapper.GetMotorTachoEvent += OnGetMotorTacho;
 
 		}
 
@@ -47,7 +48,13 @@ namespace Ev3LowLevelLib
 			MotorSpeedChanged?.Invoke(port, speed);
 		}
 
+		private void OnGetMotorTacho(int port, int speed)
+		{
+			MotorTachoChanged?.Invoke(port, speed);
+		}
+
 		public event Action<int, int> MotorSpeedChanged;
+		public event Action<int, int> MotorTachoChanged;
 		#endregion
 
 		#region Touch sensor

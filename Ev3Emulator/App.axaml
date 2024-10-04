@@ -11,6 +11,8 @@
 				<ResourceInclude Source="/Styles/Button.axaml" />
 				<ResourceInclude Source="/Styles/TabControl.axaml" />
 				<ResourceInclude Source="/Styles/ListBox.axaml" />
+				<ResourceInclude Source="/Styles/ComboBox.axaml" />
+				<ResourceInclude Source="/Styles/Slider.axaml" />
 			</ResourceDictionary.MergedDictionaries>
 
 			<FontFamily x:Key="MontsFont">avares://Ev3Emulator/Assets/Fonts/Montserrat#Montserrat</FontFamily>
