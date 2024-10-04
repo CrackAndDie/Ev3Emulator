@@ -412,6 +412,7 @@ extern "C" {
 	static int chmod(const char* dirname, int mode)
 	{
 		// placeholder
+		return 0;
 	}
 
 	/*

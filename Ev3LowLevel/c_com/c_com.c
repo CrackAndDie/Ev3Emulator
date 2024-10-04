@@ -277,7 +277,7 @@ RESULT    cComInit(void)
 	ComInstance.ComResult = OK;
 
 	ComInstance.BrickName[0] = 0;
-	File = fopen("./settings/BrickName", "r");
+	File = fopen("./lms_os/settings/BrickName", "r");
 	if (File != NULL)
 	{
 
@@ -5435,7 +5435,7 @@ void      cComSet(void)
 		{
 			if (FAIL != cBtSetName((char*)pName, Len + 1))
 			{
-				File = fopen("./settings/BrickName", "w");
+				File = fopen("./lms_os/settings/BrickName", "w");
 				if (File != NULL)
 				{
 					fwrite(pName, 1, (int)Len + 1, File);

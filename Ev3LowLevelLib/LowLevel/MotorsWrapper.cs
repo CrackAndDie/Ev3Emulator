@@ -1,5 +1,6 @@
 ﻿using Ev3LowLevelLib;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -52,14 +53,18 @@ namespace Ev3Emulator.LowLevel
 			_calcTachoTaskCts = new CancellationTokenSource();
 			_calcTachoTask = Task.Run(async () =>
 			{
+				_lastTachoTimestamp = Stopwatch.GetTimestamp();
 				while (_calcTachoTaskCts != null && !_calcTachoTaskCts.IsCancellationRequested)
 				{
+					var ticks = Stopwatch.GetTimestamp() - _lastTachoTimestamp;
+					_lastTachoTimestamp = Stopwatch.GetTimestamp();
+					var coeff = 0.1f / (ticks / (float)Stopwatch.Frequency);
 					for (int i = 0; i < 4; ++i)
 					{
 						int speed;
 						lock (_currentMotorDataLock)
 							speed = CurrentMotorData[i].Speed;
-						SetMotorTachoDelta(i, speed / 10f);
+						SetMotorTachoDelta(i, (speed / 10f) * coeff);
 					}
 					await Task.Delay(100);
 				}
@@ -161,5 +166,6 @@ namespace Ev3Emulator.LowLevel
 
 		private static Task _calcTachoTask = null;
 		private static CancellationTokenSource _calcTachoTaskCts = null;
+		private static long _lastTachoTimestamp = 0;
 	}
 }

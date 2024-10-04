@@ -1,5 +1,4 @@
 ﻿using Ev3Emulator.LowLevel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System;
 using System.Diagnostics;
 using Ev3LowLevelLib.Other;
@@ -13,9 +12,9 @@ namespace Ev3LowLevelLib
             SystemWrapper.Init();
             FilesystemWrapper.Init();
             TimeWrapper.Init();
-            InputWrapper.Init(OnUpdateUart); // TODO:
-            MotorsWrapper.Init(); // TODO:
-            SoundWrapper.Init(); // TODO:
+            InputWrapper.Init(OnUpdateUart);
+            MotorsWrapper.Init();
+            SoundWrapper.Init();
 
             SystemWrapper.LmsExited += OnLmsVmExited;
 

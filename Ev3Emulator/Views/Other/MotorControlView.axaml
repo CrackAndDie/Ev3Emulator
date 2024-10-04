@@ -42,7 +42,7 @@
 					   FontWeight="Medium"
 					   FontFamily="{StaticResource MontsFont}"
 					   VerticalAlignment="Center"
-					   Width="70"
+					   Width="50"
 					   Margin="6,0"/>
 
 			<TextBlock Text="Tacho ticks:"
