@@ -12,6 +12,7 @@
         Height="450"
         x:Class="Ev3Emulator.Views.MainWindow"
         Title="Ev3Emulator"
+		Icon="/Resources/logo.ico"
         x:CompileBindings="False"
 		x:Name="thisWindow">
 	<Grid RowDefinitions="40, *" 

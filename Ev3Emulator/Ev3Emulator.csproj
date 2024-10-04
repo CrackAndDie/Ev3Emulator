@@ -8,6 +8,7 @@
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
+		<ApplicationIcon>Resources\logo.ico</ApplicationIcon>
     </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -19,6 +20,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Resources\icon.ico" />
+      <None Remove="Resources\logo.ico" />
+      <None Remove="Resources\logo.png" />
       <None Remove="Resources\SensorIcons\color_sens.bmp" />
       <None Remove="Resources\SensorIcons\color_sens.png" />
       <None Remove="Resources\SensorIcons\gyro_sens.bmp" />
@@ -38,6 +42,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AvaloniaResource Include="Resources\logo.ico" />
+      <AvaloniaResource Include="Resources\logo.png" />
       <AvaloniaResource Include="Resources\SensorIcons\color_sens.bmp" />
       <AvaloniaResource Include="Resources\SensorIcons\color_sens.png" />
       <AvaloniaResource Include="Resources\SensorIcons\gyro_sens.bmp" />
@@ -54,6 +60,10 @@
       <AvaloniaResource Include="Resources\SensorIcons\touch.png" />
       <AvaloniaResource Include="Resources\SensorIcons\us_sens.bmp" />
       <AvaloniaResource Include="Resources\SensorIcons\us_sens.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Resources\logo.ico" />
     </ItemGroup>
 
     <ItemGroup>
