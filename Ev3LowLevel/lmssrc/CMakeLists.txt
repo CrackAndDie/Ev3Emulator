@@ -47,6 +47,7 @@ macro (add_lms_app TARGET)
         set (raw ${CMAKE_CURRENT_BINARY_DIR}/${sound}.raw)
         set (rsf ${CMAKE_CURRENT_BINARY_DIR}/${sound}.rsf)
 
+        configure_file(${sound}.wav ${sound}.wav COPYONLY)
         configure_file(${sound}.raw ${sound}.raw COPYONLY)
         configure_file(${sound}.rsf ${sound}.rsf COPYONLY)
 

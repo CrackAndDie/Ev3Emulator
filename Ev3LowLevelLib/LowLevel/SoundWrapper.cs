@@ -8,40 +8,46 @@ namespace Ev3Emulator.LowLevel
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
 		private extern static void reg_w_sound_playTone(reg_w_sound_playToneAction playTone);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void reg_w_sound_playToneAction(short freq);
+		public delegate void reg_w_sound_playToneAction(short freq, ushort duration);
 
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
-		private extern static void reg_w_sound_isTonePlaying(reg_w_sound_isTonePlayingAction isTonePlaying);
+		private extern static void reg_w_sound_isSoundPlaying(reg_w_sound_isSoundPlayingAction isSoundPlaying);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate int reg_w_sound_isTonePlayingAction();
+		public delegate int reg_w_sound_isSoundPlayingAction();
 
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
-		private extern static void reg_w_sound_playChunk(reg_w_sound_playChunkAction playChunk);
+		private extern static void reg_w_sound_playSound(reg_w_sound_playSoundAction playSound);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void reg_w_sound_playChunkAction(IntPtr data, int len);
+		public delegate void reg_w_sound_playSoundAction(string name, int size, int rate);
 
-		// TODO: custom handler post processed
-		public static void Init()
+		public static void Init(Action<short, ushort> playTone, Func<int> isSoundPlaying, Action<string, int, int> playSound)
 		{
+			_playTone = playTone;
+			_isSoundPlaying = isSoundPlaying;
+			_playSound = playSound;
+
 			reg_w_sound_playTone(PlayTone);
-			reg_w_sound_isTonePlaying(IsTonePlaying);
-			reg_w_sound_playChunk(PlayChunk);
+			reg_w_sound_isSoundPlaying(IsSoundPlaying);
+			reg_w_sound_playSound(PlaySound);
 		}
 
-		private static void PlayTone(short freq)
+		private static void PlayTone(short freq, ushort duration)
 		{
-			// TODO:
+			_playTone?.Invoke(freq, duration);
 		}
 
-		private static int IsTonePlaying()
+		private static int IsSoundPlaying()
 		{
-			// TODO:
-			return 0;
+			return _isSoundPlaying?.Invoke() ?? 0;
 		}
 
-		private static void PlayChunk(IntPtr data, int len)
+		private static void PlaySound(string name, int size, int rate)
 		{
-			// TODO:
+			_playSound?.Invoke(name, size, rate);
 		}
+
+		private static Action<short, ushort> _playTone;
+		private static Func<int> _isSoundPlaying;
+		private static Action<string, int, int> _playSound;
 	}
 }

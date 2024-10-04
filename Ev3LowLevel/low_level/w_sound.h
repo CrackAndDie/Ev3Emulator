@@ -2,15 +2,15 @@
 #define   W_SOUND_H_
 
 // play tone
-void (*w_sound_playTone)(short freq);
-__declspec(dllexport) void reg_w_sound_playTone(void (*f)(short freq));
+void (*w_sound_playTone)(short freq, unsigned short duration);
+__declspec(dllexport) void reg_w_sound_playTone(void (*f)(short freq, unsigned short duration));
 
 // is tone playing
-int (*w_sound_isTonePlaying)(void);
-__declspec(dllexport) void reg_w_sound_isTonePlaying(int (*f)(void));
+int (*w_sound_isSoundPlaying)(void);
+__declspec(dllexport) void reg_w_sound_isSoundPlaying(int (*f)(void));
 
 // play chunk
-void (*w_sound_playChunk)(unsigned char* data, int len);
-__declspec(dllexport) void reg_w_sound_playChunk(void (*f)(unsigned char* data, int len));
+void (*w_sound_playSound)(unsigned char* name, int size, int rate);
+__declspec(dllexport) void reg_w_sound_playSound(void (*f)(unsigned char* name, int size, int rate));
 
 #endif // W_SOUND_H_

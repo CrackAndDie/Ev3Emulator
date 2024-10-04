@@ -25,6 +25,7 @@ using System.Threading;
 using Ev3Emulator.Modules;
 using Ev3LowLevelLib;
 using Avalonia.Controls;
+using Ev3Emulator.Entities;
 
 namespace Ev3Emulator;
 
@@ -61,6 +62,9 @@ public partial class App : ApplicationBase
 		var viewModelService = Container.Resolve<IViewModelResolverService>();
         viewModelService.RegisterViewModelAssembly(Assembly.GetExecutingAssembly());
 
+		var soundHandler = Container.Resolve<SoundHandler>();
+        soundHandler.Init();
+
 		return base.CreateShell();
     }
 
@@ -77,6 +81,7 @@ public partial class App : ApplicationBase
         containerRegistry.RegisterSingleton<IWindowProgressService, WindowProgressService>();
 
         containerRegistry.RegisterSingleton<Ev3Entity, Ev3Entity>();
+        containerRegistry.RegisterSingleton<SoundHandler, SoundHandler>();
 
         RegisterAppServices(containerRegistry);
     }

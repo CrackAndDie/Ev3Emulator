@@ -14,7 +14,6 @@ namespace Ev3LowLevelLib
             TimeWrapper.Init();
             InputWrapper.Init(OnUpdateUart);
             MotorsWrapper.Init();
-            SoundWrapper.Init();
 
             SystemWrapper.LmsExited += OnLmsVmExited;
 
@@ -268,6 +267,11 @@ namespace Ev3LowLevelLib
         {
             ButtonsWrapper.Init(getPressed);
         }
+
+		public void InitSound(Action<short, ushort> playTone, Func<int> isSoundPlaying, Action<string, int, int> playSound) 
+		{
+			SoundWrapper.Init(playTone, isSoundPlaying, playSound);
+		}
 
 		#region Lms vm
 		public void StopVm()

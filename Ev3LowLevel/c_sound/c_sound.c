@@ -303,7 +303,7 @@ RESULT cSoundClose(void)
 {
     SoundInstance.cSoundState = SOUND_STOPPED;
 
-    w_sound_playTone(0);
+    w_sound_playTone(0, 0);
 
     /*if (SoundInstance.pcm) {
         snd_pcm_close(SoundInstance.pcm);
@@ -339,7 +339,7 @@ RESULT cSoundUpdate(void)
                 BytesToRead = SoundInstance.BytesToWrite;
             }
 
-            if (SoundInstance.hSoundFile >= 0) {
+            if (w_sound_isSoundPlaying()) {
                 int frames;
 
                 // TODO: convert bytes to frames and vice versa in case of ADPCM
@@ -355,8 +355,8 @@ RESULT cSoundUpdate(void)
                 //    break;
                 //}
 
-                BytesRead = fread(SoundInstance.SoundData, 1, BytesToRead, SoundInstance.hSoundFile);
-                w_sound_playChunk(SoundInstance.SoundData, BytesRead);
+                // BytesRead = fread(SoundInstance.SoundData, 1, BytesToRead, SoundInstance.hSoundFile);
+                // w_sound_playChunk(SoundInstance.SoundData, BytesRead);
                 //frames = snd_pcm_writei(SoundInstance.pcm,
                 //                        SoundInstance.SoundData,
                 //                        BytesRead);
@@ -373,14 +373,15 @@ RESULT cSoundUpdate(void)
                 //    SoundInstance.BytesToWrite -= BytesRead;
                 //}
 
-                SoundInstance.BytesToWrite -= BytesRead;
+                // SoundInstance.BytesToWrite -= BytesRead;
             }
         } else {
             // We have finished writing the file, so if we are looping, start
             // over, otherwise wait for the sound to finish playing.
 
             if (SoundInstance.cSoundState == SOUND_FILE_LOOPING) {
-                fseek(SoundInstance.hSoundFile, 8, SEEK_SET);
+                // fseek(SoundInstance.hSoundFile, 8, SEEK_SET);
+                w_sound_playSound(SoundInstance.PathBuffer, SoundInstance.SoundDataLength, SoundInstance.SoundSampleRate);
                 SoundInstance.BytesToWrite = SoundInstance.SoundDataLength;
             } else {
                 /*snd_pcm_state_t state = snd_pcm_state(SoundInstance.pcm);
@@ -397,18 +398,18 @@ RESULT cSoundUpdate(void)
         break;
 
     case SOUND_TONE_PLAYING:
-        if (w_sound_isTonePlaying()) {
-            ULONG elapsed = VMInstance.NewTime - SoundInstance.ToneStartTime;
+        //if (w_sound_isSoundPlaying()) {
+        //    ULONG elapsed = VMInstance.NewTime - SoundInstance.ToneStartTime;
 
-            if (elapsed >= SoundInstance.ToneDuration) {
-                // stop the tone
-                w_sound_playTone(0);
-            } else {
-                // keep playing
-                break;
-            }
-        }
-        SoundInstance.cSoundState = SOUND_STOPPED;
+        //    if (elapsed >= SoundInstance.ToneDuration) {
+        //        // stop the tone
+        //        w_sound_playTone(0);
+        //    } else {
+        //        // keep playing
+        //        break;
+        //    }
+        //}
+        //SoundInstance.cSoundState = SOUND_STOPPED;
         Result = OK;
 
         break;
@@ -509,7 +510,7 @@ void cSoundEntry(void)
         /*if (cSoundPlayTone(Frequency) != -1) {
             SoundInstance.cSoundState = SOUND_TONE_PLAYING;
         }*/
-        w_sound_playTone(Frequency);
+        w_sound_playTone(Frequency, SoundInstance.ToneDuration);
         SoundInstance.cSoundState = SOUND_TONE_PLAYING;
 
         break;
@@ -545,10 +546,10 @@ void cSoundEntry(void)
             PathName[0] = 0;
             if (pFileName[0] != '.') {
                 GetResourcePath(PathName, MAX_FILENAME_SIZE);
-                sprintf(SoundInstance.PathBuffer, "%s%s.rsf", (char*)PathName,
+                sprintf(SoundInstance.PathBuffer, "%s%s.wav", (char*)PathName,
                         (char*)pFileName);
             } else {
-                sprintf(SoundInstance.PathBuffer, "%s.rsf", (char*)pFileName);
+                sprintf(SoundInstance.PathBuffer, "%s.wav", (char*)pFileName);
             }
 
             // Open SoundFile
@@ -577,6 +578,11 @@ void cSoundEntry(void)
                 SoundInstance.cSoundState = Loop ? SOUND_FILE_LOOPING
                     : SOUND_FILE_PLAYING;
                 SoundInstance.BytesToWrite = SoundInstance.SoundDataLength;
+
+                fclose(SoundInstance.hSoundFile);
+                SoundInstance.hSoundFile = -1;
+
+                w_sound_playSound(SoundInstance.PathBuffer, SoundInstance.SoundDataLength, SoundInstance.SoundSampleRate);
             } else {
                 fprintf(stderr, "Failed to open sound file '%s': %s\n",
                         SoundInstance.PathBuffer, strerror(errno));
@@ -606,7 +612,7 @@ void cSoundTest(void)
 {
     DATA8 busy = 0;
 
-    if (w_sound_isTonePlaying()) {
+    if (w_sound_isSoundPlaying()) {
         busy = 1;
     }
 
@@ -632,7 +638,7 @@ void cSoundReady(void)
 
     TmpIp = GetObjectIp();
 
-    if (w_sound_isTonePlaying()) {
+    if (w_sound_isSoundPlaying()) {
         // Rewind IP and set status
         DspStat = BUSYBREAK; // break the interpreter and waits busy
         SetDispatchStatus(DspStat);

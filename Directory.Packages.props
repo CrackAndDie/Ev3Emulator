@@ -29,5 +29,9 @@
 
     <PackageVersion Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <PackageVersion Include="System.Management" Version="8.0.0" />
+
+    <PackageVersion Include="LibVLCSharp" Version="3.9.0" />
+    <PackageVersion Include="VideoLAN.LibVLC.Windows" Version="3.0.16" />
+    <PackageVersion Include="SDL2-CS.NetCore" Version="2.0.8" />
   </ItemGroup>
 </Project>
