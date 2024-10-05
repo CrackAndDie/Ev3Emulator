@@ -15,6 +15,7 @@
 		<TextBlock Text="Dist:"
 				   FontWeight="Medium"
 				   FontFamily="{StaticResource MontsFont}"
+                   Foreground="Black"
 				   VerticalAlignment="Center"
 				   Grid.Column="0"
 				   Grid.Row="0"
@@ -35,6 +36,7 @@
 				   Grid.Row="1"
 				   VerticalAlignment="Center"
 				   FontWeight="Medium"
-				   FontFamily="{StaticResource MontsFont}"/>
+				   FontFamily="{StaticResource MontsFont}"
+                   Foreground="Black"/>
 	</Grid>
 </UserControl>

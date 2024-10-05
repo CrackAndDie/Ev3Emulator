@@ -25,6 +25,7 @@
 				BoxShadow="0 4 12 0 #22000000">
 			<Grid Margin="8, 0">
 				<TextBlock Text="Ev3Emulator"
+                           Foreground="Black"
 						   FontWeight="DemiBold"
 						   FontFamily="{StaticResource MontsFont}"
 						   HorizontalAlignment="Left"

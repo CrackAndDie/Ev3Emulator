@@ -15,6 +15,7 @@
 		<TextBlock Text="Hand rot:"
 				   FontWeight="Medium"
 				   FontFamily="{StaticResource MontsFont}"
+                   Foreground="Black"
 				   VerticalAlignment="Center"
 				   Grid.Column="0"
 				   Grid.Row="0"/>
@@ -30,6 +31,7 @@
 		<TextBlock Text="Curr speed:"
 				   FontWeight="Medium"
 				   FontFamily="{StaticResource MontsFont}"
+                   Foreground="Black"
 				   VerticalAlignment="Center"
 				   Grid.Row="1"
 				   Grid.Column="0"/>
@@ -41,17 +43,20 @@
 			<TextBlock Text="{Binding CurrentMotorSpeed}"
 					   FontWeight="Medium"
 					   FontFamily="{StaticResource MontsFont}"
+                       Foreground="Black"
 					   VerticalAlignment="Center"
 					   Width="50"
 					   Margin="6,0"/>
 
 			<TextBlock Text="Tacho ticks:"
-				   FontWeight="Medium"
-				   FontFamily="{StaticResource MontsFont}"
-				   VerticalAlignment="Center"/>
+					   FontWeight="Medium"
+					   FontFamily="{StaticResource MontsFont}"
+                       Foreground="Black"
+					   VerticalAlignment="Center"/>
 			<TextBlock Text="{Binding CurrentMotorTacho}"
 					   FontWeight="Medium"
 					   FontFamily="{StaticResource MontsFont}"
+                       Foreground="Black"
 					   VerticalAlignment="Center"
 					   Width="70"
 					   Margin="6,0"/>

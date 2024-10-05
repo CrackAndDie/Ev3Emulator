@@ -12,6 +12,7 @@
 			<TextBlock Text="{Binding PortName}"
 					   FontWeight="DemiBold"
 					   FontFamily="{StaticResource MontsFont}"
+                       Foreground="Black"
 					   HorizontalAlignment="Left"
 					   VerticalAlignment="Center"
 					   FontSize="16"/>

@@ -16,6 +16,7 @@
 				FontWeight="Medium"
 				VerticalAlignment="Center"
 				HorizontalAlignment="Left"
+                Foreground="Black"
 				FontFamily="{StaticResource MontsFont}"
 				Padding="5"/>
 	</Grid>
