@@ -1,4 +1,4 @@
-## Ev3 emulator  
+# Ev3 emulator  
 
 #### The main goal of the project is to create an emulator that would be very similar to the original Ev3 brick  
 
@@ -19,6 +19,4 @@ If you do not have any tools to compile the app:
 
 - For now, the EV3 firmware library is only tested on Windows machines, but when I was rewriting it, I assumed it would be cross-platform;
 - It can be compiled and tested only targeting x86 because of some problems with pointer size. I've tried to deal with it but understood that there is too much work;
-- Output/input fuction implementations are still under development;
-- There are still some small bugs like I can't rename the brick;
 - Communication with the brick is also not done yet. I couldn't find any resources about emulating USB or Bluetooth. So probably only WiFi would be supported.
