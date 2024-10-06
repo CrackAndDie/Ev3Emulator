@@ -7,7 +7,6 @@ using Hypocrite.Core.Extensions;
 using Hypocrite.Core.Mvvm;
 using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
-using LibVLCSharp.Shared;
 using System.Collections.Generic;
 
 namespace Ev3Emulator.Entities

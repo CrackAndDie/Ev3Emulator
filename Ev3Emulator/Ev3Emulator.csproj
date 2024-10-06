@@ -81,8 +81,8 @@
 
         <PackageReference Include="Newtonsoft.Json" />
 
-		<PackageReference Include="LibVLCSharp" />
-		<PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="VideoLAN.LibVLC.Windows" />
+        <PackageReference Include="LibVLCSharp" />
+        <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="VideoLAN.LibVLC.Windows" />
     </ItemGroup>
 
 	<!--<ItemGroup>

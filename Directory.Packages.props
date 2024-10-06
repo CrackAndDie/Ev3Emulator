@@ -33,5 +33,6 @@
     <PackageVersion Include="LibVLCSharp" Version="3.9.0" />
     <PackageVersion Include="VideoLAN.LibVLC.Windows" Version="3.0.16" />
     <PackageVersion Include="SDL2-CS.NetCore" Version="2.0.8" />
+    <PackageVersion Include="SDL2-CS" Version="2.0.0" />
   </ItemGroup>
 </Project>
