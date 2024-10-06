@@ -2,7 +2,8 @@
 
 #### The main goal of the project is to create an emulator that would be very similar to the original Ev3 brick  
 
-![image](https://github.com/user-attachments/assets/f8aaddaa-cc58-4faf-a702-9ca7a4124e3f)
+![image](https://github.com/user-attachments/assets/5c709fb5-56b5-43a6-807d-7f0d2b77c910)  
+![image](https://github.com/user-attachments/assets/27cb8853-d376-4545-baef-250dd1239910)
 
 
 ### How to use?
