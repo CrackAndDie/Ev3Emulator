@@ -11,6 +11,7 @@ set (SOURCE_FILES
     w_motors.c
     w_sound.c
     w_input.c
+    w_wifi.c
     dirent_win.c
 )
 

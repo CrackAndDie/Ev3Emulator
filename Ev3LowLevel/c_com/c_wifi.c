@@ -39,6 +39,7 @@
 
 #include "w_system.h"
 #include "c_wifi.h"
+#include "w_wifi.h"
 
 #ifdef DEBUG_WIFI
 #define pr_dbg(f, ...) w_system_printf(f, ##__VA_ARGS__)
@@ -701,6 +702,11 @@ UWORD cWiFiWriteTcp(UBYTE* Buffer, UWORD Length)
                 DataWritten = 0;
             }
         }*/
+
+        if (w_wifi_isConnected())
+        {
+            DataWritten = w_wifi_writeData(Buffer, Length);
+        }
     }
 
     return DataWritten;
@@ -730,24 +736,23 @@ UWORD cWiFiWriteTcp(UBYTE* Buffer, UWORD Length)
 //    return Result;
 //}
 //
-///**
-// * @brief           Reset the TCP connection state.
-// *
-// * @param data      The connection data.
-// * @return          OK on success, otherwise FAIL.
-// */
-//static RESULT cWiFiResetTcp(void)
-//{
-//    RESULT Result;
-//
-//    pr_dbg("\nRESET - client disconnected!\n");
-//
-//    TcpReadState = TCP_IDLE;
-//    Result = cWiFiTcpClose(connection_data);
-//    cWiFiStartBroadcast(connection_data);
-//
-//    return Result;
-//}
+/**
+ * @brief           Reset the TCP connection state.
+ *
+ * @param data      The connection data.
+ * @return          OK on success, otherwise FAIL.
+ */
+static RESULT cWiFiResetTcp(void)
+{
+    RESULT Result = OK;
+
+    pr_dbg("\nRESET - client disconnected!\n");
+
+    TcpReadState = TCP_WAIT_ON_START;
+    w_wifi_startConnections();
+
+    return Result;
+}
 
 /**
  * @brief           Reads data from the active TCP connection.
@@ -763,201 +768,199 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
 {
     size_t DataRead = 0;
 
-//    if (connection_data && connection_data->connection) {
-//        GSocket *socket = g_socket_connection_get_socket(connection_data->connection);
-//        GError *error = NULL;
-//        gsize read_length;
-//
-//        // setup for read
-//
-//        switch (TcpReadState) {
-//        case TCP_IDLE:
-//            // Do Nothing
-//            return 0;
-//        case TCP_WAIT_ON_START:
-//            TcpReadBufPointer = 0;
-//            read_length = 100; // Fixed TEXT
-//            break;
-//        case TCP_WAIT_ON_LENGTH:
-//            // We can should read the length of the message
-//            // The packets can be split from the client
-//            // I.e. Length bytes (2) can be send as a subset
-//            // the Sequence can also arrive as a single pair of bytes
-//            // and the finally the payload will be received
-//
-//            // Begin on new buffer :-)
-//            TcpReadBufPointer = 0;
-//            read_length = 2;
-//            break;
-//        case TCP_WAIT_ON_ONLY_CHUNK:
-//            read_length = TcpRestLen;
-//            break;
-//        case TCP_WAIT_ON_FIRST_CHUNK:
-//            read_length = Length - 2;
-//            break;
-//        case TCP_WAIT_COLLECT_BYTES:
-//            TcpReadBufPointer = 0;
-//            if (TcpRestLen < Length) {
-//                read_length = TcpRestLen;
-//            } else {
-//                read_length = Length;
-//            }
-//            break;
-//        default:
-//            // Should never go here...
-//            TcpReadState = TCP_IDLE;
-//            return 0;
-//        }
-//
-//        // do the actual read
-//
-//        DataRead = g_socket_receive(socket, (gchar *)Buffer + TcpReadBufPointer,
-//                                    read_length, NULL, &error);
-//        if (DataRead == -1) {
-//            if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
-//                g_printerr("Failed to read data: %s\n", error->message);
-//            }
-//            g_error_free(error);
-//            DataRead = 0;
-//        } else {
-//            // handle the read data
-//
-//            switch (TcpReadState) {
-//            case TCP_IDLE:
-//                break;
-//            case TCP_WAIT_ON_START:
-//                pr_dbg("TCP_WAIT_ON_START:\n");
-//#ifdef DEBUG_WIFI
-//                w_system_printf("\nDataRead = %d, Buffer = \n", DataRead);
-//                if (DataRead > 0) {
-//                    int ii;
-//
-//                    for (ii = 0; ii < DataRead; ii++) {
-//                        w_system_printf("0x%x, ", Buffer[ii]);
-//                    }
-//                } else {
-//                    w_system_printf("DataRead shows FAIL: %d", DataRead);
-//                }
-//                w_system_printf("\n");
-//#endif
-//
-//                if (DataRead == 0) {
-//                    // We've a disconnect
-//                    cWiFiResetTcp();
-//                    break;
-//                }
-//
-//                if (strstr((char*)Buffer, "ET /target?sn=") > 0) {
-//                    pr_dbg("\nTCP_WAIT_ON_START and  ET /target?sn= found :-)"
-//                           " DataRead = %d, Length = %d, Buffer = %s\n",
-//                           DataRead, Length, Buffer);
-//
-//                    // A match found => UNLOCK
-//                    // Say OK back
-//                    cWiFiWriteTcp((UBYTE*)"Accept:EV340\r\n\r\n", 16);
-//                    TcpReadState = TCP_WAIT_ON_LENGTH;
-//                }
-//
-//                DataRead = 0; // No COM-module activity yet
-//                break;
-//
-//            case TCP_WAIT_ON_LENGTH:
-//                pr_dbg("TCP_WAIT_ON_LENGTH:\n");
-//                if (DataRead == 0) {
-//                    // We've a disconnect
-//                    cWiFiResetTcp();
-//                    break;
-//                }
-//
-//                TcpRestLen = (UWORD)(Buffer[0] + Buffer[1] * 256);
-//                TcpTotalLength = (UWORD)(TcpRestLen + 2);
-//                if (TcpTotalLength > Length) {
-//                    TcpReadState = TCP_WAIT_ON_FIRST_CHUNK;
-//                } else {
-//                    TcpReadState = TCP_WAIT_ON_ONLY_CHUNK;
-//                }
-//
-//                TcpReadBufPointer += DataRead;	// Position in ReadBuffer adjust
-//                DataRead = 0;                   // Signal NO data yet
-//
-//                pr_dbg("\n*************** NEW TX *************\n");
-//                pr_dbg("TCP_WAIT_ON_LENGTH TcpRestLen = %d, Length = %d\n",
-//                       TcpRestLen, Length);
-//
-//                break;
-//
-//            case TCP_WAIT_ON_ONLY_CHUNK:
-//                pr_dbg("TCP_WAIT_ON_ONLY_CHUNK: BufferStart = %d\n",
-//                       TcpReadBufPointer);
-//                pr_dbg("DataRead = %d\n",DataRead);
-//                pr_dbg("BufferPointer = %p\n", &(Buffer[TcpReadBufPointer]));
-//
-//                if(DataRead == 0) {
-//                // We've a disconnect
-//                    cWiFiResetTcp();
-//                    break;
-//                }
-//
-//                TcpReadBufPointer += DataRead;
-//
-//                if(TcpRestLen == DataRead) {
-//                    DataRead = TcpTotalLength; // Total count read
-//                    TcpReadState = TCP_WAIT_ON_LENGTH;
-//                } else {
-//                    TcpRestLen -= DataRead; // Still some bytes in this only chunk
-//                    DataRead = 0;           // No COMM job yet
-//                }
-//#if 0 // this makes lots of noise
-//                int i;
-//
-//                for (i = 0; i < TcpTotalLength; i++) {
-//                    w_system_printf("ReadBuffer[%d] = 0x%x\n", i, Buffer[i]);
-//                }
-//#endif
-//                pr_dbg("TcpRestLen = %d, DataRead incl. 2 = %d, Length = %d\n",
-//                       TcpRestLen, DataRead, Length);
-//
-//                break;
-//
-//            case TCP_WAIT_ON_FIRST_CHUNK:
-//                pr_dbg("TCP_WAIT_ON_FIRST_CHUNK:\n");
-//
-//                if(DataRead == 0) {
-//                    // We've a disconnect
-//                    cWiFiResetTcp();
-//                    break;
-//                }
-//                pr_dbg("DataRead = %d\n", DataRead);
-//
-//                TcpRestLen -= DataRead;
-//                TcpReadState = TCP_WAIT_COLLECT_BYTES;
-//                DataRead += 2;
-//                pr_dbg("\nTCP_WAIT_ON_FIRST_CHUNK TcpRestLen = %d, DataRead incl."
-//                       " 2 = %d, Length = %d\n", TcpRestLen, DataRead, Length);
-//
-//                break;
-//
-//            case TCP_WAIT_COLLECT_BYTES:
-//                pr_dbg("TCP_WAIT_COLLECT_BYTES:\n");
-//                pr_dbg("DataRead = %d\n", DataRead);
-//
-//                if(DataRead == 0) {
-//                    // We've a disconnect
-//                    cWiFiResetTcp();
-//                    break;
-//                }
-//
-//                TcpRestLen -= DataRead;
-//                if(TcpRestLen == 0) {
-//                    TcpReadState = TCP_WAIT_ON_LENGTH;
-//                }
-//                pr_dbg("\nTCP_WAIT_COLLECT_BYTES TcpRestLen = %d, DataRead incl."
-//                       " 2 = %d, Length = %d\n", TcpRestLen, DataRead, Length);
-//
-//                break;
-//            }
-//        }
-//    }
+    if (w_wifi_isConnected()) {
+        int read_length;
+
+        // setup for read
+
+        switch (TcpReadState) {
+        case TCP_IDLE:
+            // Do Nothing
+            return 0;
+        case TCP_WAIT_ON_START:
+            TcpReadBufPointer = 0;
+            read_length = 100; // Fixed TEXT
+            break;
+        case TCP_WAIT_ON_LENGTH:
+            // We can should read the length of the message
+            // The packets can be split from the client
+            // I.e. Length bytes (2) can be send as a subset
+            // the Sequence can also arrive as a single pair of bytes
+            // and the finally the payload will be received
+
+            // Begin on new buffer :-)
+            TcpReadBufPointer = 0;
+            read_length = 2;
+            break;
+        case TCP_WAIT_ON_ONLY_CHUNK:
+            read_length = TcpRestLen;
+            break;
+        case TCP_WAIT_ON_FIRST_CHUNK:
+            read_length = Length - 2;
+            break;
+        case TCP_WAIT_COLLECT_BYTES:
+            TcpReadBufPointer = 0;
+            if (TcpRestLen < Length) {
+                read_length = TcpRestLen;
+            } else {
+                read_length = Length;
+            }
+            break;
+        default:
+            // Should never go here...
+            TcpReadState = TCP_IDLE;
+            return 0;
+        }
+
+        // do the actual read
+
+        DataRead = w_wifi_readData(Buffer + TcpReadBufPointer, read_length);
+
+        if (DataRead == -1) {
+            /*if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
+                g_printerr("Failed to read data: %s\n", error->message);
+            }
+            g_error_free(error);*/
+            DataRead = 0;
+        } else {
+            // handle the read data
+
+            switch (TcpReadState) {
+            case TCP_IDLE:
+                break;
+            case TCP_WAIT_ON_START:
+                pr_dbg("TCP_WAIT_ON_START:\n");
+#ifdef DEBUG_WIFI
+                w_system_printf("\nDataRead = %d, Buffer = \n", DataRead);
+                if (DataRead > 0) {
+                    int ii;
+
+                    for (ii = 0; ii < DataRead; ii++) {
+                        w_system_printf("0x%x, ", Buffer[ii]);
+                    }
+                } else {
+                    w_system_printf("DataRead shows FAIL: %d", DataRead);
+                }
+                w_system_printf("\n");
+#endif
+
+                if (DataRead == 0) {
+                    // We've a disconnect
+                    cWiFiResetTcp();
+                    break;
+                }
+
+                if (strstr((char*)Buffer, "ET /target?sn=") > 0) {
+                    pr_dbg("\nTCP_WAIT_ON_START and  ET /target?sn= found :-)"
+                           " DataRead = %d, Length = %d, Buffer = %s\n",
+                           DataRead, Length, Buffer);
+
+                    // A match found => UNLOCK
+                    // Say OK back
+                    cWiFiWriteTcp((UBYTE*)"Accept:EV340\r\n\r\n", 16);
+                    TcpReadState = TCP_WAIT_ON_LENGTH;
+                }
+
+                DataRead = 0; // No COM-module activity yet
+                break;
+
+            case TCP_WAIT_ON_LENGTH:
+                pr_dbg("TCP_WAIT_ON_LENGTH:\n");
+                if (DataRead == 0) {
+                    // We've a disconnect
+                    cWiFiResetTcp();
+                    break;
+                }
+
+                TcpRestLen = (UWORD)(Buffer[0] + Buffer[1] * 256);
+                TcpTotalLength = (UWORD)(TcpRestLen + 2);
+                if (TcpTotalLength > Length) {
+                    TcpReadState = TCP_WAIT_ON_FIRST_CHUNK;
+                } else {
+                    TcpReadState = TCP_WAIT_ON_ONLY_CHUNK;
+                }
+
+                TcpReadBufPointer += DataRead;	// Position in ReadBuffer adjust
+                DataRead = 0;                   // Signal NO data yet
+
+                pr_dbg("\n*************** NEW TX *************\n");
+                pr_dbg("TCP_WAIT_ON_LENGTH TcpRestLen = %d, Length = %d\n",
+                       TcpRestLen, Length);
+
+                break;
+
+            case TCP_WAIT_ON_ONLY_CHUNK:
+                pr_dbg("TCP_WAIT_ON_ONLY_CHUNK: BufferStart = %d\n",
+                       TcpReadBufPointer);
+                pr_dbg("DataRead = %d\n",DataRead);
+                pr_dbg("BufferPointer = %p\n", &(Buffer[TcpReadBufPointer]));
+
+                if(DataRead == 0) {
+                // We've a disconnect
+                    cWiFiResetTcp();
+                    break;
+                }
+
+                TcpReadBufPointer += DataRead;
+
+                if(TcpRestLen == DataRead) {
+                    DataRead = TcpTotalLength; // Total count read
+                    TcpReadState = TCP_WAIT_ON_LENGTH;
+                } else {
+                    TcpRestLen -= DataRead; // Still some bytes in this only chunk
+                    DataRead = 0;           // No COMM job yet
+                }
+#if 0 // this makes lots of noise
+                int i;
+
+                for (i = 0; i < TcpTotalLength; i++) {
+                    w_system_printf("ReadBuffer[%d] = 0x%x\n", i, Buffer[i]);
+                }
+#endif
+                pr_dbg("TcpRestLen = %d, DataRead incl. 2 = %d, Length = %d\n",
+                       TcpRestLen, DataRead, Length);
+
+                break;
+
+            case TCP_WAIT_ON_FIRST_CHUNK:
+                pr_dbg("TCP_WAIT_ON_FIRST_CHUNK:\n");
+
+                if(DataRead == 0) {
+                    // We've a disconnect
+                    cWiFiResetTcp();
+                    break;
+                }
+                pr_dbg("DataRead = %d\n", DataRead);
+
+                TcpRestLen -= DataRead;
+                TcpReadState = TCP_WAIT_COLLECT_BYTES;
+                DataRead += 2;
+                pr_dbg("\nTCP_WAIT_ON_FIRST_CHUNK TcpRestLen = %d, DataRead incl."
+                       " 2 = %d, Length = %d\n", TcpRestLen, DataRead, Length);
+
+                break;
+
+            case TCP_WAIT_COLLECT_BYTES:
+                pr_dbg("TCP_WAIT_COLLECT_BYTES:\n");
+                pr_dbg("DataRead = %d\n", DataRead);
+
+                if(DataRead == 0) {
+                    // We've a disconnect
+                    cWiFiResetTcp();
+                    break;
+                }
+
+                TcpRestLen -= DataRead;
+                if(TcpRestLen == 0) {
+                    TcpReadState = TCP_WAIT_ON_LENGTH;
+                }
+                pr_dbg("\nTCP_WAIT_COLLECT_BYTES TcpRestLen = %d, DataRead incl."
+                       " 2 = %d, Length = %d\n", TcpRestLen, DataRead, Length);
+
+                break;
+            }
+        }
+    }
 
     return DataRead;
 }
@@ -1709,6 +1712,8 @@ RESULT cWiFiExit(void)
     // TODO: Do we want to always turn off WiFi on exit? This is what LEGO does.
     Result = OK; //cWiFiTurnOff();
 
+    w_wifi_stopConnections();
+
     /*if (connman_agent) {
         if (!connman_manager_call_unregister_agent_sync(connman_manager,
                                                         C_WIFI_CONNMAN_AGENT_DBUS_PATH,
@@ -1748,6 +1753,10 @@ RESULT cWiFiInit(void)
     TcpReadState = TCP_IDLE;
     cWiFiSetBtSerialNo();
     cWiFiSetBrickName();
+
+    w_wifi_startConnections();
+    TcpReadState = TCP_WAIT_ON_START;
+
     /*connman_manager = cWiFiGetConnmanManagerProxy();
     if (connman_manager) {
         cWiFiRegisterAgent();

@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using Ev3LowLevelLib.Other;
+using Ev3LowLevelLib.LowLevel;
 
 namespace Ev3LowLevelLib
 {
@@ -14,6 +15,7 @@ namespace Ev3LowLevelLib
             TimeWrapper.Init();
             InputWrapper.Init(OnUpdateUart);
             MotorsWrapper.Init();
+            WifiWrapper.Init();
 
             SystemWrapper.LmsExited += OnLmsVmExited;
 
