@@ -638,6 +638,10 @@ DATA8     cComGetHandle(char* pName)
 		if (OK == cMemoryCheckFilename(pName, NULL, NULL, NULL))
 		{
 			sprintf(ComInstance.Files[Result].Name, "%s", (char*)pName);
+			if (strncmp("../prjs", ComInstance.Files[Result].Name, 8))
+			{
+				sprintf(ComInstance.Files[Result].Name, "%s", w_system_replaceWord(ComInstance.Files[Result].Name, "../prjs", "./lms_os/prjs"));
+			}
 		}
 		else
 		{
@@ -700,12 +704,12 @@ void      cComCreateBeginDl(TXBUF* pTxBuf, UBYTE* pName)
 	{
 
 		pTxBuf->pFile = (FIL*)&(ComInstance.Files[FileHandle]);
-		pTxBuf->pFile->File = open(pTxBuf->pFile->Name, O_RDONLY, 0x444);
+		pTxBuf->pFile->File = fopen(pTxBuf->pFile->Name, "r");
 		pTxBuf->FileHandle = FileHandle;
 
 		// Get file length
-		pTxBuf->pFile->Size = lseek(pTxBuf->pFile->File, 0L, SEEK_END);
-		lseek(pTxBuf->pFile->File, 0L, SEEK_SET);
+		pTxBuf->pFile->Size = fseek(pTxBuf->pFile->File, 0L, SEEK_END);
+		fseek(pTxBuf->pFile->File, 0L, SEEK_SET);
 
 		pDlMsg->CmdSize = 0x00;                               // Msg Len
 		pDlMsg->MsgCount = 0x00;                               // Msg Count
@@ -1158,7 +1162,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 					Tmp++;
 				}
 
-				pRxBuf->pFile->File = open(pRxBuf->pFile->Name, O_CREAT | O_WRONLY | O_TRUNC);
+				pRxBuf->pFile->File = fopen(pRxBuf->pFile->Name, "w+");
 
 				if (pRxBuf->pFile->File >= 0)
 				{
@@ -1378,13 +1382,13 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			BytesToRead = (ULONG)(pBeginRead->BytesToReadLsb);
 			BytesToRead += (ULONG)(pBeginRead->BytesToReadMsb) << 8;
 
-			pTxBuf->pFile->File = open(pTxBuf->pFile->Name, O_RDONLY, 0x444);
+			pTxBuf->pFile->File = fopen(pTxBuf->pFile->Name, "r");
 
 			if (pTxBuf->pFile->File >= 0)
 			{
 				// Get file length
-				pTxBuf->pFile->Size = lseek(pTxBuf->pFile->File, 0L, SEEK_END);
-				lseek(pTxBuf->pFile->File, 0L, SEEK_SET);
+				pTxBuf->pFile->Size = fseek(pTxBuf->pFile->File, 0L, SEEK_END);
+				fseek(pTxBuf->pFile->File, 0L, SEEK_SET);
 
 				pTxBuf->MsgLen = BytesToRead;
 
@@ -1607,12 +1611,12 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 			w_system_printf("File to get:  %s\n", ComInstance.Files[FileHandle].Name);
 #endif
 
-			pTxBuf->pFile->File = open(pTxBuf->pFile->Name, O_RDONLY, 0x444);
+			pTxBuf->pFile->File = fopen(pTxBuf->pFile->Name, "r");
 			if (pTxBuf->pFile->File >= 0)
 			{
 				// Get file length
-				pTxBuf->pFile->Size = lseek(pTxBuf->pFile->File, 0L, SEEK_END);
-				lseek(pTxBuf->pFile->File, 0L, SEEK_SET);
+				pTxBuf->pFile->Size = fseek(pTxBuf->pFile->File, 0L, SEEK_END);
+				fseek(pTxBuf->pFile->File, 0L, SEEK_SET);
 
 				pTxBuf->MsgLen = BytesToRead;
 				if (BytesToRead > pTxBuf->pFile->Size)
@@ -1727,9 +1731,9 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 				BytesToRead += (ULONG)(pContinueGetFile->BytesToReadMsb) << 8;
 
 				// Get new file length: Set pointer to 0 -> find end -> set where to read from
-				lseek(pTxBuf->pFile->File, 0L, SEEK_SET);
-				pTxBuf->pFile->Size = lseek(pTxBuf->pFile->File, 0L, SEEK_END);
-				lseek(pTxBuf->pFile->File, pTxBuf->pFile->Pointer, SEEK_SET);
+				fseek(pTxBuf->pFile->File, 0L, SEEK_SET);
+				pTxBuf->pFile->Size = fseek(pTxBuf->pFile->File, 0L, SEEK_END);
+				fseek(pTxBuf->pFile->File, pTxBuf->pFile->Pointer, SEEK_SET);
 
 				// If host is asking for more bytes than remaining file size then
 				// message length needs to adjusted accordingly
@@ -2426,7 +2430,7 @@ void      cComSystemCommand(RXBUF* pRxBuf, TXBUF* pTxBuf)
 
 		if (USBDEV == ComInstance.ActiveComCh)
 		{
-			UpdateFile = open(UPDATE_DEVICE_NAME, O_RDWR);
+			UpdateFile = fopen(UPDATE_DEVICE_NAME, "r+");
 
 			if (UpdateFile >= 0)
 			{
