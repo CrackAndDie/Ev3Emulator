@@ -268,7 +268,7 @@ namespace Ev3LowLevelLib
             ButtonsWrapper.Init(getPressed);
         }
 
-		public void InitSound(Action<short, ushort> playTone, Func<int> isSoundPlaying, Action<string, int, int> playSound) 
+		public void InitSound(Action<short, ushort> playTone, Func<int> isSoundPlaying, Action<string, int, int, int> playSound) 
 		{
 			SoundWrapper.Init(playTone, isSoundPlaying, playSound);
 		}

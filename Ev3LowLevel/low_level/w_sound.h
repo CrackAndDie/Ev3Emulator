@@ -10,7 +10,7 @@ int (*w_sound_isSoundPlaying)(void);
 __declspec(dllexport) void reg_w_sound_isSoundPlaying(int (*f)(void));
 
 // play chunk
-void (*w_sound_playSound)(unsigned char* name, int size, int rate);
-__declspec(dllexport) void reg_w_sound_playSound(void (*f)(unsigned char* name, int size, int rate));
+void (*w_sound_playSound)(unsigned char* name, int size, int rate, int volume);
+__declspec(dllexport) void reg_w_sound_playSound(void (*f)(unsigned char* name, int size, int rate, int volume));
 
 #endif // W_SOUND_H_

@@ -381,7 +381,7 @@ RESULT cSoundUpdate(void)
 
             if (SoundInstance.cSoundState == SOUND_FILE_LOOPING) {
                 // fseek(SoundInstance.hSoundFile, 8, SEEK_SET);
-                w_sound_playSound(SoundInstance.PathBuffer, SoundInstance.SoundDataLength, SoundInstance.SoundSampleRate);
+                w_sound_playSound(SoundInstance.PathBuffer, SoundInstance.SoundDataLength, SoundInstance.SoundSampleRate, VMInstance.NonVol.VolumePercent);
                 SoundInstance.BytesToWrite = SoundInstance.SoundDataLength;
             } else {
                 /*snd_pcm_state_t state = snd_pcm_state(SoundInstance.pcm);
@@ -582,7 +582,7 @@ void cSoundEntry(void)
                 fclose(SoundInstance.hSoundFile);
                 SoundInstance.hSoundFile = -1;
 
-                w_sound_playSound(SoundInstance.PathBuffer, SoundInstance.SoundDataLength, SoundInstance.SoundSampleRate);
+                w_sound_playSound(SoundInstance.PathBuffer, SoundInstance.SoundDataLength, SoundInstance.SoundSampleRate, VMInstance.NonVol.VolumePercent);
             } else {
                 fprintf(stderr, "Failed to open sound file '%s': %s\n",
                         SoundInstance.PathBuffer, strerror(errno));

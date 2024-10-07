@@ -18,9 +18,9 @@ namespace Ev3Emulator.LowLevel
 		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
 		private extern static void reg_w_sound_playSound(reg_w_sound_playSoundAction playSound);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void reg_w_sound_playSoundAction(string name, int size, int rate);
+		public delegate void reg_w_sound_playSoundAction(string name, int size, int rate, int volume);
 
-		public static void Init(Action<short, ushort> playTone, Func<int> isSoundPlaying, Action<string, int, int> playSound)
+		public static void Init(Action<short, ushort> playTone, Func<int> isSoundPlaying, Action<string, int, int, int> playSound)
 		{
 			_playTone = playTone;
 			_isSoundPlaying = isSoundPlaying;
@@ -41,13 +41,13 @@ namespace Ev3Emulator.LowLevel
 			return _isSoundPlaying?.Invoke() ?? 0;
 		}
 
-		private static void PlaySound(string name, int size, int rate)
+		private static void PlaySound(string name, int size, int rate, int volume)
 		{
-			_playSound?.Invoke(name, size, rate);
+			_playSound?.Invoke(name, size, rate, volume);
 		}
 
 		private static Action<short, ushort> _playTone;
 		private static Func<int> _isSoundPlaying;
-		private static Action<string, int, int> _playSound;
+		private static Action<string, int, int, int> _playSound;
 	}
 }

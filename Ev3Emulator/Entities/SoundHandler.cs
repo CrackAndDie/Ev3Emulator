@@ -25,7 +25,7 @@ namespace Ev3Emulator.Entities
 			return _mediaPlayer.IsPlaying ? 1 : 0;
 		}
 
-		public void PlaySound(string name, int size, int rate)
+		public void PlaySound(string name, int size, int rate, int volume)
 		{
 			string normalName = name;
 
@@ -36,7 +36,7 @@ namespace Ev3Emulator.Entities
 
             var media = new Media(_libVlc, normalName, FromType.FromPath);
             _mediaPlayer.Media = media;
-			_mediaPlayer.Volume = 100; // TODO: get volume from brick
+			_mediaPlayer.Volume = volume; 
 			_mediaPlayer.Play();
         }
 
