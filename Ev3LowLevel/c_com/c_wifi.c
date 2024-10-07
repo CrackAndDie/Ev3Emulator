@@ -41,11 +41,8 @@
 #include "c_wifi.h"
 #include "w_wifi.h"
 
-#ifdef DEBUG_WIFI
 #define pr_dbg(f, ...) w_system_printf(f, ##__VA_ARGS__)
-#else
-#define pr_dbg(f, ...) while (0) { }
-#endif
+// #define pr_dbg(f, ...) while (0) { }
 
 #define C_WIFI_HIDDEN_NAME "[HIDDEN]"
 #define C_WIFI_CONNMAN_AGENT_DBUS_PATH "/org/ev3dev/lms2012/connman/agent"
@@ -768,7 +765,7 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
 {
     size_t DataRead = 0;
 
-    if (w_wifi_isConnected()) {
+    if (w_wifi_isConnected() && w_wifi_isDataAvailable()) {
         int read_length;
 
         // setup for read
@@ -779,7 +776,7 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
             return 0;
         case TCP_WAIT_ON_START:
             TcpReadBufPointer = 0;
-            read_length = 100; // Fixed TEXT
+            read_length = 64; // Fixed TEXT
             break;
         case TCP_WAIT_ON_LENGTH:
             // We can should read the length of the message
@@ -814,6 +811,8 @@ UWORD cWiFiReadTcp(UBYTE* Buffer, UWORD Length)
 
         // do the actual read
 
+        pr_dbg("\ncWiFiReadTcp "
+            " read_length = %d, TcpReadBufPointer = %d\n", read_length, TcpReadBufPointer);
         DataRead = w_wifi_readData(Buffer + TcpReadBufPointer, read_length);
 
         if (DataRead == -1) {

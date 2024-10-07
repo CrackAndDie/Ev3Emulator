@@ -34,6 +34,11 @@ namespace Ev3LowLevelLib.LowLevel
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate byte reg_w_wifi_isConnectedAction();
 
+		[DllImport(@"lms2012", CallingConvention = CallingConvention.Cdecl)]
+		private extern static void reg_w_wifi_isDataAvailable(reg_w_wifi_isDataAvailableAction isDataAvailable);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate byte reg_w_wifi_isDataAvailableAction();
+
 		public static void Init()
 		{
 			reg_w_wifi_startConnections(StartConnections);
@@ -41,6 +46,7 @@ namespace Ev3LowLevelLib.LowLevel
 			reg_w_wifi_readData(ReadData);
 			reg_w_wifi_writeData(WriteData);
 			reg_w_wifi_isConnected(IsConnected);
+			reg_w_wifi_isDataAvailable(IsDataAvailable);
 		}
 
 		private static void StartConnections()
@@ -76,7 +82,7 @@ namespace Ev3LowLevelLib.LowLevel
 			var dt = (byte*)buf.ToPointer();
 			byte[] recvBuff = new byte[amount];
 			var reallyRecv = _currentConnection.ConnectedSocket.Receive(recvBuff);
-			for (int i = 0; i < amount; ++i)
+			for (int i = 0; i < reallyRecv; ++i)
 			{
 				dt[i] = recvBuff[i];
 			}
@@ -101,6 +107,11 @@ namespace Ev3LowLevelLib.LowLevel
 		private static byte IsConnected()
 		{
 			return (byte)((_currentConnection.ConnectedSocket != null) ? 1 : 0);
+		}
+
+		private static byte IsDataAvailable()
+		{
+			return (byte)((_currentConnection.ConnectedSocket != null && _currentConnection.ConnectedSocket.Available > 0) ? 1 : 0);
 		}
 
 		private static LabVIEW _currentConnection;
@@ -205,6 +216,7 @@ namespace Ev3LowLevelLib.LowLevel
 				//byte[] toSend = Encoding.UTF8.GetBytes("Accept:EV340\r\n\r\n");
 				//sct.Send(toSend);
 				ConnectedSocket = sct;
+				ConnectedSocket.ReceiveTimeout = 5000;
 			}
 		}
 		#endregion

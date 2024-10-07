@@ -17,8 +17,12 @@ __declspec(dllexport) void reg_w_wifi_readData(int (*f)(unsigned char* buf, int 
 int (*w_wifi_writeData)(unsigned char* buf, int amount);
 __declspec(dllexport) void reg_w_wifi_writeData(int (*f)(unsigned char* buf, int amount));
 
-// stop conn
+// is connected
 unsigned char (*w_wifi_isConnected)(void);
 __declspec(dllexport) void reg_w_wifi_isConnected(unsigned char (*f)(void));
+
+// is data avail for read
+unsigned char (*w_wifi_isDataAvailable)(void);
+__declspec(dllexport) void reg_w_wifi_isDataAvailable(unsigned char (*f)(void));
 
 #endif    // W_WIFI_H_

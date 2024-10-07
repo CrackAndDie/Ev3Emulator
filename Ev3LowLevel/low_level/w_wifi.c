@@ -24,3 +24,8 @@ void reg_w_wifi_isConnected(unsigned char (*f)(void))
 {
     w_wifi_isConnected = f;
 }
+
+void reg_w_wifi_isDataAvailable(unsigned char (*f)(void))
+{
+    w_wifi_isDataAvailable = f;
+}
