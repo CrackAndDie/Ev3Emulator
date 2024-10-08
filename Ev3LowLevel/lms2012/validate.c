@@ -843,19 +843,19 @@ static IMINDEX cValidateGetErrorIndex(void)
 
 RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 {
-	RESULT  Result = FAIL;  // Current status
-	IMINDEX OpCode;         // Current opcode
-	ULONG   Pars;           // Current parameter types
-	UBYTE   ParType;        // Current parameter type
-	DATA8   Sub;            // Current sub code if any
-	UBYTE   Tab;            // Sub code table index
-	ULONG   Value;
-	UBYTE   ParCode = 0;
+	static RESULT  Result = FAIL;  // Current status
+	static IMINDEX OpCode;         // Current opcode
+	static ULONG   Pars;           // Current parameter types
+	static UBYTE   ParType;        // Current parameter type
+	static DATA8   Sub;            // Current sub code if any
+	static UBYTE   Tab;            // Sub code table index
+	static ULONG   Value;
+	static UBYTE   ParCode = 0;
 	static void* pParValue;
-	DATA8   Parameters;
-	DATA32  Bytes;
-	int     Indent;
-	int     LineLength;
+	static DATA8   Parameters;
+	static DATA32  Bytes;
+	static int     Indent;
+	static int     LineLength;
 
 	// Check for validation error
 	if ((*pIndex) == cValidateGetErrorIndex())
@@ -1506,23 +1506,23 @@ RESULT cValidateDisassemble(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 
 static RESULT cValidateDisassembleProgram(PRGID PrgId, IP pI, LABEL* pLabel)
 {
-	RESULT  Result = OK;
-	IMINDEX Size;
-	OBJID   ObjIndex;
-	IMINDEX MinIndex;
-	IMINDEX MaxIndex;
-	IMINDEX Index;
-	IMINDEX Addr;
-	ULONG   LastOffset;
-	OBJID   LastObject;
-	UBYTE   Stop;
-	IMINDEX TmpIndex;
-	UBYTE   Type;
-	DATA32  Lng;
+	static RESULT  Result = OK;
+	static IMINDEX Size;
+	static OBJID   ObjIndex;
+	static IMINDEX MinIndex;
+	static IMINDEX MaxIndex;
+	static IMINDEX Index;
+	static IMINDEX Addr;
+	static ULONG   LastOffset;
+	static OBJID   LastObject;
+	static UBYTE   Stop;
+	static IMINDEX TmpIndex;
+	static UBYTE   Type;
+	static DATA32  Lng;
 
-	IMGHEAD* pIH;
-	OBJHEAD* pOH;
-	OBJID   Objects;
+	static IMGHEAD* pIH;
+	static OBJHEAD* pOH;
+	static OBJID   Objects;
 
 	pIH = (IMGHEAD*)pI;
 	pOH = (OBJHEAD*)&pI[sizeof(IMGHEAD) - sizeof(OBJHEAD)];
@@ -1743,19 +1743,19 @@ static RESULT cValidateCheckAlignment(ULONG Value, DATA8 Type)
 
 static RESULT cValidateBytecode(IP pI, IMINDEX* pIndex, LABEL* pLabel)
 {
-	RESULT  Result = FAIL;
-	RESULT  Aligned = OK;
-	IMINDEX OpCode;
-	ULONG   Pars;
-	DATA8   Sub;
-	IMGDATA Tab;
-	ULONG   Value;
-	UBYTE   ParType = PAR;
-	UBYTE   ParCode;
+	static RESULT  Result = FAIL;
+	static RESULT  Aligned = OK;
+	static IMINDEX OpCode;
+	static ULONG   Pars;
+	static DATA8   Sub;
+	static IMGDATA Tab;
+	static ULONG   Value;
+	static UBYTE   ParType = PAR;
+	static UBYTE   ParCode;
 	static void* pParValue;
-	DATA8   Parameters;
-	DATA8   ParNo;
-	DATA32  Bytes;
+	static DATA8   Parameters;
+	static DATA8   ParNo;
+	static DATA32  Bytes;
 
 	OpCode = pI[*pIndex] & 0xFF;
 
@@ -2349,6 +2349,9 @@ RESULT cValidateProgram(PRGID PrgId, IP pI, LABEL* pLabel, DATA8 Disassemble)
 	// Result of validation
 	if (cValidateGetErrorIndex())
 	{
+#ifdef    DEBUG
+		w_system_printf("Error index was %d\n", cValidateGetErrorIndex());
+#endif
 		if (cValidateGetErrorIndex() == 8)
 		{
 			Result = OK;
