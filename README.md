@@ -20,4 +20,4 @@ If you do not have any tools to compile the app:
 
 - For now, the EV3 firmware library is only tested on Windows machines, but when I was rewriting it, I assumed it would be cross-platform;
 - It can be compiled and tested only targeting x86 because of some problems with pointer size. I've tried to deal with it but understood that there is too much work;
-- Communication with the brick is also not done yet. I couldn't find any resources about emulating USB or Bluetooth. So probably only WiFi would be supported.
+- I couldn't find any resources about emulating USB or Bluetooth. Only WiFi is supported.
